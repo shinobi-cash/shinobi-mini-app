@@ -7,17 +7,17 @@ export interface PasskeyCredential {
 }
 
 export interface UserProfile {
-  id: string
-  passkeyId: string
-  publicKey: string
-  createdAt: string
-  lastSignIn: string
+  id: string;
+  publicKey: string;
+  privateKey: string;
+  address: string;
+  createdAt: string;
+  lastSignIn: string;
 }
 
 export interface AuthState {
   isAuthenticated: boolean
+  isSetupComplete: boolean
   user: UserProfile | null
-  mnemonic: string | null
-  nullifier: string | null
-  secret: string | null
+  mnemonic: string[] | null
 }
