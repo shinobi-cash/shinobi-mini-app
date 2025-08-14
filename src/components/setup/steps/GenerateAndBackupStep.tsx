@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { Copy, Eye, EyeOff, Check } from 'lucide-react'
+import { Copy, Eye, EyeOff, Check, Key } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useSetupStore } from '@/stores/setupStore'
 import { generateKeysFromRandomSeed } from '@/utils/crypto'
@@ -65,7 +65,9 @@ export function GenerateAndBackupStep() {
     <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
       <div className="w-full max-w-sm mx-auto flex flex-col items-center space-y-8">
         <div className="text-center space-y-6">
-          <div className="text-8xl">🔑</div>
+          <div className="w-20 h-20 mx-auto flex items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
+            <Key className="w-10 h-10 text-purple-600 dark:text-purple-400" />
+          </div>
           <h1 className="text-2xl font-bold text-app-primary">Generate & Backup</h1>
           <p className="text-app-secondary">Your recovery phrase is shown below. Save it securely.</p>
         </div>

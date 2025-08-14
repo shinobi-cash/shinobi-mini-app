@@ -5,10 +5,6 @@ import BigNumber from 'bignumber.js';
 
 function deriveKeyHex(seed: string, index: number): string {
   // Hash seed + index with Poseidon-lite, get hex string
-  const input = [
-    BigNumber(seed).plus(index).toFixed(),
-    '0'
-  ];
   const hash = poseidon2([BigNumber(seed).plus(index).toFixed(), '0']);
   let hex = hash.toString(16);
   // Pad to even length
