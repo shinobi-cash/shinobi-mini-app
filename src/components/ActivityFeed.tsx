@@ -13,31 +13,32 @@ export const ActivityFeed = ({ activities }: ActivityFeedProps) => {
   const depositCount = calculateDepositCount(activities)
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* Total Deposits Section - Fixed */}
-      <div className="px-4 py-4 flex-shrink-0">
-        <div className="bg-app-surface rounded-xl p-4 border border-app shadow-sm">
+    <section className="flex flex-col gap-4">
+      {/* Total Deposits Section - Card */}
+      <div className="px-2 pt-2 sm:px-4 sm:pt-4 flex-shrink-0">
+        <div className="bg-app-surface rounded-2xl p-5 border border-app shadow-md">
           <div className="text-center">
-            <h3 className="text-sm font-medium text-app-secondary mb-1">Total Deposits</h3>
-            <p className="text-2xl font-semibold text-app-primary tabular-nums mb-1">
+            <h3 className="text-base font-semibold text-app-secondary mb-2">Total Deposits</h3>
+            <p className="text-3xl font-bold text-app-primary tabular-nums mb-2">
               {formatEthAmount(totalDeposits)} ETH
             </p>
-            <p className="text-sm text-app-tertiary">
+            <p className="text-base text-app-tertiary">
               {depositCount} deposit{depositCount !== 1 ? 's' : ''} approved
             </p>
           </div>
         </div>
       </div>
 
-      {/* Activities Section - Title Fixed, Table Scrollable */}
-      <div className="pb-20 flex-1 flex flex-col min-h-0 overflow-hidden">
-        <h2 className="text-xl font-semibold mb-4 text-app-secondary tracking-tight flex-shrink-0 text-center">
-          Activities
-        </h2>
-        
+      {/* Activities Section - Title & Table */}
+      <div className="flex-1 flex flex-col min-h-0 gap-2">
+        <div className="sticky top-0 z-10 bg-app-surface rounded-t-xl border-b border-app shadow-md">
+          <h2 className="text-lg font-semibold py-3 text-app-secondary tracking-tight text-center">
+            Activities
+          </h2>
+        </div>
         {/* Scrollable Activities Table */}
-        <div className="bg-app-surface border border-app shadow-sm flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto">
+        <div className="bg-app-surface border border-app shadow-md rounded-b-xl overflow-hidden">
+          <div className="overflow-y-auto max-h-[60vh]">
             {sortedActivities.map((activity, index) => (
               <div key={activity.id}>
                 <ActivityRow activity={activity} />
@@ -50,6 +51,6 @@ export const ActivityFeed = ({ activities }: ActivityFeedProps) => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   )
 }
