@@ -15,5 +15,10 @@ export function LaunchScreen() {
     })
   }, [])
 
-  return isReady ? <MainScreen /> : <SplashScreen />
+  if (!isReady) {
+    return <SplashScreen />
+  }
+
+  // Always show MainScreen - users can setup from Profile tab
+  return <MainScreen />
 }
