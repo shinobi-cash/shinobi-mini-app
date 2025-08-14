@@ -12,6 +12,16 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
   --radius: 0.625rem;
+  
+  /* Standardized mobile-first font sizes */
+  --font-size-xs: 0.75rem;     /* 12px - Small labels, captions */
+  --font-size-sm: 0.875rem;    /* 14px - Body text, descriptions */
+  --font-size-base: 1rem;      /* 16px - Default body text */
+  --font-size-lg: 1.125rem;    /* 18px - Emphasized text */
+  --font-size-xl: 1.25rem;     /* 20px - Small headings */
+  --font-size-2xl: 1.5rem;     /* 24px - Medium headings */
+  --font-size-3xl: 1.875rem;   /* 30px - Large headings */
+  --font-size-4xl: 2.25rem;    /* 36px - Hero text */
 }
 
 /* Light theme (default) */
@@ -190,4 +200,15 @@
   .bg-status-warning { background-color: var(--status-warning); }
   .bg-status-error { background-color: var(--status-error); }
   .bg-status-neutral { background-color: var(--status-neutral); }
+  
+  /* Standardized font size utilities */
+  .text-xs-app { font-size: var(--font-size-xs); }
+  .text-sm-app { font-size: var(--font-size-sm); }
+  .text-base-app { font-size: var(--font-size-base); }
+  .text-lg-app { font-size: var(--font-size-lg); }
+  .text-xl-app { font-size: var(--font-size-xl); }
+  .text-2xl-app { font-size: var(--font-size-2xl); }
+  .text-3xl-app { font-size: var(--font-size-3xl); }
+  .text-4xl-app { font-size: var(--font-size-4xl); }
+  .text-emoji { font-size: var(--font-size-emoji); }
 }
