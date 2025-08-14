@@ -1,93 +1,112 @@
 import { useAuth } from '../contexts/AuthContext'
-import { Fingerprint, ChevronRight } from 'lucide-react'
+import { useState } from 'react'
+import { useSetupStore } from '../stores/setupStore'
+import { SetupFlow } from './setup/SetupFlow'
+
+import { User } from 'lucide-react'
+import { LoadAccountGrid } from './LoadAccountGrid'
+import { Button } from './ui/button'
 
 export const ProfileScreen = () => {
-  const { isAuthenticated, signInWithPasskey, createPasskey, signOut, isLoading } = useAuth()
+  const { isAuthenticated, signOut } = useAuth()
+  const { currentStep, setCurrentStep, setKeys, completeSetup } = useSetupStore()
+  const [showLoadAccount, setShowLoadAccount] = useState(false)
+  const [loadError, setLoadError] = useState<string | undefined>()
 
-  if (!isAuthenticated) {
-    return <UnauthenticatedProfile onSignIn={signInWithPasskey} onCreate={createPasskey} isLoading={isLoading} />
+  // Simulate mnemonic to keys/address (replace with real crypto in production)
+  function deriveKeysFromMnemonic(mnemonic: string[]): { publicKey: string, privateKey: string, address: string } {
+    // For demo: join words, hash, and mock keys
+    const seed = mnemonic.join('-')
+    return {
+      publicKey: 'pub_' + seed.slice(0, 16),
+      privateKey: 'priv_' + seed.slice(0, 16),
+      address: '0x' + seed.replace(/[^a-zA-Z0-9]/g, '').slice(0, 40)
+    }
   }
 
+  const handleLoad = (mnemonicWords: string[]) => {
+    if (!mnemonicWords || mnemonicWords.length !== 12 || mnemonicWords.some(w => !w)) {
+      setLoadError('Please enter all 12 words of your recovery phrase.')
+      return
+    }
+    setLoadError(undefined)
+    const { publicKey, privateKey, address } = deriveKeysFromMnemonic(mnemonicWords)
+    setKeys({ publicKey, privateKey, mnemonic: mnemonicWords, address })
+    completeSetup()
+    setShowLoadAccount(false)
+  }
+  if (!isAuthenticated) {
+    // Only show onboarding if user has started it (currentStep !== null)
+    if (currentStep !== null) {
+      return <SetupFlow />;
+    }
+
+    // Always show welcome screen until onboarding starts
+    return (
+      <div className="h-full flex flex-col items-center justify-center">
+        <div className="w-full max-w-sm mx-auto flex flex-col items-center justify-center px-4 py-10">
+          <h2 className="text-2xl font-bold mb-4 text-center text-app-primary dark:text-app-primary font-sans">Welcome to Shinobi</h2>
+          <p className="text-base mb-8 text-center text-app-secondary dark:text-app-secondary">Choose how you want to get started:</p>
+          <div className="w-full flex flex-col gap-4">
+            <Button
+              variant="default"
+              className="w-full h-12 text-base font-medium rounded-2xl"
+              onClick={() => setCurrentStep('generate-keys')}
+              size="lg"
+            >
+              Create Account
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full h-12 text-base font-medium rounded-2xl border border-app"
+              onClick={() => setShowLoadAccount(true)}
+              size="lg"
+            >
+              Load Account
+            </Button>
+          </div>
+          {showLoadAccount && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+              <LoadAccountGrid onLoad={handleLoad} error={loadError} onClose={() => setShowLoadAccount(false)} />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
   return <AuthenticatedProfile onSignOut={signOut} />
 }
 
-const UnauthenticatedProfile = ({ 
-  onSignIn, 
-  onCreate, 
-  isLoading 
-}: { 
-  onSignIn: () => void
-  onCreate: () => void
-  isLoading: boolean
-}) => (
-  <div className="flex flex-col h-full px-4">
-    {/* Centered Content */}
-    <div className="flex-1 flex flex-col items-center justify-center">
-      <div className="text-8xl mb-8">🔐</div>
-      
-      <div className="w-full space-y-3">
-        <button
-          onClick={onSignIn}
-          disabled={isLoading}
-          className="w-full bg-blue-600 text-white py-4 rounded-2xl font-semibold active:scale-95 transition-all disabled:opacity-50"
-        >
-          <div className="flex items-center justify-center space-x-2">
-            <Fingerprint className="w-5 h-5" />
-            <span>Sign In</span>
-          </div>
-        </button>
-
-        <button
-          onClick={onCreate}
-          disabled={isLoading}
-          className="w-full bg-app-surface border border-app text-app-primary py-4 rounded-2xl font-semibold active:scale-95 transition-all disabled:opacity-50"
-        >
-          Create Passkey
-        </button>
-      </div>
-    </div>
-  </div>
-)
 
 const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => (
-  <div className="flex flex-col h-full">
-    {/* Profile Header */}
-    <div className="px-4 py-8 text-center">
-      <div className="text-6xl mb-4">🥷</div>
-      <h2 className="text-2xl font-semibold text-app-primary">Ninja</h2>
+  <div className="flex flex-col items-center justify-center h-full gap-8 px-4 py-10">
+    <div className="w-16 h-16 mb-4 flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
+      <User className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
     </div>
-
-    {/* Settings List - Apple Style */}
-    <div className="px-4 flex-1">
-      <div className="bg-app-surface rounded-xl overflow-hidden border border-app">
-        <button className="w-full p-4 flex items-center justify-between active:bg-app-surface-hover">
-          <div className="flex items-center space-x-3">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-app-primary">Passkey</span>
-          </div>
-          <ChevronRight className="w-5 h-5 text-app-tertiary" />
-        </button>
-        
-        <div className="border-t border-app"></div>
-        
-        <button className="w-full p-4 flex items-center justify-between active:bg-app-surface-hover">
-          <div className="flex items-center space-x-3">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-app-primary">Privacy Keys</span>
-          </div>
-          <ChevronRight className="w-5 h-5 text-app-tertiary" />
-        </button>
-      </div>
-    </div>
-
-    {/* Sign Out */}
-    <div className="px-4 pb-4">
-      <button
+    <h2 className="text-2xl font-bold text-center text-app-primary font-sans mb-2">Welcome, User!</h2>
+    <div className="w-full max-w-xs flex flex-col gap-4">
+      <Button
+        className="w-full h-12 rounded-2xl text-base font-medium"
+        size="lg"
+        onClick={() => window.location.href = '/deposit'}
+      >
+        Go to Deposit
+      </Button>
+      <Button
+        className="w-full h-12 rounded-2xl text-base font-medium"
+        size="lg"
+        onClick={() => window.location.href = '/'}
+      >
+        Go to Home
+      </Button>
+      <Button
         onClick={onSignOut}
-        className="w-full bg-red-500 text-white py-4 rounded-2xl font-semibold active:scale-95 transition-all"
+        variant="destructive"
+        className="w-full h-12 rounded-2xl text-base font-medium"
+        size="lg"
       >
         Sign Out
-      </button>
+      </Button>
     </div>
   </div>
 )
