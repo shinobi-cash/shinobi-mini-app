@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { sdk } from '@farcaster/frame-sdk'
+import { sdk } from '@farcaster/miniapp-sdk'
 import { SplashScreen } from './SplashScreen'
 import { MainScreen } from './MainScreen'
 
