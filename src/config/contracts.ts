@@ -40,7 +40,42 @@ export const PAYMASTER_ABI = [
   },
 ] as const
 
+// Privacy Pool Entry Point ABI (for deposits)
+export const PRIVACY_POOL_ENTRYPOINT_ABI = [
+  {
+    inputs: [{ name: "_precommitment", type: "uint256" }],
+    name: "deposit",
+    outputs: [{ name: "_commitment", type: "uint256" }],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "_depositor", type: "address" },
+      { indexed: true, name: "_pool", type: "address" },
+      { indexed: false, name: "_commitment", type: "uint256" },
+      { indexed: false, name: "_amount", type: "uint256" }
+    ],
+    name: "Deposited",
+    type: "event",
+  }
+] as const
+
+// Privacy Pool ABI (for events and pool interactions)
 export const PRIVACY_POOL_ABI = [
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "_depositor", type: "address" },
+      { indexed: false, name: "_commitment", type: "uint256" },
+      { indexed: false, name: "_label", type: "uint256" },
+      { indexed: false, name: "_value", type: "uint256" },
+      { indexed: false, name: "_precommitmentHash", type: "uint256" }
+    ],
+    name: "Deposited",
+    type: "event",
+  },
   {
     inputs: [
       { name: "withdrawal", type: "tuple", components: [] },
@@ -52,3 +87,41 @@ export const PRIVACY_POOL_ABI = [
     type: "function",
   },
 ] as const
+
+// Types for deposit functionality
+export interface DepositRecord {
+  timestamp: string
+  nullifier: string
+  secret: string
+  precommitment: string
+  commitment: string
+  label: string
+  transactionHash: string
+  blockNumber: string
+  depositIndex: number
+  amount: string
+  status: "deposited" | "asp_approved" | "withdrawn"
+}
+
+// Default deposit amounts (in ETH)
+export const DEFAULT_DEPOSIT_AMOUNTS = [
+  "0.001",
+  "0.01", 
+  "0.1"
+] as const
+
+// Gas limits for different operations
+export const GAS_LIMITS = {
+  DEPOSIT: 500000n,
+  WITHDRAW: 800000n,
+} as const
+
+// Utility function to get contract address by name
+export function getContractAddress(contractName: keyof typeof CONTRACTS): `0x${string}` {
+  return CONTRACTS[contractName] as `0x${string}`
+}
+
+// Utility function to validate network
+export function isCorrectNetwork(chainId: number): boolean {
+  return chainId === NETWORK.CHAIN_ID
+}
