@@ -8,6 +8,7 @@ import { Button } from './ui/button'
 import { poseidon2 } from 'poseidon-lite';
 import BigNumber from 'bignumber.js';
 import { SNARK_SCALAR_FIELD } from '@/config/snark';
+import { CONTRACTS } from '@/config/contracts';
 
 export const ProfileScreen = () => {
   const { signOut } = useAuth()
@@ -28,10 +29,39 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
   const { mnemonic, privateKey } = useSetupStore();
   const [pairs, setPairs] = useState<{ nullifier: string, secret: string }[]>([]);
 
-  function deriveFieldElement(seed: string, index: number): string {
+  /**
+   * Derive nullifier using Option C approach: hash-based domain separation
+   */
+  function deriveNullifier(accountKey: string, poolAddress: string, index: number): string {
+    const nullifierSeed = createDomainSeed(accountKey, "nullifier");
+    return deriveFieldElement(nullifierSeed, poolAddress, index);
+  }
+
+  /**
+   * Derive secret using Option C approach: hash-based domain separation
+   */
+  function deriveSecret(accountKey: string, poolAddress: string, index: number): string {
+    const secretSeed = createDomainSeed(accountKey, "secret");
+    return deriveFieldElement(secretSeed, poolAddress, index);
+  }
+
+  /**
+   * Create domain-separated seed by hashing accountKey + domain
+   */
+  function createDomainSeed(accountKey: string, domain: string): string {
+    const combined = accountKey + domain;
+    const hash = poseidon2([BigNumber(combined).toFixed(), '0']);
+    return new BigNumber(hash.toString()).mod(new BigNumber(SNARK_SCALAR_FIELD)).toFixed();
+  }
+
+  /**
+   * Derive a field element from seed, pool address, and index
+   */
+  function deriveFieldElement(seed: string, poolAddress: string, index: number): string {
     const input = [
-      BigNumber(seed).plus(index).toFixed(),
-      '0'
+      seed,
+      poolAddress,
+      index.toString()
     ];
     const hash = poseidon2(input);
     return new BigNumber(hash.toString()).mod(new BigNumber(SNARK_SCALAR_FIELD)).toFixed();
@@ -39,12 +69,15 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
 
   // Generate nullifiers/secrets on mount or when keys change
   useEffect(() => {
-    const seed = privateKey || (mnemonic ? mnemonic.join('') : '');
-    if (!seed) return;
+    const accountKey = privateKey || (mnemonic ? mnemonic.join('') : '');
+    if (!accountKey) return;
+    
+    const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
     const generated: { nullifier: string, secret: string }[] = [];
+    
     for (let i = 0; i < 3; i++) {
-      const nullifier = deriveFieldElement(seed, i);
-      const secret = deriveFieldElement(seed, i + 1000);
+      const nullifier = deriveNullifier(accountKey, poolAddress, i);
+      const secret = deriveSecret(accountKey, poolAddress, i);
       generated.push({ nullifier, secret });
     }
     setPairs(generated);

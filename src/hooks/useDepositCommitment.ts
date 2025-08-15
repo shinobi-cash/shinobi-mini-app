@@ -2,6 +2,7 @@ import { useSetupStore } from '../stores/setupStore';
 import { poseidon2 } from 'poseidon-lite';
 import BigNumber from 'bignumber.js';
 import { SNARK_SCALAR_FIELD } from '../config/snark';
+import { CONTRACTS } from '../config/contracts';
 import { useMemo } from 'react';
 
 export interface CommitmentData {
@@ -12,18 +13,21 @@ export interface CommitmentData {
 
 /**
  * Hook to generate nullifier, secret, and precommitment for deposit
- * Uses index 0 for now (first pair)
+ * Uses pool-specific derivation with index 0 for now (first pair)
  */
 export function useDepositCommitment(): CommitmentData | null {
   const { mnemonic, privateKey } = useSetupStore();
 
   return useMemo(() => {
-    const seed = privateKey || (mnemonic ? mnemonic.join('') : '');
-    if (!seed) return null;
+    const accountKey = privateKey || (mnemonic ? mnemonic.join('') : '');
+    if (!accountKey) return null;
 
-    // Derive nullifier and secret using index 0
-    const nullifier = deriveFieldElement(seed, 0);
-    const secret = deriveFieldElement(seed, 0 + 1000);
+    const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
+    const index = 0; // First pair for now
+
+    // Derive nullifier and secret using new approach
+    const nullifier = deriveNullifier(accountKey, poolAddress, index);
+    const secret = deriveSecret(accountKey, poolAddress, index);
 
     // Generate precommitment using Poseidon hash
     const precommitment = generatePrecommitment(nullifier, secret);
@@ -37,12 +41,40 @@ export function useDepositCommitment(): CommitmentData | null {
 }
 
 /**
- * Derive a field element from seed and index (same logic as ProfileScreen)
+ * Derive nullifier using Option C approach: hash-based domain separation
  */
-function deriveFieldElement(seed: string, index: number): string {
+function deriveNullifier(accountKey: string, poolAddress: string, index: number): string {
+  // Create domain-separated seed for nullifiers
+  const nullifierSeed = createDomainSeed(accountKey, "nullifier");
+  return deriveFieldElement(nullifierSeed, poolAddress, index);
+}
+
+/**
+ * Derive secret using Option C approach: hash-based domain separation
+ */
+function deriveSecret(accountKey: string, poolAddress: string, index: number): string {
+  // Create domain-separated seed for secrets
+  const secretSeed = createDomainSeed(accountKey, "secret");
+  return deriveFieldElement(secretSeed, poolAddress, index);
+}
+
+/**
+ * Create domain-separated seed by hashing accountKey + domain
+ */
+function createDomainSeed(accountKey: string, domain: string): string {
+  const combined = accountKey + domain;
+  const hash = poseidon2([BigNumber(combined).toFixed(), '0']);
+  return new BigNumber(hash.toString()).mod(new BigNumber(SNARK_SCALAR_FIELD)).toFixed();
+}
+
+/**
+ * Derive a field element from seed, pool address, and index
+ */
+function deriveFieldElement(seed: string, poolAddress: string, index: number): string {
   const input = [
-    BigNumber(seed).plus(index).toFixed(),
-    '0'
+    seed,
+    poolAddress,
+    index.toString()
   ];
   const hash = poseidon2(input);
   return new BigNumber(hash.toString()).mod(new BigNumber(SNARK_SCALAR_FIELD)).toFixed();
