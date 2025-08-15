@@ -1,16 +1,16 @@
-import { Home, Plus, History, User } from 'lucide-react'
+import { Home, Plus, Minus, User } from 'lucide-react'
 import { useNavigation } from '../contexts/NavigationContext'
 
 interface NavItem {
   icon: React.ReactNode
   label: string
-  screen: 'home' | 'deposit' | 'history' | 'profile'
+  screen: 'home' | 'deposit' | 'withdraw' | 'profile'
 }
 
 const navItems: NavItem[] = [
   { icon: <Home className="w-6 h-6" />, label: 'Home', screen: 'home' },
   { icon: <Plus className="w-6 h-6" />, label: 'Deposit', screen: 'deposit' },
-  { icon: <History className="w-6 h-6" />, label: 'History', screen: 'history' },
+  { icon: <Minus className="w-6 h-6" />, label: 'Withdraw', screen: 'withdraw' },
   { icon: <User className="w-6 h-6" />, label: 'Profile', screen: 'profile' },
 ]
 

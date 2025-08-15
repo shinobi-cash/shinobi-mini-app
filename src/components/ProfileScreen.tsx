@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useSetupStore } from '../stores/setupStore'
 import { AuthenticationGate } from './shared/AuthenticationGate'
 
-import { User } from 'lucide-react'
+import { User, History } from 'lucide-react'
 import { Button } from './ui/button'
 import { poseidon2 } from 'poseidon-lite';
 import BigNumber from 'bignumber.js';
@@ -57,6 +57,15 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
       </div>
       <h2 className="text-2xl font-bold text-center text-app-primary font-sans mb-2">Welcome, User!</h2>
       <div className="w-full max-w-xs flex flex-col gap-4">
+        <Button
+          onClick={() => {/* TODO: Show history modal/screen */}}
+          variant="outline"
+          className="w-full h-12 rounded-2xl text-base font-medium flex items-center gap-2"
+          size="lg"
+        >
+          <History className="w-5 h-5" />
+          View Transaction History
+        </Button>
         <Button
           onClick={onSignOut}
           variant="destructive"

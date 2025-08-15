@@ -24,12 +24,12 @@ const MainContent = () => {
             <DepositScreen />
           </ScreenLayout>
         )
-      case 'history':
+      case 'withdraw':
         return (
           <ScreenLayout>
             <ScreenContainer>
               <div className="flex-1 flex items-center justify-center min-h-[60vh]">
-                <p className="text-app-secondary">History Screen (Coming Soon)</p>
+                <p className="text-app-secondary">Withdraw Screen (Coming Soon)</p>
               </div>
             </ScreenContainer>
           </ScreenLayout>
