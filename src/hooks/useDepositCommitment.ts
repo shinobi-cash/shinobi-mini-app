@@ -4,6 +4,8 @@ import BigNumber from 'bignumber.js';
 import { SNARK_SCALAR_FIELD } from '../config/snark';
 import { CONTRACTS } from '../config/contracts';
 import { useMemo } from 'react';
+import { keccak256, toBytes } from 'viem';
+import { restoreFromMnemonic } from '../utils/crypto';
 
 export interface CommitmentData {
   nullifier: string;
@@ -19,24 +21,42 @@ export function useDepositCommitment(): CommitmentData | null {
   const { mnemonic, privateKey } = useSetupStore();
 
   return useMemo(() => {
-    const accountKey = privateKey || (mnemonic ? mnemonic.join('') : '');
-    if (!accountKey) return null;
+    // Get the actual private key, either directly or derived from mnemonic
+    let accountKey: string;
+    if (privateKey) {
+      accountKey = privateKey;
+    } else if (mnemonic) {
+      try {
+        const restoredKeys = restoreFromMnemonic(mnemonic);
+        accountKey = restoredKeys.privateKey;
+      } catch (error) {
+        console.error('Failed to restore private key from mnemonic:', error);
+        return null;
+      }
+    } else {
+      return null;
+    }
 
-    const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
-    const index = 0; // First pair for now
+    try {
+      const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
+      const index = 0; // First pair for now
 
-    // Derive nullifier and secret using new approach
-    const nullifier = deriveNullifier(accountKey, poolAddress, index);
-    const secret = deriveSecret(accountKey, poolAddress, index);
+      // Derive nullifier and secret using new approach
+      const nullifier = deriveNullifier(accountKey, poolAddress, index);
+      const secret = deriveSecret(accountKey, poolAddress, index);
 
-    // Generate precommitment using Poseidon hash
-    const precommitment = generatePrecommitment(nullifier, secret);
+      // Generate precommitment using Poseidon hash
+      const precommitment = generatePrecommitment(nullifier, secret);
 
-    return {
-      nullifier,
-      secret,
-      precommitment,
-    };
+      return {
+        nullifier,
+        secret,
+        precommitment,
+      };
+    } catch (error) {
+      console.error('Error generating commitment:', error);
+      return null;
+    }
   }, [mnemonic, privateKey]);
 }
 
@@ -63,21 +83,27 @@ function deriveSecret(accountKey: string, poolAddress: string, index: number): s
  */
 function createDomainSeed(accountKey: string, domain: string): string {
   const combined = accountKey + domain;
-  const hash = poseidon2([BigNumber(combined).toFixed(), '0']);
-  return new BigNumber(hash.toString()).mod(new BigNumber(SNARK_SCALAR_FIELD)).toFixed();
+  
+  // Hash the combined string using keccak256 to get hex value
+  const hash = keccak256(toBytes(combined));
+  
+  // Convert hex to BigNumber and ensure it's within scalar field
+  const hashBigNumber = new BigNumber(hash);
+  return hashBigNumber.mod(new BigNumber(SNARK_SCALAR_FIELD)).toFixed();
 }
 
 /**
  * Derive a field element from seed, pool address, and index
  */
 function deriveFieldElement(seed: string, poolAddress: string, index: number): string {
-  const input = [
-    seed,
-    poolAddress,
-    index.toString()
-  ];
-  const hash = poseidon2(input);
-  return new BigNumber(hash.toString()).mod(new BigNumber(SNARK_SCALAR_FIELD)).toFixed();
+  // Combine pool address and index into a single value using keccak256
+  const combined = poolAddress + index.toString();
+  const hash = keccak256(toBytes(combined));
+  const combinedValue = new BigNumber(hash).mod(new BigNumber(SNARK_SCALAR_FIELD)).toFixed();
+
+  // Now use poseidon2 with exactly 2 inputs
+  const poseidonHash = poseidon2([seed, combinedValue]);
+  return new BigNumber(poseidonHash.toString()).mod(new BigNumber(SNARK_SCALAR_FIELD)).toFixed();
 }
 
 /**
