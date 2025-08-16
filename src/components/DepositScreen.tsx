@@ -3,7 +3,7 @@ import { AuthenticationGate } from './shared/AuthenticationGate';
 import { WalletGate } from './shared/WalletGate';
 import { ChevronDown, AlertTriangle, Loader2, ExternalLink } from 'lucide-react';
 import { Button } from './ui/button';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { formatEther } from 'viem';
 import { NETWORK, DEFAULT_DEPOSIT_AMOUNTS, isCorrectNetwork } from '../config/contracts';
 import { useDepositCommitment } from '../hooks/useDepositCommitment';
@@ -32,6 +32,7 @@ const DepositForm = () => {
   const { data: balance } = useBalance({ address });
   const chainId = useChainId();
   const [amount, setAmount] = useState('');
+  const shownToastsRef = useRef(new Set<string>());
   const [selectedAsset] = useState({ symbol: 'ETH', name: 'Ethereum', icon: '⚫' });
   
   const isOnCorrectNetwork = isCorrectNetwork(chainId);
@@ -59,7 +60,10 @@ const DepositForm = () => {
 
   // Handle transaction success with toast and auto-reset
   useEffect(() => {
-    if (isSuccess && transactionHash) {
+    if (isSuccess && transactionHash && !shownToastsRef.current.has(transactionHash)) {
+      // Mark this transaction hash as shown
+      shownToastsRef.current.add(transactionHash);
+      
       toast.success('Deposit Successful!', {
         description: (
           <div className="flex items-center gap-2">
@@ -83,7 +87,7 @@ const DepositForm = () => {
         setAmount('');
       }, 1000);
     }
-  }, [isSuccess, transactionHash, reset]);
+  }, [isSuccess, transactionHash]);
 
   const handleAmountChange = (value: string) => {
     // Only allow numbers and decimal point
