@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSetupStore } from '../../stores/setupStore';
 import { Button } from '../ui/button';
-import { LoadAccountGrid } from '../LoadAccountGrid';
+import { LoadAccountDrawer } from '../LoadAccountDrawer';
 
 interface AuthenticationActionsProps {
   context?: 'profile' | 'deposit';
@@ -55,15 +55,12 @@ export const AuthenticationActions = ({ context: _ }: AuthenticationActionsProps
         Load Account
       </Button>
       
-      {showLoadAccount && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <LoadAccountGrid 
-            onLoad={handleLoad} 
-            error={loadError}
-            onClose={() => setShowLoadAccount(false)} 
-          />
-        </div>
-      )}
+      <LoadAccountDrawer 
+        onLoad={handleLoad} 
+        error={loadError}
+        open={showLoadAccount}
+        onOpenChange={setShowLoadAccount}
+      />
     </div>
   );
 };
