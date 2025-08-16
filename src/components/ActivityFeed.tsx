@@ -1,7 +1,9 @@
 import { Activity } from '../types/activity'
 import { ActivityRow } from './ActivityRow'
+import { ActivityDetailDrawer } from './ActivityDetailDrawer'
 import { sortActivitiesByTime } from '../utils/timeUtils'
 import { calculateTotalDeposits, calculateDepositCount, formatEthAmount } from '../utils/activityUtils'
+import { useState } from 'react'
 
 interface ActivityFeedProps {
   activities: Activity[]
@@ -12,9 +14,17 @@ interface ActivityFeedProps {
 }
 
 export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPage }: ActivityFeedProps) => {
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  
   const sortedActivities = sortActivitiesByTime(activities)
   const totalDeposits = calculateTotalDeposits(activities)
   const depositCount = calculateDepositCount(activities)
+
+  const handleActivityClick = (activity: Activity) => {
+    setSelectedActivity(activity)
+    setDrawerOpen(true)
+  }
 
   return (
     <section className="flex flex-col gap-4">
@@ -64,7 +74,7 @@ export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPa
             ) : (
               <>
                 {sortedActivities.map((activity, index) => (
-                  <div key={activity.id}>
+                  <div key={activity.id} onClick={() => handleActivityClick(activity)}>
                     <ActivityRow activity={activity} />
                     {/* Remove border from last item only if no load more button */}
                     {index === sortedActivities.length - 1 && !hasNextPage && (
@@ -87,6 +97,13 @@ export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPa
           </div>
         </div>
       </div>
+
+      {/* Activity Detail Drawer */}
+      <ActivityDetailDrawer
+        activity={selectedActivity}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+      />
     </section>
   )
 }
