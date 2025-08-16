@@ -1,14 +1,14 @@
-// Deployed contract addresses on Base Sepolia
+// Deployed contract addresses on Base Sepolia (updated to match indexer)
 export const CONTRACTS = {
-  // Your deployed SimplePrivacyPoolPaymaster
-  PAYMASTER: "0x0f97BD2171F4Cdf912Ae6E6C074B228C45B610cF",
+  // SimplePrivacyPoolPaymaster (updated from indexer)
+  PAYMASTER: "0xbF03af7e4870c5Cc4e3C4F9914239F5E093F959a",
   
   // Expected smart account for deterministic pattern
   EXPECTED_SMART_ACCOUNT: "0xa3aBDC7f6334CD3EE466A115f30522377787c024",
   
-  // Privacy Pool contracts
-  PRIVACY_POOL_ENTRYPOINT: "0x67992c861b7559FBB6F5B6d55Cc383472D80e0A5",
-  ETH_PRIVACY_POOL: "0xbBB978Ad37d847ffa1651900Ca75837212EBdf1f",
+  // Privacy Pool contracts (updated from indexer)
+  PRIVACY_POOL_ENTRYPOINT: "0xfBa5eDD64d4611ca50DD8dF9C4F94b895C66219b",
+  ETH_PRIVACY_POOL: "0xB68E4f712bd0783fbc6b369409885c2319Db114a",
   
   // ERC-4337 EntryPoint (standard across networks)
   ERC4337_ENTRYPOINT: "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
