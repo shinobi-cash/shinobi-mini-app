@@ -1,4 +1,6 @@
 // Activity types and interfaces
+import { formatEther } from 'viem'
+
 export type ActivityType = 'DEPOSIT' | 'WITHDRAWAL' | 'RAGEQUIT'
 export type ActivityStatus = 'pending' | 'approved' | 'rejected' | 'completed'
 
@@ -10,6 +12,8 @@ export interface IndexerActivity {
   user: string
   recipient?: string | null
   amount: string // bigint as string from GraphQL
+  originalAmount?: string | null // bigint as string (deposits only)
+  vettingFeeAmount?: string | null // bigint as string (deposits only)
   commitment: string // bigint as string
   label?: string | null // bigint as string
   precommitmentHash?: string | null // bigint as string
@@ -31,6 +35,8 @@ export interface Activity {
   user: string
   recipient?: string
   amount: string // formatted for display
+  originalAmount?: string // for deposits - before vetting fee
+  vettingFeeAmount?: string // for deposits - vetting fee
   feeAmount?: string
   relayer?: string
   isSponsored: boolean
@@ -38,6 +44,12 @@ export interface Activity {
   timestamp: string // formatted relative time
   blockNumber: string
   transactionHash: string
+  // ZK proof fields
+  commitment?: string
+  label?: string
+  precommitmentHash?: string
+  spentNullifier?: string
+  newCommitment?: string
   // Additional computed fields
   displayAmount: string // formatted ETH amount
   userShort: string // shortened address
@@ -48,7 +60,12 @@ export function convertIndexerToUIActivity(indexerActivity: IndexerActivity): Ac
   // Convert bigint amount to ETH (assuming 18 decimals)
   const amountInEth = formatEthAmount(indexerActivity.amount)
   const feeInEth = indexerActivity.feeAmount ? formatEthAmount(indexerActivity.feeAmount) : undefined
+  const originalAmountInEth = indexerActivity.originalAmount ? formatEthAmount(indexerActivity.originalAmount) : undefined
+  const vettingFeeInEth = indexerActivity.vettingFeeAmount ? formatEthAmount(indexerActivity.vettingFeeAmount) : undefined
   
+  // Determine status based on activity type  
+  const status = indexerActivity.type === 'DEPOSIT' ? 'pending' : 'completed'
+
   return {
     id: indexerActivity.id,
     type: indexerActivity.type,
@@ -56,24 +73,35 @@ export function convertIndexerToUIActivity(indexerActivity: IndexerActivity): Ac
     user: indexerActivity.user,
     recipient: indexerActivity.recipient || undefined,
     amount: amountInEth,
+    originalAmount: originalAmountInEth,
+    vettingFeeAmount: vettingFeeInEth,
     feeAmount: feeInEth,
     relayer: indexerActivity.relayer || undefined,
     isSponsored: indexerActivity.isSponsored,
-    status: 'completed', // All indexed activities are completed
+    status,
     timestamp: formatTimestamp(indexerActivity.timestamp),
     blockNumber: indexerActivity.blockNumber,
     transactionHash: indexerActivity.transactionHash,
+    // ZK proof fields
+    commitment: indexerActivity.commitment || undefined,
+    label: indexerActivity.label || undefined,
+    precommitmentHash: indexerActivity.precommitmentHash || undefined,
+    spentNullifier: indexerActivity.spentNullifier || undefined,
+    newCommitment: indexerActivity.newCommitment || undefined,
+    // Additional computed fields
     displayAmount: `${amountInEth} ETH`,
     userShort: shortenAddress(indexerActivity.user),
   }
 }
 
+
 // Helper function to format bigint wei amount to ETH
 function formatEthAmount(weiAmount: string): string {
   try {
     const wei = BigInt(weiAmount)
-    const eth = Number(wei) / 1e18
-    return eth.toFixed(6).replace(/\.?0+$/, '') // Remove trailing zeros
+    const ethString = formatEther(wei)
+    // Remove trailing zeros and decimal point if not needed, but avoid scientific notation
+    return ethString.replace(/\.?0+$/, '') || '0'
   } catch {
     return '0'
   }
