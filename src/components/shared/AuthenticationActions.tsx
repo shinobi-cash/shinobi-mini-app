@@ -2,14 +2,16 @@ import { useState } from 'react';
 import { useSetupStore } from '../../stores/setupStore';
 import { Button } from '../ui/button';
 import { LoadAccountDrawer } from '../LoadAccountDrawer';
+import { CreateAccountDrawer } from '../CreateAccountDrawer';
 
 interface AuthenticationActionsProps {
   context?: 'profile' | 'deposit';
 }
 
 export const AuthenticationActions = ({ context: _ }: AuthenticationActionsProps) => {
-  const { setCurrentStep, setKeys, completeSetup } = useSetupStore();
+  const { setKeys, completeSetup } = useSetupStore();
   const [showLoadAccount, setShowLoadAccount] = useState(false);
+  const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [loadError, setLoadError] = useState<string | undefined>();
 
   // Reuse the same logic from ProfileScreen
@@ -40,7 +42,7 @@ export const AuthenticationActions = ({ context: _ }: AuthenticationActionsProps
       <Button
         variant="default"
         className="w-full h-12 text-base font-medium rounded-2xl"
-        onClick={() => setCurrentStep('generate-keys')}
+        onClick={() => setShowCreateAccount(true)}
         size="lg"
       >
         Create Account
@@ -60,6 +62,11 @@ export const AuthenticationActions = ({ context: _ }: AuthenticationActionsProps
         error={loadError}
         open={showLoadAccount}
         onOpenChange={setShowLoadAccount}
+      />
+
+      <CreateAccountDrawer 
+        open={showCreateAccount}
+        onOpenChange={setShowCreateAccount}
       />
     </div>
   );
