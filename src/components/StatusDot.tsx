@@ -7,12 +7,12 @@ interface StatusDotProps {
 
 export const StatusDot = ({ type, status }: StatusDotProps) => {
   // Withdrawals and ragequits are always completed (green)
-  if (type === 'withdrawal' || type === 'ragequit') {
+  if (type === 'WITHDRAWAL' || type === 'RAGEQUIT') {
     return <div className="w-3 h-3 rounded-full bg-status-success" />
   }
 
   // Deposits have different statuses
-  if (type === 'deposit') {
+  if (type === 'DEPOSIT') {
     const colorMap = {
       approved: 'bg-status-success',
       pending: 'bg-status-warning',

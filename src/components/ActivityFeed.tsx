@@ -5,9 +5,13 @@ import { calculateTotalDeposits, calculateDepositCount, formatEthAmount } from '
 
 interface ActivityFeedProps {
   activities: Activity[]
+  loading?: boolean
+  error?: string
+  onLoadMore?: () => void
+  hasNextPage?: boolean
 }
 
-export const ActivityFeed = ({ activities }: ActivityFeedProps) => {
+export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPage }: ActivityFeedProps) => {
   const sortedActivities = sortActivitiesByTime(activities)
   const totalDeposits = calculateTotalDeposits(activities)
   const depositCount = calculateDepositCount(activities)
@@ -39,15 +43,47 @@ export const ActivityFeed = ({ activities }: ActivityFeedProps) => {
         {/* Scrollable Activities Table */}
         <div className="bg-app-surface border border-app shadow-md rounded-b-xl overflow-hidden">
           <div className="overflow-y-auto max-h-[60vh]">
-            {sortedActivities.map((activity, index) => (
-              <div key={activity.id}>
-                <ActivityRow activity={activity} />
-                {/* Remove border from last item */}
-                {index === sortedActivities.length - 1 && (
-                  <div className="border-b-0" />
-                )}
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <p className="text-app-secondary">Loading activities...</p>
               </div>
-            ))}
+            ) : error ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <p className="text-app-secondary mb-1">{error}</p>
+                  <p className="text-sm text-app-tertiary">Check your connection and try again</p>
+                </div>
+              </div>
+            ) : sortedActivities.length === 0 ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <p className="text-app-secondary mb-1">No activities yet</p>
+                  <p className="text-sm text-app-tertiary">Start by making a deposit to see your activity history</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {sortedActivities.map((activity, index) => (
+                  <div key={activity.id}>
+                    <ActivityRow activity={activity} />
+                    {/* Remove border from last item only if no load more button */}
+                    {index === sortedActivities.length - 1 && !hasNextPage && (
+                      <div className="border-b-0" />
+                    )}
+                  </div>
+                ))}
+                {hasNextPage && onLoadMore && (
+                  <div className="border-t border-app-border p-4 text-center">
+                    <button
+                      onClick={onLoadMore}
+                      className="px-4 py-2 text-sm text-app-primary hover:text-app-secondary transition-colors duration-200 font-medium"
+                    >
+                      Load More Activities
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>

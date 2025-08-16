@@ -5,17 +5,24 @@ import { DepositScreen } from './DepositScreen'
 import { BottomNavBar } from './BottomNavBar'
 import { ScreenLayout, ScreenContainer } from './layout/ScreenLayout'
 import { NavigationProvider, useNavigation } from '../contexts/NavigationContext'
-import { MOCK_ACTIVITIES } from '../data/mockActivities'
+import { useIndexerActivities } from '../hooks/useIndexerActivities'
 
 const MainContent = () => {
   const { currentScreen } = useNavigation()
+  const { activities, loading, error, isEmpty, loadMore, hasNextPage } = useIndexerActivities()
 
   const renderScreen = () => {
     switch (currentScreen) {
       case 'home':
         return (
           <ScreenLayout>
-            <ActivityFeed activities={MOCK_ACTIVITIES} />
+            {loading ? (
+              <ActivityFeed activities={[]} loading={true} />
+            ) : error ? (
+              <ActivityFeed activities={[]} error="Failed to load activities" />
+            ) : (
+              <ActivityFeed activities={activities} onLoadMore={loadMore} hasNextPage={hasNextPage} />
+            )}
           </ScreenLayout>
         )
       case 'deposit':
@@ -43,7 +50,27 @@ const MainContent = () => {
       default:
         return (
           <ScreenLayout>
-            <ActivityFeed activities={MOCK_ACTIVITIES} />
+            {loading ? (
+              <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+                <p className="text-app-secondary">Loading activities...</p>
+              </div>
+            ) : error ? (
+              <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+                <div className="text-center">
+                  <p className="text-app-secondary mb-2">Failed to load activities</p>
+                  <p className="text-sm text-app-tertiary">Check your connection and try again</p>
+                </div>
+              </div>
+            ) : isEmpty ? (
+              <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+                <div className="text-center">
+                  <p className="text-app-secondary mb-2">No activities yet</p>
+                  <p className="text-sm text-app-tertiary">Start by making a deposit to see your activity history</p>
+                </div>
+              </div>
+            ) : (
+              <ActivityFeed activities={activities} />
+            )}
           </ScreenLayout>
         )
     }
