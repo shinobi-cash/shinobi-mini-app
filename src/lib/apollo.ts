@@ -1,7 +1,9 @@
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client'
 
 // Shinobi.cash indexer GraphQL endpoint
-const INDEXER_URL = 'http://18.223.158.172:42069/graphql'
+const INDEXER_URL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:42069/graphql'  // Local development
+  : 'http://18.223.158.172:42069/graphql'  // Production
 
 export const apolloClient = new ApolloClient({
   uri: INDEXER_URL,
@@ -27,6 +29,8 @@ export const GET_ACTIVITIES = gql`
         user
         recipient
         amount
+        originalAmount
+        vettingFeeAmount
         commitment
         label
         precommitmentHash
