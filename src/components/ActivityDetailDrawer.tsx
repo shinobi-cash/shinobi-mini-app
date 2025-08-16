@@ -18,7 +18,7 @@ interface ActivityDetailDrawerProps {
 }
 
 export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityDetailDrawerProps) => {
-  const [copiedField, setCopiedField] = useState<string | null>(null)
+  const [, setCopiedField] = useState<string | null>(null)
 
   const copyToClipboard = async (text: string, fieldName: string) => {
     try {
