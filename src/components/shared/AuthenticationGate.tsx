@@ -1,7 +1,5 @@
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useSetupStore } from '../../stores/setupStore';
-import { SetupFlow } from '../setup/SetupFlow';
 import { AuthenticationActions } from './AuthenticationActions';
 
 interface AuthenticationGateProps {
@@ -18,16 +16,10 @@ export const AuthenticationGate = ({
   context = 'profile'
 }: AuthenticationGateProps) => {
   const { isAuthenticated } = useAuth();
-  const { currentStep } = useSetupStore();
   
   // If user is authenticated, show children (the protected content)
   if (isAuthenticated) {
     return <>{children}</>;
-  }
-  
-  // If user is in setup flow, show setup
-  if (currentStep !== null) {
-    return <SetupFlow />;
   }
   
   // Otherwise show authentication options
