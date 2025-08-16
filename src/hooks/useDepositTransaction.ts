@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther, decodeEventLog } from 'viem';
 import { 
@@ -79,13 +79,13 @@ export function useDepositTransaction() {
     }
   }, [receipt, state.isSuccess]);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setState({
       isSuccess: false,
       error: null,
       depositRecord: null,
     });
-  };
+  }, []);
 
   // Clear error when starting new transaction
   const clearError = () => {
