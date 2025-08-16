@@ -6,7 +6,7 @@ interface ActivityRowProps {
 }
 
 export const ActivityRow = ({ activity }: ActivityRowProps) => (
-  <div className="bg-app-surface border-b border-app px-3 py-3 sm:px-4 sm:py-4 active:bg-app-surface-hover rounded-xl transition-all duration-150 cursor-pointer">
+  <div className="bg-app-surface border-b border-app px-3 py-3 sm:px-4 sm:py-4 active:bg-app-surface-hover rounded-xl transition-all duration-150 cursor-pointer hover:bg-app-surface-hover">
     <div className="flex items-center justify-between gap-2">
       {/* Left side: Type and amount */}
       <div className="flex-1 min-w-0">
