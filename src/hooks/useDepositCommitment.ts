@@ -3,79 +3,151 @@ import { poseidon2 } from 'poseidon-lite';
 import BigNumber from 'bignumber.js';
 import { SNARK_SCALAR_FIELD } from '../config/snark';
 import { CONTRACTS } from '../config/contracts';
-import { useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { keccak256, toBytes } from 'viem';
 import { restoreFromMnemonic } from '../utils/crypto';
+import { useAccount } from 'wagmi';
+import { depositStorage } from '../lib/depositStorage';
+import { checkNotePrecommitmentExists } from '../lib/apollo';
 
-export interface CommitmentData {
+// Cash note data - like a currency note with unique cryptographic properties
+export interface CashNoteData {
   nullifier: string;
   secret: string;
   precommitment: string;
+  noteIndex: number; // The unique index of this cash note
+}
+
+// Hook result interface
+export interface DepositCashNoteResult {
+  noteData: CashNoteData | null;
+  isGeneratingNote: boolean;
+  error: string | null;
+  regenerateNote: () => Promise<void>;
 }
 
 /**
- * Hook to generate nullifier, secret, and precommitment for deposit
- * Uses pool-specific derivation with index 0 for now (first pair)
+ * Hook to generate a unique cash note for deposit
+ * Each note is like a currency note with unique cryptographic properties
+ * Automatically finds the next available note index and ensures no collisions
  */
-export function useDepositCommitment(): CommitmentData | null {
+export function useDepositCommitment(): DepositCashNoteResult {
   const { mnemonic, privateKey } = useSetupStore();
+  const { address } = useAccount();
+  
+  const [state, setState] = useState<{
+    noteData: CashNoteData | null;
+    isGeneratingNote: boolean;
+    error: string | null;
+  }>({
+    noteData: null,
+    isGeneratingNote: false,
+    error: null,
+  });
 
-  return useMemo(() => {
-    // Get the actual private key, either directly or derived from mnemonic
-    let accountKey: string;
-    if (privateKey) {
-      accountKey = privateKey;
-    } else if (mnemonic) {
-      try {
+  const generateUniqueNote = useCallback(async () => {
+    if (!address || !privateKey) {
+      setState(prev => ({ ...prev, noteData: null, isGeneratingNote: false }));
+      return;
+    }
+
+    setState(prev => ({ ...prev, isGeneratingNote: true, error: null }));
+    
+    try {
+      // Get the account key
+      let accountKey: string;
+      if (privateKey) {
+        accountKey = privateKey;
+      } else if (mnemonic) {
         const restoredKeys = restoreFromMnemonic(mnemonic);
         accountKey = restoredKeys.privateKey;
-      } catch (error) {
-        console.error('Failed to restore private key from mnemonic:', error);
-        return null;
+      } else {
+        throw new Error('No account key available');
       }
-    } else {
-      return null;
-    }
 
-    try {
       const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
-      const index = 0; // First pair for now
-
-      // Derive nullifier and secret using new approach
-      const nullifier = deriveNullifier(accountKey, poolAddress, index);
-      const secret = deriveSecret(accountKey, poolAddress, index);
-
-      // Generate precommitment using Poseidon hash
-      const precommitment = generatePrecommitment(nullifier, secret);
-
-      return {
-        nullifier,
-        secret,
-        precommitment,
-      };
+      
+      // Get next available note index
+      let candidateNoteIndex = await depositStorage.getNextNoteIndex(accountKey, poolAddress);
+      let attempts = 0;
+      const maxAttempts = 5;
+      
+      while (attempts < maxAttempts) {
+        // Generate cash note for this index
+        const nullifier = deriveNullifier(accountKey, poolAddress, candidateNoteIndex);
+        const secret = deriveSecret(accountKey, poolAddress, candidateNoteIndex);
+        const precommitment = generatePrecommitment(nullifier, secret);
+        
+        // Check if this note's precommitment already exists on-chain
+        const noteExists = await checkNotePrecommitmentExists(precommitment);
+        
+        if (!noteExists) {
+          // Success! Update storage and return the cash note
+          await depositStorage.updateLastUsedNoteIndex(accountKey, poolAddress, candidateNoteIndex);
+          
+          const noteData: CashNoteData = {
+            nullifier,
+            secret,
+            precommitment,
+            noteIndex: candidateNoteIndex,
+          };
+          
+          setState(prev => ({
+            ...prev,
+            noteData,
+            isGeneratingNote: false,
+            error: null,
+          }));
+          return;
+        }
+        
+        // Collision detected, try next note index
+        console.warn(`Cash note collision detected at index ${candidateNoteIndex}, trying next index`);
+        candidateNoteIndex++;
+        attempts++;
+      }
+      
+      throw new Error(`Failed to generate unique cash note after ${maxAttempts} attempts`);
+      
     } catch (error) {
-      console.error('Error generating commitment:', error);
-      return null;
+      console.error('Error generating cash note:', error);
+      setState(prev => ({
+        ...prev,
+        noteData: null,
+        isGeneratingNote: false,
+        error: error instanceof Error ? error.message : 'Failed to generate cash note',
+      }));
     }
-  }, [mnemonic, privateKey]);
+  }, [address, privateKey, mnemonic]);
+
+  useEffect(() => {
+    generateUniqueNote();
+  }, [generateUniqueNote]);
+
+  return {
+    noteData: state.noteData,
+    isGeneratingNote: state.isGeneratingNote,
+    error: state.error,
+    regenerateNote: generateUniqueNote,
+  };
 }
 
 /**
- * Derive nullifier using Option C approach: hash-based domain separation
+ * Derive nullifier for a cash note using hash-based domain separation
  */
-function deriveNullifier(accountKey: string, poolAddress: string, index: number): string {
+export function deriveNullifier(accountKey: string, poolAddress: string, noteIndex: number): string {
   // Create domain-separated seed for nullifiers
   const nullifierSeed = createDomainSeed(accountKey, "nullifier");
-  return deriveFieldElement(nullifierSeed, poolAddress, index);
+  return deriveFieldElement(nullifierSeed, poolAddress, noteIndex);
 }
 
 /**
- * Derive secret using Option C approach: hash-based domain separation
+ * Derive secret for a cash note using hash-based domain separation
  */
-function deriveSecret(accountKey: string, poolAddress: string, index: number): string {
+export function deriveSecret(accountKey: string, poolAddress: string, noteIndex: number): string {
   // Create domain-separated seed for secrets
   const secretSeed = createDomainSeed(accountKey, "secret");
-  return deriveFieldElement(secretSeed, poolAddress, index);
+  return deriveFieldElement(secretSeed, poolAddress, noteIndex);
 }
 
 /**
@@ -93,11 +165,11 @@ function createDomainSeed(accountKey: string, domain: string): string {
 }
 
 /**
- * Derive a field element from seed, pool address, and index
+ * Derive a field element from seed, pool address, and note index
  */
-function deriveFieldElement(seed: string, poolAddress: string, index: number): string {
-  // Combine pool address and index into a single value using keccak256
-  const combined = poolAddress + index.toString();
+function deriveFieldElement(seed: string, poolAddress: string, noteIndex: number): string {
+  // Combine pool address and note index into a single value using keccak256
+  const combined = poolAddress + noteIndex.toString();
   const hash = keccak256(toBytes(combined));
   const combinedValue = new BigNumber(hash).mod(new BigNumber(SNARK_SCALAR_FIELD)).toFixed();
 
@@ -108,8 +180,9 @@ function deriveFieldElement(seed: string, poolAddress: string, index: number): s
 
 /**
  * Generate precommitment using Poseidon hash of nullifier and secret
+ * This is the "face value" of the cash note that gets committed on-chain
  */
-function generatePrecommitment(nullifier: string, secret: string): string {
+export function generatePrecommitment(nullifier: string, secret: string): string {
   const precommitmentHash = poseidon2([nullifier, secret]);
   return new BigNumber(precommitmentHash.toString()).mod(new BigNumber(SNARK_SCALAR_FIELD)).toFixed();
 }
@@ -120,3 +193,6 @@ function generatePrecommitment(nullifier: string, secret: string): string {
 export function commitmentToBigInt(commitment: string): bigint {
   return BigInt(commitment);
 }
+
+// For backward compatibility
+export type CommitmentData = CashNoteData;
