@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { GET_ACTIVITIES } from '../lib/apollo'
-import { IndexerActivity, Activity, convertIndexerToUIActivity } from '../types/activity'
+import { Activity } from '../types/activity'
 
 interface PageInfo {
   hasNextPage: boolean
@@ -11,7 +11,7 @@ interface PageInfo {
 
 interface ActivitiesResponse {
   activitys: {
-    items: IndexerActivity[]
+    items: Activity[]
     pageInfo: PageInfo
   }
 }
@@ -31,8 +31,8 @@ export function useIndexerActivities(options: UseIndexerActivitiesOptions = {}) 
     notifyOnNetworkStatusChange: true,
   })
 
-  // Convert indexer activities to UI activities
-  const indexerActivities: Activity[] = data?.activitys?.items?.map(convertIndexerToUIActivity) || []
+  // Use activities directly from indexer (no conversion needed)
+  const activities: Activity[] = data?.activitys?.items || []
   const pageInfo = data?.activitys?.pageInfo
 
   const loadMore = () => {
@@ -58,10 +58,10 @@ export function useIndexerActivities(options: UseIndexerActivitiesOptions = {}) 
   }
 
   return {
-    activities: indexerActivities,
+    activities,
     loading,
     error,
-    isEmpty: !loading && !error && indexerActivities.length === 0,
+    isEmpty: !loading && !error && activities.length === 0,
     pageInfo,
     loadMore,
     hasNextPage: pageInfo?.hasNextPage || false,

@@ -25,6 +25,7 @@ export const GET_ACTIVITIES = gql`
       items {
         id
         type
+        aspStatus
         poolId
         user
         recipient
