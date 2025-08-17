@@ -5,7 +5,8 @@ import {
   DrawerContent, 
   DrawerHeader, 
   DrawerTitle,
-  DrawerClose 
+  DrawerClose, 
+  DrawerDescription
 } from './ui/drawer'
 import { X } from 'lucide-react'
 
@@ -62,18 +63,12 @@ export const LoadAccountDrawer = ({ onLoad, isLoading = false, error, open, onOp
               <X className="h-3.5 w-3.5 text-app-secondary" />
             </DrawerClose>
           </div>
+          <DrawerDescription className="text-sm items-start text-app-secondary">  
+            Enter your Recovery Phrase to load your account. You can paste the entire phrase into any field.
+          </DrawerDescription>
         </DrawerHeader>
-
+        
         <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-4">
-          {/* Description */}
-          <div className="bg-app-surface rounded-xl p-3 border border-app shadow-sm">
-            <div className="text-center">
-              <p className="text-sm font-medium text-app-secondary">
-                Enter your Recovery Phrase to load your account. You can paste the entire phrase into any field.
-              </p>
-            </div>
-          </div>
-
           {/* Word Grid */}
           <div className="bg-app-surface rounded-xl p-3 border border-app shadow-sm">
             <form onSubmit={handleSubmit} className="space-y-4">

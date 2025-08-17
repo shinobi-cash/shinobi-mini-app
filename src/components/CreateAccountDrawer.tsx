@@ -5,7 +5,8 @@ import {
   DrawerContent, 
   DrawerHeader, 
   DrawerTitle,
-  DrawerClose 
+  DrawerClose, 
+  DrawerDescription
 } from './ui/drawer'
 import { Key, X, Download, Copy, Eye, EyeOff, Check, FileText, Sparkles } from 'lucide-react'
 import { useSetupStore } from '../stores/setupStore'
@@ -32,6 +33,8 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
   const { setKeys, mnemonic, completeSetup } = useSetupStore()
 
   const handleGenerateKeys = async () => {
+    isGenerating;
+    setCanDownload;
     setCurrentStep('generating')
     setIsGenerating(true)
     setProgress(0)
@@ -382,6 +385,8 @@ Shinobi Privacy App`
             ) : null}
           </div>
         </DrawerHeader>
+        <DrawerDescription className="text-sm items-start text-app-secondary">  
+        </DrawerDescription>
 
         <div className="flex-1 overflow-y-auto px-4 pb-6">
           {renderContent()}
