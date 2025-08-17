@@ -6,7 +6,7 @@ interface StatusDotProps {
 }
 
 export const StatusDot = ({ type, status }: StatusDotProps) => {
-  // Withdrawals and ragequits are always completed (green)
+  // Withdrawals and ragequits are always auto-approved (green)
   if (type === 'WITHDRAWAL' || type === 'RAGEQUIT') {
     return <div className="w-3 h-3 rounded-full bg-status-success" />
   }

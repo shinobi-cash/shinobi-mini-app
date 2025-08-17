@@ -1,15 +1,17 @@
-import { Activity } from '../types/activity'
+import type { Activity } from '../types/activity'
 import { 
   Drawer, 
   DrawerContent, 
   DrawerHeader, 
   DrawerTitle,
+  DrawerDescription,
   DrawerClose 
 } from './ui/drawer'
 import { X, ExternalLink, Copy } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { NETWORK } from '../config/contracts'
+import { formatTimestamp, formatEthAmount } from '@/utils/activityUtils'
 
 interface ActivityDetailDrawerProps {
   activity: Activity | null
@@ -52,6 +54,8 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
               <X className="h-3.5 w-3.5 text-app-secondary" />
             </DrawerClose>
           </div>
+          <DrawerDescription className="text-sm items-start text-app-secondary">  
+          </DrawerDescription>
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-4">
@@ -67,7 +71,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-app-secondary">Original Amount:</span>
                   <span className="text-sm font-semibold text-app-primary tabular-nums">
-                    {activity.originalAmount} ETH
+                    {formatEthAmount(activity.originalAmount)} ETH
                   </span>
                 </div>
                 
@@ -75,7 +79,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-app-secondary">Vetting Fee:</span>
                   <span className="text-sm font-semibold text-red-500 tabular-nums">
-                    -{activity.vettingFeeAmount} ETH
+                    -{formatEthAmount(activity.vettingFeeAmount)} ETH
                   </span>
                 </div>
                 
@@ -86,7 +90,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-app-secondary">Final Amount:</span>
                   <span className="text-lg font-bold text-app-primary tabular-nums">
-                    {activity.amount} ETH
+                    {formatEthAmount(activity.amount)} ETH
                   </span>
                 </div>
               </div>
@@ -94,7 +98,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
               <div className="text-center">
                 <p className="text-sm font-medium text-app-secondary mb-1">Amount</p>
                 <p className="text-2xl font-bold text-app-primary tabular-nums">
-                  {activity.displayAmount}
+                  {`${formatEthAmount(activity.amount)} ETH`}
                 </p>
                 {activity.type === 'DEPOSIT' && (
                   <p className="text-xs text-app-tertiary mt-0.5">After vetting fees</p>
@@ -147,7 +151,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                 {/* Timestamp */}
                 <div className="px-3 py-2 flex items-center justify-between">
                   <span className="text-xs font-medium text-app-secondary">Time</span>
-                  <span className="text-xs text-app-primary">{activity.timestamp}</span>
+                  <span className="text-xs text-app-primary">{formatTimestamp(activity.timestamp)}</span>
                 </div>
 
                 {/* ASP Status - only for deposits */}
@@ -156,12 +160,12 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                     <span className="text-xs font-medium text-app-secondary">ASP Status</span>
                     <div className="flex items-center gap-1.5">
                       <div className={`w-1.5 h-1.5 rounded-full ${
-                        activity.status === 'approved' ? 'bg-green-500' : 
-                        activity.status === 'pending' ? 'bg-yellow-500' : 
-                        activity.status === 'rejected' ? 'bg-red-500' : 'bg-gray-400'
+                        activity.aspStatus === 'approved' ? 'bg-green-500' : 
+                        activity.aspStatus === 'pending' ? 'bg-yellow-500' : 
+                        activity.aspStatus === 'rejected' ? 'bg-red-500' : 'bg-gray-400'
                       }`} />
                       <span className="text-xs text-app-primary capitalize">
-                        {activity.status}
+                        {activity.aspStatus}
                       </span>
                     </div>
                   </div>
@@ -210,7 +214,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                     <div className="px-3 py-2 flex items-center justify-between">
                       <span className="text-xs font-medium text-app-secondary">Relay Fee</span>
                       <span className="text-xs font-mono text-app-primary">
-                        {parseFloat(activity.feeAmount).toFixed(6)} ETH
+                        {formatEthAmount(activity.feeAmount)} ETH
                       </span>
                     </div>
                   )}

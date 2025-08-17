@@ -1,6 +1,6 @@
-import { Activity } from '../types/activity'
+import type { Activity } from '../types/activity'
 import { StatusDot } from './StatusDot'
-
+import { formatTimestamp, formatEthAmount } from '@/utils/activityUtils'
 interface ActivityRowProps {
   activity: Activity
 }
@@ -14,7 +14,7 @@ export const ActivityRow = ({ activity }: ActivityRowProps) => (
           {activity.type.toLowerCase()}
         </div>
         <div className="text-sm sm:text-base text-app-secondary font-medium tabular-nums">
-          {activity.displayAmount}
+          {`${formatEthAmount(activity.amount)} ETH`}
         </div>
       </div>
 
@@ -22,10 +22,10 @@ export const ActivityRow = ({ activity }: ActivityRowProps) => (
       <div className="flex items-center gap-2 sm:gap-3">
         <div className="text-right">
           <div className="text-xs sm:text-sm text-app-tertiary font-medium whitespace-nowrap">
-            {activity.timestamp}
+            {formatTimestamp(activity.timestamp)}
           </div>
         </div>
-        <StatusDot type={activity.type} status={activity.status} />
+        <StatusDot type={activity.type} status={activity.aspStatus} />
       </div>
     </div>
   </div>

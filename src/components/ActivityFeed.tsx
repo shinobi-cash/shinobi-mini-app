@@ -2,7 +2,7 @@ import { Activity } from '../types/activity'
 import { ActivityRow } from './ActivityRow'
 import { ActivityDetailDrawer } from './ActivityDetailDrawer'
 import { sortActivitiesByTime } from '../utils/timeUtils'
-import { calculateTotalDeposits, calculateDepositCount, formatEthAmount } from '../utils/activityUtils'
+import { calculateTotalDeposits, calculateDepositCount } from '../utils/activityUtils'
 import { useState } from 'react'
 
 interface ActivityFeedProps {
@@ -34,7 +34,7 @@ export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPa
           <div className="text-center">
             <h3 className="text-base font-semibold text-app-secondary mb-2">Total Deposits</h3>
             <p className="text-3xl font-bold text-app-primary tabular-nums mb-2">
-              {formatEthAmount(totalDeposits)} ETH
+              {totalDeposits} ETH
             </p>
             <p className="text-base text-app-tertiary">
               {depositCount} deposit{depositCount !== 1 ? 's' : ''} approved
