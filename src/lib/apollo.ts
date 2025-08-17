@@ -54,13 +54,88 @@ export const GET_ACTIVITIES = gql`
   }
 `
 
-export const GET_POOLS = gql`
-  query GetPools {
-    pools {
+
+// Check if a cash note precommitment already exists on-chain
+const buildPrecommitmentExistsQuery = (precommitmentHash: string) => gql`
+  query CheckPrecommitmentExists {
+    activitys(where: { precommitmentHash: "${precommitmentHash}" }, limit: 1) {
       items {
         id
+        precommitmentHash
+        user
+        blockNumber
         timestamp
       }
     }
   }
 `
+
+
+// Get deposit by precommitment hash
+const buildDepositByPrecommitmentQuery = (precommitmentHash: string) => gql`
+  query GetDepositByPrecommitment {
+    activitys(where: { precommitmentHash: "${precommitmentHash}" }, limit: 1) {
+      items {
+        id
+        type
+        aspStatus
+        poolId
+        user
+        amount
+        originalAmount
+        vettingFeeAmount
+        commitment
+        label
+        precommitmentHash
+        spentNullifier
+        newCommitment
+        feeAmount
+        relayer
+        isSponsored
+        blockNumber
+        timestamp
+        transactionHash
+      }
+    }
+  }
+`
+
+/**
+ * Check if a cash note precommitment already exists on-chain
+ * Returns true if the precommitment is already used
+ */
+export async function checkNotePrecommitmentExists(precommitment: string): Promise<boolean> {
+  try {
+    const query = buildPrecommitmentExistsQuery(precommitment);
+    const result = await apolloClient.query({
+      query,
+      fetchPolicy: 'network-only', // Always check latest on-chain state
+    });
+    
+    return result.data?.activitys?.items?.length > 0;
+  } catch (error) {
+    console.error('Failed to check note precommitment on-chain:', error);
+    // On error, assume not used to avoid blocking deposits
+    // This allows graceful degradation when indexer is unavailable
+    return false;
+  }
+}
+
+
+/**
+ * Fetch deposit by precommitment hash for specific note data
+ */
+export async function fetchDepositByPrecommitment(precommitmentHash: string) {
+  try {
+    const query = buildDepositByPrecommitmentQuery(precommitmentHash);
+    const result = await apolloClient.query({
+      query,
+      fetchPolicy: 'network-only',
+    });
+    
+    return result.data?.activitys?.items?.[0] || null;
+  } catch (error) {
+    console.error('Failed to fetch deposit by precommitment:', error);
+    return null;
+  }
+}
