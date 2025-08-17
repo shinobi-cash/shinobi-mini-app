@@ -3,14 +3,10 @@ import { useState } from 'react'
 import { useSetupStore } from '../stores/setupStore'
 import { AuthenticationGate } from './shared/AuthenticationGate'
 
-import { User, History, ChevronDown, ChevronRight } from 'lucide-react'
+import { User, History, ChevronDown, ChevronRight, RefreshCw } from 'lucide-react'
 import { Button } from './ui/button'
-import { poseidon2 } from 'poseidon-lite';
-import BigNumber from 'bignumber.js';
-import { SNARK_SCALAR_FIELD } from '@/config/snark';
 import { CONTRACTS } from '@/config/contracts';
-import { keccak256, toBytes } from 'viem';
-import { restoreFromMnemonic } from '@/utils/crypto';
+import { useCashNoteData } from '../hooks/useProfileData';
 
 export const ProfileScreen = () => {
   const { signOut } = useAuth()
@@ -30,77 +26,29 @@ export const ProfileScreen = () => {
 const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
   const { mnemonic, privateKey } = useSetupStore();
   const [expandedPools, setExpandedPools] = useState<Set<string>>(new Set());
+  const profileData = useCashNoteData();
 
-  /**
-   * Derive nullifier using Option C approach: hash-based domain separation
-   */
-  function deriveNullifier(accountKey: string, poolAddress: string, index: number): string {
-    const nullifierSeed = createDomainSeed(accountKey, "nullifier");
-    return deriveFieldElement(nullifierSeed, poolAddress, index);
-  }
-
-  /**
-   * Derive secret using Option C approach: hash-based domain separation
-   */
-  function deriveSecret(accountKey: string, poolAddress: string, index: number): string {
-    const secretSeed = createDomainSeed(accountKey, "secret");
-    return deriveFieldElement(secretSeed, poolAddress, index);
-  }
-
-  /**
-   * Create domain-separated seed by hashing accountKey + domain
-   */
-  function createDomainSeed(accountKey: string, domain: string): string {
-    const combined = accountKey + domain;
-    const hash = keccak256(toBytes(combined));
-    const hashBigNumber = new BigNumber(hash);
-    return hashBigNumber.mod(new BigNumber(SNARK_SCALAR_FIELD)).toFixed();
-  }
-
-  /**
-   * Derive a field element from seed, pool address, and index
-   */
-  function deriveFieldElement(seed: string, poolAddress: string, index: number): string {
-    const combined = poolAddress + index.toString();
-    const hash = keccak256(toBytes(combined));
-    const combinedValue = new BigNumber(hash).mod(new BigNumber(SNARK_SCALAR_FIELD)).toFixed();
-
-    const poseidonHash = poseidon2([seed, combinedValue]);
-    return new BigNumber(poseidonHash.toString()).mod(new BigNumber(SNARK_SCALAR_FIELD)).toFixed();
-  }
-
-  // Get the actual private key, either directly or derived from mnemonic
-  const getAccountKey = (): string | null => {
-    if (privateKey) {
-      return privateKey;
-    } else if (mnemonic) {
-      try {
-        const restoredKeys = restoreFromMnemonic(mnemonic);
-        return restoredKeys.privateKey;
-      } catch (error) {
-        console.error('Failed to restore private key from mnemonic:', error);
-        return null;
-      }
-    }
-    return null;
-  };
-
-  // Generate single note for ETH pool
-  const generateNote = (accountKey: string) => {
-    if (!accountKey) return null;
+  // Generate real cash note data with deposit information
+  const generateAllNotesWithData = () => {
+    if (profileData.totalNotes === 0) return [];
     
-    try {
-      const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
-      const index = 0; // Single note for now
+    const notes = [];
+    for (let noteIndex = 0; noteIndex < profileData.totalNotes; noteIndex++) {
+      // Find matching deposit data for this note index
+      const depositData = profileData.deposits.find(
+        deposit => deposit.noteIndex === noteIndex
+      );
       
-      const nullifier = deriveNullifier(accountKey, poolAddress, index);
-      const secret = deriveSecret(accountKey, poolAddress, index);
+      const noteWithStatus = {
+        noteIndex,
+        hasDeposit: !!depositData,
+        depositData: depositData || null,
+      };
       
-      return { nullifier, secret };
-    } catch (error) {
-      console.error('Error generating note:', error);
-      return null;
+      notes.push(noteWithStatus);
     }
+    
+    return notes;
   };
 
   const togglePool = (poolId: string) => {
@@ -120,10 +68,26 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-2xl font-bold text-app-primary">Wallet</h1>
-            <p className="text-sm text-app-secondary">Your private cash notes</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-app-secondary">Your private cash notes</p>
+              {profileData.isSyncing && (
+                <RefreshCw className="w-3 h-3 text-app-secondary animate-spin" />
+              )}
+            </div>
           </div>
-          <div className="w-10 h-10 flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
-            <User className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={profileData.refreshData}
+              disabled={profileData.isSyncing}
+              className="w-8 h-8 p-0 rounded-full"
+            >
+              <RefreshCw className={`w-4 h-4 ${profileData.isSyncing ? 'animate-spin' : ''}`} />
+            </Button>
+            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
+              <User className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
           </div>
         </div>
       </div>
@@ -141,10 +105,10 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
             poolId="eth"
             poolName="ETH Pool"
             poolAddress={CONTRACTS.ETH_PRIVACY_POOL}
-            accountKey={getAccountKey() || ''}
             isExpanded={expandedPools.has('eth')}
             onToggle={() => togglePool('eth')}
-            generateNote={generateNote}
+            profileData={profileData}
+            generateAllNotesWithData={generateAllNotesWithData}
           />
         </div>
 
@@ -188,20 +152,19 @@ interface PoolAccordionProps {
   poolId: string;
   poolName: string;
   poolAddress: string;
-  accountKey: string;
   isExpanded: boolean;
   onToggle: () => void;
-  generateNote: (accountKey: string) => { nullifier: string; secret: string } | null;
+  profileData: any; // Type from useCashNoteData hook
+  generateAllNotesWithData: () => Array<{ noteIndex: number; hasDeposit: boolean; depositData: any | null }>;
 }
 
 const PoolAccordion = ({ 
   poolName, 
-  accountKey, 
   isExpanded, 
   onToggle, 
-  generateNote 
+  profileData,
+  generateAllNotesWithData
 }: PoolAccordionProps) => {
-  const note = accountKey ? generateNote(accountKey) : null;
   
   return (
     <div className="bg-app-card rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
@@ -216,12 +179,20 @@ const PoolAccordion = ({
           </div>
           <div className="text-left">
             <p className="text-sm font-medium text-app-primary">{poolName}</p>
-            <p className="text-xs text-app-secondary">{note ? '1 cash note' : 'No notes'}</p>
+            <p className="text-xs text-app-secondary">
+              {(() => {
+                const totalNotes = profileData.totalNotes;
+                return totalNotes > 0 ? `${totalNotes} cash note${totalNotes > 1 ? 's' : ''}` : 'No notes';
+              })()}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-app-secondary">
-            {note ? 'Ready' : 'Empty'}
+            {(() => {
+              const totalNotes = profileData.totalNotes;
+              return totalNotes > 0 ? 'Ready' : 'Empty';
+            })()}
           </span>
           {isExpanded ? (
             <ChevronDown className="w-4 h-4 text-app-secondary" />
@@ -234,19 +205,43 @@ const PoolAccordion = ({
       {/* Expanded Content */}
       {isExpanded && (
         <div className="border-t border-gray-100 dark:border-gray-800 p-4">
-          {note ? (
-            <CashNoteCard 
-              nullifier={note.nullifier}
-              secret={note.secret}
-              amount="0.01" // Placeholder
-              isDeposited={false} // Placeholder
-            />
-          ) : (
-            <div className="text-center py-6 text-app-secondary">
-              <span className="text-2xl mb-2 block">💰</span>
-              <p className="text-xs">No cash notes available</p>
-            </div>
-          )}
+          {(() => {
+            if (profileData.isLoading || profileData.isSyncing) {
+              return (
+                <div className="text-center py-6 text-app-secondary">
+                  <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
+                  <p className="text-xs">Loading your cash notes...</p>
+                </div>
+              );
+            }
+            
+            const allNotes = generateAllNotesWithData();
+            
+            if (allNotes.length === 0) {
+              return (
+                <div className="text-center py-6 text-app-secondary">
+                  <span className="text-2xl mb-2 block">💰</span>
+                  <p className="text-xs">No cash notes created yet</p>
+                  <p className="text-xs mt-1">Make a deposit to create your first cash note</p>
+                </div>
+              );
+            }
+            
+            return (
+              <div className="space-y-3">
+                {allNotes.map((note) => (
+                  <CashNoteCard 
+                    key={note.noteIndex}
+                    noteIndex={note.noteIndex}
+                    amount={note.depositData?.amount || '0.00'}
+                    isDeposited={note.hasDeposit}
+                    transactionHash={note.depositData?.transactionHash}
+                    timestamp={note.depositData?.timestamp}
+                  />
+                ))}
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>
@@ -254,19 +249,20 @@ const PoolAccordion = ({
 };
 
 interface CashNoteCardProps {
-  nullifier: string;
-  secret: string;
+  noteIndex: number;
   amount: string;
   isDeposited: boolean;
+  transactionHash?: string;
+  timestamp?: string;
 }
 
-const CashNoteCard = ({ amount, isDeposited }: CashNoteCardProps) => {
+const CashNoteCard = ({ noteIndex, amount, isDeposited, transactionHash, timestamp }: CashNoteCardProps) => {
   return (
     <div className="rounded-xl p-3">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-            <span className="text-xs font-medium text-green-700 dark:text-green-400">#1</span>
+            <span className="text-xs font-medium text-green-700 dark:text-green-400">#{noteIndex + 1}</span>
           </div>
           <span className="text-sm font-medium text-app-primary">Cash Note</span>
         </div>
@@ -285,7 +281,18 @@ const CashNoteCard = ({ amount, isDeposited }: CashNoteCardProps) => {
         </div>
       </div>
       <div className="text-xs text-app-secondary">
-        <p>💡 This note can be used once for private transactions</p>
+        {isDeposited && timestamp ? (
+          <div className="space-y-1">
+            <p>✅ Deposited on {new Date(timestamp).toLocaleDateString()}</p>
+            {transactionHash && (
+              <p className="font-mono text-xs truncate">
+                {transactionHash.slice(0, 10)}...{transactionHash.slice(-8)}
+              </p>
+            )}
+          </div>
+        ) : (
+          <p>💡 This note can be used once for private transactions</p>
+        )}
       </div>
     </div>
   );

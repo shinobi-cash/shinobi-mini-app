@@ -8,7 +8,7 @@ import {
   DepositRecord,
   GAS_LIMITS 
 } from '../config/contracts';
-import { commitmentToBigInt, CommitmentData } from './useDepositCommitment';
+import { commitmentToBigInt, CashNoteData } from './useDepositCommitment';
 
 interface DepositState {
   isSuccess: boolean;
@@ -38,7 +38,7 @@ export function useDepositTransaction() {
     hash,
   });
 
-  const deposit = (amount: string, commitmentData: CommitmentData) => {
+  const deposit = (amount: string, cashNoteData: CashNoteData) => {
     setState(prev => ({ 
       ...prev, 
       error: null,
@@ -47,7 +47,7 @@ export function useDepositTransaction() {
     }));
 
     const amountWei = parseEther(amount);
-    const precommitmentBigInt = commitmentToBigInt(commitmentData.precommitment);
+    const precommitmentBigInt = commitmentToBigInt(cashNoteData.precommitment);
 
     // Call the deposit function on the privacy pool entry point
     writeContract({

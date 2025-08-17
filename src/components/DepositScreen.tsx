@@ -36,7 +36,7 @@ const DepositForm = () => {
   const [selectedAsset] = useState({ symbol: 'ETH', name: 'Ethereum', icon: '⚫' });
   
   const isOnCorrectNetwork = isCorrectNetwork(chainId);
-  const commitmentData = useDepositCommitment();
+  const { noteData, isGeneratingNote, error: noteError, regenerateNote } = useDepositCommitment();
   const { 
     deposit, 
     reset,
@@ -57,6 +57,17 @@ const DepositForm = () => {
       });
     }
   }, [error]);
+
+  // Handle note generation errors silently - auto-retry without user notification
+  useEffect(() => {
+    if (noteError) {
+      console.warn('Note generation failed, auto-retrying:', noteError);
+      // Silently retry after a short delay
+      setTimeout(() => {
+        regenerateNote();
+      }, 1000);
+    }
+  }, [noteError, regenerateNote]);
 
   // Handle transaction success with toast and auto-reset
   useEffect(() => {
@@ -101,13 +112,13 @@ const DepositForm = () => {
   };
 
   const handleDeposit = async () => {
-    if (!commitmentData || !amount) return;
+    if (!noteData || !amount) return;
     
     // Clear any previous errors
     clearError();
     
     try {
-      await deposit(amount, commitmentData);
+      await deposit(amount, noteData);
     } catch (error) {
       console.error('Deposit failed:', error);
     }
@@ -115,9 +126,9 @@ const DepositForm = () => {
 
   const isValidAmount = amount && parseFloat(amount) > 0;
   const hasBalance = balance && parseFloat(formatEther(balance.value)) > 0;
-  const hasCommitmentData = commitmentData !== null;
+  const hasNoteData = noteData !== null;
   const isTransacting = isLoading || isConfirming;
-  const canDeposit = isValidAmount && hasBalance && parseFloat(amount) <= parseFloat(formatEther(balance?.value || 0n)) && isOnCorrectNetwork && hasCommitmentData && !isTransacting;
+  const canDeposit = isValidAmount && hasBalance && parseFloat(amount) <= parseFloat(formatEther(balance?.value || 0n)) && isOnCorrectNetwork && hasNoteData && !isTransacting;
 
   return (
     <div className="h-full flex flex-col px-4 py-4">
@@ -224,8 +235,8 @@ const DepositForm = () => {
               <Loader2 className="w-4 h-4 animate-spin" />
               Confirming...
             </div>
-          ) : !hasCommitmentData
-          ? 'Authentication Required'
+          ) : isGeneratingNote || !hasNoteData
+          ? 'Preparing...'
           : !isOnCorrectNetwork 
           ? `Switch to ${NETWORK.NAME}`
           : !hasBalance 
