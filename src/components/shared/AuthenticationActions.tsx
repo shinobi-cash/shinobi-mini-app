@@ -5,7 +5,7 @@ import { LoadAccountDrawer } from '../LoadAccountDrawer';
 import { CreateAccountDrawer } from '../CreateAccountDrawer';
 
 interface AuthenticationActionsProps {
-  context?: 'profile' | 'deposit';
+  context?: 'profile' | 'deposit' | 'withdraw';
 }
 
 export const AuthenticationActions = ({ context: _ }: AuthenticationActionsProps) => {

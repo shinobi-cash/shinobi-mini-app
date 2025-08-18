@@ -2,8 +2,9 @@ import { AppHeader } from './AppHeader'
 import { ActivityFeed } from './ActivityFeed'
 import { ProfileScreen } from './ProfileScreen'
 import { DepositScreen } from './DepositScreen'
+import { WithdrawalScreen } from './WithdrawalScreen'
 import { BottomNavBar } from './BottomNavBar'
-import { ScreenLayout, ScreenContainer } from './layout/ScreenLayout'
+import { ScreenLayout } from './layout/ScreenLayout'
 import { NavigationProvider, useNavigation } from '../contexts/NavigationContext'
 import { useIndexerActivities } from '../hooks/useIndexerActivities'
 
@@ -34,11 +35,7 @@ const MainContent = () => {
       case 'withdraw':
         return (
           <ScreenLayout>
-            <ScreenContainer>
-              <div className="flex-1 flex items-center justify-center min-h-[60vh]">
-                <p className="text-app-secondary">Withdraw Screen (Coming Soon)</p>
-              </div>
-            </ScreenContainer>
+            <WithdrawalScreen />
           </ScreenLayout>
         )
       case 'profile':

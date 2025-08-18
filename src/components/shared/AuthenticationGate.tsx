@@ -6,7 +6,7 @@ interface AuthenticationGateProps {
   children: React.ReactNode;
   title?: string;
   description?: string;
-  context?: 'profile' | 'deposit';
+  context?: 'profile' | 'deposit' | 'withdraw';
 }
 
 export const AuthenticationGate = ({ 
