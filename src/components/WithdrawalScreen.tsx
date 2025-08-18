@@ -160,6 +160,38 @@ const WithdrawalForm = ({ noteData, onBack }: WithdrawalFormProps) => {
   const youReceive = withdrawAmountNum - estimatedFee;
   const remainingBalance = availableBalance - withdrawAmountNum;
 
+  // Format ETH amounts with meaningful precision
+  const formatEthAmount = (amount: number): string => {
+    if (amount === 0) return '0';
+    
+    // For amounts >= 1, show 4 decimal places
+    if (amount >= 1) {
+      return amount.toFixed(4);
+    }
+    
+    // For amounts < 1, show at least 2 significant digits
+    const str = amount.toString();
+    const scientificMatch = str.match(/^(\d+\.?\d*)[eE]([+-]?\d+)$/);
+    
+    if (scientificMatch) {
+      // Handle scientific notation (very small numbers)
+      return amount.toFixed(Math.max(6, Math.abs(parseInt(scientificMatch[2])) + 2));
+    }
+    
+    // Find first non-zero digit after decimal point
+    const decimalIndex = str.indexOf('.');
+    if (decimalIndex === -1) return str;
+    
+    let firstNonZero = decimalIndex + 1;
+    while (firstNonZero < str.length && str[firstNonZero] === '0') {
+      firstNonZero++;
+    }
+    
+    // Show at least 2 significant digits after the first non-zero
+    const significantDigits = Math.max(4, firstNonZero - decimalIndex + 1);
+    return amount.toFixed(significantDigits);
+  };
+
   // Validation
   const isValidAmount = withdrawAmountNum > 0 && withdrawAmountNum <= availableBalance;
   const isValidRecipient = isAddress(recipientAddress);
@@ -208,9 +240,9 @@ const WithdrawalForm = ({ noteData, onBack }: WithdrawalFormProps) => {
   };
 
   // Copy to clipboard
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, fieldName?: string) => {
     navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard');
+    toast.success(fieldName ? `${fieldName} copied!` : 'Copied to clipboard');
   };
 
   // Reset form
@@ -229,74 +261,107 @@ const WithdrawalForm = ({ noteData, onBack }: WithdrawalFormProps) => {
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="size-4" />
           </Button>
-          <h1 className="text-xl font-bold text-app-primary">Withdrawal Complete</h1>
+          <div className="flex-1">
+            <h1 className="text-lg font-bold text-app-primary">Withdraw</h1>
+            <p className="text-xs text-app-secondary mt-1">Withdrawal completed successfully</p>
+          </div>
         </div>
 
         {/* Success Content */}
-        <div className="flex-1 space-y-6 overflow-auto">
-          <div className="text-center py-8">
-            <div className="size-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 className="size-8 text-green-600 dark:text-green-400" />
+        <div className="flex-1 overflow-auto space-y-4">
+          {/* Success Hero Section */}
+          <div className="bg-app-surface rounded-xl p-3 border border-app shadow-sm">
+            <div className="text-center py-4">
+              <div className="size-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                <CheckCircle2 className="size-8 text-green-600" />
+              </div>
+              <p className="text-sm font-medium text-app-secondary mb-1">Successfully received</p>
+              <p className="text-2xl font-bold text-app-primary tabular-nums">
+                {formatEthAmount(youReceive)} ETH
+              </p>
+              <p className="text-xs text-app-tertiary mt-0.5">Funds sent anonymously</p>
             </div>
-            <h2 className="text-xl font-semibold mb-2 text-app-primary">Withdrawal Successful!</h2>
-            <p className="text-app-secondary">Your funds have been sent anonymously</p>
+          </div>
+
+          {/* Transaction Summary */}
+          <div className="bg-app-surface rounded-xl border border-app shadow-sm overflow-hidden">
+            <div className="px-3 py-2 border-b border-app">
+              <h3 className="text-sm font-semibold text-app-primary">Transaction Summary</h3>
+            </div>
+            
+            <div className="divide-y divide-app-border">
+              <div className="px-3 py-2 flex items-center justify-between">
+                <span className="text-xs font-medium text-app-secondary">Withdrawal Amount</span>
+                <span className="text-xs font-mono text-app-primary tabular-nums">
+                  {formatEthAmount(parseFloat(withdrawAmount))} ETH
+                </span>
+              </div>
+              
+              <div className="px-3 py-2 flex items-center justify-between">
+                <span className="text-xs font-medium text-app-secondary">Network Fee</span>
+                <span className="text-xs font-mono text-red-500 tabular-nums">
+                  -{formatEthAmount(estimatedFee)} ETH
+                </span>
+              </div>
+              
+              <div className="px-3 py-2 flex items-center justify-between">
+                <span className="text-xs font-medium text-app-secondary">Gas Fee</span>
+                <span className="text-xs text-green-600">Free (Sponsored)</span>
+              </div>
+            </div>
           </div>
 
           {/* Transaction Details */}
-          <div className="space-y-4">
-            <div className="bg-app-card border border-app-border rounded-xl p-4 space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-app-secondary">Amount Withdrawn</span>
-                <span className="font-medium text-app-primary">{withdrawAmount} ETH</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-app-secondary">Fee Paid</span>
-                <span className="font-medium text-app-primary">{estimatedFee.toFixed(4)} ETH</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-app-secondary">You Received</span>
-                <span className="font-semibold text-lg text-app-primary">{youReceive.toFixed(4)} ETH</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-app-secondary">Gas Fee</span>
-                <span className="font-medium text-green-600">Free (Sponsored)</span>
-              </div>
+          <div className="bg-app-surface rounded-xl border border-app shadow-sm overflow-hidden">
+            <div className="px-3 py-2 border-b border-app">
+              <h3 className="text-sm font-semibold text-app-primary">Transaction Details</h3>
             </div>
-
-            <div className="bg-app-card border border-app-border rounded-xl p-4 space-y-3">
-              <div className="flex justify-between items-start">
-                <span className="text-sm text-app-secondary">To Address</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm">{recipientAddress.slice(0, 6)}...{recipientAddress.slice(-4)}</span>
-                  <Button variant="ghost" size="icon" className="size-6" onClick={() => copyToClipboard(recipientAddress)}>
-                    <Copy className="size-3" />
-                  </Button>
+            
+            <div className="divide-y divide-app-border">
+              <div className="px-3 py-2 flex items-center justify-between">
+                <span className="text-xs font-medium text-app-secondary">To Address</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-mono text-app-primary">
+                    {recipientAddress.slice(0, 6)}...{recipientAddress.slice(-4)}
+                  </span>
+                  <button
+                    onClick={() => copyToClipboard(recipientAddress, 'Address')}
+                    className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
+                  >
+                    <Copy className="h-3.5 w-3.5 text-app-tertiary" />
+                  </button>
                 </div>
               </div>
-              <div className="flex justify-between items-start">
-                <span className="text-sm text-app-secondary">Transaction</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm">{transactionHash.slice(0, 6)}...{transactionHash.slice(-4)}</span>
-                  <Button variant="ghost" size="icon" className="size-6" onClick={() => copyToClipboard(transactionHash)}>
-                    <Copy className="size-3" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="size-6">
-                    <ExternalLink className="size-3" />
-                  </Button>
+              
+              <div className="px-3 py-2 flex items-center justify-between">
+                <span className="text-xs font-medium text-app-secondary">Transaction Hash</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-mono text-app-primary">
+                    {transactionHash.slice(0, 6)}...{transactionHash.slice(-4)}
+                  </span>
+                  <button
+                    onClick={() => copyToClipboard(transactionHash, 'Transaction Hash')}
+                    className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
+                  >
+                    <Copy className="h-3.5 w-3.5 text-app-tertiary" />
+                  </button>
+                  <button className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200">
+                    <ExternalLink className="h-3.5 w-3.5 text-app-tertiary" />
+                  </button>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Actions */}
-          <div className="space-y-3 mt-auto">
-            <Button onClick={handleStartOver} className="w-full h-11 rounded-xl">
-              Make Another Withdrawal
-            </Button>
-            <Button variant="outline" onClick={onBack} className="w-full h-11 rounded-xl">
-              Back to Profile
-            </Button>
-          </div>
+        {/* Actions */}
+        <div className="mt-auto space-y-3">
+          <Button onClick={handleStartOver} className="w-full h-11 rounded-xl text-sm font-medium">
+            Make Another Withdrawal
+          </Button>
+          <Button variant="outline" onClick={onBack} className="w-full h-11 rounded-xl text-sm font-medium">
+            Back to Notes
+          </Button>
         </div>
       </div>
     );

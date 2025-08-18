@@ -49,6 +49,38 @@ export const TransactionPreviewDrawer = ({
     return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
   };
 
+  // Format ETH amounts with meaningful precision
+  const formatEthAmount = (amount: number): string => {
+    if (amount === 0) return '0';
+    
+    // For amounts >= 1, show 4 decimal places
+    if (amount >= 1) {
+      return amount.toFixed(4);
+    }
+    
+    // For amounts < 1, show at least 2 significant digits
+    const str = amount.toString();
+    const scientificMatch = str.match(/^(\d+\.?\d*)[eE]([+-]?\d+)$/);
+    
+    if (scientificMatch) {
+      // Handle scientific notation (very small numbers)
+      return amount.toFixed(Math.max(6, Math.abs(parseInt(scientificMatch[2])) + 2));
+    }
+    
+    // Find first non-zero digit after decimal point
+    const decimalIndex = str.indexOf('.');
+    if (decimalIndex === -1) return str;
+    
+    let firstNonZero = decimalIndex + 1;
+    while (firstNonZero < str.length && str[firstNonZero] === '0') {
+      firstNonZero++;
+    }
+    
+    // Show at least 2 significant digits after the first non-zero
+    const significantDigits = Math.max(4, firstNonZero - decimalIndex + 1);
+    return amount.toFixed(significantDigits);
+  };
+
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
       <DrawerContent className="bg-app-background border-app max-h-[85vh]">
@@ -72,7 +104,7 @@ export const TransactionPreviewDrawer = ({
             <div className="text-center">
               <p className="text-sm font-medium text-app-secondary mb-1">You will receive</p>
               <p className="text-2xl font-bold text-app-primary tabular-nums">
-                {youReceive.toFixed(4)} ETH
+                {formatEthAmount(youReceive)} ETH
               </p>
               <p className="text-xs text-app-tertiary mt-0.5">After network fees</p>
             </div>
@@ -88,14 +120,14 @@ export const TransactionPreviewDrawer = ({
               <div className="px-3 py-2 flex items-center justify-between">
                 <span className="text-xs font-medium text-app-secondary">Withdrawal Amount</span>
                 <span className="text-xs font-mono text-app-primary tabular-nums">
-                  {withdrawAmountNum.toFixed(4)} ETH
+                  {formatEthAmount(withdrawAmountNum)} ETH
                 </span>
               </div>
               
               <div className="px-3 py-2 flex items-center justify-between">
                 <span className="text-xs font-medium text-app-secondary">Network Fee</span>
                 <span className="text-xs font-mono text-red-500 tabular-nums">
-                  -{estimatedFee.toFixed(4)} ETH
+                  -{formatEthAmount(estimatedFee)} ETH
                 </span>
               </div>
               
@@ -108,7 +140,7 @@ export const TransactionPreviewDrawer = ({
                 <div className="px-3 py-2 flex items-center justify-between">
                   <span className="text-xs font-medium text-app-secondary">Remaining in Note</span>
                   <span className="text-xs font-mono text-app-primary tabular-nums">
-                    {remainingBalance.toFixed(4)} ETH
+                    {formatEthAmount(remainingBalance)} ETH
                   </span>
                 </div>
               )}
