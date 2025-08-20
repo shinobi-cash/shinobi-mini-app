@@ -1,8 +1,8 @@
 import { Activity } from '../types/activity'
 import { ActivityRow } from './ActivityRow'
 import { ActivityDetailDrawer } from './ActivityDetailDrawer'
-import { calculateTotalDeposits, calculateDepositCount } from '../utils/activityUtils'
 import { useState } from 'react'
+import { formatEthAmount } from '@/utils/formatters'
 
 interface ActivityFeedProps {
   activities: Activity[]
@@ -10,6 +10,18 @@ interface ActivityFeedProps {
   error?: string
   onLoadMore?: () => void
   hasNextPage?: boolean
+}
+
+const calculateTotalDeposits = (activities: Activity[]): number => {
+  return activities
+    .filter(activity => activity.type === 'DEPOSIT' && activity.aspStatus === 'approved')
+    .reduce((total, activity) => total + parseFloat(formatEthAmount(activity.amount)), 0)
+}
+
+const calculateDepositCount = (activities: Activity[]): number => {
+  return activities
+    .filter(activity => activity.type === 'DEPOSIT' && activity.aspStatus === 'approved')
+    .length
 }
 
 export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPage }: ActivityFeedProps) => {
