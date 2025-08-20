@@ -1,18 +1,21 @@
 /**
- * Indexer Service
+ * Centralized Query Service
  * 
- * Handles all interactions with The Graph indexer and IPFS for privacy pool data.
- * This includes GraphQL queries for blockchain data and IPFS fetching for ASP data.
+ * All GraphQL query execution functions in one place for easy maintenance.
+ * Handles all interactions with The Graph indexer and IPFS.
  */
 
-import { apolloClient } from '../lib/apollo';
+import { apolloClient } from '../lib/clients';
 import { INDEXER_FETCH_POLICY, IPFS_GATEWAY_URL, CONTRACTS } from '../config/constants';
 import {
+  GET_ACTIVITIES,
   GET_STATE_TREE_COMMITMENTS,
   GET_LATEST_ASP_ROOT,
+  GET_APPROVED_LABELS,
   GET_DEPOSIT_BY_PRECOMMITMENT,
   CHECK_NULLIFIER_SPENT,
   GET_POOL_DEPOSITS,
+  GET_POOL_CONFIG,
   HEALTH_CHECK
 } from '../config/queries';
 
@@ -26,8 +29,8 @@ export interface StateTreeLeaf {
 export interface ASPApprovalList {
   version: '1.0';
   poolId: string;
-  cumulativeApprovedLabels: string[]; // All approved labels in insertion order
-  aspRoot: string; // The calculated ASP merkle root
+  cumulativeApprovedLabels: string[];
+  aspRoot: string;
   timestamp: number;
   description: string;
 }
@@ -38,22 +41,106 @@ export interface ASPData {
   approvedLabels: string[];
 }
 
-export interface DepositActivity {
+export interface Activity {
   id: string;
-  commitment: string;
-  label: string;
-  amount: string;
-  timestamp: string;
-  transactionHash: string;
-  blockNumber: string;
   type: string;
   aspStatus: string;
+  poolId: string;
+  user: string;
+  recipient?: string;
+  amount: string;
+  originalAmount?: string;
+  vettingFeeAmount?: string;
+  commitment?: string;
+  label?: string;
+  precommitmentHash?: string;
+  spentNullifier?: string;
+  newCommitment?: string;
+  feeAmount?: string;
+  relayer?: string;
+  isSponsored?: boolean;
+  blockNumber: string;
+  timestamp: string;
+  transactionHash: string;
+}
+
+// ============ ACTIVITY QUERIES ============
+
+/**
+ * Get all activities with pagination support
+ */
+export async function fetchActivities(limit: number = 15, after?: string) {
+  const result = await apolloClient.query({
+    query: GET_ACTIVITIES,
+    variables: { limit, after },
+    fetchPolicy: INDEXER_FETCH_POLICY,
+  });
+  
+  return result.data?.activitys || { items: [], pageInfo: {} };
+}
+
+/**
+ * Fetch deposit by precommitment hash for specific note data
+ */
+export async function fetchDepositByPrecommitment(precommitmentHash: string): Promise<Activity | null> {
+  try {
+    const result = await apolloClient.query({
+      query: GET_DEPOSIT_BY_PRECOMMITMENT,
+      variables: { precommitmentHash },
+      fetchPolicy: INDEXER_FETCH_POLICY,
+    });
+    
+    return result.data?.activitys?.items?.[0] || null;
+  } catch (error) {
+    console.error('Failed to fetch deposit by precommitment:', error);
+    return null;
+  }
+}
+
+/**
+ * Check if nullifier has been spent in a withdrawal
+ */
+export async function isNullifierSpent(spentNullifier: string): Promise<boolean> {
+  try {
+    const result = await apolloClient.query({
+      query: CHECK_NULLIFIER_SPENT,
+      variables: { spentNullifier },
+      fetchPolicy: INDEXER_FETCH_POLICY,
+    });
+    
+    return result.data?.activitys?.items?.length > 0;
+  } catch (error) {
+    console.error('Failed to check withdrawal by nullifier:', error);
+    // On error, assume not spent to avoid marking valid deposits as spent
+    return false;
+  }
+}
+
+/**
+ * Fetch all deposits for a specific pool
+ */
+export async function fetchPoolDeposits(poolAddress?: string): Promise<Activity[]> {
+  try {
+    const poolId = (poolAddress || CONTRACTS.ETH_PRIVACY_POOL).toLowerCase();
+    
+    const result = await apolloClient.query({
+      query: GET_POOL_DEPOSITS,
+      variables: { poolId },
+      fetchPolicy: INDEXER_FETCH_POLICY,
+    });
+
+    return result.data?.activitys?.items || [];
+
+  } catch (error) {
+    console.error('Failed to fetch pool deposits:', error);
+    throw new Error('Failed to fetch pool deposits from indexer');
+  }
 }
 
 // ============ STATE TREE QUERIES ============
 
 /**
- * Fetch state tree commitments ordered by leafIndex in ascending order
+ * Fetch state tree commitments ordered by leafIndex
  */
 export async function fetchStateTreeLeaves(): Promise<StateTreeLeaf[]> {
   try {
@@ -148,6 +235,24 @@ export async function fetchApprovedLabelsFromIPFS(ipfsCID: string): Promise<stri
 }
 
 /**
+ * Get approved labels directly from indexer (fallback method)
+ */
+export async function fetchApprovedLabelsFromIndexer(): Promise<string[]> {
+  try {
+    const result = await apolloClient.query({
+      query: GET_APPROVED_LABELS,
+      fetchPolicy: INDEXER_FETCH_POLICY,
+    });
+
+    const activities = result.data?.activitys?.items || [];
+    return activities.map((activity: any) => activity.label);
+  } catch (error) {
+    console.error('Failed to fetch approved labels from indexer:', error);
+    return [];
+  }
+}
+
+/**
  * Fetch complete ASP data (root + approved labels from IPFS)
  */
 export async function fetchASPData(): Promise<ASPData> {
@@ -172,68 +277,27 @@ export async function fetchASPData(): Promise<ASPData> {
   }
 }
 
-// ============ DEPOSIT AND ACTIVITY QUERIES ============
+// ============ POOL QUERIES ============
 
 /**
- * Fetch deposit by precommitment hash
+ * Get pool configuration and stats
  */
-export async function fetchDepositByPrecommitment(precommitmentHash: string): Promise<DepositActivity | null> {
+export async function fetchPoolConfig(poolId: string) {
   try {
     const result = await apolloClient.query({
-      query: GET_DEPOSIT_BY_PRECOMMITMENT,
-      variables: { precommitmentHash },
-      fetchPolicy: INDEXER_FETCH_POLICY,
-    });
-
-    const activities = result.data?.activitys?.items || [];
-    return activities.length > 0 ? activities[0] : null;
-
-  } catch (error) {
-    console.error('Failed to fetch deposit by precommitment:', error);
-    return null;
-  }
-}
-
-/**
- * Check if a nullifier is spent by looking for withdrawal activities
- */
-export async function isNullifierSpent(nullifierHash: string): Promise<boolean> {
-  try {
-    const result = await apolloClient.query({
-      query: CHECK_NULLIFIER_SPENT,
-      variables: { nullifierHash },
-      fetchPolicy: INDEXER_FETCH_POLICY,
-    });
-
-    const withdrawals = result.data?.activitys?.items || [];
-    return withdrawals.length > 0;
-
-  } catch (error) {
-    console.error('Failed to check nullifier spent status:', error);
-    throw new Error('Failed to check nullifier spent status');
-  }
-}
-
-/**
- * Fetch all deposits for a specific pool
- */
-export async function fetchPoolDeposits(poolAddress?: string): Promise<DepositActivity[]> {
-  try {
-    const poolId = (poolAddress || CONTRACTS.ETH_PRIVACY_POOL).toLowerCase();
-    
-    const result = await apolloClient.query({
-      query: GET_POOL_DEPOSITS,
+      query: GET_POOL_CONFIG,
       variables: { poolId },
       fetchPolicy: INDEXER_FETCH_POLICY,
     });
 
-    return result.data?.activitys?.items || [];
-
+    return result.data?.pool || null;
   } catch (error) {
-    console.error('Failed to fetch pool deposits:', error);
-    throw new Error('Failed to fetch pool deposits from indexer');
+    console.error('Failed to fetch pool config:', error);
+    return null;
   }
 }
+
+// ============ HEALTH AND META QUERIES ============
 
 /**
  * Check indexer health and connectivity

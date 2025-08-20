@@ -72,27 +72,74 @@ export const GET_APPROVED_LABELS = gql`
 // ============ DEPOSIT AND ACTIVITY QUERIES ============
 
 /**
+ * Get all activities with pagination support
+ */
+export const GET_ACTIVITIES = gql`
+  query GetActivities($limit: Int = 15, $after: String) {
+    activitys(limit: $limit, after: $after, orderBy: "timestamp", orderDirection: "desc") {
+      items {
+        id
+        type
+        aspStatus
+        poolId
+        user
+        recipient
+        amount
+        originalAmount
+        vettingFeeAmount
+        commitment
+        label
+        precommitmentHash
+        spentNullifier
+        newCommitment
+        feeAmount
+        relayer
+        isSponsored
+        blockNumber
+        timestamp
+        transactionHash
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+    }
+  }
+`;
+
+/**
  * Get deposit by precommitment hash
  */
 export const GET_DEPOSIT_BY_PRECOMMITMENT = gql`
   query GetDepositByPrecommitment($precommitmentHash: String!) {
     activitys(
       where: { 
-        type: "DEPOSIT"
         precommitmentHash: $precommitmentHash 
       }
       limit: 1
     ) {
       items {
         id
-        commitment
-        label
-        amount
-        timestamp
-        transactionHash
-        blockNumber
         type
         aspStatus
+        poolId
+        user
+        amount
+        originalAmount
+        vettingFeeAmount
+        commitment
+        label
+        precommitmentHash
+        spentNullifier
+        newCommitment
+        feeAmount
+        relayer
+        isSponsored
+        blockNumber
+        timestamp
+        transactionHash
       }
     }
   }
@@ -102,17 +149,18 @@ export const GET_DEPOSIT_BY_PRECOMMITMENT = gql`
  * Check if nullifier is spent (withdrawal exists)
  */
 export const CHECK_NULLIFIER_SPENT = gql`
-  query CheckNullifierSpent($nullifierHash: String!) {
+  query CheckNullifierSpent($spentNullifier: String!) {
     activitys(
       where: { 
-        type: "WITHDRAWAL"
-        nullifierHash: $nullifierHash 
+        spentNullifier: $spentNullifier 
       }
       limit: 1
     ) {
       items {
         id
-        nullifierHash
+        type
+        spentNullifier
+        blockNumber
         timestamp
         transactionHash
       }

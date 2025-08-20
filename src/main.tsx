@@ -6,7 +6,7 @@ import { WagmiProvider } from "wagmi";
 
 import App from "./App.tsx";
 import { config } from "./wagmi.ts";
-import { apolloClient } from "./lib/apollo.ts";
+import { apolloClient } from "./lib/clients.ts";
 
 import "./index.css";
 

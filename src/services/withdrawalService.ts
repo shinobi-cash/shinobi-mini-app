@@ -21,7 +21,7 @@ import {
   fetchASPData,
   type StateTreeLeaf,
   type ASPData 
-} from './indexerService';
+} from './queryService';
 import { 
   fetchPoolScope,
   createWithdrawalData,

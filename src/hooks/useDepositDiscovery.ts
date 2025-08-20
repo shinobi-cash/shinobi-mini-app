@@ -5,7 +5,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { noteCache, DiscoveredNote } from '../lib/noteCache';
-import { fetchDepositByPrecommitment, isNullifierSpent } from '../lib/apollo';
+import { fetchDepositByPrecommitment, isNullifierSpent } from '../services/queryService';
 import { deriveNullifier, deriveSecret, generatePrecommitment } from './useDepositCommitment';
 import { restoreFromMnemonic } from '../utils/crypto';
 import { formatEther } from 'viem';
@@ -74,14 +74,14 @@ export function useDepositDiscovery(): UseDepositDiscoveryResult {
         
         discoveredNotes.push({
           noteIndex,
-          amount: formatEther(BigInt(amount)),
-          transactionHash: depositActivity.transactionHash || 'unknown',
-          blockNumber: depositActivity.blockNumber || 'unknown',
-          timestamp: depositActivity.timestamp || Date.now().toString(),
           status,
-          precommitmentHash: depositActivity.precommitmentHash,
-          commitment: depositActivity.commitment,
-          label: depositActivity.label,
+          amount: formatEther(BigInt(amount)),
+          transactionHash: depositActivity.transactionHash,
+          blockNumber: depositActivity.blockNumber,
+          timestamp: depositActivity.timestamp ,
+          precommitmentHash: depositActivity.precommitmentHash ||  '',
+          commitment: depositActivity.commitment || '',
+          label: depositActivity.label || '',
           discoveredAt: Date.now(),
         });
 

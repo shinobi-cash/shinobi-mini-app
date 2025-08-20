@@ -1,6 +1,4 @@
-import { apolloClient } from '../lib/apollo';
-import { gql } from '@apollo/client';
-import { BUNDLER_URL } from '../config/contracts';
+import { BUNDLER_URL } from '../config/constants';
 import { createPublicClient, http } from 'viem';
 import { baseSepolia } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -8,26 +6,9 @@ import { toSimpleSmartAccount } from "permissionless/accounts";
 import { createSmartAccountClient } from "permissionless";
 import { entryPoint07Address } from 'viem/account-abstraction';
 import { CONTRACTS } from '@/config/constants';
-
-export interface StateTreeLeaf {
-  leafIndex: string;
-  leafValue: string;
-}
-
-export interface ASPApprovalList {
-  version: '1.0';
-  poolId: string;
-  cumulativeApprovedLabels: string[]; // All approved labels in insertion order
-  aspRoot: string; // The calculated ASP merkle root
-  timestamp: number;
-  description: string;
-}
-
-export interface ASPData {
-  aspRoot: string;
-  ipfsCID: string;
-  approvedLabels: string[];
-}
+// Re-export types and functions from query service
+export type { StateTreeLeaf, ASPApprovalList, ASPData } from '../services/queryService';
+export { fetchStateTreeLeaves, fetchASPData } from '../services/queryService';
 
 // Minimal Privacy Pool ABI for SCOPE function
 const PRIVACY_POOL_ABI = [
@@ -48,117 +29,7 @@ const publicClient = createPublicClient({
 
 const WITHDRAWAL_ACCOUNT_PRIVATE_KEY= "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" as `0x${string}`
 
-/**
- * Fetch state tree commitments ordered by leafIndex in ascending order
- */
-export async function fetchStateTreeLeaves(): Promise<StateTreeLeaf[]> {
-  try {
-    console.log('📊 Fetching state tree commitments...');
-    
-    const poolId = CONTRACTS.ETH_PRIVACY_POOL.toLowerCase();
-    
-    const result = await apolloClient.query({
-      query: gql`
-        query GetStateTreeCommitments($poolId: String!) {
-          merkleTreeLeafs(
-            where: { poolId: $poolId }
-            orderBy: "leafIndex"
-            orderDirection: "asc"
-          ) {
-            items {
-              leafIndex
-              leafValue
-              treeRoot
-              treeSize
-            }
-          }
-        }
-      `,
-      variables: { poolId },
-      fetchPolicy: 'network-only',
-    });
-
-    const stateTreeLeaves = result.data?.merkleTreeLeafs?.items || [];
-    
-    console.log(`✅ State tree leaves fetched: ${stateTreeLeaves.length} leaves`);
-    
-    return stateTreeLeaves.map((leaf: any) => ({
-      leafIndex: leaf.leafIndex,
-      leafValue: leaf.leafValue,
-    }));
-
-  } catch (error) {
-    console.error('Failed to fetch state tree leaves:', error);
-    throw new Error('Failed to fetch state tree data from indexer');
-  }
-}
-
-/**
- * Fetch latest ASP root and approved labels from IPFS
- */
-export async function fetchASPData(): Promise<ASPData> {
-  try {
-    console.log('🌳 Fetching latest ASP root...');
-    
-    // Step 1: Get latest ASP root and IPFS CID from indexer
-    const result = await apolloClient.query({
-      query: gql`
-        query GetLatestAspRoot {
-          associationSetUpdates(
-            orderBy: "timestamp"
-            orderDirection: "desc"
-            limit: 1
-          ) {
-            items {
-              root
-              ipfsCID
-              timestamp
-            }
-          }
-        }
-      `,
-      fetchPolicy: 'network-only',
-    });
-
-    const latestUpdate = result.data?.associationSetUpdates?.items?.[0];
-    
-    if (!latestUpdate?.root || !latestUpdate?.ipfsCID) {
-      throw new Error('No ASP root found or missing IPFS CID');
-    }
-
-    const { root: aspRoot, ipfsCID } = latestUpdate;
-    console.log(`✅ Latest ASP root found: ${aspRoot}`);
-    console.log(`📎 IPFS CID: ${ipfsCID}`);
-
-    // Step 2: Fetch approval list from IPFS
-    console.log('🏷️ Fetching approved labels from IPFS...');
-    const ipfsResponse = await fetch(`https://gateway.pinata.cloud/ipfs/${ipfsCID}`);
-    
-    if (!ipfsResponse.ok) {
-      throw new Error(`IPFS fetch failed: ${ipfsResponse.status} ${ipfsResponse.statusText}`);
-    }
-    
-    const approvalList = await ipfsResponse.json() as ASPApprovalList;
-    
-    // Validate the approval list structure
-    if (!approvalList.cumulativeApprovedLabels || !Array.isArray(approvalList.cumulativeApprovedLabels)) {
-      throw new Error('Invalid approval list format: missing cumulativeApprovedLabels array');
-    }
-    
-    const approvedLabels = approvalList.cumulativeApprovedLabels;
-    console.log(`✅ ASP data fetched: ${approvedLabels.length} approved labels`);
-    
-    return {
-      aspRoot,
-      ipfsCID,
-      approvedLabels,
-    };
-
-  } catch (error) {
-    console.error('Failed to fetch ASP data:', error);
-    throw new Error('Failed to fetch ASP data from indexer and IPFS');
-  }
-}
+// Note: fetchStateTreeLeaves and fetchASPData are now imported from queryService
 
 /**
  * Fetch privacy pool scope via contract call

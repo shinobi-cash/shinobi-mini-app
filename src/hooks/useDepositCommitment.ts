@@ -7,7 +7,7 @@ import { keccak256, toBytes } from 'viem';
 import { restoreFromMnemonic } from '../utils/crypto';
 import { useAccount } from 'wagmi';
 import { noteCache } from '../lib/noteCache';
-import { fetchDepositByPrecommitment } from '../lib/apollo';
+import { fetchDepositByPrecommitment } from '../services/queryService';
 
 // Cash note data - like a currency note with unique cryptographic properties
 export interface CashNoteData {

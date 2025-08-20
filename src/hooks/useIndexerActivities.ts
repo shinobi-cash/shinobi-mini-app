@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client'
-import { GET_ACTIVITIES } from '../lib/apollo'
+import { GET_ACTIVITIES } from '../config/queries'
 import { Activity } from '../types/activity'
 
 interface PageInfo {
