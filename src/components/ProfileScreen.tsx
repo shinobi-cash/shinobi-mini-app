@@ -6,6 +6,7 @@ import { User, History, ChevronDown, ChevronRight, RefreshCw } from 'lucide-reac
 import { Button } from './ui/button'
 import { CONTRACTS } from '@/config/contracts';
 import { useDepositDiscovery } from '../hooks/useDepositDiscovery';
+import { formatDate } from '@/utils/formatters';
 
 export const ProfileScreen = () => {
   const { signOut } = useAuth()
@@ -282,7 +283,7 @@ const CashNoteCard = ({ noteIndex, amount, isDeposited, transactionHash, timesta
       <div className="text-xs text-app-secondary">
         {isDeposited && timestamp ? (
           <div className="space-y-1">
-            <p>✅ Deposited on {new Date(timestamp).toLocaleDateString()}</p>
+            <p>✅ Deposited on {formatDate(timestamp)}</p>
             {transactionHash && (
               <p className="font-mono text-xs truncate">
                 {transactionHash.slice(0, 10)}...{transactionHash.slice(-8)}

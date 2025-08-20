@@ -9,7 +9,7 @@ import {
   DrawerDescription
 } from './ui/drawer';
 import { toast } from 'sonner';
-import { formatEther, parseEther } from 'viem';
+import { formatEthAmount, formatHash } from '../utils/formatters';
 
 interface TransactionPreviewDrawerProps {
   isOpen: boolean;
@@ -46,30 +46,7 @@ export const TransactionPreviewDrawer = ({
     toast.success(`${fieldName} copied!`);
   };
 
-  const formatHash = (hash: string) => {
-    return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
-  };
-
-  // Format ETH amounts using viem's formatEther for proper precision with consistent decimals
-  const formatEthAmount = (amount: number | string | undefined): string => {
-    if (!amount || amount === 0) return '0';
-    try {
-      // Convert to string first, then to BigInt wei, then format
-      const amountStr = typeof amount === 'number' ? amount.toString() : amount;
-      const weiAmount = parseEther(amountStr);
-      const formatted = formatEther(weiAmount);
-      
-      // Ensure consistent decimal places (pad with zeros if needed, trim if too long)
-      const parts = formatted.split('.');
-      if (parts.length === 1) {
-        return `${parts[0]}.0000000`;
-      }
-      const decimals = parts[1].padEnd(7, '0').substring(0, 7);
-      return `${parts[0]}.${decimals}`;
-    } catch {
-      return '0.0000000';
-    }
-  };
+  // Use consistent ETH formatting with 7 decimal places for precise comparison
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
@@ -96,7 +73,7 @@ export const TransactionPreviewDrawer = ({
                 You will receive
               </p>
               <p className="text-2xl font-bold text-app-primary tabular-nums">
-                {formatEthAmount(youReceive)} ETH
+                {formatEthAmount(youReceive, { decimals: 7 })} ETH
               </p>
             </div>
           </div>
@@ -111,14 +88,14 @@ export const TransactionPreviewDrawer = ({
               <div className="px-3 py-2 flex items-center justify-between">
                 <span className="text-xs font-medium text-app-secondary">Note Balance</span>
                 <span className="text-xs font-mono text-app-primary tabular-nums">
-                  {formatEthAmount(parseFloat(noteData.amount))} ETH
+                  {formatEthAmount(parseFloat(noteData.amount), { decimals: 7 })} ETH
                 </span>
               </div>
               
               <div className="px-3 py-2 flex items-center justify-between">
                 <span className="text-xs font-medium text-app-secondary">Withdrawal Amount</span>
                 <span className="text-xs font-mono  text-red-500  tabular-nums">
-                  -{formatEthAmount(withdrawAmountNum)} ETH
+                  -{formatEthAmount(withdrawAmountNum, { decimals: 7 })} ETH
                 </span>
               </div>
               
@@ -134,7 +111,7 @@ export const TransactionPreviewDrawer = ({
                   </div>
                 </div>
                 <span className="text-xs font-mono text-red-500 tabular-nums">
-                  -{formatEthAmount(executionFee)} ETH
+                  -{formatEthAmount(executionFee, { decimals: 7 })} ETH
                 </span>
               </div>
 
@@ -142,7 +119,7 @@ export const TransactionPreviewDrawer = ({
                 <div className="px-3 py-2 flex items-center justify-between">
                   <span className="text-xs font-medium text-app-secondary">Remaining in Note</span>
                   <span className="text-xs font-mono text-app-primary tabular-nums">
-                    {formatEthAmount(remainingBalance)} ETH
+                    {formatEthAmount(remainingBalance, { decimals: 7 })} ETH
                   </span>
                 </div>
               )}

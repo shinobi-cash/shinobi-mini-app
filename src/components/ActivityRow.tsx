@@ -1,6 +1,6 @@
 import type { Activity } from '../types/activity'
 import { StatusDot } from './StatusDot'
-import { formatTimestamp, formatEthAmount } from '@/utils/activityUtils'
+import { formatEthAmount, formatTimestamp } from '@/utils/formatters'
 interface ActivityRowProps {
   activity: Activity
 }
@@ -14,7 +14,7 @@ export const ActivityRow = ({ activity }: ActivityRowProps) => (
           {activity.type.toLowerCase()}
         </div>
         <div className="text-sm sm:text-base text-app-secondary font-medium tabular-nums">
-          {`${formatEthAmount(activity.amount)} ETH`}
+          {`${formatEthAmount(activity.amount, { maxDecimals: 6 })} ETH`}
         </div>
       </div>
 

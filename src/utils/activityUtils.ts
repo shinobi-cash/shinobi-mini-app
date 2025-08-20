@@ -1,7 +1,6 @@
 
-import { formatDistance } from 'date-fns'
 import type { Activity } from '../types/activity'
-import { formatEther } from 'viem'
+import { formatEthAmount } from './formatters'
 
 // Calculate total deposit value from approved deposits
 export const calculateTotalDeposits = (activities: Activity[]): number => {
@@ -17,18 +16,4 @@ export const calculateDepositCount = (activities: Activity[]): number => {
     .length
 }
 
-export function formatTimestamp(timestamp: string): string {
-  return formatDistance(new Date(parseInt(timestamp)*1000), new Date(), { addSuffix: true })
-}
-
-// Helper function to format bigint wei amount to ETH
-export function formatEthAmount(weiAmount: string): string {
-  try {
-    const wei = BigInt(weiAmount)
-    const ethString = formatEther(wei)
-    // Remove trailing zeros and decimal point if not needed, but avoid scientific notation
-    return ethString.replace(/\.?0+$/, '') || '0'
-  } catch {
-    return '0'
-  }
-}
+// Note: formatEthAmount and timestamp formatting functions are now imported from ./formatters

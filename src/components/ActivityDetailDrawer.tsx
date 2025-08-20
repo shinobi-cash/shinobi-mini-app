@@ -11,7 +11,7 @@ import { X, ExternalLink, Copy } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { NETWORK } from '../config/contracts'
-import { formatTimestamp, formatEthAmount } from '@/utils/activityUtils'
+import { formatEthAmount, formatHash, formatTimestamp } from '@/utils/formatters'
 
 interface ActivityDetailDrawerProps {
   activity: Activity | null
@@ -33,9 +33,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
     }
   }
 
-  const formatHash = (hash: string) => {
-    return `${hash.slice(0, 6)}...${hash.slice(-4)}`
-  }
+  // formatHash is now imported from utils/formatters
 
   if (!activity) return null
 
@@ -71,7 +69,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-app-secondary">Original Amount:</span>
                   <span className="text-sm font-semibold text-app-primary tabular-nums">
-                    {formatEthAmount(activity.originalAmount)} ETH
+                    {formatEthAmount(activity.originalAmount, { maxDecimals: 6 })} ETH
                   </span>
                 </div>
                 
@@ -79,7 +77,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-app-secondary">Vetting Fee:</span>
                   <span className="text-sm font-semibold text-red-500 tabular-nums">
-                    -{formatEthAmount(activity.vettingFeeAmount)} ETH
+                    -{formatEthAmount(activity.vettingFeeAmount, { maxDecimals: 6 })} ETH
                   </span>
                 </div>
                 
@@ -90,7 +88,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-app-secondary">Final Amount:</span>
                   <span className="text-lg font-bold text-app-primary tabular-nums">
-                    {formatEthAmount(activity.amount)} ETH
+                    {formatEthAmount(activity.amount, { maxDecimals: 6 })} ETH
                   </span>
                 </div>
               </div>
@@ -98,7 +96,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
               <div className="text-center">
                 <p className="text-sm font-medium text-app-secondary mb-1">Amount</p>
                 <p className="text-2xl font-bold text-app-primary tabular-nums">
-                  {`${formatEthAmount(activity.amount)} ETH`}
+                  {`${formatEthAmount(activity.amount, { maxDecimals: 6 })} ETH`}
                 </p>
                 {activity.type === 'DEPOSIT' && (
                   <p className="text-xs text-app-tertiary mt-0.5">After vetting fees</p>
@@ -214,7 +212,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                     <div className="px-3 py-2 flex items-center justify-between">
                       <span className="text-xs font-medium text-app-secondary">Relay Fee</span>
                       <span className="text-xs font-mono text-app-primary">
-                        {formatEthAmount(activity.feeAmount)} ETH
+                        {formatEthAmount(activity.feeAmount, { maxDecimals: 6 })} ETH
                       </span>
                     </div>
                   )}

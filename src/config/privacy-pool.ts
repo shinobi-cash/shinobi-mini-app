@@ -42,13 +42,6 @@ export const PRIVACY_POOL_CONFIG = {
   },
 } as const
 
-// Helper functions
-export const formatEthAmount = (weiAmount: bigint): string => {
-  const ethAmount = Number(weiAmount) / 1e18
-  return ethAmount.toFixed(4)
-}
-
-export const parseEthAmount = (ethAmount: string): bigint => {
-  const weiAmount = parseFloat(ethAmount) * 1e18
-  return BigInt(Math.floor(weiAmount))
-}
+// Helper functions - moved to utils/formatters.ts
+// Re-export for backward compatibility
+export { formatEthAmount, parseEthAmount } from '../utils/formatters'
