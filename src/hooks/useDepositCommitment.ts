@@ -1,4 +1,4 @@
-import { useSetupStore } from '../stores/setupStore';
+import { useAuth } from '../contexts/AuthContext';
 import { poseidon2 } from 'poseidon-lite';
 import BigNumber from 'bignumber.js';
 import { SNARK_SCALAR_FIELD } from '../config/snark';
@@ -7,8 +7,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { keccak256, toBytes } from 'viem';
 import { restoreFromMnemonic } from '../utils/crypto';
 import { useAccount } from 'wagmi';
-import { depositStorage } from '../lib/depositStorage';
-import { checkNotePrecommitmentExists } from '../lib/apollo';
+import { noteCache } from '../lib/noteCache';
+import { fetchDepositByPrecommitment } from '../lib/apollo';
 
 // Cash note data - like a currency note with unique cryptographic properties
 export interface CashNoteData {
@@ -32,7 +32,7 @@ export interface DepositCashNoteResult {
  * Automatically finds the next available note index and ensures no collisions
  */
 export function useDepositCommitment(): DepositCashNoteResult {
-  const { mnemonic, privateKey } = useSetupStore();
+  const { mnemonic, privateKey } = useAuth();
   const { address } = useAccount();
   
   const [state, setState] = useState<{
@@ -68,7 +68,7 @@ export function useDepositCommitment(): DepositCashNoteResult {
       const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
       
       // Get next available note index
-      let candidateNoteIndex = await depositStorage.getNextNoteIndex(accountKey, poolAddress);
+      let candidateNoteIndex = await noteCache.getNextNoteIndex(accountKey, poolAddress);
       let attempts = 0;
       const maxAttempts = 5;
       
@@ -79,11 +79,12 @@ export function useDepositCommitment(): DepositCashNoteResult {
         const precommitment = generatePrecommitment(nullifier, secret);
         
         // Check if this note's precommitment already exists on-chain
-        const noteExists = await checkNotePrecommitmentExists(precommitment);
+        const depositData = await fetchDepositByPrecommitment(precommitment);
+        const noteExists = !!depositData;
         
         if (!noteExists) {
           // Success! Update storage and return the cash note
-          await depositStorage.updateLastUsedNoteIndex(accountKey, poolAddress, candidateNoteIndex);
+          await noteCache.updateLastUsedNoteIndex(accountKey, poolAddress, candidateNoteIndex);
           
           const noteData: CashNoteData = {
             nullifier,
