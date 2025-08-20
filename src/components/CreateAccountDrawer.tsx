@@ -9,7 +9,7 @@ import {
   DrawerDescription
 } from './ui/drawer'
 import { Key, X, Download, Copy, Eye, EyeOff, Check, FileText, Sparkles } from 'lucide-react'
-import { useSetupStore } from '../stores/setupStore'
+import { useAuth } from '../contexts/AuthContext'
 import { generateKeysFromRandomSeed } from '../utils/crypto'
 import { toast } from 'sonner'
 
@@ -30,7 +30,7 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
   const [hasCopied, setHasCopied] = useState(false)
   const [canDownload, setCanDownload] = useState(true)
   
-  const { setKeys, mnemonic, completeSetup } = useSetupStore()
+  const { setKeys, mnemonic } = useAuth()
 
   const handleGenerateKeys = async () => {
     isGenerating;
@@ -147,7 +147,6 @@ Shinobi Privacy App`
       return
     }
     
-    completeSetup()
     setCurrentStep('complete')
     
     setTimeout(() => {

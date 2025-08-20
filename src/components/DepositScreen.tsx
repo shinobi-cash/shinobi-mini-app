@@ -42,7 +42,6 @@ const DepositForm = () => {
     reset,
     clearError,
     isLoading, 
-    isConfirming, 
     isSuccess, 
     error, 
     transactionHash 
@@ -127,7 +126,7 @@ const DepositForm = () => {
   const isValidAmount = amount && parseFloat(amount) > 0;
   const hasBalance = balance && parseFloat(formatEther(balance.value)) > 0;
   const hasNoteData = noteData !== null;
-  const isTransacting = isLoading || isConfirming;
+  const isTransacting = isLoading;
   const canDeposit = isValidAmount && hasBalance && parseFloat(amount) <= parseFloat(formatEther(balance?.value || 0n)) && isOnCorrectNetwork && hasNoteData && !isTransacting;
 
   return (
@@ -229,11 +228,6 @@ const DepositForm = () => {
             <div className="flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" />
               Preparing Transaction...
-            </div>
-          ) : isConfirming ? (
-            <div className="flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Confirming...
             </div>
           ) : isGeneratingNote || !hasNoteData
           ? 'Preparing...'
