@@ -27,11 +27,11 @@ import {
   createWithdrawalData,
   formatProofForContract,
   encodeRelayCallData,
-  createWithdrawalSmartAccountClient,
   prepareWithdrawalUserOperation,
   executeWithdrawalUserOperation,
   type WithdrawalData,
 } from './contractService';
+import { getWithdrawalSmartAccountClient } from '@/lib/clients';
 
 // ============ TYPES ============
 
@@ -264,7 +264,7 @@ export async function prepareWithdrawalTransaction(
   );
   
   // Create smart account client
-  const smartAccountClient = await createWithdrawalSmartAccountClient();
+  const smartAccountClient = await getWithdrawalSmartAccountClient();
   
   // Prepare UserOperation
   const userOperation = await prepareWithdrawalUserOperation(

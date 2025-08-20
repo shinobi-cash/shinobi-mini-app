@@ -1,12 +1,16 @@
 /**
  * Singleton Client Instances
- * 
- * Centralized configuration and initialization of all singleton client instances
- * used throughout the application. This provides a single source of truth for
- * client configurations and makes it easier to manage dependencies.
  */
 
 import { ApolloClient, InMemoryCache } from '@apollo/client';
+import { BUNDLER_URL, WITHDRAWAL_ACCOUNT_PRIVATE_KEY } from '../config/constants';
+import { createPublicClient, http } from 'viem';
+import { baseSepolia } from 'viem/chains';
+import { privateKeyToAccount } from 'viem/accounts';
+import { toSimpleSmartAccount } from "permissionless/accounts";
+import { createSmartAccountClient } from "permissionless";
+import { entryPoint07Address } from 'viem/account-abstraction';
+import { CONTRACTS } from '@/config/constants';
 
 // ============ APOLLO GRAPHQL CLIENT ============
 
@@ -37,3 +41,45 @@ export const apolloClient = new ApolloClient({
   },
 });
 
+
+// Create public client for contract calls
+export const publicClient = createPublicClient({
+  chain: baseSepolia,
+  transport: http(),
+});
+
+
+export async function getWithdrawalSmartAccountClient(){
+  const account = privateKeyToAccount(WITHDRAWAL_ACCOUNT_PRIVATE_KEY);
+
+  const simpleAccount = await toSimpleSmartAccount({
+        owner: account as any,
+        client: publicClient as any,
+        entryPoint: { address: entryPoint07Address, version: "0.7" },
+    });
+
+    const smartAccountClient = createSmartAccountClient({
+      client: publicClient as any,
+      account: simpleAccount,
+      bundlerTransport: http(BUNDLER_URL) as any,
+      paymaster: {
+          // Provide stub data for gas estimation - just hardcode high gas values
+          async getPaymasterStubData() {
+              return {
+                  paymaster: CONTRACTS.PAYMASTER as `0x${string}`,
+                  paymasterData: "0x" as `0x${string}`, // Empty paymaster data
+                  paymasterPostOpGasLimit: 35000n, // Above the 32,000 minimum
+              };
+          },
+          // Provide real paymaster data for actual transaction
+          async getPaymasterData() {
+              return {
+                  paymaster: CONTRACTS.PAYMASTER as `0x${string}`,
+                  paymasterData: "0x" as `0x${string}`, // Empty - paymaster validates via callData
+                  paymasterPostOpGasLimit: 35000n, // Above the 32,000 minimum
+              };
+          },
+      },
+  });
+  return smartAccountClient;
+}

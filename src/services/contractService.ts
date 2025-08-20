@@ -10,13 +10,10 @@
 
 import { createPublicClient, http, encodeAbiParameters, encodeFunctionData } from 'viem';
 import { baseSepolia } from 'viem/chains';
-import { privateKeyToAccount } from 'viem/accounts';
-import { toSimpleSmartAccount } from "permissionless/accounts";
-import { createSmartAccountClient, SmartAccountClient } from "permissionless";
+import { SmartAccountClient } from "permissionless";
 import { entryPoint07Address, UserOperation } from 'viem/account-abstraction';
-import { BUNDLER_URL } from '../config/constants';
 import { PRIVACY_POOL_ABI, PRIVACY_POOL_ENTRYPOINT_ABI } from '../config/abis';
-import { WITHDRAWAL_ACCOUNT_PRIVATE_KEY, WITHDRAWAL_FEES, GAS_LIMITS, CONTRACTS } from '../config/constants';
+import { WITHDRAWAL_FEES, CONTRACTS } from '../config/constants';
 
 // ============ TYPES ============
 
@@ -149,65 +146,6 @@ export function formatProofForContract(proof: {
       BigInt(publicSignals[7]),
     ],
   };
-}
-
-// ============ ACCOUNT ABSTRACTION SETUP ============
-
-/**
- * Create smart account client for withdrawal operations
- */
-export async function createWithdrawalSmartAccountClient(
-  config?: Partial<SmartAccountConfig>
-): Promise<any> {
-  const privateKey = config?.privateKey || WITHDRAWAL_ACCOUNT_PRIVATE_KEY;
-  const bundlerUrl = config?.bundlerUrl || BUNDLER_URL;
-  const paymasterAddress = (config?.paymasterAddress || CONTRACTS.PAYMASTER) as `0x${string}`;
-
-  try {
-    console.log('🔑 Creating smart account client...');
-    
-    const account = privateKeyToAccount(privateKey);
-
-    const simpleAccount = await toSimpleSmartAccount({
-      owner: account as any,
-      client: publicClient as any,
-      entryPoint: { address: entryPoint07Address, version: "0.7" },
-    });
-
-    const smartAccountClient = createSmartAccountClient({
-      client: publicClient,
-      account: simpleAccount,
-      bundlerTransport: http(bundlerUrl) ,
-      paymaster: {
-        // Provide stub data for gas estimation
-        async getPaymasterStubData() {
-          return {
-            paymaster: paymasterAddress,
-            paymasterData: "0x" as `0x${string}`,
-            paymasterPostOpGasLimit: GAS_LIMITS.PAYMASTER_POST_OP_GAS_LIMIT,
-          };
-        },
-        // Provide real paymaster data for actual transaction
-        async getPaymasterData() {
-          return {
-            paymaster: paymasterAddress,
-            paymasterData: "0x" as `0x${string}`,
-            paymasterPostOpGasLimit: GAS_LIMITS.PAYMASTER_POST_OP_GAS_LIMIT,
-          };
-        },
-      },
-    });
-
-    console.log(`✅ Smart account client created`);
-    console.log(`   Account address: ${simpleAccount.address}`);
-    console.log(`   Paymaster: ${paymasterAddress}`);
-    
-    return smartAccountClient;
-
-  } catch (error) {
-    console.error('Failed to create smart account client:', error);
-    throw new Error('Failed to create smart account client');
-  }
 }
 
 /**
