@@ -1,4 +1,4 @@
-import { Copy, Loader2, X } from 'lucide-react';
+import { Copy, Loader2, X, Info } from 'lucide-react';
 import { Button } from './ui/button';
 import { 
   Drawer, 
@@ -9,6 +9,7 @@ import {
   DrawerDescription
 } from './ui/drawer';
 import { toast } from 'sonner';
+import { formatEther, parseEther } from 'viem';
 
 interface TransactionPreviewDrawerProps {
   isOpen: boolean;
@@ -20,7 +21,7 @@ interface TransactionPreviewDrawerProps {
   };
   withdrawAmount: string;
   recipientAddress: string;
-  estimatedFee: number;
+  executionFee: number;
   youReceive: number;
   remainingBalance: number;
   isProcessing: boolean;
@@ -33,7 +34,7 @@ export const TransactionPreviewDrawer = ({
   noteData,
   withdrawAmount,
   recipientAddress,
-  estimatedFee,
+  executionFee,
   youReceive,
   remainingBalance,
   isProcessing
@@ -49,36 +50,25 @@ export const TransactionPreviewDrawer = ({
     return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
   };
 
-  // Format ETH amounts with meaningful precision
-  const formatEthAmount = (amount: number): string => {
-    if (amount === 0) return '0';
-    
-    // For amounts >= 1, show 4 decimal places
-    if (amount >= 1) {
-      return amount.toFixed(4);
+  // Format ETH amounts using viem's formatEther for proper precision with consistent decimals
+  const formatEthAmount = (amount: number | string | undefined): string => {
+    if (!amount || amount === 0) return '0';
+    try {
+      // Convert to string first, then to BigInt wei, then format
+      const amountStr = typeof amount === 'number' ? amount.toString() : amount;
+      const weiAmount = parseEther(amountStr);
+      const formatted = formatEther(weiAmount);
+      
+      // Ensure consistent decimal places (pad with zeros if needed, trim if too long)
+      const parts = formatted.split('.');
+      if (parts.length === 1) {
+        return `${parts[0]}.0000000`;
+      }
+      const decimals = parts[1].padEnd(7, '0').substring(0, 7);
+      return `${parts[0]}.${decimals}`;
+    } catch {
+      return '0.0000000';
     }
-    
-    // For amounts < 1, show at least 2 significant digits
-    const str = amount.toString();
-    const scientificMatch = str.match(/^(\d+\.?\d*)[eE]([+-]?\d+)$/);
-    
-    if (scientificMatch) {
-      // Handle scientific notation (very small numbers)
-      return amount.toFixed(Math.max(6, Math.abs(parseInt(scientificMatch[2])) + 2));
-    }
-    
-    // Find first non-zero digit after decimal point
-    const decimalIndex = str.indexOf('.');
-    if (decimalIndex === -1) return str;
-    
-    let firstNonZero = decimalIndex + 1;
-    while (firstNonZero < str.length && str[firstNonZero] === '0') {
-      firstNonZero++;
-    }
-    
-    // Show at least 2 significant digits after the first non-zero
-    const significantDigits = Math.max(4, firstNonZero - decimalIndex + 1);
-    return amount.toFixed(significantDigits);
   };
 
   return (
@@ -98,15 +88,16 @@ export const TransactionPreviewDrawer = ({
           </DrawerDescription>
         </DrawerHeader>
 
-        <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
           {/* Amount Section */}
           <div className="bg-app-surface rounded-xl p-3 border border-app shadow-sm">
             <div className="text-center">
-              <p className="text-sm font-medium text-app-secondary mb-1">You will receive</p>
+              <p className="text-sm font-medium text-app-secondary mb-1">
+                You will receive
+              </p>
               <p className="text-2xl font-bold text-app-primary tabular-nums">
                 {formatEthAmount(youReceive)} ETH
               </p>
-              <p className="text-xs text-app-tertiary mt-0.5">After network fees</p>
             </div>
           </div>
 
@@ -118,22 +109,33 @@ export const TransactionPreviewDrawer = ({
             
             <div className="divide-y divide-app-border">
               <div className="px-3 py-2 flex items-center justify-between">
-                <span className="text-xs font-medium text-app-secondary">Withdrawal Amount</span>
+                <span className="text-xs font-medium text-app-secondary">Note Balance</span>
                 <span className="text-xs font-mono text-app-primary tabular-nums">
-                  {formatEthAmount(withdrawAmountNum)} ETH
+                  {formatEthAmount(parseFloat(noteData.amount))} ETH
                 </span>
               </div>
               
               <div className="px-3 py-2 flex items-center justify-between">
-                <span className="text-xs font-medium text-app-secondary">Network Fee</span>
+                <span className="text-xs font-medium text-app-secondary">Withdrawal Amount</span>
+                <span className="text-xs font-mono  text-red-500  tabular-nums">
+                  -{formatEthAmount(withdrawAmountNum)} ETH
+                </span>
+              </div>
+              
+              <div className="px-3 py-2 flex items-center justify-between">
+                <div className="flex items-center gap-1">
+                  <span className="text-xs font-medium text-app-secondary">Execution Fee (Max)</span>
+                  <div className="group relative">
+                    <Info className="h-3 w-3 text-app-tertiary hover:text-app-secondary cursor-help" />
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                      Maximum fee taken from withdrawal. Unused portion refunded to recipient.
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                    </div>
+                  </div>
+                </div>
                 <span className="text-xs font-mono text-red-500 tabular-nums">
-                  -{formatEthAmount(estimatedFee)} ETH
+                  -{formatEthAmount(executionFee)} ETH
                 </span>
-              </div>
-              
-              <div className="px-3 py-2 flex items-center justify-between">
-                <span className="text-xs font-medium text-app-secondary">Gas Fee</span>
-                <span className="text-xs text-green-600">Free (Sponsored)</span>
               </div>
 
               {remainingBalance > 0 && (
@@ -150,15 +152,10 @@ export const TransactionPreviewDrawer = ({
           {/* Transaction Details */}
           <div className="bg-app-surface rounded-xl border border-app shadow-sm overflow-hidden">
             <div className="px-3 py-2 border-b border-app">
-              <h3 className="text-sm font-semibold text-app-primary">Transaction Details</h3>
+              <h3 className="text-sm font-semibold text-app-primary">Recipient Details</h3>
             </div>
             
             <div className="divide-y divide-app-border">
-              <div className="px-3 py-2 flex items-center justify-between">
-                <span className="text-xs font-medium text-app-secondary">From Note</span>
-                <span className="text-xs text-app-primary">#{noteData.noteIndex}</span>
-              </div>
-              
               <div className="px-3 py-2 flex items-center justify-between">
                 <span className="text-xs font-medium text-app-secondary">To Address</span>
                 <div className="flex items-center gap-1.5">
@@ -178,7 +175,7 @@ export const TransactionPreviewDrawer = ({
         </div>
 
         {/* Actions */}
-        <div className="px-4 pb-6">
+        <div className="px-4 pb-4">
           <Button
             onClick={onConfirm}
             disabled={isProcessing}
