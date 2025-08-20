@@ -1,7 +1,6 @@
 import { Activity } from '../types/activity'
 import { ActivityRow } from './ActivityRow'
 import { ActivityDetailDrawer } from './ActivityDetailDrawer'
-import { sortActivitiesByTime } from '../utils/timeUtils'
 import { calculateTotalDeposits, calculateDepositCount } from '../utils/activityUtils'
 import { useState } from 'react'
 
@@ -17,7 +16,6 @@ export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPa
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
   
-  const sortedActivities = sortActivitiesByTime(activities)
   const totalDeposits = calculateTotalDeposits(activities)
   const depositCount = calculateDepositCount(activities)
 
@@ -64,7 +62,7 @@ export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPa
                   <p className="text-sm text-app-tertiary">Check your connection and try again</p>
                 </div>
               </div>
-            ) : sortedActivities.length === 0 ? (
+            ) : activities.length === 0 ? (
               <div className="flex items-center justify-center py-8">
                 <div className="text-center">
                   <p className="text-app-secondary mb-1">No activities yet</p>
@@ -73,11 +71,11 @@ export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPa
               </div>
             ) : (
               <>
-                {sortedActivities.map((activity, index) => (
+                {activities.map((activity, index) => (
                   <div key={activity.id} onClick={() => handleActivityClick(activity)}>
                     <ActivityRow activity={activity} />
                     {/* Remove border from last item only if no load more button */}
-                    {index === sortedActivities.length - 1 && !hasNextPage && (
+                    {index === activities.length - 1 && !hasNextPage && (
                       <div className="border-b-0" />
                     )}
                   </div>
