@@ -1,5 +1,3 @@
-import { CONTRACTS } from './contracts'
-
 // Privacy Pool configuration
 export const PRIVACY_POOL_CONFIG = {
   // Default deposit amounts (in ETH)
@@ -53,9 +51,4 @@ export const formatEthAmount = (weiAmount: bigint): string => {
 export const parseEthAmount = (ethAmount: string): bigint => {
   const weiAmount = parseFloat(ethAmount) * 1e18
   return BigInt(Math.floor(weiAmount))
-}
-
-// Contract addresses for easy access
-export const getContractAddress = (contract: keyof typeof CONTRACTS) => {
-  return CONTRACTS[contract]
 }
