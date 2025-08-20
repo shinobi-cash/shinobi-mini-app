@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from './ui/button'
 import { 
   Drawer, 
@@ -20,6 +20,20 @@ interface LoadAccountDrawerProps {
 
 export const LoadAccountDrawer = ({ onLoad, isLoading = false, error, open, onOpenChange }: LoadAccountDrawerProps) => {
   const [words, setWords] = useState<string[]>(Array(12).fill(''))
+  const firstInputRef = useRef<HTMLInputElement>(null)
+
+  // Manage focus when drawer opens/closes
+  useEffect(() => {
+    if (open) {
+      // Delay focus to ensure drawer animation completes and DOM is ready
+      const timer = setTimeout(() => {
+        if (firstInputRef.current) {
+          firstInputRef.current.focus()
+        }
+      }, 200)
+      return () => clearTimeout(timer)
+    }
+  }, [open])
 
   const handlePaste = (e: React.ClipboardEvent, idx: number) => {
     e.preventDefault()
@@ -52,7 +66,7 @@ export const LoadAccountDrawer = ({ onLoad, isLoading = false, error, open, onOp
   }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
+    <Drawer open={open} onOpenChange={onOpenChange} modal={true}>
       <DrawerContent className="bg-app-background border-app max-h-[85vh]">
         <DrawerHeader className="pb-0 px-4 pt-2">
           <div className="flex items-center justify-between">
@@ -79,6 +93,7 @@ export const LoadAccountDrawer = ({ onLoad, isLoading = false, error, open, onOp
                       {idx + 1}
                     </label>
                     <input
+                      ref={idx === 0 ? firstInputRef : undefined}
                       type="text"
                       className="p-2 rounded-lg border border-app text-sm font-mono text-center focus:outline-none focus:ring-2 focus:ring-blue-500 bg-app-background"
                       placeholder="word"
