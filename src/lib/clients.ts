@@ -37,15 +37,3 @@ export const apolloClient = new ApolloClient({
   },
 });
 
-// ============ FUTURE CLIENT INSTANCES ============
-
-/*
- * Add other singleton client instances here as needed:
- * 
- * export const httpClient = axios.create({ ... });
- * export const ipfsClient = new IpfsClient({ ... });
- * export const walletClient = createWalletClient({ ... });
- * 
- * This keeps all external service connections in one place
- * and makes it easier to mock or replace them for testing.
- */
