@@ -1,5 +1,6 @@
+import { KeyGenerationResult } from '@/utils/crypto';
 import { createContext, useContext, useState, ReactNode } from 'react'
-import { KeyGenerationResult } from '../types/auth'
+
 
 interface AuthContextType {
   // Authentication state

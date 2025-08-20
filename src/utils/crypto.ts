@@ -5,7 +5,13 @@
 
 import * as bip39 from 'bip39'
 import { ethers } from 'ethers'
-import type { KeyGenerationResult } from '@/types/setup'
+
+export interface KeyGenerationResult {
+  publicKey: string
+  privateKey: string
+  mnemonic: string[]
+  address: string
+}
 
 /**
  * Generate a deterministic message for signing
