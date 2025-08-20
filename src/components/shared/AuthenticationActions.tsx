@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSetupStore } from '../../stores/setupStore';
+import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/button';
 import { LoadAccountDrawer } from '../LoadAccountDrawer';
 import { CreateAccountDrawer } from '../CreateAccountDrawer';
@@ -9,7 +9,7 @@ interface AuthenticationActionsProps {
 }
 
 export const AuthenticationActions = ({ context: _ }: AuthenticationActionsProps) => {
-  const { setKeys, completeSetup } = useSetupStore();
+  const { setKeys } = useAuth();
   const [showLoadAccount, setShowLoadAccount] = useState(false);
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [loadError, setLoadError] = useState<string | undefined>();
@@ -33,7 +33,6 @@ export const AuthenticationActions = ({ context: _ }: AuthenticationActionsProps
     setLoadError(undefined);
     const { publicKey, privateKey, address } = deriveKeysFromMnemonic(mnemonicWords);
     setKeys({ publicKey, privateKey, mnemonic: mnemonicWords, address });
-    completeSetup();
     setShowLoadAccount(false);
   };
 
@@ -42,7 +41,11 @@ export const AuthenticationActions = ({ context: _ }: AuthenticationActionsProps
       <Button
         variant="default"
         className="w-full h-12 text-base font-medium rounded-2xl"
-        onClick={() => setShowCreateAccount(true)}
+        onClick={(e) => {
+          // Blur the button to remove focus before opening drawer
+          e.currentTarget.blur();
+          setShowCreateAccount(true);
+        }}
         size="lg"
       >
         Create Account
@@ -51,7 +54,11 @@ export const AuthenticationActions = ({ context: _ }: AuthenticationActionsProps
       <Button
         variant="outline"
         className="w-full h-12 text-base font-medium rounded-2xl border border-app"
-        onClick={() => setShowLoadAccount(true)}
+        onClick={(e) => {
+          // Blur the button to remove focus before opening drawer
+          e.currentTarget.blur();
+          setShowLoadAccount(true);
+        }}
         size="lg"
       >
         Load Account
