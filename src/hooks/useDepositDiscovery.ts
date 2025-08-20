@@ -4,13 +4,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { CONTRACTS } from '../config/contracts';
 import { noteCache, DiscoveredNote } from '../lib/noteCache';
 import { fetchDepositByPrecommitment, isNullifierSpent } from '../lib/apollo';
 import { deriveNullifier, deriveSecret, generatePrecommitment } from './useDepositCommitment';
 import { restoreFromMnemonic } from '../utils/crypto';
 import { formatEther } from 'viem';
 import { poseidon1 } from 'poseidon-lite';
+import { CONTRACTS } from '@/config/constants';
 
 export interface DepositDiscoveryState {
   unspentNotes: DiscoveredNote[];

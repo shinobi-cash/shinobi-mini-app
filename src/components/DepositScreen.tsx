@@ -5,10 +5,17 @@ import { ChevronDown, AlertTriangle, Loader2, ExternalLink } from 'lucide-react'
 import { Button } from './ui/button';
 import { useState, useEffect, useRef } from 'react';
 import { formatEther } from 'viem';
-import { NETWORK, DEFAULT_DEPOSIT_AMOUNTS, isCorrectNetwork } from '../config/contracts';
+import { NETWORK } from '../config/constants';
 import { useDepositCommitment } from '../hooks/useDepositCommitment';
 import { useDepositTransaction } from '../hooks/useDepositTransaction';
 import { toast } from 'sonner';
+
+const DEPOSIT_AMOUNTS= [
+    { value: "0.01", label: "0.01 ETH" },
+    { value: "0.05", label: "0.05 ETH" },
+    { value: "0.1", label: "0.1 ETH" },
+    { value: "0.5", label: "0.5 ETH" },
+  ]
 
 export const DepositScreen = () => {
   return (
@@ -35,7 +42,7 @@ const DepositForm = () => {
   const shownToastsRef = useRef(new Set<string>());
   const [selectedAsset] = useState({ symbol: 'ETH', name: 'Ethereum', icon: '⚫' });
   
-  const isOnCorrectNetwork = isCorrectNetwork(chainId);
+  const isOnCorrectNetwork = chainId === NETWORK.CHAIN_ID;
   const { noteData, isGeneratingNote, error: noteError, regenerateNote } = useDepositCommitment();
   const { 
     deposit, 
@@ -172,15 +179,15 @@ const DepositForm = () => {
         
         {/* Quick Amount Buttons */}
         <div className="flex gap-2 justify-center">
-          {DEFAULT_DEPOSIT_AMOUNTS.map((quickAmount) => (
+          {DEPOSIT_AMOUNTS.map((deposit) => (
             <Button
-              key={quickAmount}
+              key={deposit.value}
               variant="outline"
               size="sm"
-              onClick={() => handleQuickAmount(quickAmount)}
+              onClick={() => handleQuickAmount(deposit.value)}
               className="rounded-full px-3 py-1 text-xs"
             >
-              {quickAmount}
+              {deposit.label}
             </Button>
           ))}
         </div>

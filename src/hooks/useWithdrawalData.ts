@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { apolloClient } from '../lib/apollo';
 import { gql } from '@apollo/client';
-import { CONTRACTS } from '../config/contracts';
+import { CONTRACTS } from '@/config/constants';
 
 interface WithdrawalData {
   stateTreeLeaves: Array<{ leafIndex: string; leafValue: string }> | null;

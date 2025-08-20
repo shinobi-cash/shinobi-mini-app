@@ -14,9 +14,9 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { toSimpleSmartAccount } from "permissionless/accounts";
 import { createSmartAccountClient, SmartAccountClient } from "permissionless";
 import { entryPoint07Address, UserOperation } from 'viem/account-abstraction';
-import { BUNDLER_URL, CONTRACTS } from '../config/contracts';
+import { BUNDLER_URL } from '../config/constants';
 import { PRIVACY_POOL_ABI, PRIVACY_POOL_ENTRYPOINT_ABI } from '../config/abis';
-import { WITHDRAWAL_ACCOUNT_PRIVATE_KEY, WITHDRAWAL_FEES, GAS_LIMITS } from '../config/constants';
+import { WITHDRAWAL_ACCOUNT_PRIVATE_KEY, WITHDRAWAL_FEES, GAS_LIMITS, CONTRACTS } from '../config/constants';
 
 // ============ TYPES ============
 

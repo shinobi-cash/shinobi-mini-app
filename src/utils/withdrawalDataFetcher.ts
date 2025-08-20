@@ -1,12 +1,13 @@
 import { apolloClient } from '../lib/apollo';
 import { gql } from '@apollo/client';
-import { BUNDLER_URL, CONTRACTS } from '../config/contracts';
+import { BUNDLER_URL } from '../config/contracts';
 import { createPublicClient, http } from 'viem';
 import { baseSepolia } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 import { toSimpleSmartAccount } from "permissionless/accounts";
 import { createSmartAccountClient } from "permissionless";
 import { entryPoint07Address } from 'viem/account-abstraction';
+import { CONTRACTS } from '@/config/constants';
 
 export interface StateTreeLeaf {
   leafIndex: string;

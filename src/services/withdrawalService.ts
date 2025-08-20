@@ -8,9 +8,8 @@
  * - UserOperation preparation and execution
  */
 
-import { keccak256, parseEther, encodeAbiParameters } from 'viem';
-import { CONTRACTS } from '../config/contracts';
-import { ZK_CONSTANTS, WITHDRAWAL_FEES, VALIDATION_RULES } from '../config/constants';
+import { keccak256, parseEther, encodeAbiParameters, isAddress } from 'viem';
+import { SNARK_SCALAR_FIELD, WITHDRAWAL_FEES, CONTRACTS } from '../config/constants';
 import { DiscoveredNote, noteCache } from '../lib/noteCache';
 import { deriveNullifier, deriveSecret } from '../hooks/useDepositCommitment';
 import { restoreFromMnemonic } from '../utils/crypto';
@@ -82,7 +81,7 @@ export interface PreparedWithdrawal {
  */
 function hashToBigInt(data: string): bigint {
   const hash = keccak256(data as `0x${string}`);
-  return BigInt(hash) % BigInt(ZK_CONSTANTS.SNARK_SCALAR_FIELD);
+  return BigInt(hash) % BigInt(SNARK_SCALAR_FIELD);
 }
 
 /**
@@ -378,7 +377,7 @@ export function validateWithdrawalRequest(request: WithdrawalRequest): void {
     throw new Error('Withdrawal amount exceeds note balance');
   }
   
-  if (!recipientAddress || !VALIDATION_RULES.ADDRESS_REGEX.test(recipientAddress)) {
+  if (!recipientAddress || !isAddress(recipientAddress)) {
     throw new Error('Invalid recipient address');
   }
   

@@ -1,13 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useWriteContract } from 'wagmi';
 import { parseEther } from 'viem';
-import { 
-  CONTRACTS, 
-  DepositRecord,
-} from '../config/contracts';
 import { commitmentToBigInt, CashNoteData } from './useDepositCommitment';
 import { PRIVACY_POOL_ENTRYPOINT_ABI } from '@/config/abis';
+import { CONTRACTS } from '@/config/constants';
 
+// Types for deposit functionality
+export interface DepositRecord {
+  timestamp: string
+  nullifier: string
+  secret: string
+  precommitment: string
+  commitment: string
+  label: string
+  transactionHash: string
+  blockNumber: string
+  depositIndex: number
+  amount: string
+  status: "deposited" | "asp_approved" | "withdrawn"
+}
 interface DepositState {
   isSuccess: boolean;
   error: string | null;

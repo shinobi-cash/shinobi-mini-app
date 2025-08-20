@@ -6,8 +6,7 @@
  */
 
 import { apolloClient } from '../lib/apollo';
-import { CONTRACTS } from '../config/contracts';
-import { INDEXER_CONSTANTS, IPFS_CONFIG } from '../config/constants';
+import { INDEXER_FETCH_POLICY, IPFS_GATEWAY_URL, CONTRACTS } from '../config/constants';
 import {
   GET_STATE_TREE_COMMITMENTS,
   GET_LATEST_ASP_ROOT,
@@ -65,7 +64,7 @@ export async function fetchStateTreeLeaves(): Promise<StateTreeLeaf[]> {
     const result = await apolloClient.query({
       query: GET_STATE_TREE_COMMITMENTS,
       variables: { poolId },
-      fetchPolicy: INDEXER_CONSTANTS.FETCH_POLICY,
+      fetchPolicy: INDEXER_FETCH_POLICY,
     });
 
     const stateTreeLeaves = result.data?.merkleTreeLeafs?.items || [];
@@ -94,7 +93,7 @@ export async function fetchLatestASPRoot(): Promise<{ root: string; ipfsCID: str
     
     const result = await apolloClient.query({
       query: GET_LATEST_ASP_ROOT,
-      fetchPolicy: INDEXER_CONSTANTS.FETCH_POLICY,
+      fetchPolicy: INDEXER_FETCH_POLICY,
     });
 
     const latestUpdate = result.data?.associationSetUpdates?.items?.[0];
@@ -124,7 +123,7 @@ export async function fetchLatestASPRoot(): Promise<{ root: string; ipfsCID: str
 export async function fetchApprovedLabelsFromIPFS(ipfsCID: string): Promise<string[]> {
   try {
     console.log('🏷️ Fetching approved labels from IPFS...');
-    const ipfsResponse = await fetch(`${IPFS_CONFIG.GATEWAY_URL}${ipfsCID}`);
+    const ipfsResponse = await fetch(`${IPFS_GATEWAY_URL}${ipfsCID}`);
     
     if (!ipfsResponse.ok) {
       throw new Error(`IPFS fetch failed: ${ipfsResponse.status} ${ipfsResponse.statusText}`);
@@ -183,7 +182,7 @@ export async function fetchDepositByPrecommitment(precommitmentHash: string): Pr
     const result = await apolloClient.query({
       query: GET_DEPOSIT_BY_PRECOMMITMENT,
       variables: { precommitmentHash },
-      fetchPolicy: INDEXER_CONSTANTS.FETCH_POLICY,
+      fetchPolicy: INDEXER_FETCH_POLICY,
     });
 
     const activities = result.data?.activitys?.items || [];
@@ -203,7 +202,7 @@ export async function isNullifierSpent(nullifierHash: string): Promise<boolean> 
     const result = await apolloClient.query({
       query: CHECK_NULLIFIER_SPENT,
       variables: { nullifierHash },
-      fetchPolicy: INDEXER_CONSTANTS.FETCH_POLICY,
+      fetchPolicy: INDEXER_FETCH_POLICY,
     });
 
     const withdrawals = result.data?.activitys?.items || [];
@@ -225,7 +224,7 @@ export async function fetchPoolDeposits(poolAddress?: string): Promise<DepositAc
     const result = await apolloClient.query({
       query: GET_POOL_DEPOSITS,
       variables: { poolId },
-      fetchPolicy: INDEXER_CONSTANTS.FETCH_POLICY,
+      fetchPolicy: INDEXER_FETCH_POLICY,
     });
 
     return result.data?.activitys?.items || [];
@@ -243,7 +242,7 @@ export async function checkIndexerHealth(): Promise<boolean> {
   try {
     const result = await apolloClient.query({
       query: HEALTH_CHECK,
-      fetchPolicy: INDEXER_CONSTANTS.FETCH_POLICY,
+      fetchPolicy: INDEXER_FETCH_POLICY,
     });
 
     return !!result.data?._meta?.block;

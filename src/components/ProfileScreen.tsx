@@ -4,9 +4,9 @@ import { AuthenticationGate } from './shared/AuthenticationGate'
 
 import { User, History, ChevronDown, ChevronRight, RefreshCw } from 'lucide-react'
 import { Button } from './ui/button'
-import { CONTRACTS } from '@/config/contracts';
 import { useDepositDiscovery } from '../hooks/useDepositDiscovery';
 import { formatDate } from '@/utils/formatters';
+import { CONTRACTS } from '@/config/constants'
 
 export const ProfileScreen = () => {
   const { signOut } = useAuth()

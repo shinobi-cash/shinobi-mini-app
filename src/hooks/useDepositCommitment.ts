@@ -1,8 +1,7 @@
 import { useAuth } from '../contexts/AuthContext';
 import { poseidon2 } from 'poseidon-lite';
 import BigNumber from 'bignumber.js';
-import { SNARK_SCALAR_FIELD } from '../config/snark';
-import { CONTRACTS } from '../config/contracts';
+import { SNARK_SCALAR_FIELD, CONTRACTS } from '../config/constants';
 import { useState, useEffect, useCallback } from 'react';
 import { keccak256, toBytes } from 'viem';
 import { restoreFromMnemonic } from '../utils/crypto';

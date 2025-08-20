@@ -10,7 +10,7 @@ import {
 import { X, ExternalLink, Copy } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { NETWORK } from '../config/contracts'
+import { NETWORK } from '../config/constants'
 import { formatEthAmount, formatHash, formatTimestamp } from '@/utils/formatters'
 
 interface ActivityDetailDrawerProps {
