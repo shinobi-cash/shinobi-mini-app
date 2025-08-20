@@ -1,9 +1,10 @@
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client'
 
 // Shinobi.cash indexer GraphQL endpoint
-const INDEXER_URL = process.env.NODE_ENV === 'development' 
-  ? 'http://localhost:42069/graphql'  // Local development
-  : 'http://18.223.158.172:42069/graphql'  // Production
+const INDEXER_URL = import.meta.env.VITE_SUBGRAPH_URL || 
+  (process.env.NODE_ENV === 'development' 
+    ? 'http://localhost:42069/graphql'  // Local development
+    : import.meta.env.VITE_PRODUCTION_INDEXER_URL)  // Production (must be set)
 
 export const apolloClient = new ApolloClient({
   uri: INDEXER_URL,
@@ -55,20 +56,6 @@ export const GET_ACTIVITIES = gql`
 `
 
 
-// Check if a cash note precommitment already exists on-chain
-const buildPrecommitmentExistsQuery = (precommitmentHash: string) => gql`
-  query CheckPrecommitmentExists {
-    activitys(where: { precommitmentHash: "${precommitmentHash}" }, limit: 1) {
-      items {
-        id
-        precommitmentHash
-        user
-        blockNumber
-        timestamp
-      }
-    }
-  }
-`
 
 
 // Get deposit by precommitment hash
@@ -100,26 +87,22 @@ const buildDepositByPrecommitmentQuery = (precommitmentHash: string) => gql`
   }
 `
 
-/**
- * Check if a cash note precommitment already exists on-chain
- * Returns true if the precommitment is already used
- */
-export async function checkNotePrecommitmentExists(precommitment: string): Promise<boolean> {
-  try {
-    const query = buildPrecommitmentExistsQuery(precommitment);
-    const result = await apolloClient.query({
-      query,
-      fetchPolicy: 'network-only', // Always check latest on-chain state
-    });
-    
-    return result.data?.activitys?.items?.length > 0;
-  } catch (error) {
-    console.error('Failed to check note precommitment on-chain:', error);
-    // On error, assume not used to avoid blocking deposits
-    // This allows graceful degradation when indexer is unavailable
-    return false;
+// Check if nullifier has been spent in withdrawal
+const buildWithdrawalByNullifierQuery = (nullifier: string) => gql`
+  query CheckWithdrawalByNullifier {
+    activitys(where: { spentNullifier: "${nullifier}" }, limit: 1) {
+      items {
+        id
+        type
+        spentNullifier
+        blockNumber
+        timestamp
+        transactionHash
+      }
+    }
   }
-}
+`
+
 
 
 /**
@@ -137,5 +120,25 @@ export async function fetchDepositByPrecommitment(precommitmentHash: string) {
   } catch (error) {
     console.error('Failed to fetch deposit by precommitment:', error);
     return null;
+  }
+}
+
+/**
+ * Check if nullifier has been spent in a withdrawal
+ * Returns true if the nullifier has been used in a withdrawal activity
+ */
+export async function isNullifierSpent(nullifier: string): Promise<boolean> {
+  try {
+    const query = buildWithdrawalByNullifierQuery(nullifier);
+    const result = await apolloClient.query({
+      query,
+      fetchPolicy: 'network-only',
+    });
+    
+    return result.data?.activitys?.items?.length > 0;
+  } catch (error) {
+    console.error('Failed to check withdrawal by nullifier:', error);
+    // On error, assume not spent to avoid marking valid deposits as spent
+    return false;
   }
 }
