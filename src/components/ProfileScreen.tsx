@@ -1,12 +1,11 @@
 import { useAuth } from '../contexts/AuthContext'
 import { useState } from 'react'
-import { useSetupStore } from '../stores/setupStore'
 import { AuthenticationGate } from './shared/AuthenticationGate'
 
 import { User, History, ChevronDown, ChevronRight, RefreshCw } from 'lucide-react'
 import { Button } from './ui/button'
 import { CONTRACTS } from '@/config/contracts';
-import { useCashNoteData } from '../hooks/useProfileData';
+import { useDepositDiscovery } from '../hooks/useDepositDiscovery';
 
 export const ProfileScreen = () => {
   const { signOut } = useAuth()
@@ -24,25 +23,25 @@ export const ProfileScreen = () => {
 
 
 const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
-  const { mnemonic, privateKey } = useSetupStore();
+  const { mnemonic, privateKey } = useAuth();
   const [expandedPools, setExpandedPools] = useState<Set<string>>(new Set());
-  const profileData = useCashNoteData();
+  const noteDiscovery = useDepositDiscovery();
 
   // Generate real cash note data with deposit information
   const generateAllNotesWithData = () => {
-    if (profileData.totalNotes === 0) return [];
+    if (noteDiscovery.totalNotes === 0) return [];
     
     const notes = [];
-    for (let noteIndex = 0; noteIndex < profileData.totalNotes; noteIndex++) {
-      // Find matching deposit data for this note index
-      const depositData = profileData.deposits.find(
-        deposit => deposit.noteIndex === noteIndex
+    for (let noteIndex = 0; noteIndex < noteDiscovery.totalNotes; noteIndex++) {
+      // Find matching note data for this note index
+      const note = noteDiscovery.unspentNotes.find(
+        n => n.noteIndex === noteIndex
       );
       
       const noteWithStatus = {
         noteIndex,
-        hasDeposit: !!depositData,
-        depositData: depositData || null,
+        hasDeposit: !!note,
+        depositData: note || null,
       };
       
       notes.push(noteWithStatus);
@@ -70,7 +69,7 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
             <h1 className="text-2xl font-bold text-app-primary">Wallet</h1>
             <div className="flex items-center gap-2">
               <p className="text-sm text-app-secondary">Your private cash notes</p>
-              {profileData.isSyncing && (
+              {noteDiscovery.isDiscovering && (
                 <RefreshCw className="w-3 h-3 text-app-secondary animate-spin" />
               )}
             </div>
@@ -79,11 +78,11 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={profileData.refreshData}
-              disabled={profileData.isSyncing}
+              onClick={noteDiscovery.refreshNotes}
+              disabled={noteDiscovery.isDiscovering}
               className="w-8 h-8 p-0 rounded-full"
             >
-              <RefreshCw className={`w-4 h-4 ${profileData.isSyncing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${noteDiscovery.isDiscovering ? 'animate-spin' : ''}`} />
             </Button>
             <div className="w-10 h-10 flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
               <User className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
@@ -107,7 +106,7 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
             poolAddress={CONTRACTS.ETH_PRIVACY_POOL}
             isExpanded={expandedPools.has('eth')}
             onToggle={() => togglePool('eth')}
-            profileData={profileData}
+            noteDiscovery={noteDiscovery}
             generateAllNotesWithData={generateAllNotesWithData}
           />
         </div>
@@ -154,7 +153,7 @@ interface PoolAccordionProps {
   poolAddress: string;
   isExpanded: boolean;
   onToggle: () => void;
-  profileData: any; // Type from useCashNoteData hook
+  noteDiscovery: any; // Type from useDepositDiscovery hook
   generateAllNotesWithData: () => Array<{ noteIndex: number; hasDeposit: boolean; depositData: any | null }>;
 }
 
@@ -162,7 +161,7 @@ const PoolAccordion = ({
   poolName, 
   isExpanded, 
   onToggle, 
-  profileData,
+  noteDiscovery,
   generateAllNotesWithData
 }: PoolAccordionProps) => {
   
@@ -181,7 +180,7 @@ const PoolAccordion = ({
             <p className="text-sm font-medium text-app-primary">{poolName}</p>
             <p className="text-xs text-app-secondary">
               {(() => {
-                const totalNotes = profileData.totalNotes;
+                const totalNotes = noteDiscovery.totalNotes;
                 return totalNotes > 0 ? `${totalNotes} cash note${totalNotes > 1 ? 's' : ''}` : 'No notes';
               })()}
             </p>
@@ -190,7 +189,7 @@ const PoolAccordion = ({
         <div className="flex items-center gap-2">
           <span className="text-xs text-app-secondary">
             {(() => {
-              const totalNotes = profileData.totalNotes;
+              const totalNotes = noteDiscovery.totalNotes;
               return totalNotes > 0 ? 'Ready' : 'Empty';
             })()}
           </span>
@@ -206,7 +205,7 @@ const PoolAccordion = ({
       {isExpanded && (
         <div className="border-t border-gray-100 dark:border-gray-800 p-4">
           {(() => {
-            if (profileData.isLoading || profileData.isSyncing) {
+            if (noteDiscovery.isDiscovering) {
               return (
                 <div className="text-center py-6 text-app-secondary">
                   <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
