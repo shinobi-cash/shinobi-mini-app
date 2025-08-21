@@ -4,6 +4,7 @@ import { Note } from '@/lib/noteCache';
 import { useNotes } from '@/hooks/useDepositDiscovery';
 import { useAuth } from '@/contexts/AuthContext';
 import { CONTRACTS } from '@/config/constants';
+import { formatEthAmount } from '@/utils/formatters';
 
 interface ListUnspentNotesProps {
   onNoteSelected: (note: Note) => void;
@@ -124,7 +125,7 @@ const NoteCard = ({ note, onSelect }: NoteCardProps) => {
             </span>
           </div>
           <div>
-            <p className="font-medium text-app-primary">{note.amount} ETH</p>
+            <p className="font-medium text-app-primary">{formatEthAmount(note.amount)} ETH</p>
             <p className="text-xs text-app-secondary">
               {noteLabel} • Available for withdrawal
             </p>

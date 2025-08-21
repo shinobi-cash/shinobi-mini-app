@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
 import { TransactionPreviewDrawer } from './TransactionPreviewDrawer';
 import { Note } from '@/lib/noteCache';
+import { formatEthAmount } from '../utils/formatters';
 import { 
   executePreparedWithdrawal,
   validateWithdrawalRequest,
@@ -37,7 +38,8 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
   const [isExecuting, setIsExecuting] = useState(false);
 
   // Calculate values for validation and display
-  const availableBalance = parseFloat(note.amount);
+  // note.amount is in wei (string), convert to ETH for calculations
+  const availableBalance = parseFloat(formatEthAmount(note.amount));
   const withdrawAmountNum = parseFloat(withdrawAmount) || 0;
   
   // Use service to calculate withdrawal amounts
@@ -62,7 +64,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
 
   // Handle max button
   const handleMaxClick = () => {
-    setWithdrawAmount(note.amount);
+    setWithdrawAmount(availableBalance.toString());
   };
 
   // Handle withdrawal preparation using our clean service
@@ -171,7 +173,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
           {/* Available Balance */}
           <div className="text-center mb-3">
             <p className="text-xs text-app-secondary">
-              Available: <span className="text-app-primary font-medium">{note.amount} ETH</span>
+              Available: <span className="text-app-primary font-medium">{formatEthAmount(note.amount, { maxDecimals: 6 })} ETH</span>
             </p>
           </div>
           
@@ -205,7 +207,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
           
           {!isValidAmount && withdrawAmount && (
             <p className="text-xs text-destructive mt-2 text-center">
-              Amount must be between 0 and {note.amount} ETH
+              Amount must be between 0 and {formatEthAmount(note.amount)} ETH
             </p>
           )}
         </div>
