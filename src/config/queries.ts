@@ -113,7 +113,7 @@ export const GET_ACTIVITIES = gql`
  * Get deposit by precommitment hash
  */
 export const GET_DEPOSIT_BY_PRECOMMITMENT = gql`
-  query GetDepositByPrecommitment($precommitmentHash: String!) {
+  query GetDepositByPrecommitment($precommitmentHash: BigInt!) {
     activitys(
       where: { 
         precommitmentHash: $precommitmentHash 
@@ -149,7 +149,7 @@ export const GET_DEPOSIT_BY_PRECOMMITMENT = gql`
  * Check if nullifier is spent (withdrawal exists)
  */
 export const CHECK_NULLIFIER_SPENT = gql`
-  query CheckNullifierSpent($spentNullifier: String!) {
+  query CheckNullifierSpent($spentNullifier: BigInt!) {
     activitys(
       where: { 
         spentNullifier: $spentNullifier 
@@ -172,7 +172,7 @@ export const CHECK_NULLIFIER_SPENT = gql`
  * Fetch withdrawal activity with change note details by spent nullifier
  */
 export const FETCH_WITHDRAWAL_BY_SPENT_NULLIFIER = gql`
-  query FetchWithdrawalBySpentNullifier($spentNullifier: String!) {
+  query FetchWithdrawalBySpentNullifier($spentNullifier: BigInt!) {
     activitys(
       where: { 
         type: "WITHDRAWAL"
