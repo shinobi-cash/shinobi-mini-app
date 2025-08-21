@@ -10,6 +10,136 @@ import {
 import { fetchDepositByPrecommitment, fetchWithdrawalBySpentNullifier } from '@/services/queryService';
 
 /**
+ * Discover a single deposit chain by deposit index with optional cached data optimization
+ */
+async function discoverSingleDepositChain(
+  accountKey: bigint,
+  poolAddress: string,
+  depositIndex: number,
+  cachedChain?: NoteChain
+): Promise<NoteChain | null> {
+  const depositNullifier = deriveDepositNullifier(accountKey, poolAddress, depositIndex);
+  const depositSecret = deriveDepositSecret(accountKey, poolAddress, depositIndex);
+  const precommitment = poseidon2([depositNullifier, depositSecret]);
+
+  try {
+    const depositData = await fetchDepositByPrecommitment(precommitment.toString());
+
+    if (!depositData) {
+      return null;
+    }
+
+    // Start with cached chain if available, otherwise create new deposit note
+    let chain: NoteChain;
+    let changeIndex: number;
+    let remainingAmount: bigint;
+    let currentNoteNullifier: bigint;
+
+    if (cachedChain && cachedChain.length > 0) {
+      // Use cached data and continue from the last unspent note
+      chain = [...cachedChain]; // Copy cached chain
+      
+      // Find the last note in the chain (should be unspent)
+      const lastNote = chain[chain.length - 1];
+      changeIndex = lastNote.changeIndex + 1;
+      remainingAmount = BigInt(lastNote.amount);
+      
+      // Check if the last cached note has 0 balance and should be marked as spent
+      if (remainingAmount <= 0n && lastNote.status === 'unspent') {
+        lastNote.status = 'spent';
+        return chain; // Chain is complete
+      }
+      
+      // Only check if the last cached note is actually still unspent and has balance
+      if (lastNote.status === 'unspent' && remainingAmount > 0n) {
+        if (lastNote.changeIndex === 0) {
+          // Last note is the deposit
+          currentNoteNullifier = depositNullifier;
+        } else {
+          // Last note is a change note
+          currentNoteNullifier = deriveChangeNullifier(accountKey, poolAddress, depositIndex, lastNote.changeIndex);
+        }
+      } else {
+        // All cached notes are spent or have 0 balance, chain is complete
+        return chain;
+      }
+    } else {
+      // No cache - start fresh
+      let depositNote: Note = {
+        poolAddress,
+        depositIndex,
+        changeIndex: 0,
+        amount: depositData.amount,
+        transactionHash: depositData.transactionHash,
+        blockNumber: depositData.blockNumber,
+        timestamp: depositData.timestamp,
+        status: 'unspent',
+        label: depositData.label!,
+      };
+
+      chain = [depositNote];
+      currentNoteNullifier = depositNullifier;
+      changeIndex = 1;
+      remainingAmount = BigInt(depositData.amount);
+    }
+
+    // Continue discovering from where we left off
+    let changeFound = false;
+    
+    do {
+      const currentNoteNullifierHash = poseidon1([currentNoteNullifier]);
+      const withdrawalData = await fetchWithdrawalBySpentNullifier(currentNoteNullifierHash.toString());
+
+      if (withdrawalData && withdrawalData.newCommitment) {
+        // Mark the current note in the chain as spent
+        if (changeIndex === 1) {
+          // First change note - mark the deposit as spent
+          chain[0].status = 'spent';
+        } else {
+          // Subsequent change notes - mark the previous change note as spent
+          chain[chain.length - 1].status = 'spent';
+        }
+        
+        changeFound = true;
+        
+        // Calculate remaining amount after this withdrawal
+        remainingAmount -= BigInt(withdrawalData.amount);
+        
+        const changeNote: Note = {
+          poolAddress,
+          depositIndex,
+          changeIndex,
+          amount: remainingAmount.toString(),
+          transactionHash: withdrawalData.transactionHash,
+          blockNumber: withdrawalData.blockNumber,
+          timestamp: withdrawalData.timestamp,
+          status: remainingAmount > 0n ? 'unspent' : 'spent', // Mark as spent if 0 balance
+          label: chain[0].label,
+        };
+
+        chain.push(changeNote);
+        
+        // If remaining amount is 0, this note is fully spent - stop here
+        if (remainingAmount <= 0n) {
+          changeFound = false;
+        } else {
+          currentNoteNullifier = deriveChangeNullifier(accountKey, poolAddress, depositIndex, changeIndex);
+          changeIndex++;
+        }
+      } else {
+        // No new change note found, so the current note (last in chain) remains unspent
+        changeFound = false;
+      }
+    } while (changeFound);
+
+    return chain;
+  } catch (error) {
+    console.warn(`Failed to check deposit at index ${depositIndex}:`, error);
+    return null;
+  }
+}
+
+/**
  * Main discovery function to find, update, and organize all notes for an account in a single pass.
  */
 export async function discoverNotes(
@@ -18,95 +148,45 @@ export async function discoverNotes(
   accountKey: bigint
 ): Promise<DiscoveryResult> {
   const cached = await noteCache.getCachedNotes(publicKey, poolAddress);
-  const startDepositIndex = cached ? cached.lastUsedIndex + 1 : 0;
-
-  const notes: NoteChain[] = cached ? cached.notes : [];
+  
+  let notes: NoteChain[] = [];
   let lastUsedIndex = cached ? cached.lastUsedIndex : -1;
   let newNotesFound = 0;
 
-  let consecutiveNotFound = 0;
-  const maxGap = 2; // Use a reasonable gap to stop searching for deposits
+  // Step 1: Re-validate and extend existing cached note chains
+  if (cached && cached.notes.length > 0) {
+    for (const cachedChain of cached.notes) {
+      const depositIndex = cachedChain[0].depositIndex;
+      
+      // Optimize: pass cached chain to avoid re-fetching spent notes
+      const chain = await discoverSingleDepositChain(accountKey, poolAddress, depositIndex, cachedChain);
+      if (chain) {
+        notes.push(chain);
+        // Count new notes found in this chain
+        if (chain.length > cachedChain.length) {
+          newNotesFound += (chain.length - cachedChain.length);
+        }
+      }
+    }
+  }
 
-  // Single pass to discover deposits and their change notes
+  // Step 2: Search for completely new deposits starting from last known index
+  const startDepositIndex = cached ? cached.lastUsedIndex + 1 : 0;
+  let consecutiveNotFound = 0;
+  const maxGap = 2;
   let depositIndex = startDepositIndex;
   while (consecutiveNotFound < maxGap) {
-    console.log(`Checking deposit at index ${depositIndex}...`);
-    const depositNullifier = deriveDepositNullifier(accountKey, poolAddress, depositIndex);
-    const depositSecret = deriveDepositSecret(accountKey, poolAddress, depositIndex);
-    const precommitment = poseidon2([depositNullifier, depositSecret]);
-
-    try {
-      const depositData = await fetchDepositByPrecommitment(precommitment.toString());
-
-      if (depositData) {
-        let depositNote: Note = {
-          poolAddress,
-          depositIndex,
-          changeIndex: 0,
-          amount: depositData.amount,
-          transactionHash: depositData.transactionHash,
-          blockNumber: depositData.blockNumber,
-          timestamp: depositData.timestamp,
-          status: 'unspent',
-          label: depositData.label!,
-        };
-
-        const chain: NoteChain = [depositNote];
-        let currentNoteNullifier = depositNullifier;
-
-        let changeIndex = 1;
-        let changeFound = false;
-        let remainingAmount =  BigInt(depositData.amount)
-        do {
-          const currentNoteNullifierHash = poseidon1([currentNoteNullifier]);
-          const withdrawalData = await fetchWithdrawalBySpentNullifier(currentNoteNullifierHash.toString());
-
-          if (withdrawalData && withdrawalData.newCommitment) {
-            // Mark the current note in the chain as spent
-            if (changeIndex === 1) {
-              // First change note - mark the deposit as spent
-              depositNote.status = 'spent';
-            } else {
-              // Subsequent change notes - mark the previous change note as spent
-              chain[chain.length - 1].status = 'spent';
-            }
-            
-            changeFound = true;
-            
-            // Calculate remaining amount after this withdrawal
-            remainingAmount -= BigInt(withdrawalData.amount);
-            const changeNote: Note = {
-              poolAddress,
-              depositIndex,
-              changeIndex,
-              amount: remainingAmount.toString(),
-              transactionHash: withdrawalData.transactionHash,
-              blockNumber: withdrawalData.blockNumber,
-              timestamp: withdrawalData.timestamp,
-              status: 'unspent', // This will be marked spent if further changes are found
-              label: depositNote.label,
-            };
-
-            chain.push(changeNote);
-            currentNoteNullifier = deriveChangeNullifier(accountKey, poolAddress, depositIndex, changeIndex);
-            changeIndex++;
-          } else {
-            // No new change note found, so the current note (last in chain) remains unspent
-            changeFound = false;
-          }
-        } while (changeFound);
-
-        notes.push(chain);
-        newNotesFound += chain.length;
-        lastUsedIndex = Math.max(lastUsedIndex, depositIndex);
-        consecutiveNotFound = 0;
-      } else {
-        consecutiveNotFound++;
-      }
-    } catch (error) {
-      console.warn(`Failed to check deposit at index ${depositIndex}:`, error);
+    const chain = await discoverSingleDepositChain(accountKey, poolAddress, depositIndex);
+    
+    if (chain) {
+      notes.push(chain);
+      newNotesFound += chain.length;
+      lastUsedIndex = Math.max(lastUsedIndex, depositIndex);
+      consecutiveNotFound = 0;
+    } else {
       consecutiveNotFound++;
     }
+    
     depositIndex++;
   }
 
@@ -119,9 +199,6 @@ export async function discoverNotes(
     syncTime: Date.now(),
   };
 }
-
-// NOTE: The `discoverDeposits` and `discoverWithdrawalChanges` helper functions are no longer needed,
-// as their logic is now integrated into the main `discoverNotes` function.
 
 export function useNotes(
   publicKey: string,
