@@ -1,197 +1,144 @@
-/**
- * Hook for discovering user deposits from the indexer
- */
-
-import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { noteCache, DiscoveredNote } from '../lib/noteCache';
-import { fetchDepositByPrecommitment, isNullifierSpent } from '../services/queryService';
-import { deriveNullifier, deriveSecret, generatePrecommitment } from './useDepositCommitment';
-import { restoreFromMnemonic } from '../utils/crypto';
-import { formatEther } from 'viem';
-import { poseidon1 } from 'poseidon-lite';
-import { CONTRACTS } from '@/config/constants';
-
-export interface DepositDiscoveryState {
-  unspentNotes: DiscoveredNote[];
-  totalNotes: number;
-  isDiscovering: boolean;
-  error: string | null;
-  lastDiscoveryTime: Date | null;
-  newNotesFound: number;
-}
-
-export interface UseDepositDiscoveryResult extends DepositDiscoveryState {
-  discoverNotes: (forceRefresh?: boolean) => Promise<void>;
-  refreshNotes: () => Promise<void>;
-}
+// hooks/useNotes.ts
+import { Note, DiscoveryResult, NoteChain, noteCache } from '@/lib/noteCache';
+import { useState, useEffect } from 'react';
+import { poseidon2 } from 'poseidon-lite';
+import {
+  deriveDepositNullifier,
+  deriveDepositSecret,
+  deriveChangeNullifier
+} from '@/utils/noteDerivation';
+import { fetchDepositByPrecommitment, fetchWithdrawalBySpentNullifier } from '@/services/queryService';
 
 /**
- * Hook to discover user deposits from the indexer
- * Handles discovery logic and caching
+ * Main discovery function to find, update, and organize all notes for an account in a single pass.
  */
-export function useDepositDiscovery(): UseDepositDiscoveryResult {
-  const { mnemonic, privateKey } = useAuth();
-  
-  const [state, setState] = useState<DepositDiscoveryState>({
-    unspentNotes: [],
-    totalNotes: 0,
-    isDiscovering: false,
-    error: null,
-    lastDiscoveryTime: null,
-    newNotesFound: 0,
-  });
+export async function discoverNotes(
+  publicKey: string,
+  poolAddress: string,
+  accountKey: bigint
+): Promise<DiscoveryResult> {
+  const cached = await noteCache.getCachedNotes(publicKey, poolAddress);
+  const startDepositIndex = cached ? cached.lastUsedIndex + 1 : 0;
 
-  /**
-   * Core discovery logic - generates precommitments and checks blockchain
-   */
-  const performNoteDiscovery = useCallback(async (accountKey: string, poolAddress: string): Promise<DiscoveredNote[]> => {
-    const discoveredNotes: DiscoveredNote[] = [];
-    let noteIndex = 0;
-    const maxSearchIndex = 1000;
+  const notes: NoteChain[] = cached ? cached.notes : [];
+  let lastUsedIndex = cached ? cached.lastUsedIndex : -1;
+  let newNotesFound = 0;
 
-    while (noteIndex < maxSearchIndex) {
-      try {
-        // Generate cryptographic values for this note index
-        const nullifier = deriveNullifier(accountKey, poolAddress, noteIndex);
-        const secret = deriveSecret(accountKey, poolAddress, noteIndex);
-        const precommitmentHash = generatePrecommitment(nullifier, secret);
-        const nullifierHash = poseidon1([nullifier]).toString();
+  let consecutiveNotFound = 0;
+  const maxGap = 3; // Use a reasonable gap to stop searching for deposits
 
-        // Check deposit existence and spent status in parallel
-        const [depositActivity, isSpent] = await Promise.all([
-          fetchDepositByPrecommitment(precommitmentHash),
-          isNullifierSpent(nullifierHash)
-        ]);
-        
-        if (!depositActivity) {
-          break; // No more deposits found - end discovery
-        }
-
-        // Create discovered note with proper status
-        const amount = depositActivity.amount || '0';
-        const status = isSpent ? 'spent' : 'unspent';
-        
-        discoveredNotes.push({
-          noteIndex,
-          status,
-          amount: formatEther(BigInt(amount)),
-          transactionHash: depositActivity.transactionHash,
-          blockNumber: depositActivity.blockNumber,
-          timestamp: depositActivity.timestamp ,
-          precommitmentHash: depositActivity.precommitmentHash ||  '',
-          commitment: depositActivity.commitment || '',
-          label: depositActivity.label || '',
-          discoveredAt: Date.now(),
-        });
-
-        noteIndex++;
-      } catch (error) {
-        console.error(`Error discovering note at index ${noteIndex}:`, error);
-        noteIndex++;
-      }
-    }
-
-    return discoveredNotes;
-  }, []);
-
-  /**
-   * Discover notes with caching support
-   */
-  const discoverNotes = useCallback(async (forceRefresh = false) => {
-    if (!mnemonic && !privateKey) return;
-
-    const accountKey = getAccountKey(mnemonic || undefined, privateKey || undefined);
-    if (!accountKey) {
-      setState(prev => ({ ...prev, error: 'Failed to get account key' }));
-      return;
-    }
-
-    setState(prev => ({ ...prev, isDiscovering: true, error: null }));
+  // Single pass to discover deposits and their change notes
+  let depositIndex = startDepositIndex;
+  while (consecutiveNotFound < maxGap) {
+    const depositNullifier = deriveDepositNullifier(accountKey, poolAddress, depositIndex);
+    const depositSecret = deriveDepositSecret(accountKey, poolAddress, depositIndex);
+    const precommitment = poseidon2([depositNullifier, depositSecret]);
 
     try {
-      const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
+      const depositData = await fetchDepositByPrecommitment(precommitment.toString());
 
-      // Check cache first
-      if (!forceRefresh) {
-        const cachedResult = await noteCache.getCachedNotes(accountKey, poolAddress);
-        if (cachedResult) {
-          const unspentNotes = cachedResult.notes.filter(note => note.status === 'unspent');
-          setState(prev => ({
-            ...prev,
-            unspentNotes,
-            totalNotes: cachedResult.notes.length,
-            newNotesFound: 0,
-            isDiscovering: false,
-            lastDiscoveryTime: new Date(cachedResult.syncTime),
-          }));
-          return;
-        }
+      if (depositData) {
+        let depositNote: Note = {
+          poolAddress,
+          depositIndex,
+          changeIndex: 0,
+          amount: depositData.amount,
+          transactionHash: depositData.transactionHash,
+          blockNumber: depositData.blockNumber,
+          timestamp: depositData.timestamp,
+          status: 'unspent',
+          label: depositData.label!,
+        };
+
+        const chain: NoteChain = [depositNote];
+        let currentNoteNullifier = depositNullifier;
+
+        let changeIndex = 1;
+        let changeFound = false;
+        do {
+          const withdrawalData = await fetchWithdrawalBySpentNullifier(currentNoteNullifier.toString());
+
+          if (withdrawalData && withdrawalData.newCommitment) {
+            // This is a spent note, create a new change note
+            depositNote.status = 'spent';
+            changeFound = true;
+
+            const changeNote: Note = {
+              poolAddress,
+              depositIndex,
+              changeIndex,
+              amount: withdrawalData.amount,
+              transactionHash: withdrawalData.transactionHash,
+              blockNumber: withdrawalData.blockNumber,
+              timestamp: withdrawalData.timestamp,
+              status: 'unspent', // Assume unspent until proven otherwise
+              label: depositNote.label,
+            };
+
+            chain.push(changeNote);
+            currentNoteNullifier = deriveChangeNullifier(accountKey, poolAddress, depositIndex, changeIndex);
+            changeIndex++;
+          } else {
+            // No new change note found, so the last note is the unspent one
+            changeFound = false;
+          }
+        } while (changeFound);
+
+        notes.push(chain);
+        newNotesFound += chain.length;
+        lastUsedIndex = Math.max(lastUsedIndex, depositIndex);
+        consecutiveNotFound = 0;
+      } else {
+        consecutiveNotFound++;
       }
-
-      // Perform fresh discovery
-      const discoveredNotes = await performNoteDiscovery(accountKey, poolAddress);
-      
-      // Cache the results
-      await noteCache.storeDiscoveredNotes(accountKey, poolAddress, discoveredNotes);
-
-      // Update state with unspent notes only
-      const unspentNotes = discoveredNotes.filter(note => note.status === 'unspent');
-      setState(prev => ({
-        ...prev,
-        unspentNotes,
-        totalNotes: discoveredNotes.length,
-        newNotesFound: discoveredNotes.length,
-        isDiscovering: false,
-        lastDiscoveryTime: new Date(),
-      }));
-
     } catch (error) {
-      console.error('Failed to discover notes:', error);
-      setState(prev => ({
-        ...prev,
-        isDiscovering: false,
-        error: error instanceof Error ? error.message : 'Failed to discover notes',
-      }));
+      console.warn(`Failed to check deposit at index ${depositIndex}:`, error);
+      consecutiveNotFound++;
     }
-  }, [mnemonic, privateKey, performNoteDiscovery]);
+    depositIndex++;
+  }
 
-  /**
-   * Force refresh from blockchain
-   */
-  const refreshNotes = useCallback(() => discoverNotes(true), [discoverNotes]);
-
-  /**
-   * Auto-discover on authentication
-   */
-  useEffect(() => {
-    if (mnemonic || privateKey) {
-      discoverNotes();
-    }
-  }, [mnemonic, privateKey, discoverNotes]);
+  await noteCache.storeDiscoveredNotes(publicKey, poolAddress, notes);
 
   return {
-    ...state,
-    discoverNotes,
-    refreshNotes,
+    notes: notes,
+    lastUsedIndex,
+    newNotesFound,
+    syncTime: Date.now(),
   };
 }
 
+// NOTE: The `discoverDeposits` and `discoverWithdrawalChanges` helper functions are no longer needed,
+// as their logic is now integrated into the main `discoverNotes` function.
 
-/**
- * Get account key from mnemonic or private key
- */
-function getAccountKey(mnemonic?: string[], privateKey?: string): string | null {
-  if (privateKey) {
-    return privateKey;
-  } else if (mnemonic) {
-    try {
-      const restoredKeys = restoreFromMnemonic(mnemonic);
-      return restoredKeys.privateKey;
-    } catch (error) {
-      console.error('Failed to restore private key from mnemonic:', error);
-      return null;
+export function useNotes(
+  publicKey: string,
+  poolAddress: string,
+  accountKey: bigint
+) {
+  const [data, setData] = useState<DiscoveryResult | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function runDiscovery() {
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await discoverNotes(publicKey, poolAddress, accountKey);
+        if (mounted) setData(result);
+      } catch (err) {
+        if (mounted) setError(err as Error);
+      } finally {
+        if (mounted) setLoading(false);
+      }
     }
-  }
-  return null;
+    runDiscovery();
+    return () => {
+      mounted = false;
+    };
+  }, [publicKey, poolAddress, accountKey]);
+
+  return { data, loading, error };
 }
