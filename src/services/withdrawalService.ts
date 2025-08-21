@@ -30,7 +30,7 @@ import {
   type WithdrawalData,
 } from './contractService';
 import { getWithdrawalSmartAccountClient } from '@/lib/clients';
-import { deriveChangeNullifier, deriveChangeSecret, derivedNoteCommitment } from '@/utils/noteDerivation';
+import { deriveChangeNullifier, deriveChangeSecret, deriveDepositNullifier, deriveDepositSecret, derivedNoteCommitment } from '@/utils/noteDerivation';
 
 // ============ TYPES ============
 
@@ -147,12 +147,18 @@ export async function calculateWithdrawalContext(
   const newNullifier = deriveChangeNullifier(accountKey, poolAddress, note.depositIndex, note.changeIndex+1);
   const newSecret = deriveChangeSecret(accountKey, poolAddress, note.depositIndex, note.changeIndex+1);
   
+  let existingNullifier: bigint;
+    let existingSecret: bigint;
   // Get existing nullifier and secret from the note being spent
-  const existingNullifier = deriveChangeNullifier(accountKey, poolAddress, note.depositIndex, note.changeIndex);
-  const existingSecret = deriveChangeSecret(accountKey, poolAddress, note.depositIndex, note.changeIndex);
-  
-  console.log(`  New nullifier: ${newNullifier}`);
-  console.log(`  New secret: ${newSecret}`);
+  if (note.changeIndex === 0) {
+    // Deposit note
+    existingNullifier = deriveDepositNullifier(accountKey, note.poolAddress, note.depositIndex);
+    existingSecret = deriveDepositSecret(accountKey, note.poolAddress, note.depositIndex);
+  } else {
+    // Change note
+    existingNullifier = deriveChangeNullifier(accountKey, note.poolAddress, note.depositIndex, note.changeIndex);
+    existingSecret = deriveChangeSecret(accountKey, note.poolAddress, note.depositIndex, note.changeIndex);
+  }
   
   return {
     stateTreeLeaves,
@@ -187,12 +193,11 @@ export async function generateWithdrawalProof(
     newNullifier,
     newSecret
   } = context;
-  
   // Generate ZK proof using the circuit
   const prover = new WithdrawalProofGenerator();
   const withdrawalProof = await prover.generateWithdrawalProof({
     existingCommitmentHash: noteCommitment,
-    existingValue: parseEther(note.amount),
+    existingValue: BigInt(note.amount),
     existingNullifier: BigInt(existingNullifier),
     existingSecret: BigInt(existingSecret),
     withdrawalValue: parseEther(withdrawAmount),
