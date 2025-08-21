@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/button';
 import { LoadAccountDrawer } from '../LoadAccountDrawer';
 import { CreateAccountDrawer } from '../CreateAccountDrawer';
+import { restoreFromMnemonic, validateMnemonic } from '../../utils/crypto';
 
 interface AuthenticationActionsProps {
   context?: 'profile' | 'deposit' | 'withdraw';
@@ -14,26 +15,26 @@ export const AuthenticationActions = ({ context: _ }: AuthenticationActionsProps
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [loadError, setLoadError] = useState<string | undefined>();
 
-  // Reuse the same logic from ProfileScreen
-  function deriveKeysFromMnemonic(mnemonic: string[]): { publicKey: string, privateKey: string, address: string } {
-    // For demo: join words, hash, and mock keys
-    const seed = mnemonic.join('-');
-    return {
-      publicKey: 'pub_' + seed.slice(0, 16),
-      privateKey: 'priv_' + seed.slice(0, 16),
-      address: '0x' + seed.replace(/[^a-zA-Z0-9]/g, '').slice(0, 40)
-    };
-  }
-
   const handleLoad = (mnemonicWords: string[]) => {
     if (!mnemonicWords || mnemonicWords.length !== 12 || mnemonicWords.some(w => !w)) {
       setLoadError('Please enter all 12 words of your recovery phrase.');
       return;
     }
-    setLoadError(undefined);
-    const { publicKey, privateKey, address } = deriveKeysFromMnemonic(mnemonicWords);
-    setKeys({ publicKey, privateKey, mnemonic: mnemonicWords, address });
-    setShowLoadAccount(false);
+
+    // Validate mnemonic using proper crypto validation
+    if (!validateMnemonic(mnemonicWords)) {
+      setLoadError('Invalid recovery phrase. Please check your words and try again.');
+      return;
+    }
+
+    try {
+      setLoadError(undefined);
+      const { publicKey, privateKey, address } = restoreFromMnemonic(mnemonicWords);
+      setKeys({ publicKey, privateKey, mnemonic: mnemonicWords, address });
+      setShowLoadAccount(false);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : 'Failed to load account. Please try again.');
+    }
   };
 
   return (
