@@ -21,8 +21,8 @@ const DEPOSIT_AMOUNTS= [
 export const DepositScreen = () => {
   return (
     <AuthenticationGate
-      title="Deposit to Privacy Pool"
-      description="Create or load your account to start making private deposits"
+      title="Account Required"
+      description="Create or load your account to access privacy features"
       context="deposit"
     >
       <WalletGate

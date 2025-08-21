@@ -7,8 +7,8 @@ import { Note } from '@/lib/noteCache';
 export const WithdrawalScreen = () => {
   return (
     <AuthenticationGate
-      title="Withdraw from Privacy Pool"
-      description="Load your account to access your private notes for withdrawal"
+      title="Account Required"
+      description="Create or load your account to access privacy features"
       context="withdraw"
     >
       <WithdrawalContent />

@@ -14,8 +14,8 @@ export const ProfileScreen = () => {
 
   return (
     <AuthenticationGate 
-      title="Welcome to Shinobi"
-      description="Choose how you want to get started:"
+      title="Account Required"
+      description="Create or load your account to access privacy features"
       context="profile"
     >
       <AuthenticatedProfile onSignOut={signOut} />
