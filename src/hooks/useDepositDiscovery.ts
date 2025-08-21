@@ -62,13 +62,19 @@ export async function discoverNotes(
           const withdrawalData = await fetchWithdrawalBySpentNullifier(currentNoteNullifierHash.toString());
 
           if (withdrawalData && withdrawalData.newCommitment) {
-            // This is a spent note, create a new change note
-            depositNote.status = 'spent';
+            // Mark the current note in the chain as spent
+            if (changeIndex === 1) {
+              // First change note - mark the deposit as spent
+              depositNote.status = 'spent';
+            } else {
+              // Subsequent change notes - mark the previous change note as spent
+              chain[chain.length - 1].status = 'spent';
+            }
+            
             changeFound = true;
             
-            if(changeIndex >= 1){
-             remainingAmount -= BigInt(withdrawalData.amount);
-            }
+            // Calculate remaining amount after this withdrawal
+            remainingAmount -= BigInt(withdrawalData.amount);
             const changeNote: Note = {
               poolAddress,
               depositIndex,
@@ -77,7 +83,7 @@ export async function discoverNotes(
               transactionHash: withdrawalData.transactionHash,
               blockNumber: withdrawalData.blockNumber,
               timestamp: withdrawalData.timestamp,
-              status: 'unspent', // Assume unspent until proven otherwise
+              status: 'unspent', // This will be marked spent if further changes are found
               label: depositNote.label,
             };
 
@@ -85,7 +91,7 @@ export async function discoverNotes(
             currentNoteNullifier = deriveChangeNullifier(accountKey, poolAddress, depositIndex, changeIndex);
             changeIndex++;
           } else {
-            // No new change note found, so the last note is the unspent one
+            // No new change note found, so the current note (last in chain) remains unspent
             changeFound = false;
           }
         } while (changeFound);
