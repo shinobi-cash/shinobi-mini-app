@@ -12,16 +12,19 @@ interface ActivityFeedProps {
   hasNextPage?: boolean
 }
 
-const calculateTotalDeposits = (activities: Activity[]): number => {
-  return activities
-    .filter(activity => activity.type === 'DEPOSIT' && activity.aspStatus === 'approved')
-    .reduce((total, activity) => total + parseFloat(formatEthAmount(activity.amount)), 0)
+const getApprovedDeposits = (activities: Activity[]) => {
+  return activities.filter(activity => activity.type === 'DEPOSIT' && activity.aspStatus === 'approved')
+}
+
+const calculateTotalDeposits = (activities: Activity[]): string => {
+  const approvedDeposits = getApprovedDeposits(activities)
+  const totalWei = approvedDeposits.reduce((total, activity) => total + BigInt(activity.amount), 0n)
+  
+  return formatEthAmount(totalWei)
 }
 
 const calculateDepositCount = (activities: Activity[]): number => {
-  return activities
-    .filter(activity => activity.type === 'DEPOSIT' && activity.aspStatus === 'approved')
-    .length
+  return getApprovedDeposits(activities).length
 }
 
 export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPage }: ActivityFeedProps) => {
