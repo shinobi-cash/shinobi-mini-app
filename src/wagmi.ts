@@ -1,16 +1,28 @@
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 import { http, createConfig } from "wagmi";
-import { base, baseSepolia, mainnet } from "wagmi/chains";
+import { baseSepolia } from "wagmi/chains";
+import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { isFarcasterEnvironment } from './utils/environment';
 
-export const config = createConfig({
-  chains: [baseSepolia, base, mainnet],
+// For browser usage - Rainbow wallet configuration
+const rainbowConfig = getDefaultConfig({
+  appName: 'Shinobi.Cash',
+  projectId: import.meta.env.VITE_WC_PROJECT_ID || '',
+  chains: [baseSepolia],
+  ssr: false,
+});
+
+// For Farcaster mini app - simple config with only Farcaster connector
+const farcasterConfig = createConfig({
+  chains: [baseSepolia],
   connectors: [farcasterMiniApp()],
   transports: {
     [baseSepolia.id]: http(),
-    [base.id]: http(),
-    [mainnet.id]: http(),
   },
 });
+
+// Export the appropriate config based on environment
+export const config = isFarcasterEnvironment() ? farcasterConfig : rainbowConfig;
 
 declare module "wagmi" {
   interface Register {
