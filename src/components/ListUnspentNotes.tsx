@@ -1,10 +1,10 @@
-import { Loader2, Wallet } from 'lucide-react';
+import { Loader2, Wallet, ChevronRight, Circle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Note } from '@/lib/noteCache';
 import { useNotes } from '@/hooks/useDepositDiscovery';
 import { useAuth } from '@/contexts/AuthContext';
 import { CONTRACTS } from '@/config/constants';
-import { formatEthAmount } from '@/utils/formatters';
+import { formatEthAmount, formatTimestamp } from '@/utils/formatters';
 
 interface ListUnspentNotesProps {
   onNoteSelected: (note: Note) => void;
@@ -28,26 +28,31 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
 
   if (isDiscovering) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500 mb-4" />
-        <p className="text-sm text-app-secondary">Discovering your notes...</p>
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="relative">
+          <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4">
+            <Loader2 className="w-6 h-6 animate-spin text-blue-600 dark:text-blue-400" />
+          </div>
+        </div>
+        <h3 className="text-base font-semibold text-app-primary mb-1">Discovering Notes</h3>
+        <p className="text-sm text-app-secondary">Scanning the blockchain for your privacy notes...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
-          <span className="text-2xl">⚠️</span>
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
+          <Circle className="w-6 h-6 text-red-600 dark:text-red-400 fill-current" />
         </div>
-        <h3 className="text-lg font-medium text-app-primary mb-2">Discovery Error</h3>
-        <p className="text-sm text-app-secondary mb-4 text-center max-w-sm">
-          {error.message}
+        <h3 className="text-base font-semibold text-app-primary mb-1">Discovery Failed</h3>
+        <p className="text-sm text-app-secondary mb-6 text-center max-w-xs leading-relaxed">
+          Unable to discover your notes. Check your connection and try again.
         </p>
         <Button 
-          onClick={() => window.location.reload()} // A simple way to trigger a re-render and re-fetch
-          variant="outline"
+          onClick={() => window.location.reload()}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-medium active:scale-95 transition-all"
         >
           Try Again
         </Button>
@@ -57,48 +62,41 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
 
   if (availableNotes.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-          <Wallet className="w-8 h-8 text-gray-400" />
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+          <Wallet className="w-6 h-6 text-gray-500 dark:text-gray-400" />
         </div>
-        <h3 className="text-lg font-medium text-app-primary mb-2">No Notes Available</h3>
-        <p className="text-sm text-app-secondary text-center max-w-sm">
-          You don't have any unspent notes to withdraw from. Make a deposit first to create notes.
+        <h3 className="text-base font-semibold text-app-primary mb-1">No Available Notes</h3>
+        <p className="text-sm text-app-secondary text-center max-w-xs leading-relaxed">
+          Make a deposit first to create privacy notes that you can withdraw from.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-app-primary">Select Note to Withdraw</h2>
-          <p className="text-sm text-app-secondary">
-            Choose one of your {availableNotes.length} available note{availableNotes.length > 1 ? 's' : ''}
-          </p>
+    <section className="flex flex-col gap-4">
+      {/* Notes Table */}
+      <div className="flex-1 flex flex-col min-h-0 gap-2">
+        <div className="sticky top-0 z-10 bg-app-surface rounded-t-xl border-b border-app shadow-md">
+          <h2 className="text-lg font-semibold py-3 text-app-secondary tracking-tight text-center">
+            Withdraw Notes ({availableNotes.length})
+          </h2>
         </div>
-        {/* The useNotes hook doesn't expose a refreshNotes method, so a full page reload is a simple fallback */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => window.location.reload()}
-          disabled={isDiscovering}
-        >
-          Refresh
-        </Button>
+        {/* Scrollable Notes Table */}
+        <div className="bg-app-surface border border-app shadow-md overflow-hidden">
+          <div className="overflow-y-auto max-h-[60vh]">
+            {availableNotes.map((note) => (
+              <NoteCard
+                key={`${note.depositIndex}-${note.changeIndex}`}
+                note={note}
+                onSelect={() => onNoteSelected(note)}
+              />
+            ))}
+          </div>
+        </div>
       </div>
-
-      <div className="space-y-3">
-        {availableNotes.map((note) => (
-          <NoteCard
-            key={`${note.depositIndex}-${note.changeIndex}`}
-            note={note}
-            onSelect={() => onNoteSelected(note)}
-          />
-        ))}
-      </div>
-    </div>
+    </section>
   );
 };
 
@@ -109,38 +107,37 @@ interface NoteCardProps {
 
 const NoteCard = ({ note, onSelect }: NoteCardProps) => {
   const noteLabel = note.changeIndex === 0
-    ? `Deposit Note #${note.depositIndex}`
-    : `Change Note #${note.depositIndex}.${note.changeIndex}`;
+    ? `Deposit #${note.depositIndex}`
+    : `Change #${note.depositIndex}.${note.changeIndex}`;
 
   return (
-    <div 
-      className="p-4 border border-app rounded-xl bg-app-surface hover:bg-app-surface-hover transition-colors cursor-pointer"
+    <button
+      className="w-full bg-app-surface border-b border-app px-3 py-3 sm:px-4 sm:py-4 active:bg-app-surface-hover transition-all duration-150 hover:bg-app-surface-hover text-left group"
       onClick={onSelect}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-            <span className="text-sm font-medium text-green-700">
-              {note.changeIndex === 0 ? 'D' : 'C'}
-            </span>
+      {/* Note Details */}
+      <div className="flex-1 flex justify-between gap-2">
+        {/* Left side: Type and amount */}
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-app-primary tracking-tight capitalize text-base sm:text-lg truncate">
+            {noteLabel}
           </div>
-          <div>
-            <p className="font-medium text-app-primary">{formatEthAmount(note.amount)} ETH</p>
-            <p className="text-xs text-app-secondary">
-              {noteLabel} • Available for withdrawal
-            </p>
+          <div className="text-sm sm:text-base text-app-secondary font-medium tabular-nums">
+            {`${formatEthAmount(note.amount, { maxDecimals: 6 })} ETH`}
           </div>
         </div>
-        <div className="text-right">
-          <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-            <div className="w-1 h-1 rounded-full bg-green-500" />
-            Unspent
+
+        {/* Right side: Timestamp and status */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="text-right">
+            <div className="text-xs sm:text-sm text-app-tertiary font-medium whitespace-nowrap">
+              {formatTimestamp(note.timestamp)}
+            </div>
           </div>
-          <p className="text-xs text-app-secondary mt-1">
-            Tap to withdraw
-          </p>
+          {/* Arrow Indicator */}
+          <ChevronRight className="w-5 h-5 text-app-secondary group-hover:text-app-primary transition-colors" />
         </div>
       </div>
-    </div>
+    </button>
   );
 };
