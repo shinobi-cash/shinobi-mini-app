@@ -1,7 +1,7 @@
 // hooks/useNotes.ts
 import { Note, DiscoveryResult, NoteChain, noteCache } from '@/lib/noteCache';
 import { useState, useEffect } from 'react';
-import { poseidon2 } from 'poseidon-lite';
+import { poseidon1, poseidon2 } from 'poseidon-lite';
 import {
   deriveDepositNullifier,
   deriveDepositSecret,
@@ -25,11 +25,12 @@ export async function discoverNotes(
   let newNotesFound = 0;
 
   let consecutiveNotFound = 0;
-  const maxGap = 3; // Use a reasonable gap to stop searching for deposits
+  const maxGap = 2; // Use a reasonable gap to stop searching for deposits
 
   // Single pass to discover deposits and their change notes
   let depositIndex = startDepositIndex;
   while (consecutiveNotFound < maxGap) {
+    console.log(`Checking deposit at index ${depositIndex}...`);
     const depositNullifier = deriveDepositNullifier(accountKey, poolAddress, depositIndex);
     const depositSecret = deriveDepositSecret(accountKey, poolAddress, depositIndex);
     const precommitment = poseidon2([depositNullifier, depositSecret]);
@@ -55,19 +56,24 @@ export async function discoverNotes(
 
         let changeIndex = 1;
         let changeFound = false;
+        let remainingAmount =  BigInt(depositData.amount)
         do {
-          const withdrawalData = await fetchWithdrawalBySpentNullifier(currentNoteNullifier.toString());
+          const currentNoteNullifierHash = poseidon1([currentNoteNullifier]);
+          const withdrawalData = await fetchWithdrawalBySpentNullifier(currentNoteNullifierHash.toString());
 
           if (withdrawalData && withdrawalData.newCommitment) {
             // This is a spent note, create a new change note
             depositNote.status = 'spent';
             changeFound = true;
-
+            
+            if(changeIndex >= 1){
+             remainingAmount -= BigInt(withdrawalData.amount);
+            }
             const changeNote: Note = {
               poolAddress,
               depositIndex,
               changeIndex,
-              amount: withdrawalData.amount,
+              amount: remainingAmount.toString(),
               transactionHash: withdrawalData.transactionHash,
               blockNumber: withdrawalData.blockNumber,
               timestamp: withdrawalData.timestamp,
