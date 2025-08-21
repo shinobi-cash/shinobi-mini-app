@@ -21,7 +21,7 @@ export const AppHeader = () => {
             )}
           </button>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-app-primary font-sans text-center">Shinobi</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-app-primary font-sans text-center">shinobi.cash</h1>
         <div className="flex justify-end">
           <WalletDropdown />
         </div>

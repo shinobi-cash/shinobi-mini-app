@@ -6,7 +6,7 @@ import { isFarcasterEnvironment } from './utils/environment';
 
 // For browser usage - Rainbow wallet configuration
 const rainbowConfig = getDefaultConfig({
-  appName: 'Shinobi.Cash',
+  appName: 'shinobi.cash',
   projectId: import.meta.env.VITE_WC_PROJECT_ID || '',
   chains: [baseSepolia],
   ssr: false,

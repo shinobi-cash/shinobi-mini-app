@@ -9,7 +9,7 @@
     "splashBackgroundColor": "#000000",
     "webhookUrl": "https://shinobi-mini-app.vercel.app/api/webhook",
     "subtitle": "Your Privacy Shield for Crypto",
-    "description": "Shinobi - Private crypto transactions using zero-knowledge proofs"
+    "description": "shinobi.cash Private crypto transactions using zero-knowledge proofs"
   },
   {
     "accountAssociation": {
