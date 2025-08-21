@@ -10,9 +10,7 @@
 
 import { keccak256, parseEther, encodeAbiParameters, isAddress } from 'viem';
 import { SNARK_SCALAR_FIELD, WITHDRAWAL_FEES, CONTRACTS } from '../config/constants';
-import { DiscoveredNote, noteCache } from '../lib/noteCache';
-import { deriveNullifier, deriveSecret } from '../hooks/useDepositCommitment';
-import { restoreFromMnemonic } from '../utils/crypto';
+import { Note } from '../lib/noteCache';
 import { WithdrawalProofGenerator } from '../utils/WithdrawalProofGenerator';
 
 // Import our new services
@@ -32,17 +30,15 @@ import {
   type WithdrawalData,
 } from './contractService';
 import { getWithdrawalSmartAccountClient } from '@/lib/clients';
+import { deriveChangeNullifier, deriveChangeSecret, derivedNoteCommitment } from '@/utils/noteDerivation';
 
 // ============ TYPES ============
 
 export interface WithdrawalRequest {
-  noteData: DiscoveredNote;
+  note: Note;
   withdrawAmount: string;
   recipientAddress: string;
-  accountKeys: {
-    mnemonic?: string;
-    privateKey?: string;
-  };
+  accountKey: bigint
 }
 
 export interface WithdrawalContext {
@@ -51,11 +47,10 @@ export interface WithdrawalContext {
   poolScope: string;
   withdrawalData: readonly [string, string];
   context: bigint;
-  newNullifier: string;
-  newSecret: string;
-  existingNullifier: string;
-  existingSecret: string;
-  nextNoteIndex: number;
+  newNullifier: bigint;
+  newSecret: bigint;
+  existingNullifier: bigint;
+  existingSecret: bigint;
 }
 
 export interface WithdrawalProofData {
@@ -82,23 +77,6 @@ export interface PreparedWithdrawal {
 function hashToBigInt(data: string): bigint {
   const hash = keccak256(data as `0x${string}`);
   return BigInt(hash) % BigInt(SNARK_SCALAR_FIELD);
-}
-
-/**
- * Get account key from mnemonic or private key
- */
-function getAccountKey(accountKeys: { mnemonic?: string; privateKey?: string }): string {
-  if (accountKeys.privateKey) {
-    return accountKeys.privateKey;
-  } else if (accountKeys.mnemonic) {
-    const mnemonicArray = Array.isArray(accountKeys.mnemonic) 
-      ? accountKeys.mnemonic 
-      : accountKeys.mnemonic.split(' ');
-    const restoredKeys = restoreFromMnemonic(mnemonicArray);
-    return restoredKeys.privateKey;
-  } else {
-    throw new Error('No account key available for nullifier generation');
-  }
 }
 
 // ============ CORE WITHDRAWAL FLOW ============
@@ -139,14 +117,14 @@ export async function calculateWithdrawalContext(
 ): Promise<WithdrawalContext> {
   console.log('🔐 Step 2: Calculating withdrawal context...');
   
-  const { noteData, recipientAddress, accountKeys } = request;
+  const { note, recipientAddress, accountKey } = request;
   const { stateTreeLeaves, aspData, poolScope } = withdrawalData;
   
   // Create withdrawal data structure for context calculation
   const withdrawalDataStruct = createWithdrawalData(
     recipientAddress,
     CONTRACTS.PAYMASTER,
-    WITHDRAWAL_FEES.DEFAULT_RELAY_FEE_BPS
+    WITHDRAWAL_FEES.DEFAULT_RELAY_FEE_BPS,
   );
   
   // Calculate context hash
@@ -163,20 +141,15 @@ export async function calculateWithdrawalContext(
   console.log(`  Context hash: ${context}`);
   
   // Get account key and generate nullifiers/secrets
-  const accountKey = getAccountKey(accountKeys);
   const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
   
-  // Get next available note index (last used + 1)
-  const nextNoteIndex = await noteCache.getNextNoteIndex(accountKey, poolAddress);
-  console.log(`  Next note index: ${nextNoteIndex}`);
-  
   // Generate new nullifier and secret for the withdrawal
-  const newNullifier = deriveNullifier(accountKey, poolAddress, nextNoteIndex);
-  const newSecret = deriveSecret(accountKey, poolAddress, nextNoteIndex);
+  const newNullifier = deriveChangeNullifier(accountKey, poolAddress, note.depositIndex, note.changeIndex+1);
+  const newSecret = deriveChangeSecret(accountKey, poolAddress, note.depositIndex, note.changeIndex+1);
   
   // Get existing nullifier and secret from the note being spent
-  const existingNullifier = deriveNullifier(accountKey, poolAddress, noteData.noteIndex);
-  const existingSecret = deriveSecret(accountKey, poolAddress, noteData.noteIndex);
+  const existingNullifier = deriveChangeNullifier(accountKey, poolAddress, note.depositIndex, note.changeIndex);
+  const existingSecret = deriveChangeSecret(accountKey, poolAddress, note.depositIndex, note.changeIndex);
   
   console.log(`  New nullifier: ${newNullifier}`);
   console.log(`  New secret: ${newSecret}`);
@@ -191,7 +164,6 @@ export async function calculateWithdrawalContext(
     newSecret,
     existingNullifier,
     existingSecret,
-    nextNoteIndex,
   };
 }
 
@@ -204,7 +176,8 @@ export async function generateWithdrawalProof(
 ): Promise<WithdrawalProofData> {
   console.log('🔐 Step 3: Generating ZK proof...');
   
-  const { noteData, withdrawAmount } = request;
+  const { note, withdrawAmount } = request;
+  const noteCommitment = derivedNoteCommitment(request.accountKey, note);
   const {
     stateTreeLeaves,
     aspData,
@@ -218,13 +191,13 @@ export async function generateWithdrawalProof(
   // Generate ZK proof using the circuit
   const prover = new WithdrawalProofGenerator();
   const withdrawalProof = await prover.generateWithdrawalProof({
-    existingCommitmentHash: BigInt(noteData.commitment),
-    existingValue: parseEther(noteData.amount),
+    existingCommitmentHash: noteCommitment,
+    existingValue: parseEther(note.amount),
     existingNullifier: BigInt(existingNullifier),
     existingSecret: BigInt(existingSecret),
     withdrawalValue: parseEther(withdrawAmount),
     context: contextHash,
-    label: BigInt(noteData.label),
+    label: BigInt(note.label),
     newNullifier: BigInt(newNullifier),
     newSecret: BigInt(newSecret),
     stateTreeCommitments: stateTreeLeaves.map(leaf => BigInt(leaf.leafValue)),
@@ -338,13 +311,6 @@ export async function processWithdrawal(request: WithdrawalRequest): Promise<Pre
 }
 
 /**
- * Prepare withdrawal without execution (for preview)
- */
-export async function prepareWithdrawal(request: WithdrawalRequest): Promise<PreparedWithdrawal> {
-  return processWithdrawal(request);
-}
-
-/**
  * Execute a prepared withdrawal
  */
 export async function executePreparedWithdrawal(
@@ -362,9 +328,9 @@ export async function executePreparedWithdrawal(
  * Validate withdrawal request
  */
 export function validateWithdrawalRequest(request: WithdrawalRequest): void {
-  const { noteData, withdrawAmount, recipientAddress, accountKeys } = request;
+  const { note, withdrawAmount, recipientAddress, accountKey } = request;
   
-  if (!noteData || !noteData.commitment) {
+  if (!note ) {
     throw new Error('Invalid note data');
   }
   
@@ -373,7 +339,7 @@ export function validateWithdrawalRequest(request: WithdrawalRequest): void {
   }
   
   
-  if (parseFloat(withdrawAmount) > parseFloat(noteData.amount)) {
+  if (parseFloat(withdrawAmount) > parseFloat(note.amount)) {
     throw new Error('Withdrawal amount exceeds note balance');
   }
   
@@ -381,7 +347,7 @@ export function validateWithdrawalRequest(request: WithdrawalRequest): void {
     throw new Error('Invalid recipient address');
   }
   
-  if (!accountKeys.privateKey && !accountKeys.mnemonic) {
+  if (!accountKey) {
     throw new Error('No account keys provided');
   }
 }

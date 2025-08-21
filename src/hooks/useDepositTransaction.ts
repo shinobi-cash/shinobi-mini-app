@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useWriteContract } from 'wagmi';
 import { parseEther } from 'viem';
-import { commitmentToBigInt, CashNoteData } from './useDepositCommitment';
+import { CashNoteData } from './useDepositCommitment';
 import { PRIVACY_POOL_ENTRYPOINT_ABI } from '@/config/abis';
 import { CONTRACTS } from '@/config/constants';
 
@@ -48,7 +48,7 @@ export function useDepositTransaction() {
     }));
 
     const amountWei = parseEther(amount);
-    const precommitmentBigInt = commitmentToBigInt(cashNoteData.precommitment);
+    const precommitmentBigInt = cashNoteData.precommitment;
 
     // Call the deposit function on the privacy pool entry point
     writeContract({
