@@ -61,7 +61,7 @@ export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPa
           </h2>
         </div>
         {/* Scrollable Activities Table */}
-        <div className="bg-app-surface border border-app shadow-md rounded-b-xl overflow-hidden">
+        <div className="bg-app-surface border border-app shadow-md overflow-hidden">
           <div className="overflow-y-auto max-h-[60vh]">
             {loading ? (
               <div className="flex items-center justify-center py-8">
