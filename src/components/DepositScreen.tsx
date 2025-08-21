@@ -1,7 +1,7 @@
 import { useAccount, useBalance, useChainId } from 'wagmi';
 import { AuthenticationGate } from './shared/AuthenticationGate';
 import { WalletGate } from './shared/WalletGate';
-import { ChevronDown, AlertTriangle, Loader2, ExternalLink } from 'lucide-react';
+import { ChevronDown, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { useState, useEffect, useRef } from 'react';
 import { formatEther } from 'viem';
@@ -9,6 +9,7 @@ import { NETWORK } from '../config/constants';
 import { useDepositCommitment } from '../hooks/useDepositCommitment';
 import { useDepositTransaction } from '../hooks/useDepositTransaction';
 import { toast } from 'sonner';
+import { showTransactionSuccessToast } from '../utils/toastUtils';
 
 const DEPOSIT_AMOUNTS= [
     { value: "0.01", label: "0.01 ETH" },
@@ -81,22 +82,7 @@ const DepositForm = () => {
       // Mark this transaction hash as shown
       shownToastsRef.current.add(transactionHash);
       
-      toast.success('Deposit Successful!', {
-        description: (
-          <div className="flex items-center gap-2">
-            <span>Transaction confirmed</span>
-            <a 
-              href={`${NETWORK.EXPLORER_URL}/tx/${transactionHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline flex items-center gap-1"
-            >
-              View <ExternalLink className="w-3 h-3" />
-            </a>
-          </div>
-        ),
-        duration: 7000,
-      });
+      showTransactionSuccessToast(transactionHash, 'Deposit Successful!', 7000);
       
       // Reset form for next deposit
       setTimeout(() => {
@@ -104,7 +90,7 @@ const DepositForm = () => {
         setAmount('');
       }, 1000);
     }
-  }, [isSuccess, transactionHash]);
+  }, [isSuccess, transactionHash, reset]);
 
   const handleAmountChange = (value: string) => {
     // Only allow numbers and decimal point

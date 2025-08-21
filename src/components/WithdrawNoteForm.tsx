@@ -5,6 +5,7 @@ import { Input } from './ui/input';
 import { isAddress } from 'viem';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { showTransactionSuccessToast } from '../utils/toastUtils';
 import { useAuth } from '../contexts/AuthContext';
 import { TransactionPreviewDrawer } from './TransactionPreviewDrawer';
 import { Note } from '@/lib/noteCache';
@@ -119,7 +120,9 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
       const transactionHash = await executePreparedWithdrawal(preparedWithdrawal);
       
       console.log('✅ Withdrawal executed successfully:', transactionHash);
-      toast.success(`Withdrawal completed! Tx: ${transactionHash.slice(0, 10)}...`);
+      
+      // Show success toast with transaction link
+      showTransactionSuccessToast(transactionHash, 'Withdrawal Completed!');
       
       setShowPreview(false);
       setIsExecuting(false);

@@ -60,6 +60,17 @@ export function useDepositTransaction() {
     });
   };
 
+  // Handle transaction success
+  useEffect(() => {
+    if (hash) {
+      setState(prev => ({
+        ...prev,
+        isSuccess: true,
+        error: null,
+      }));
+    }
+  }, [hash]);
+
   // Handle errors
   useEffect(() => {
     const error = writeError;
