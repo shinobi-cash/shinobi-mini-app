@@ -86,7 +86,7 @@ export const TransactionPreviewDrawer = ({
               <div className="px-3 py-2 flex items-center justify-between">
                 <span className="text-xs font-medium text-app-secondary">Note Balance</span>
                 <span className="text-xs font-mono text-app-primary tabular-nums">
-                  {formatEthAmount(parseFloat(note.amount), { decimals: 7 })} ETH
+                  {formatEthAmount(note.amount, { decimals: 7 })} ETH
                 </span>
               </div>
               
