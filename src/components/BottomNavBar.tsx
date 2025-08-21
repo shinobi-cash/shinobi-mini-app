@@ -18,7 +18,7 @@ export const BottomNavBar = () => {
   const { currentScreen, setCurrentScreen } = useNavigation()
 
   return (
-  <nav className="fixed bottom-0 left-0 right-0 bg-app-surface/95 dark:bg-app-surface/95 backdrop-blur-lg border-t border-app-border z-50 pb-safe-area-bottom">
+  <nav className="fixed bottom-0 left-0 right-0 bg-app-surface border-t border-app-border z-50 pb-safe-area-bottom">
       <div className="flex items-center justify-around px-2">
         {navItems.map((item, index) => {
           const isActive = currentScreen === item.screen
@@ -29,7 +29,7 @@ export const BottomNavBar = () => {
               aria-label={item.label}
               className={`flex flex-col items-center space-y-1 py-4 px-6 min-w-0 flex-1 transition-colors duration-200 rounded-xl active:scale-95 ${
                 isActive
-                  ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 shadow-sm'
+                  ? 'text-indigo-600 dark:text-indigo-400 shadow-sm'
                   : 'text-app-secondary hover:text-app-primary active:text-app-primary dark:text-app-secondary dark:hover:text-app-primary dark:active:text-app-primary'
               }`}
               style={{ minWidth: 44, minHeight: 44 }}
@@ -39,7 +39,7 @@ export const BottomNavBar = () => {
               </div>
               <span className={`text-xs font-semibold transition-colors duration-200 ${
                 isActive 
-                  ? 'text-blue-600 dark:text-blue-400' 
+                  ? 'text-indigo-600 dark:text-indigo-400' 
                   : 'text-app-secondary dark:text-app-secondary'
               }`}> 
                 {item.label}

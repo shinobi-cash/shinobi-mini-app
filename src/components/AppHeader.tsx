@@ -6,7 +6,7 @@ export const AppHeader = () => {
   const { theme, toggleTheme } = useTheme()
   
   return (
-    <header className="sticky top-0 z-50 border-b border-app py-3 px-2 sm:py-4 sm:px-4 bg-app-header backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-app py-3 px-2 sm:py-4 sm:px-4 bg-app-header">
       <div className="grid grid-cols-3 items-center">
         <div className="flex justify-start">
           <button 

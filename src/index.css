@@ -81,13 +81,13 @@
   
   /* Custom app colors */
   --app-background: #000000;
-  --app-surface: rgba(38, 38, 38, 0.4);
-  --app-surface-hover: rgba(64, 64, 64, 0.5);
-  --app-border: rgba(64, 64, 64, 0.3);
+  --app-surface: #262626;
+  --app-surface-hover: #404040;
+  --app-border: #404040;
   --app-text-primary: #ffffff;
   --app-text-secondary: #a3a3a3;
   --app-text-tertiary: #737373;
-  --app-header-bg: rgba(26, 26, 26, 0.8);
+  --app-header-bg: #1a1a1a;
   
   /* Status colors */
   --status-success: #22c55e;
