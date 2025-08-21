@@ -1,19 +1,31 @@
 import { Loader2, Wallet } from 'lucide-react';
 import { Button } from './ui/button';
-import { useDepositDiscovery } from '../hooks/useDepositDiscovery';
-import { DiscoveredNote } from '@/lib/noteCache';
+import { Note } from '@/lib/noteCache';
+import { useNotes } from '@/hooks/useDepositDiscovery';
+import { useAuth } from '@/contexts/AuthContext';
+import { CONTRACTS } from '@/config/constants';
 
 interface ListUnspentNotesProps {
-  onNoteSelected: (note: DiscoveredNote) => void;
+  onNoteSelected: (note: Note) => void;
 }
 
 export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
-  const noteDiscovery = useDepositDiscovery();
+  const { publicKey, accountKey } = useAuth(); 
+  const poolAddress = CONTRACTS.ETH_PRIVACY_POOL; // Assuming this is defined in your constants
 
-  // Get available unspent notes
-  const availableNotes = noteDiscovery.unspentNotes;
+  const { data: noteDiscovery, loading: isDiscovering, error } = useNotes(publicKey!, poolAddress, accountKey!);
 
-  if (noteDiscovery.isDiscovering) {
+  // Get available unspent notes by filtering the 2D notes array.
+  const availableNotes = (noteDiscovery?.notes || [])
+    .map(noteChain => {
+      // An unspent note is always the last note in a chain
+      const lastNote = noteChain[noteChain.length - 1];
+      // Only include the note if it is unspent
+      return lastNote.status === 'unspent' ? lastNote : null;
+    })
+    .filter(Boolean) as Note[];
+
+  if (isDiscovering) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <Loader2 className="w-8 h-8 animate-spin text-blue-500 mb-4" />
@@ -22,7 +34,7 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
     );
   }
 
-  if (noteDiscovery.error) {
+  if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
@@ -30,10 +42,10 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
         </div>
         <h3 className="text-lg font-medium text-app-primary mb-2">Discovery Error</h3>
         <p className="text-sm text-app-secondary mb-4 text-center max-w-sm">
-          {noteDiscovery.error}
+          {error.message}
         </p>
         <Button 
-          onClick={() => noteDiscovery.refreshNotes()}
+          onClick={() => window.location.reload()} // A simple way to trigger a re-render and re-fetch
           variant="outline"
         >
           Try Again
@@ -65,11 +77,12 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
             Choose one of your {availableNotes.length} available note{availableNotes.length > 1 ? 's' : ''}
           </p>
         </div>
+        {/* The useNotes hook doesn't expose a refreshNotes method, so a full page reload is a simple fallback */}
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => noteDiscovery.refreshNotes()}
-          disabled={noteDiscovery.isDiscovering}
+          onClick={() => window.location.reload()}
+          disabled={isDiscovering}
         >
           Refresh
         </Button>
@@ -78,7 +91,7 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
       <div className="space-y-3">
         {availableNotes.map((note) => (
           <NoteCard
-            key={note.noteIndex}
+            key={`${note.depositIndex}-${note.changeIndex}`}
             note={note}
             onSelect={() => onNoteSelected(note)}
           />
@@ -89,11 +102,15 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
 };
 
 interface NoteCardProps {
-  note: DiscoveredNote;
+  note: Note;
   onSelect: () => void;
 }
 
 const NoteCard = ({ note, onSelect }: NoteCardProps) => {
+  const noteLabel = note.changeIndex === 0
+    ? `Deposit Note #${note.depositIndex}`
+    : `Change Note #${note.depositIndex}.${note.changeIndex}`;
+
   return (
     <div 
       className="p-4 border border-app rounded-xl bg-app-surface hover:bg-app-surface-hover transition-colors cursor-pointer"
@@ -102,12 +119,14 @@ const NoteCard = ({ note, onSelect }: NoteCardProps) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-            <span className="text-sm font-medium text-green-700">#{note.noteIndex + 1}</span>
+            <span className="text-sm font-medium text-green-700">
+              {note.changeIndex === 0 ? 'D' : 'C'}
+            </span>
           </div>
           <div>
             <p className="font-medium text-app-primary">{note.amount} ETH</p>
             <p className="text-xs text-app-secondary">
-              Note {note.noteIndex + 1} • Available for withdrawal
+              {noteLabel} • Available for withdrawal
             </p>
           </div>
         </div>

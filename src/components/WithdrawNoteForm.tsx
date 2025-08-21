@@ -7,28 +7,28 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
 import { TransactionPreviewDrawer } from './TransactionPreviewDrawer';
-import { DiscoveredNote } from '@/lib/noteCache';
+import { Note } from '@/lib/noteCache';
 import { 
-  prepareWithdrawal, 
   executePreparedWithdrawal,
   validateWithdrawalRequest,
   calculateWithdrawalAmounts,
   type WithdrawalRequest,
-  type PreparedWithdrawal
+  type PreparedWithdrawal,
+  processWithdrawal
 } from '../services/withdrawalService';
 
 interface WithdrawNoteFormProps {
-  noteData: DiscoveredNote;
+  note: Note;
   onBack: () => void;
 }
 
-export const WithdrawNoteForm = ({ noteData, onBack }: WithdrawNoteFormProps) => {
+export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [recipientAddress, setRecipientAddress] = useState('');
   const [showPreview, setShowPreview] = useState(false);
 
   // Get auth context for account keys
-  const { mnemonic, privateKey } = useAuth();
+  const { accountKey } = useAuth();
 
   // State for withdrawal preparation
   const [isPreparing, setIsPreparing] = useState(false);
@@ -37,7 +37,7 @@ export const WithdrawNoteForm = ({ noteData, onBack }: WithdrawNoteFormProps) =>
   const [isExecuting, setIsExecuting] = useState(false);
 
   // Calculate values for validation and display
-  const availableBalance = parseFloat(noteData.amount);
+  const availableBalance = parseFloat(note.amount);
   const withdrawAmountNum = parseFloat(withdrawAmount) || 0;
   
   // Use service to calculate withdrawal amounts
@@ -62,7 +62,7 @@ export const WithdrawNoteForm = ({ noteData, onBack }: WithdrawNoteFormProps) =>
 
   // Handle max button
   const handleMaxClick = () => {
-    setWithdrawAmount(noteData.amount);
+    setWithdrawAmount(note.amount);
   };
 
   // Handle withdrawal preparation using our clean service
@@ -73,13 +73,10 @@ export const WithdrawNoteForm = ({ noteData, onBack }: WithdrawNoteFormProps) =>
       
       // Create withdrawal request
       const withdrawalRequest: WithdrawalRequest = {
-        noteData,
+        note,
         withdrawAmount,
         recipientAddress,
-        accountKeys: { 
-          mnemonic: mnemonic ? mnemonic.join(' ') : undefined, 
-          privateKey: privateKey || undefined 
-        }
+        accountKey:accountKey!,
       };
       
       // Validate the request first
@@ -87,7 +84,7 @@ export const WithdrawNoteForm = ({ noteData, onBack }: WithdrawNoteFormProps) =>
       
       // Prepare the withdrawal using our service
       console.log('🚀 Preparing withdrawal...');
-      const prepared = await prepareWithdrawal(withdrawalRequest);
+      const prepared = await processWithdrawal(withdrawalRequest);
       
       // Set both states together to avoid race condition
       setPreparedWithdrawal(prepared);
@@ -152,7 +149,7 @@ export const WithdrawNoteForm = ({ noteData, onBack }: WithdrawNoteFormProps) =>
         </Button>
         <div className="flex-1">
           <h1 className="text-lg font-bold text-app-primary">Withdraw</h1>
-          <p className="text-xs text-app-secondary">Note #{noteData.noteIndex + 1} • Anonymous withdrawal</p>
+          <p className="text-xs text-app-secondary"> Anonymous withdrawal</p>
         </div>
       </div>
 
@@ -174,7 +171,7 @@ export const WithdrawNoteForm = ({ noteData, onBack }: WithdrawNoteFormProps) =>
           {/* Available Balance */}
           <div className="text-center mb-3">
             <p className="text-xs text-app-secondary">
-              Available: <span className="text-app-primary font-medium">{noteData.amount} ETH</span>
+              Available: <span className="text-app-primary font-medium">{note.amount} ETH</span>
             </p>
           </div>
           
@@ -208,7 +205,7 @@ export const WithdrawNoteForm = ({ noteData, onBack }: WithdrawNoteFormProps) =>
           
           {!isValidAmount && withdrawAmount && (
             <p className="text-xs text-destructive mt-2 text-center">
-              Amount must be between 0 and {noteData.amount} ETH
+              Amount must be between 0 and {note.amount} ETH
             </p>
           )}
         </div>
@@ -267,7 +264,7 @@ export const WithdrawNoteForm = ({ noteData, onBack }: WithdrawNoteFormProps) =>
           isOpen={showPreview}
           onClose={() => setShowPreview(false)}
           onConfirm={handleExecuteTransaction}
-          noteData={noteData}
+          note={note}
           withdrawAmount={withdrawAmount}
           recipientAddress={recipientAddress}
           executionFee={executionFee}
