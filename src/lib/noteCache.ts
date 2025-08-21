@@ -4,30 +4,30 @@
  */
 
 // Types for discovered notes
-export interface DiscoveredNote {
-  noteIndex: number;
-  amount: string; // in ETH
+export interface Note {
+  poolAddress: string;
+  depositIndex: number;
+  changeIndex: number;
+  amount: string;
   transactionHash: string;
   blockNumber: string;
   timestamp: string;
   status: 'unspent' | 'spent';
-  precommitmentHash: string;
-  commitment: string;
   label: string;
-  discoveredAt: number;
 }
+
+export type NoteChain = Note[];
 
 export interface CachedNoteData {
   poolAddress: string;
-  accountId: string; // Safe public identifier (NOT private key)
-  notes: DiscoveredNote[];
-  lastUsedNoteIndex: number;
+  publicKey: string; // Safe public key identifier
+  notes: NoteChain[];
+  lastUsedDepositIndex: number;
   lastSyncTime: number;
-  totalNotes: number;
 }
 
 export interface DiscoveryResult {
-  notes: DiscoveredNote[];
+  notes: NoteChain[];
   lastUsedIndex: number;
   newNotesFound: number;
   syncTime: number;
@@ -35,15 +35,12 @@ export interface DiscoveryResult {
 
 // IndexedDB setup
 const DB_NAME = 'shinobi.cash';
-const DB_VERSION = 1;
+const DB_VERSION = 3; // Incremented for clean migration
 const STORE_NAME = 'account-note-data';
 
 class NoteCacheService {
   private db: IDBDatabase | null = null;
 
-  /**
-   * Initialize IndexedDB
-   */
   async init(): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -56,102 +53,70 @@ class NoteCacheService {
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-          store.createIndex('accountId', 'accountId', { unique: false });
-          store.createIndex('poolAddress', 'poolAddress', { unique: false });
+        
+        // Clean migration: drop old store if it exists
+        if (db.objectStoreNames.contains(STORE_NAME)) {
+          db.deleteObjectStore(STORE_NAME);
         }
+        
+        // Create new store with publicKey-based indexing
+        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        store.createIndex('publicKey', 'publicKey', { unique: false });
+        store.createIndex('poolAddress', 'poolAddress', { unique: false });
       };
     });
   }
 
-  /**
-   * Get composite key for storage using safe account ID
-   */
-  private getKey(accountId: string, poolAddress: string): string {
-    return `${accountId}_${poolAddress}`;
+  private getKey(publicKey: string, poolAddress: string): string {
+    return `${publicKey.toLowerCase()}_${poolAddress.toLowerCase()}`;
   }
 
-  /**
-   * Generate safe account ID from private key (for storage only)
-   * Uses hash to avoid storing the actual private key
-   */
-  private generateAccountId(accountKey: string): string {
-    // Create a safe identifier by hashing the private key
-    // This allows us to uniquely identify the account without storing the private key
-    const encoder = new TextEncoder();
-    const data = encoder.encode(accountKey);
-    
-    // Simple hash function (for demo - in production use crypto.subtle.digest)
-    let hash = 0;
-    for (let i = 0; i < data.length; i++) {
-      const char = data[i];
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    
-    return `acc_${Math.abs(hash).toString(16)}`;
-  }
-
-  /**
-   * Get cached data if valid, otherwise return null
-   */
-  async getCachedNotes(accountKey: string, poolAddress: string): Promise<DiscoveryResult | null> {
+  async getCachedNotes(publicKey: string, poolAddress: string): Promise<DiscoveryResult | null> {
     if (!this.db) await this.init();
 
-    const accountId = this.generateAccountId(accountKey);
-    const cached = await this.getCachedData(accountId, poolAddress);
-    
-    if (cached && this.isCacheValid(cached.lastSyncTime)) {
+    const cached = await this.getCachedData(publicKey, poolAddress);
+
+    if (cached) {
       return {
         notes: cached.notes,
-        lastUsedIndex: cached.lastUsedNoteIndex,
+        lastUsedIndex: cached.lastUsedDepositIndex,
         newNotesFound: 0,
         syncTime: cached.lastSyncTime,
       };
     }
-    
+
     return null;
   }
 
-  /**
-   * Store discovered notes in cache
-   */
   async storeDiscoveredNotes(
-    accountKey: string, 
-    poolAddress: string, 
-    notes: DiscoveredNote[]
+    publicKey: string,
+    poolAddress: string,
+    notes: NoteChain[]
   ): Promise<void> {
     if (!this.db) await this.init();
 
-    const accountId = this.generateAccountId(accountKey);
-    const lastUsedIndex = notes.length > 0 
-      ? Math.max(...notes.map(note => note.noteIndex))
+    const lastUsedIndex = notes.length > 0
+      ? Math.max(...notes.map(chain => chain[0].depositIndex))
       : -1;
 
-    await this.storeData(accountId, poolAddress, notes, lastUsedIndex);
+    await this.storeData(publicKey, poolAddress, notes, lastUsedIndex);
   }
 
-
-  /**
-   * Store data in IndexedDB (NEVER stores private keys)
-   */
   private async storeData(
-    accountId: string,
+    publicKey: string,
     poolAddress: string,
-    notes: DiscoveredNote[],
-    lastUsedNoteIndex: number
+    notes: NoteChain[],
+    lastUsedDepositIndex: number
   ): Promise<void> {
     if (!this.db) await this.init();
 
     const data = {
-      id: this.getKey(accountId, poolAddress),
+      id: this.getKey(publicKey, poolAddress),
       poolAddress,
-      accountId, // Safe public identifier (NOT private key)
+      publicKey,
       notes,
-      lastUsedNoteIndex,
+      lastUsedDepositIndex,
       lastSyncTime: Date.now(),
-      totalNotes: notes.length,
     };
 
     return new Promise((resolve, reject) => {
@@ -164,16 +129,13 @@ class NoteCacheService {
     });
   }
 
-  /**
-   * Get cached data
-   */
-  private async getCachedData(accountId: string, poolAddress: string): Promise<CachedNoteData | null> {
+  private async getCachedData(publicKey: string, poolAddress: string): Promise<CachedNoteData | null> {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORE_NAME], 'readonly');
       const store = transaction.objectStore(STORE_NAME);
-      const request = store.get(this.getKey(accountId, poolAddress));
+      const request = store.get(this.getKey(publicKey, poolAddress));
 
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
@@ -189,39 +151,30 @@ class NoteCacheService {
   }
 
   /**
-   * Check if cache is valid (5 minutes)
+   * Retrieves the next available deposit index from the cache.
+   * This is used to generate a new, unique deposit commitment.
    */
-  private isCacheValid(lastSyncTime: number): boolean {
-    const fiveMinutes = 5 * 60 * 1000;
-    return Date.now() - lastSyncTime < fiveMinutes;
+  async getNextDepositIndex(publicKey: string, poolAddress: string): Promise<number> {
+    const cached = await this.getCachedData(publicKey, poolAddress);
+    return cached ? cached.lastUsedDepositIndex + 1 : 0;
   }
 
   /**
-   * Get next available note index
+   * Updates the last used deposit index in the cache.
+   * This is called after a unique deposit commitment is successfully generated.
    */
-  async getNextNoteIndex(accountKey: string, poolAddress: string): Promise<number> {
-    const accountId = this.generateAccountId(accountKey);
-    const cached = await this.getCachedData(accountId, poolAddress);
-    return cached ? cached.lastUsedNoteIndex + 1 : 0;
-  }
-
-  /**
-   * Update last used note index
-   */
-  async updateLastUsedNoteIndex(
-    accountKey: string,
+  async updateLastUsedDepositIndex(
+    publicKey: string,
     poolAddress: string,
-    noteIndex: number
+    depositIndex: number
   ): Promise<void> {
-    const accountId = this.generateAccountId(accountKey);
-    const cached = await this.getCachedData(accountId, poolAddress);
-    
-    if (cached) {
-      cached.lastUsedNoteIndex = Math.max(cached.lastUsedNoteIndex, noteIndex);
-      await this.storeData(accountId, poolAddress, cached.notes, cached.lastUsedNoteIndex);
-    }
+    const cached = await this.getCachedData(publicKey, poolAddress);
+
+    const notes = cached ? cached.notes : [];
+    const lastUsedIndex = cached ? Math.max(cached.lastUsedDepositIndex, depositIndex) : depositIndex;
+
+    await this.storeData(publicKey, poolAddress, notes, lastUsedIndex);
   }
 }
 
-// Export singleton
 export const noteCache = new NoteCacheService();
