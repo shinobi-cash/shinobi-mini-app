@@ -89,12 +89,9 @@ const loadCircuitFiles = async (): Promise<CircuitFiles> => {
 
 // ============ UTILITY FUNCTIONS ============
 
-export function padSiblings(siblings: bigint[], targetDepth: number): bigint[] {
-    const paddedSiblings = [...siblings];
-    while (paddedSiblings.length < targetDepth) {
-        paddedSiblings.push(BigInt(0));
-    }
-    return paddedSiblings;
+function padArray(arr: bigint[], length: number): bigint[] {
+  if (arr.length >= length) return arr;
+  return [...arr, ...Array(length - arr.length).fill(BigInt(0))];
 }
 
 // ============ WITHDRAWAL PROOF GENERATOR ============
@@ -139,7 +136,6 @@ export class WithdrawalProofGenerator {
 
         // Build Merkle trees
         const { stateTree, aspTree } = this.buildMerkleTrees(stateTreeCommitments, aspTreeLabels);
-
         // Find indices in trees
         const stateIndex = stateTreeCommitments.indexOf(existingCommitmentHash);
         const aspIndex = aspTreeLabels.indexOf(label);
@@ -150,7 +146,6 @@ export class WithdrawalProofGenerator {
         if (aspIndex === -1) {
             throw new Error("Commitment label not found in ASP tree");
         }
-
         // Generate Merkle proofs
         const stateProof = stateTree.generateProof(stateIndex);
         const aspProof = aspTree.generateProof(aspIndex);
@@ -158,17 +153,22 @@ export class WithdrawalProofGenerator {
         // Prepare circuit inputs
         const circuitInputs = this.prepareCircuitInputs({
             withdrawalValue,
-            stateProof,
-            aspProof,
-            context,
-            label,
+            // Existing values
             existingValue,
             existingNullifier,
             existingSecret,
+            context,
+            label,
+            // New values
             newNullifier,
             newSecret,
-            stateIndex: stateProof.index || stateIndex, // for 1 element index is null
-            aspIndex: aspProof.index || aspIndex, // for 1 element index is null
+            // Proofs
+            stateProof,
+            aspProof,
+            stateTreeDepth: stateTree.depth,
+            ASPTreeDepth: aspTree.depth,
+            stateIndex: Object.is(stateProof.index, NaN) ? 0 : stateProof.index,
+            aspIndex: Object.is(aspProof.index, NaN) ? 0 : aspProof.index, 
         });
 
         // Generate proof
@@ -224,29 +224,33 @@ export class WithdrawalProofGenerator {
 
     private prepareCircuitInputs(params: {
         withdrawalValue: bigint;
-        stateProof: any;
-        aspProof: any;
-        context: bigint;
-        label: bigint;
         existingValue: bigint;
         existingNullifier: bigint;
         existingSecret: bigint;
+        context: bigint;
+        label: bigint;
         newNullifier: bigint;
         newSecret: bigint;
+        stateProof: any;
+        aspProof: any;
+        stateTreeDepth: number;
+        ASPTreeDepth: number;
         stateIndex: number;
         aspIndex: number;
     }) {
         const {
             withdrawalValue,
-            stateProof,
-            aspProof,
-            context,
-            label,
             existingValue,
             existingNullifier,
             existingSecret,
+            context,
+            label,
             newNullifier,
             newSecret,
+            stateProof,
+            aspProof,
+            stateTreeDepth,
+            ASPTreeDepth,
             stateIndex,
             aspIndex,
         } = params;
@@ -254,9 +258,9 @@ export class WithdrawalProofGenerator {
         return {
             withdrawnValue: withdrawalValue.toString(),
             stateRoot: stateProof.root.toString(),
-            stateTreeDepth: stateProof.root ? stateProof.siblings.length.toString() : "0",
             ASPRoot: aspProof.root.toString(),
-            ASPTreeDepth: aspProof.root ? aspProof.siblings.length.toString() : "0",
+            stateTreeDepth: stateTreeDepth.toString(),
+            ASPTreeDepth: ASPTreeDepth.toString(),
             context: context.toString(),
             label: label.toString(),
             existingValue: existingValue.toString(),
@@ -264,9 +268,9 @@ export class WithdrawalProofGenerator {
             existingSecret: existingSecret.toString(),
             newNullifier: newNullifier.toString(),
             newSecret: newSecret.toString(),
-            stateSiblings: padSiblings(stateProof.siblings, MAX_TREE_DEPTH).map((s) => s.toString()),
+            stateSiblings: padArray(stateProof.siblings, MAX_TREE_DEPTH).map((s) => s.toString()),
+            ASPSiblings: padArray(aspProof.siblings, MAX_TREE_DEPTH).map((s) => s.toString()),
             stateIndex: stateIndex,
-            ASPSiblings: padSiblings(aspProof.siblings, MAX_TREE_DEPTH).map((s) => s.toString()),
             ASPIndex: aspIndex,
         };
     }
