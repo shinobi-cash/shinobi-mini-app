@@ -14,6 +14,7 @@ import {
   GET_APPROVED_LABELS,
   GET_DEPOSIT_BY_PRECOMMITMENT,
   CHECK_NULLIFIER_SPENT,
+  FETCH_WITHDRAWAL_BY_SPENT_NULLIFIER,
   GET_POOL_DEPOSITS,
   GET_POOL_CONFIG,
   HEALTH_CHECK
@@ -113,6 +114,25 @@ export async function isNullifierSpent(spentNullifier: string): Promise<boolean>
     console.error('Failed to check withdrawal by nullifier:', error);
     // On error, assume not spent to avoid marking valid deposits as spent
     return false;
+  }
+}
+
+/**
+ * Fetch withdrawal activity by spent nullifier (for discovering change notes)
+ */
+export async function fetchWithdrawalBySpentNullifier(spentNullifier: string): Promise<any | null> {
+  try {
+    const result = await apolloClient.query({
+      query: FETCH_WITHDRAWAL_BY_SPENT_NULLIFIER,
+      variables: { spentNullifier },
+      fetchPolicy: INDEXER_FETCH_POLICY,
+    });
+    
+    const activities = result.data?.activitys?.items || [];
+    return activities.length > 0 ? activities[0] : null;
+  } catch (error) {
+    console.error('Failed to fetch withdrawal by nullifier:', error);
+    return null;
   }
 }
 

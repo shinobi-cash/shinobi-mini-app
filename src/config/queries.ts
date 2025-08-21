@@ -169,6 +169,34 @@ export const CHECK_NULLIFIER_SPENT = gql`
 `;
 
 /**
+ * Fetch withdrawal activity with change note details by spent nullifier
+ */
+export const FETCH_WITHDRAWAL_BY_SPENT_NULLIFIER = gql`
+  query FetchWithdrawalBySpentNullifier($spentNullifier: String!) {
+    activitys(
+      where: { 
+        type: "WITHDRAWAL"
+        spentNullifier: $spentNullifier 
+      }
+      limit: 1
+    ) {
+      items {
+        id
+        type
+        amount
+        spentNullifier
+        newCommitment
+        feeAmount
+        blockNumber
+        timestamp
+        transactionHash
+        aspStatus
+      }
+    }
+  }
+`;
+
+/**
  * Get all deposits for a specific pool
  */
 export const GET_POOL_DEPOSITS = gql`
