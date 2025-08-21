@@ -77,7 +77,7 @@ export async function fetchPoolScope(): Promise<string> {
 export function createWithdrawalData(
   recipientAddress: string,
   feeRecipient: string,
-  relayFeeBPS: bigint = WITHDRAWAL_FEES.DEFAULT_RELAY_FEE_BPS
+  relayFeeBPS: bigint = WITHDRAWAL_FEES.DEFAULT_RELAY_FEE_BPS,
 ): readonly [`0x${string}`, `0x${string}`] {
   return [
     CONTRACTS.PRIVACY_POOL_ENTRYPOINT as `0x${string}`,

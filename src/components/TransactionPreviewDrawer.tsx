@@ -10,15 +10,13 @@ import {
 } from './ui/drawer';
 import { toast } from 'sonner';
 import { formatEthAmount, formatHash } from '../utils/formatters';
+import { Note } from '@/lib/noteCache';
 
 interface TransactionPreviewDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  noteData: {
-    noteIndex: number;
-    amount: string;
-  };
+  note: Note;
   withdrawAmount: string;
   recipientAddress: string;
   executionFee: number;
@@ -31,7 +29,7 @@ export const TransactionPreviewDrawer = ({
   isOpen,
   onClose,
   onConfirm,
-  noteData,
+  note,
   withdrawAmount,
   recipientAddress,
   executionFee,
@@ -88,7 +86,7 @@ export const TransactionPreviewDrawer = ({
               <div className="px-3 py-2 flex items-center justify-between">
                 <span className="text-xs font-medium text-app-secondary">Note Balance</span>
                 <span className="text-xs font-mono text-app-primary tabular-nums">
-                  {formatEthAmount(parseFloat(noteData.amount), { decimals: 7 })} ETH
+                  {formatEthAmount(parseFloat(note.amount), { decimals: 7 })} ETH
                 </span>
               </div>
               

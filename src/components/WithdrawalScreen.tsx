@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { AuthenticationGate } from './shared/AuthenticationGate';
 import { ListUnspentNotes } from './ListUnspentNotes';
 import { WithdrawNoteForm } from './WithdrawNoteForm';
-import { DiscoveredNote } from '@/lib/noteCache';
+import { Note } from '@/lib/noteCache';
 
 export const WithdrawalScreen = () => {
   return (
@@ -17,13 +17,13 @@ export const WithdrawalScreen = () => {
 };
 
 const WithdrawalContent = () => {
-  const [selectedNote, setSelectedNote] = useState<DiscoveredNote | null>(null);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
   // Show withdrawal form if a note is selected
   if (selectedNote) {
     return (
       <WithdrawNoteForm 
-        noteData={selectedNote} 
+        note={selectedNote} 
         onBack={() => setSelectedNote(null)} 
       />
     );
