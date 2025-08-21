@@ -6,11 +6,10 @@ import {
   DrawerHeader, 
   DrawerTitle,
   DrawerClose, 
-  DrawerDescription
 } from './ui/drawer'
 import { Key, X, Download, Copy, Eye, EyeOff, Check, FileText, Sparkles } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { generateKeysFromRandomSeed } from '../utils/crypto'
+import { generateKeysFromRandomSeed, KeyGenerationResult } from '../utils/crypto'
 import { toast } from 'sonner'
 
 type CreateAccountStep = 'intro' | 'generating' | 'backup' | 'complete'
@@ -29,8 +28,15 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
   const [hasConfirmed, setHasConfirmed] = useState(false)
   const [hasCopied, setHasCopied] = useState(false)
   const [canDownload, setCanDownload] = useState(true)
+  const [generatedKeys, setGeneratedKeys] = useState<KeyGenerationResult | null>(null)
   
   const { setKeys, mnemonic } = useAuth()
+  
+  // Use generated keys directly, fallback to auth context mnemonic
+  const displayMnemonic = generatedKeys?.mnemonic || mnemonic
+  
+  // Prevent closing during critical steps
+  const canClose = currentStep === 'intro' || currentStep === 'complete'
 
   const handleGenerateKeys = async () => {
     isGenerating;
@@ -70,7 +76,10 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
       setCurrentTask('Finalizing keys...')
       const randomSeed = Math.random().toString(36).slice(2)
       const keys = await generateKeysFromRandomSeed(randomSeed)
-      setKeys(keys)
+      
+      // Store keys locally for immediate access
+      // Don't call setKeys(keys) yet - wait until backup is complete
+      setGeneratedKeys(keys)
       setProgress(100)
       setCurrentTask('Keys generated successfully!')
       
@@ -89,10 +98,10 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
   }
 
   const handleCopyMnemonic = async () => {
-    if (!mnemonic) return
+    if (!displayMnemonic) return
     
     try {
-      await navigator.clipboard.writeText(mnemonic.join(' '))
+      await navigator.clipboard.writeText(displayMnemonic.join(' '))
       setHasCopied(true)
       toast.success('Recovery phrase copied to clipboard')
       setTimeout(() => setHasCopied(false), 3000)
@@ -102,7 +111,7 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
   }
 
   const handleDownloadMnemonic = () => {
-    if (!mnemonic || !canDownload) {
+    if (!displayMnemonic || !canDownload) {
       toast.error('Download not available')
       return
     }
@@ -113,7 +122,7 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
 IMPORTANT: Keep this phrase secure and private. Anyone with access to this phrase can control your account.
 
 Recovery Phrase:
-${mnemonic.join(' ')}
+${displayMnemonic.join(' ')}
 
 Generated: ${new Date().toISOString()}
 
@@ -142,9 +151,19 @@ Shinobi Privacy App`
   }
 
   const handleCompleteSetup = () => {
+    if (!isRevealed) {
+      toast.error('You must reveal and view your recovery phrase first')
+      return
+    }
+    
     if (!hasConfirmed) {
       toast.error('Please confirm you have backed up your recovery phrase')
       return
+    }
+    
+    // Now that backup is complete, save keys to AuthContext
+    if (generatedKeys) {
+      setKeys(generatedKeys)
     }
     
     setCurrentStep('complete')
@@ -156,6 +175,7 @@ Shinobi Privacy App`
       setIsRevealed(false)
       setHasConfirmed(false)
       setHasCopied(false)
+      setGeneratedKeys(null)
     }, 2000)
   }
 
@@ -234,14 +254,14 @@ Shinobi Privacy App`
                 </Button>
               </div>
 
-              {isRevealed && mnemonic ? (
+              {isRevealed && displayMnemonic ? (
                 <div>
                   <div className="mb-3">
-                    <div className="grid grid-cols-3 gap-2">
-                      {mnemonic.map((word, index) => (
+                    <div className="grid grid-cols-3 gap-1">
+                      {displayMnemonic.map((word, index) => (
                         <div 
                           key={index}
-                          className="bg-app-background rounded-lg p-2 text-center border border-app"
+                          className="bg-app-background rounded-lg text-center border border-app"
                         >
                           <span className="text-xs text-app-tertiary block mb-0.5">
                             {index + 1}
@@ -286,17 +306,22 @@ Shinobi Privacy App`
                 </div>
               ) : (
                 <div 
-                  className="py-8 flex items-center justify-center cursor-pointer bg-app-background/60 rounded-xl border-2 border-dashed border-gray-300 hover:border-gray-400 transition-all"
+                  className="py-8 flex items-center justify-center cursor-pointer bg-orange-50 rounded-xl border-2 border-dashed border-orange-300 hover:border-orange-400 hover:bg-orange-100 transition-all"
                   onClick={() => setIsRevealed(true)}
                 >
                   <div className="text-center space-y-3">
                     <div className="w-12 h-12 mx-auto flex items-center justify-center rounded-full bg-orange-100">
                       <FileText className="w-6 h-6 text-orange-600" />
                     </div>
-                    <div className="flex items-center gap-2 justify-center">
-                      <Eye className="w-4 h-4 text-app-tertiary" />
-                      <p className="text-sm text-app-secondary">
-                        Tap to reveal
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 justify-center">
+                        <Eye className="w-4 h-4 text-orange-600" />
+                        <p className="text-sm font-medium text-orange-600">
+                          Tap to reveal recovery phrase
+                        </p>
+                      </div>
+                      <p className="text-xs text-orange-600/80">
+                        Required to continue
                       </p>
                     </div>
                   </div>
@@ -312,11 +337,12 @@ Shinobi Privacy App`
                   id="backup-confirmation"
                   checked={hasConfirmed}
                   onChange={(e) => setHasConfirmed(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500 flex-shrink-0"
+                  disabled={!isRevealed}
+                  className="w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <label 
                   htmlFor="backup-confirmation"
-                  className="text-sm text-app-secondary cursor-pointer"
+                  className={`text-sm cursor-pointer ${!isRevealed ? 'text-app-tertiary' : 'text-app-secondary'}`}
                 >
                   I've saved my recovery phrase securely
                 </label>
@@ -325,11 +351,11 @@ Shinobi Privacy App`
 
             <Button 
               onClick={handleCompleteSetup}
-              disabled={!hasConfirmed}
+              disabled={!isRevealed || !hasConfirmed}
               className="w-full"
               size="lg"
             >
-              Complete Setup
+              {!isRevealed ? 'Reveal Recovery Phrase First' : 'Complete Setup'}
             </Button>
           </div>
         )
@@ -367,7 +393,10 @@ Shinobi Privacy App`
   }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
+    <Drawer 
+      open={open} 
+      onOpenChange={canClose ? onOpenChange : () => {}}
+    >
       <DrawerContent className="bg-app-background border-app max-h-[85vh]">
         {/* iOS-style drag handle */}
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-app-tertiary/30" />
@@ -377,15 +406,13 @@ Shinobi Privacy App`
             <DrawerTitle className="text-lg font-semibold text-app-primary tracking-tight">
               {getTitle()}
             </DrawerTitle>
-            {currentStep === 'intro' || currentStep === 'complete' ? (
+            {(currentStep === 'intro' || currentStep === 'complete') ? (
               <DrawerClose className="rounded-full h-7 w-7 flex items-center justify-center bg-app-surface hover:bg-app-surface-hover transition-colors duration-200">
                 <X className="h-3.5 w-3.5 text-app-secondary" />
               </DrawerClose>
             ) : null}
           </div>
         </DrawerHeader>
-        <DrawerDescription className="text-sm items-start text-app-secondary">  
-        </DrawerDescription>
 
         <div className="flex-1 overflow-y-auto px-4 pb-6">
           {renderContent()}
