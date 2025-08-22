@@ -14,23 +14,20 @@ import { CONTRACTS } from '@/config/constants';
 
 // ============ APOLLO GRAPHQL CLIENT ============
 
-// Shinobi.cash indexer GraphQL endpoint configuration
-const INDEXER_URL = import.meta.env.VITE_SUBGRAPH_URL || 
-  (process.env.NODE_ENV === 'development' 
-    ? 'http://localhost:42069/graphql'  // Local development
-    : import.meta.env.VITE_PRODUCTION_INDEXER_URL);  // Production (must be set)
+const INDEXER_URL = import.meta.env.DEV 
+  ? import.meta.env.VITE_INDEXER_URL_DEV
+  : import.meta.env.VITE_INDEXER_URL_PROD;
 
-/**
- * Apollo GraphQL client instance for interacting with The Graph indexer
- * 
- * Configuration:
- * - Error policy: 'all' - Return both data and errors
- * - Cache: InMemoryCache with default settings
- * - Auto-configured endpoint based on environment
- */
+const INDEXER_API_TOKEN = import.meta.env.DEV
+  ? import.meta.env.VITE_INDEXER_TOKEN_DEV  
+  : import.meta.env.VITE_INDEXER_TOKEN_PROD;
 export const apolloClient = new ApolloClient({
   uri: INDEXER_URL,
   cache: new InMemoryCache(),
+  headers: {
+    'Authorization': `Bearer ${INDEXER_API_TOKEN}`,
+    'Content-Type': 'application/json',
+  },
   defaultOptions: {
     watchQuery: {
       errorPolicy: 'all',
