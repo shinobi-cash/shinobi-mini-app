@@ -13,15 +13,14 @@
   -webkit-text-size-adjust: 100%;
   --radius: 0.625rem;
   
-  /* Standardized mobile-first font sizes */
-  --font-size-xs: 0.75rem;     /* 12px - Small labels, captions */
-  --font-size-sm: 0.875rem;    /* 14px - Body text, descriptions */
-  --font-size-base: 1rem;      /* 16px - Default body text */
-  --font-size-lg: 1.125rem;    /* 18px - Emphasized text */
-  --font-size-xl: 1.25rem;     /* 20px - Small headings */
-  --font-size-2xl: 1.5rem;     /* 24px - Medium headings */
-  --font-size-3xl: 1.875rem;   /* 30px - Large headings */
-  --font-size-4xl: 2.25rem;    /* 36px - Hero text */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
 }
 
 /* Light theme (default) */
@@ -43,7 +42,6 @@
   --input: #e5e7eb;
   --ring: #6366f1;
   
-  /* Custom app colors */
   --app-background: #f9fafb;
   --app-surface: #ffffff;
   --app-surface-hover: #f9fafb;
@@ -53,7 +51,6 @@
   --app-text-tertiary: #9ca3af;
   --app-header-bg: rgba(255, 255, 255, 0.8);
   
-  /* Status colors */
   --status-success: #16a34a;
   --status-warning: #f59e0b;
   --status-error: #dc2626;
@@ -79,7 +76,6 @@
   --input: #404040;
   --ring: #6366f1;
   
-  /* Custom app colors */
   --app-background: #000000;
   --app-surface: #262626;
   --app-surface-hover: #404040;
@@ -89,7 +85,6 @@
   --app-text-tertiary: #737373;
   --app-header-bg: #1a1a1a;
   
-  /* Status colors */
   --status-success: #22c55e;
   --status-warning: #f59e0b;
   --status-error: #ef4444;
@@ -182,6 +177,74 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  #root {
+    width: 100%;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+    
+    @media (min-width: 640px) {
+      max-width: 430px;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 8px 32px rgba(0, 0, 0, 0.12);
+      border-radius: 0;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      min-height: calc(100vh - 40px);
+    }
+  }
+  
+  @media (min-width: 640px) {
+    body {
+      background: #f5f5f7;
+      padding: 0;
+    }
+    
+    body.dark,
+    [data-theme="dark"] body {
+      background: #1a1a1a;
+    }
+    
+    .fixed.bottom-0 {
+      left: 50% !important;
+      right: auto !important;
+      transform: translateX(-50%);
+      max-width: 430px;
+      width: 100%;
+    }
+    
+    .fixed.left-0.right-0 {
+      left: 50% !important;
+      right: auto !important;
+      transform: translateX(-50%);
+      max-width: 430px;
+      width: 100%;
+    }
+    
+    [data-slot="drawer-overlay"] {
+      left: 0 !important;
+      right: 0 !important;
+      transform: none !important;
+      width: 100vw !important;
+      max-width: none !important;
+    }
+    
+    [data-radix-dialog-overlay] {
+      left: 0 !important;
+      right: 0 !important;
+      transform: none !important;
+      width: 100vw !important;
+      max-width: none !important;
+    }
+    
+    [data-radix-dialog-content] {
+      left: 50% !important;
+      right: auto !important;
+      transform: translateX(-50%) translateY(-50%);
+      max-width: 390px;
+      width: calc(100% - 40px);
+    }
+  }
 }
 
 @layer utilities {
@@ -201,7 +264,6 @@
   .bg-status-error { background-color: var(--status-error); }
   .bg-status-neutral { background-color: var(--status-neutral); }
   
-  /* Standardized font size utilities */
   .text-xs-app { font-size: var(--font-size-xs); }
   .text-sm-app { font-size: var(--font-size-sm); }
   .text-base-app { font-size: var(--font-size-base); }
