@@ -221,6 +221,7 @@
       width: 100%;
     }
     
+    
     [data-slot="drawer-overlay"] {
       left: 0 !important;
       right: 0 !important;

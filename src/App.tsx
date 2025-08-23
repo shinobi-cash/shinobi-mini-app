@@ -1,4 +1,5 @@
 import { LaunchScreen } from "@/components/LaunchScreen"
+import { SplashScreen } from "@/components/SplashScreen"
 import { ThemeProvider } from "@/contexts/ThemeContext"
 import { AuthProvider, useAuth } from "@/contexts/AuthContext"
 import { ErrorBoundary } from "@/components/ErrorBoundary"
@@ -9,14 +10,7 @@ function AppContent() {
   const { isRestoringSession } = useAuth();
 
   if (isRestoringSession) {
-    return (
-      <div className="min-h-screen bg-app-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-app-secondary">Restoring your session...</p>
-        </div>
-      </div>
-    );
+    return <SplashScreen subtitle="Restoring your session..." />;
   }
 
   return (

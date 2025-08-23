@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { sdk } from '@farcaster/miniapp-sdk'
-import { SplashScreen } from './SplashScreen'
 import { MainScreen } from './MainScreen'
 
 // Main component
@@ -9,16 +8,13 @@ export function LaunchScreen() {
 
   useEffect(() => {
     sdk.actions.ready().then(() => {
-      setTimeout(() => {
-        setIsReady(true)
-      }, 2000)
+      setIsReady(true)
     })
   }, [])
 
   if (!isReady) {
-    return <SplashScreen />
+    return <div />
   }
 
-  // Always show MainScreen - users can setup from Profile tab
   return <MainScreen />
 }
