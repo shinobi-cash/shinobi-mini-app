@@ -42,7 +42,7 @@ export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPa
   return (
     <section className="flex flex-col gap-4">
       {/* Total Deposits Section - Card */}
-      <div className="px-2 pt-2 sm:px-4 sm:pt-4 flex-shrink-0">
+      <div className="flex-shrink-0">
         <div className="bg-app-surface rounded-2xl p-5 border border-app shadow-md">
           <div className="text-center">
             <h3 className="text-base font-semibold text-app-secondary mb-2">Total Deposits</h3>
@@ -58,7 +58,7 @@ export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPa
 
       {/* Activities Section - Title & Table */}
       <div className="flex-1 flex flex-col min-h-0 gap-2">
-        <div className="sticky top-0 z-10 bg-app-surface rounded-t-xl border-b border-app shadow-md">
+        <div className="sticky top-0 z-10 bg-app-surface border-b border-app shadow-md">
           <h2 className="text-lg font-semibold py-3 text-app-secondary tracking-tight text-center">
             Activities
           </h2>

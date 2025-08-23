@@ -78,7 +78,7 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
     <section className="flex flex-col gap-4">
       {/* Notes Table */}
       <div className="flex-1 flex flex-col min-h-0 gap-2">
-        <div className="sticky top-0 z-10 bg-app-surface rounded-t-xl border-b border-app shadow-md">
+        <div className="sticky top-0 z-10 bg-app-surface border-b border-app shadow-md">
           <h2 className="text-lg font-semibold py-3 text-app-secondary tracking-tight text-center">
             Withdraw Notes ({availableNotes.length})
           </h2>

@@ -70,7 +70,7 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
     <div className="h-full flex flex-col">
       <section className="flex flex-col gap-4 flex-1">
         {/* Summary Card */}
-        <div className="px-2 pt-2 sm:px-4 sm:pt-4 flex-shrink-0">
+        <div className="flex-shrink-0">
           <div className="bg-app-surface rounded-2xl p-5 border border-app shadow-md relative">
             {/* Sign Out Button */}
             <Button
@@ -97,7 +97,7 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
 
         {/* Transaction History */}
         <div className="flex-1 flex flex-col min-h-0 gap-2">
-          <div className="sticky top-0 z-10 bg-app-surface rounded-t-xl border-b border-app shadow-md">
+          <div className="sticky top-0 z-10 bg-app-surface border-b border-app shadow-md">
             <h2 className="text-lg font-semibold py-3 text-app-secondary tracking-tight text-center">
               Transaction History
             </h2>
