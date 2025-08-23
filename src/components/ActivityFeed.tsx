@@ -93,10 +93,10 @@ export const ActivityFeed = ({
   }, [onRefresh, isRefreshing])
 
   return (
-    <section className="flex flex-col gap-4">
+    <div className="flex flex-col h-full gap-4">
       {/* Total Deposits */}
       <div className="flex-shrink-0">
-        <div className="bg-app-surface rounded-2xl p-5 border border-app shadow-md">
+        <div className="bg-app-surface p-5 border border-app shadow-md">
           <div className="text-center">
             <h3 className="text-base font-semibold text-app-secondary mb-2">Total Deposits</h3>
             <p className="text-3xl font-bold text-app-primary tabular-nums mb-2">
@@ -111,13 +111,13 @@ export const ActivityFeed = ({
 
       {/* Activities */}
       <div className="flex-1 flex flex-col min-h-0 gap-2">
-        <div className="sticky top-0 z-10 bg-app-surface border-b border-app shadow-md">
+        <div className="flex-shrink-0 bg-app-surface border-b border-app shadow-md">
           <h2 className="text-lg font-semibold py-3 text-app-secondary tracking-tight text-center">
             Activities
           </h2>
         </div>
-        <div className="bg-app-surface border border-app shadow-md overflow-hidden">
-          <div ref={scrollContainerRef} className="overflow-y-auto max-h-[60vh]">
+        <div className="flex-1 flex flex-col bg-app-surface border border-app shadow-md overflow-hidden">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
             {isRefreshing && (
               <div className="text-center py-2 text-app-tertiary text-sm">Refreshing...</div>
             )}
@@ -167,6 +167,6 @@ export const ActivityFeed = ({
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
       />
-    </section>
+    </div>
   )
 }

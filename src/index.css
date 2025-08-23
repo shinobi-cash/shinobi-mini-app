@@ -274,4 +274,5 @@
   .text-3xl-app { font-size: var(--font-size-3xl); }
   .text-4xl-app { font-size: var(--font-size-4xl); }
   .text-emoji { font-size: var(--font-size-emoji); }
+  
 }

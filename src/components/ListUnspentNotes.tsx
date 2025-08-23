@@ -75,17 +75,17 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
   }
 
   return (
-    <section className="flex flex-col gap-4">
+    <div className="flex flex-col h-full gap-4">
       {/* Notes Table */}
       <div className="flex-1 flex flex-col min-h-0 gap-2">
-        <div className="sticky top-0 z-10 bg-app-surface border-b border-app shadow-md">
+        <div className="flex-shrink-0 bg-app-surface border-b border-app shadow-md">
           <h2 className="text-lg font-semibold py-3 text-app-secondary tracking-tight text-center">
             Withdraw Notes ({availableNotes.length})
           </h2>
         </div>
         {/* Scrollable Notes Table */}
-        <div className="bg-app-surface border border-app shadow-md overflow-hidden">
-          <div className="overflow-y-auto max-h-[60vh]">
+        <div className="flex-1 flex flex-col bg-app-surface border border-app shadow-md overflow-hidden">
+          <div className="flex-1 overflow-y-auto">
             {availableNotes.map((note) => (
               <NoteCard
                 key={`${note.depositIndex}-${note.changeIndex}`}
@@ -96,7 +96,7 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

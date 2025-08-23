@@ -1,102 +1,157 @@
 /**
- * Screen Layout Component
- * Provides consistent layout structure with safe area between header and bottom nav
+ * Native App Screen Layout System
+ * 
+ * Implements iOS/Android-style view controller pattern where each screen
+ * has defined boundaries and manages its own content within a fixed viewport.
  */
 
-import React from 'react'
+import React from 'react';
 
-interface ScreenLayoutProps {
-  children: React.ReactNode
-  className?: string
+/**
+ * Main App Container - Fixed viewport like native apps
+ * Contains header, content area, and bottom navigation
+ */
+interface AppLayoutProps {
+  header?: React.ReactNode;
+  bottomNav?: React.ReactNode;
+  children: React.ReactNode;
 }
 
-export function ScreenLayout({ children, className = '' }: ScreenLayoutProps) {
+export function AppLayout({ header, bottomNav, children }: AppLayoutProps) {
   return (
-    <div className={`
-      flex-1 
-      flex 
-      flex-col 
-      overflow-hidden
-      min-h-0
-      ${className}
-    `}>
-      {/* 
-        Content area that stays within safe bounds
-        - pb-20: Bottom padding to account for fixed bottom nav (80px base)
-        - pb-safe-area-bottom: Additional padding for devices with home indicators
-        - scrollbar-hide: Hide scrollbars for cleaner mobile experience
-      */}
-      <div className="
-        flex-1 
-        overflow-auto
-        pb-24
-        scrollbar-hide
-        supports-[padding-bottom:env(safe-area-inset-bottom)]:pb-[calc(6rem+env(safe-area-inset-bottom))]
-      ">
+    <div className="h-screen h-dvh flex flex-col bg-app-background overflow-hidden">
+      {/* Header - Fixed at top */}
+      {header && (
+        <div className="flex-shrink-0">
+          {header}
+        </div>
+      )}
+      
+      {/* Main content area - Takes remaining space */}
+      <main className="flex-1 overflow-hidden relative">
+        {children}
+      </main>
+      
+      {/* Bottom navigation - Fixed at bottom */}
+      {bottomNav && (
+        <div className="flex-shrink-0">
+          {bottomNav}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Native Screen Container - Each screen is a view controller
+ * Manages its own content within the allocated space
+ */
+interface ScreenProps {
+  children: React.ReactNode;
+  className?: string;
+  scrollable?: boolean;
+}
+
+export function Screen({ children, className = '', scrollable = true }: ScreenProps) {
+  return (
+    <div className={`absolute inset-0 flex flex-col ${className}`}>
+      {scrollable ? (
+        <div className="flex-1 overflow-y-auto scrollbar-hide">
+          {children}
+        </div>
+      ) : (
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Screen Content - Standard content container with mobile-first padding
+ */
+interface ScreenContentProps {
+  children: React.ReactNode;
+  className?: string;
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+}
+
+export function ScreenContent({ 
+  children, 
+  className = '', 
+  padding = 'md' 
+}: ScreenContentProps) {
+  const paddingClasses = {
+    none: '',
+    sm: 'p-3',
+    md: 'p-4',
+    lg: 'p-6'
+  };
+
+  return (
+    <div className={`${paddingClasses[padding]} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Screen Section - For organizing content within screens
+ */
+interface ScreenSectionProps {
+  children: React.ReactNode;
+  className?: string;
+  title?: string;
+  flex?: boolean;
+}
+
+export function ScreenSection({ 
+  children, 
+  className = '', 
+  title,
+  flex = false 
+}: ScreenSectionProps) {
+  const Container = flex ? 'div' : 'section';
+  const containerClass = flex ? 'flex-1 flex flex-col' : '';
+
+  return (
+    <Container className={`${containerClass} ${className}`}>
+      {title && (
+        <h2 className="text-lg font-semibold text-app-primary mb-4">
+          {title}
+        </h2>
+      )}
+      {children}
+    </Container>
+  );
+}
+
+/**
+ * Scrollable List Container - For lists that need proper scroll behavior
+ */
+interface ScrollableListProps {
+  children: React.ReactNode;
+  className?: string;
+  emptyState?: React.ReactNode;
+}
+
+export function ScrollableList({ children, className = '', emptyState }: ScrollableListProps) {
+  const hasChildren = React.Children.count(children) > 0;
+
+  if (!hasChildren && emptyState) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        {emptyState}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`flex-1 overflow-y-auto scrollbar-hide ${className}`}>
+      <div className="space-y-2">
         {children}
       </div>
     </div>
-  )
-}
-
-/**
- * Full Screen Layout Component
- * For screens that need to manage their own scrolling (like setup flows)
- */
-export function FullScreenLayout({ children, className = '' }: ScreenLayoutProps) {
-  return (
-    <div className={`
-      h-screen 
-      bg-app-background 
-      flex 
-      flex-col 
-      overflow-hidden
-      ${className}
-    `}>
-      {children}
-    </div>
-  )
-}
-
-/**
- * Screen Container Component
- * Standard container for screen content with proper mobile-first responsive design
- */
-interface ScreenContainerProps {
-  children: React.ReactNode
-  className?: string
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl'
-  padding?: 'sm' | 'md' | 'lg'
-}
-
-export function ScreenContainer({ 
-  children, 
-  className = '',
-  maxWidth = 'md',
-  padding = 'md'
-}: ScreenContainerProps) {
-  const maxWidthClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-md', 
-    lg: 'max-w-lg',
-    xl: 'max-w-xl'
-  }
-  
-  const paddingClasses = {
-    sm: 'p-3 sm:p-4',
-    md: 'p-4 sm:p-6', 
-    lg: 'p-6 sm:p-8'
-  }
-
-  return (
-    <div className={`
-      w-full 
-      ${maxWidthClasses[maxWidth]} 
-      mx-auto 
-      ${paddingClasses[padding]}
-      ${className}
-    `}>
-      {children}
-    </div>
-  )
+  );
 }

@@ -71,7 +71,7 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
       <section className="flex flex-col gap-4 flex-1">
         {/* Summary Card */}
         <div className="flex-shrink-0">
-          <div className="bg-app-surface rounded-2xl p-5 border border-app shadow-md relative">
+          <div className="bg-app-surface p-5 border border-app shadow-md relative">
             {/* Sign Out Button */}
             <Button
               variant="ghost"
@@ -97,14 +97,14 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
 
         {/* Transaction History */}
         <div className="flex-1 flex flex-col min-h-0 gap-2">
-          <div className="sticky top-0 z-10 bg-app-surface border-b border-app shadow-md">
+          <div className="flex-shrink-0 bg-app-surface border-b border-app shadow-md">
             <h2 className="text-lg font-semibold py-3 text-app-secondary tracking-tight text-center">
               Transaction History
             </h2>
           </div>
           {/* Scrollable History Table */}
-          <div className="bg-app-surface border border-app shadow-md overflow-hidden">
-            <div className="overflow-y-auto max-h-[60vh]">
+          <div className="flex-1 flex flex-col bg-app-surface border border-app shadow-md overflow-hidden">
+            <div className="flex-1 overflow-y-auto">
               {loading ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="text-center">
@@ -282,7 +282,7 @@ const NoteChainDetailDrawer = ({ noteChain, open, onOpenChange }: NoteChainDetai
               <h3 className="text-sm font-semibold text-app-primary">Transaction Details</h3>
             </div>
             
-            <div className="overflow-y-auto max-h-[60vh]">
+            <div className="flex-1 overflow-y-auto">
               {noteChain.map((note, index) => {
                 const isFirst = index === 0;
                 const isLast = index === noteChain.length - 1;

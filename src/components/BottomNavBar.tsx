@@ -18,7 +18,9 @@ export const BottomNavBar = () => {
   const { currentScreen, setCurrentScreen } = useNavigation()
 
   return (
-  <nav className="fixed bottom-0 left-0 right-0 bg-app-surface border-t border-app-border z-50 pb-safe-area-bottom">
+  <nav 
+    className="bg-app-surface border-t border-app-border pb-safe-area-bottom"
+  >
       <div className="flex items-center justify-around px-2">
         {navItems.map((item, index) => {
           const isActive = currentScreen === item.screen
