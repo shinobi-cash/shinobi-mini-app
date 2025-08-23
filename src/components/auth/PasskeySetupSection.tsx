@@ -1,0 +1,117 @@
+/**
+ * Passkey Setup Section - For Account Creation Flow
+ * Takes provided keys and creates a new passkey for the account
+ */
+
+import { Button } from '../ui/button';
+import { Fingerprint } from 'lucide-react';
+import { useState } from 'react';
+import { KDF } from '@/lib/keyDerivation';
+import { createHash, KeyGenerationResult } from '@/utils/crypto';
+import { noteCache } from '@/lib/noteCache';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+
+interface PasskeySetupSectionProps {
+  accountName: string;
+  accountNameError?: string;
+  generatedKeys: KeyGenerationResult | null;
+  onSuccess: () => void;
+}
+
+export function PasskeySetupSection({
+  accountName,
+  accountNameError,
+  generatedKeys,
+  onSuccess
+}: PasskeySetupSectionProps) {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { setKeys } = useAuth();
+
+  const handlePasskeySetup = async () => {
+    if (accountNameError || !accountName.trim() || !generatedKeys) {
+      return;
+    }
+
+    // Check for existing passkey
+    const hasPasskey = await noteCache.passkeyExists(accountName.trim());
+    if (hasPasskey) {
+      toast.error('A passkey for this account already exists.');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      // Derive public key hash as user handle for WebAuthn
+      const { publicKey } = generatedKeys;
+      const userHandle = await createHash(publicKey);
+      
+      // Create passkey credential
+      const { credentialId } = await KDF.createPasskeyCredential(accountName.trim(), userHandle);
+      
+      // Derive encryption key from the passkey
+      const { symmetricKey } = await KDF.deriveKeyFromPasskey(accountName.trim(), credentialId);
+      
+      // Initialize session with the derived key
+      await noteCache.initializeAccountSession(accountName.trim(), symmetricKey);
+
+      // Store account data using the session
+      const accountData = {
+        accountName: accountName.trim(),
+        mnemonic: generatedKeys.mnemonic,
+        createdAt: Date.now()
+      };
+      await noteCache.storeAccountData(accountData);
+
+      // Store passkey metadata
+      const passkeyData = {
+        accountName: accountName.trim(),
+        credentialId: credentialId,
+        challenge: '', // Not needed with PRF
+        publicKeyHash: userHandle,
+        created: Date.now()
+      };
+      await noteCache.storePasskeyData(passkeyData);
+
+      // Store session info for restoration
+      KDF.storeSessionInfo(accountName.trim(), 'passkey', { credentialId });
+        
+      // Set keys in auth context
+      setKeys(generatedKeys);
+      
+      toast.success('Account created successfully with passkey');
+      onSuccess();
+    } catch (error) {
+      console.error('Passkey setup failed:', error);
+      if (error instanceof Error && error.message.includes('PRF')) {
+        toast.error('Your device does not support advanced passkey features. Please use password authentication instead.');
+      } else {
+        toast.error('Failed to set up passkey. Please try again.');
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <Button
+      onClick={handlePasskeySetup}
+      disabled={isProcessing || !!accountNameError || !accountName.trim()}
+      className="w-full"
+      size="lg"
+    >
+      {isProcessing ? (
+        <>
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+          Setting up Passkey...
+        </>
+      ) : (
+        <>
+          <Fingerprint className="w-4 h-4 mr-2" />
+          Set up Passkey
+        </>
+      )}
+    </Button>
+  );
+}
