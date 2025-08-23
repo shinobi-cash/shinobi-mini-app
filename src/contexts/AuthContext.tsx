@@ -1,11 +1,15 @@
 import { KeyGenerationResult } from '@/utils/crypto';
 import { getAccountKey } from '@/utils/accountKey';
-import { createContext, useContext, useState, ReactNode, useMemo } from 'react'
+import { restoreFromMnemonic } from '@/utils/crypto';
+import { KDF } from '@/lib/keyDerivation';
+import { noteCache } from '@/lib/noteCache';
+import { createContext, useContext, useState, ReactNode, useMemo, useEffect } from 'react'
 
 
 interface AuthContextType {
   // Authentication state
   isAuthenticated: boolean;
+  isRestoringSession: boolean;
   
   // Account keys
   publicKey: string | null;
@@ -13,9 +17,17 @@ interface AuthContextType {
   mnemonic: string[] | null;
   accountKey: bigint | null; 
   
+  // Session restoration state
+  quickAuthState: {
+    show: boolean;
+    accountName: string;
+  } | null;
+  
   // Actions
   setKeys: (keys: KeyGenerationResult) => void;
   signOut: () => void;
+  handleQuickPasswordAuth: (password: string) => Promise<void>;
+  dismissQuickAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -30,6 +42,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     privateKey: null,
     mnemonic: null,
   });
+
+  const [isRestoringSession, setIsRestoringSession] = useState(true);
+  const [quickAuthState, setQuickAuthState] = useState<{
+    show: boolean;
+    accountName: string;
+  } | null>(null);
 
   // Derived state: parse account key once when keys change
   const accountKey = useMemo(() => {
@@ -46,6 +64,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Simple derived state - authenticated if we have the necessary keys
   const isAuthenticated = !!(keys.privateKey && keys.mnemonic && accountKey);
 
+  // Session restoration effect
+  useEffect(() => {
+    const restoreSession = async () => {
+      try {
+        const result = await KDF.resumeAuth();
+        
+        if (result.status === 'passkey-ready') {
+          // Auto-restore passkey session
+          await restoreFromSessionKey(result.result.symmetricKey, result.accountName);
+        } else if (result.status === 'password-needed') {
+          // Show password prompt for this specific account
+          setQuickAuthState({ 
+            show: true, 
+            accountName: result.accountName 
+          });
+        }
+        // else: status === 'none', show normal login flow
+      } catch (error) {
+        console.error('Session restoration failed:', error);
+        // Clear any invalid session data
+        KDF.clearSessionInfo();
+      } finally {
+        setIsRestoringSession(false);
+      }
+    };
+
+    restoreSession();
+  }, []);
+
+  const restoreFromSessionKey = async (symmetricKey: CryptoKey, accountName: string) => {
+    try {
+      // Initialize noteCache with the derived key
+      await noteCache.initializeAccountSession(accountName, symmetricKey);
+
+      // Retrieve and restore account keys
+      const accountData = await noteCache.getAccountData();
+      if (!accountData) {
+        throw new Error('Account data not found');
+      }
+
+      // Restore keys from mnemonic
+      const restoredKeys = restoreFromMnemonic(accountData.mnemonic);
+      setKeysState({
+        publicKey: restoredKeys.publicKey,
+        privateKey: restoredKeys.privateKey,
+        mnemonic: accountData.mnemonic,
+      });
+    } catch (error) {
+      console.error('Failed to restore from session key:', error);
+      throw error;
+    }
+  };
+
   const setKeys = (newKeys: KeyGenerationResult) => {
     setKeysState({
       publicKey: newKeys.publicKey,
@@ -54,23 +125,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const handleQuickPasswordAuth = async (password: string) => {
+    if (!quickAuthState) return;
+
+    try {
+      const { symmetricKey } = await KDF.deriveKeyFromPassword(password, quickAuthState.accountName);
+      await restoreFromSessionKey(symmetricKey, quickAuthState.accountName);
+      
+      // Update session timestamp
+      KDF.storeSessionInfo(quickAuthState.accountName, 'password');
+      
+      setQuickAuthState(null);
+    } catch (error) {
+      console.error('Quick password auth failed:', error);
+      throw error;
+    }
+  };
+
+  const dismissQuickAuth = () => {
+    setQuickAuthState(null);
+    KDF.clearSessionInfo();
+  };
+
   const signOut = () => {
     setKeysState({
       publicKey: null,
       privateKey: null,
       mnemonic: null,
     });
+    noteCache.clearSession();
+    KDF.clearSessionInfo();
+    setQuickAuthState(null);
   };
 
   return (
     <AuthContext.Provider value={{
       isAuthenticated,
+      isRestoringSession,
       publicKey: keys.publicKey,
       privateKey: keys.privateKey,
       mnemonic: keys.mnemonic,
       accountKey,
+      quickAuthState,
       setKeys,
       signOut,
+      handleQuickPasswordAuth,
+      dismissQuickAuth,
     }}>
       {children}
     </AuthContext.Provider>
