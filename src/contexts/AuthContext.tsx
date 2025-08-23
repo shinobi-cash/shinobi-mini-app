@@ -3,7 +3,7 @@ import { getAccountKey } from '@/utils/accountKey';
 import { restoreFromMnemonic } from '@/utils/crypto';
 import { KDF } from '@/lib/keyDerivation';
 import { noteCache } from '@/lib/noteCache';
-import { createContext, useContext, useState, ReactNode, useMemo, useEffect } from 'react'
+import { createContext, useContext, useState, ReactNode, useMemo, useEffect, useRef } from 'react'
 
 
 interface AuthContextType {
@@ -49,6 +49,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     accountName: string;
   } | null>(null);
 
+  // Prevent multiple concurrent restoration attempts (React Strict Mode protection)
+  const restorationAttempted = useRef(false);
+
   // Derived state: parse account key once when keys change
   const accountKey = useMemo(() => {
     try {
@@ -66,6 +69,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Session restoration effect
   useEffect(() => {
+    // Prevent multiple concurrent restoration attempts (React Strict Mode protection)
+    if (restorationAttempted.current) return;
+    restorationAttempted.current = true;
+
     const restoreSession = async () => {
       try {
         const result = await KDF.resumeAuth();
@@ -83,8 +90,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // else: status === 'none', show normal login flow
       } catch (error) {
         console.error('Session restoration failed:', error);
-        // Clear any invalid session data
-        KDF.clearSessionInfo();
+        // Only clear session if it's actually invalid, not if it's a concurrent request error
+        if (error instanceof Error && error.message.includes('A request is already pending')) {
+          // Don't clear session for concurrent WebAuthn requests - just log and continue
+          console.warn('WebAuthn request collision detected, skipping session clear');
+        } else {
+          // Clear session for other types of errors (invalid session, timeout, etc.)
+          KDF.clearSessionInfo();
+        }
       } finally {
         setIsRestoringSession(false);
       }
