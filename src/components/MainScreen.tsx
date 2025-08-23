@@ -10,20 +10,28 @@ import { useIndexerActivities } from '../hooks/useIndexerActivities'
 
 const MainContent = () => {
   const { currentScreen } = useNavigation()
-  const { activities, loading, error, isEmpty, loadMore, hasNextPage } = useIndexerActivities()
+  const {
+    activities,
+    loading,
+    error,
+    loadMore,
+    hasNextPage,
+    refresh,
+  } = useIndexerActivities()
 
   const renderScreen = () => {
     switch (currentScreen) {
       case 'home':
         return (
           <ScreenLayout>
-            {loading ? (
-              <ActivityFeed activities={[]} loading={true} />
-            ) : error ? (
-              <ActivityFeed activities={[]} error="Failed to load activities" />
-            ) : (
-              <ActivityFeed activities={activities} onLoadMore={loadMore} hasNextPage={hasNextPage} />
-            )}
+            <ActivityFeed
+              activities={activities}
+              loading={loading}
+              error={error ? 'Failed to load activities' : undefined}
+              hasNextPage={hasNextPage}
+              onFetchMore={() => loadMore?.() ?? Promise.resolve()} 
+              onRefresh={() => refresh?.() ?? Promise.resolve()}  
+            />
           </ScreenLayout>
         )
       case 'deposit':
@@ -47,27 +55,9 @@ const MainContent = () => {
       default:
         return (
           <ScreenLayout>
-            {loading ? (
-              <div className="flex-1 flex items-center justify-center min-h-[60vh]">
-                <p className="text-app-secondary">Loading activities...</p>
-              </div>
-            ) : error ? (
-              <div className="flex-1 flex items-center justify-center min-h-[60vh]">
-                <div className="text-center">
-                  <p className="text-app-secondary mb-2">Failed to load activities</p>
-                  <p className="text-sm text-app-tertiary">Check your connection and try again</p>
-                </div>
-              </div>
-            ) : isEmpty ? (
-              <div className="flex-1 flex items-center justify-center min-h-[60vh]">
-                <div className="text-center">
-                  <p className="text-app-secondary mb-2">No activities yet</p>
-                  <p className="text-sm text-app-tertiary">Start by making a deposit to see your activity history</p>
-                </div>
-              </div>
-            ) : (
-              <ActivityFeed activities={activities} />
-            )}
+            <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+              <p className="text-app-secondary">Unknown screen</p>
+            </div>
           </ScreenLayout>
         )
     }

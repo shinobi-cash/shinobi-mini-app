@@ -75,7 +75,7 @@ export const GET_APPROVED_LABELS = gql`
  * Get all activities with pagination support
  */
 export const GET_ACTIVITIES = gql`
-  query GetActivities($limit: Int = 15, $after: String) {
+  query GetActivities($limit: Int = 10, $after: String) {
     activitys(limit: $limit, after: $after, orderBy: "timestamp", orderDirection: "desc") {
       items {
         id

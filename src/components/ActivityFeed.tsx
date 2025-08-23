@@ -1,53 +1,106 @@
 import { Activity } from '../types/activity'
 import { ActivityRow } from './ActivityRow'
 import { ActivityDetailDrawer } from './ActivityDetailDrawer'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { formatEthAmount } from '@/utils/formatters'
 
-interface ActivityFeedProps {
+export interface ActivityFeedProps {
   activities: Activity[]
   loading?: boolean
   error?: string
-  onLoadMore?: () => void
   hasNextPage?: boolean
+  onFetchMore?: () => Promise<any>
+  onRefresh?: () => Promise<any>
 }
 
-const getApprovedDeposits = (activities: Activity[]) => {
-  return activities.filter(activity => activity.type === 'DEPOSIT' && activity.aspStatus === 'approved')
-}
-
-const calculateTotalDeposits = (activities: Activity[]): string => {
-  const approvedDeposits = getApprovedDeposits(activities)
-  const totalWei = approvedDeposits.reduce((total, activity) => total + BigInt(activity.amount), 0n)
-  
-  return formatEthAmount(totalWei)
-}
-
-const calculateDepositCount = (activities: Activity[]): number => {
-  return getApprovedDeposits(activities).length
-}
-
-export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPage }: ActivityFeedProps) => {
+export const ActivityFeed = ({
+  activities,
+  loading,
+  error,
+  onFetchMore,
+  hasNextPage,
+  onRefresh,
+}: ActivityFeedProps) => {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
-  
-  const totalDeposits = calculateTotalDeposits(activities)
-  const depositCount = calculateDepositCount(activities)
+  const [isFetchingMore, setIsFetchingMore] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const sentinelRef = useRef<HTMLDivElement>(null)
+
+  const totalDeposits = activities
+    .filter(a => a.type === 'DEPOSIT' && a.aspStatus === 'approved')
+    .reduce((acc, a) => acc + BigInt(a.amount), 0n)
+
+  const depositCount = activities.filter(a => a.type === 'DEPOSIT' && a.aspStatus === 'approved').length
 
   const handleActivityClick = (activity: Activity) => {
     setSelectedActivity(activity)
     setDrawerOpen(true)
   }
 
+  // Infinite scroll
+  useEffect(() => {
+    if (!onFetchMore || !hasNextPage) return
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !isFetchingMore) {
+        setIsFetchingMore(true)
+        onFetchMore()
+          .finally(() => setIsFetchingMore(false))
+      }
+    })
+    if (sentinelRef.current) observer.observe(sentinelRef.current)
+    return () => observer.disconnect()
+  }, [onFetchMore, hasNextPage, isFetchingMore])
+
+  // Pull-to-refresh (overscroll detection)
+  useEffect(() => {
+    if (!onRefresh) return
+    let startY = 0
+    let pulling = false
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if ((scrollContainerRef.current?.scrollTop || 0) === 0) {
+        startY = e.touches[0].clientY
+        pulling = true
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!pulling) return
+      const diff = e.touches[0].clientY - startY
+      if (diff > 50 && !isRefreshing) {
+        setIsRefreshing(true)
+        onRefresh()
+          .finally(() => setIsRefreshing(false))
+        pulling = false
+      }
+    }
+
+    const handleTouchEnd = () => {
+      pulling = false
+    }
+
+    window.addEventListener('touchstart', handleTouchStart)
+    window.addEventListener('touchmove', handleTouchMove)
+    window.addEventListener('touchend', handleTouchEnd)
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart)
+      window.removeEventListener('touchmove', handleTouchMove)
+      window.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [onRefresh, isRefreshing])
+
   return (
     <section className="flex flex-col gap-4">
-      {/* Total Deposits Section - Card */}
+      {/* Total Deposits */}
       <div className="flex-shrink-0">
         <div className="bg-app-surface rounded-2xl p-5 border border-app shadow-md">
           <div className="text-center">
             <h3 className="text-base font-semibold text-app-secondary mb-2">Total Deposits</h3>
             <p className="text-3xl font-bold text-app-primary tabular-nums mb-2">
-              {totalDeposits} ETH
+              {formatEthAmount(totalDeposits)} ETH
             </p>
             <p className="text-base text-app-tertiary">
               {depositCount} deposit{depositCount !== 1 ? 's' : ''} approved
@@ -56,17 +109,20 @@ export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPa
         </div>
       </div>
 
-      {/* Activities Section - Title & Table */}
+      {/* Activities */}
       <div className="flex-1 flex flex-col min-h-0 gap-2">
         <div className="sticky top-0 z-10 bg-app-surface border-b border-app shadow-md">
           <h2 className="text-lg font-semibold py-3 text-app-secondary tracking-tight text-center">
             Activities
           </h2>
         </div>
-        {/* Scrollable Activities Table */}
         <div className="bg-app-surface border border-app shadow-md overflow-hidden">
-          <div className="overflow-y-auto max-h-[60vh]">
-            {loading ? (
+          <div ref={scrollContainerRef} className="overflow-y-auto max-h-[60vh]">
+            {isRefreshing && (
+              <div className="text-center py-2 text-app-tertiary text-sm">Refreshing...</div>
+            )}
+
+            {loading && activities.length === 0 ? (
               <div className="flex items-center justify-center py-8">
                 <p className="text-app-secondary">Loading activities...</p>
               </div>
@@ -86,32 +142,26 @@ export const ActivityFeed = ({ activities, loading, error, onLoadMore, hasNextPa
               </div>
             ) : (
               <>
-                {activities.map((activity, index) => (
+                {activities.map((activity) => (
                   <div key={activity.id} onClick={() => handleActivityClick(activity)}>
                     <ActivityRow activity={activity} />
-                    {/* Remove border from last item only if no load more button */}
-                    {index === activities.length - 1 && !hasNextPage && (
-                      <div className="border-b-0" />
-                    )}
                   </div>
                 ))}
-                {hasNextPage && onLoadMore && (
-                  <div className="border-t border-app-border p-4 text-center">
-                    <button
-                      onClick={onLoadMore}
-                      className="px-4 py-2 text-sm text-app-primary hover:text-app-secondary transition-colors duration-200 font-medium"
-                    >
-                      Load More Activities
-                    </button>
+
+                {isFetchingMore && (
+                  <div className="p-6 text-center border-t border-app-border text-app-tertiary text-sm">
+                    Loading more activities...
                   </div>
                 )}
+
+                {/* Sentinel div for infinite scroll */}
+                <div ref={sentinelRef} className="h-2" />
               </>
             )}
           </div>
         </div>
       </div>
 
-      {/* Activity Detail Drawer */}
       <ActivityDetailDrawer
         activity={selectedActivity}
         open={drawerOpen}

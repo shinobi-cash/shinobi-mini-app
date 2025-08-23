@@ -22,19 +22,26 @@ interface UseIndexerActivitiesOptions {
 }
 
 export function useIndexerActivities(options: UseIndexerActivitiesOptions = {}) {
-  const { limit = 15, after } = options
+  const { limit = 10, after } = options
 
-  const { loading, error, data, fetchMore } = useQuery<ActivitiesResponse>(GET_ACTIVITIES, {
+  const {
+    loading,
+    error,
+    data,
+    fetchMore,
+    refetch,
+    networkStatus,
+  } = useQuery<ActivitiesResponse>(GET_ACTIVITIES, {
     variables: { limit, after },
-    pollInterval: 30000, // Poll every 30 seconds for new activities
     errorPolicy: 'all',
     notifyOnNetworkStatusChange: true,
   })
 
-  // Use activities directly from indexer (no conversion needed)
+  // Activities directly from indexer
   const activities: Activity[] = data?.activitys?.items || []
   const pageInfo = data?.activitys?.pageInfo
 
+  /** Load next page */
   const loadMore = () => {
     if (pageInfo?.hasNextPage && pageInfo?.endCursor) {
       return fetchMore({
@@ -44,7 +51,7 @@ export function useIndexerActivities(options: UseIndexerActivitiesOptions = {}) 
         },
         updateQuery: (prev, { fetchMoreResult }) => {
           if (!fetchMoreResult) return prev
-          
+
           return {
             activitys: {
               ...fetchMoreResult.activitys,
@@ -57,6 +64,14 @@ export function useIndexerActivities(options: UseIndexerActivitiesOptions = {}) 
     }
   }
 
+  /** Pull-to-refresh: reset to first page */
+  const refresh = () => {
+    return refetch({
+      limit,
+      after: undefined, // start from beginning
+    })
+  }
+
   return {
     activities,
     loading,
@@ -64,6 +79,8 @@ export function useIndexerActivities(options: UseIndexerActivitiesOptions = {}) 
     isEmpty: !loading && !error && activities.length === 0,
     pageInfo,
     loadMore,
+    refresh,
     hasNextPage: pageInfo?.hasNextPage || false,
+    networkStatus,
   }
 }
