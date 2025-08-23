@@ -1,37 +1,111 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = 'light' | 'dark'
+type Theme = "dark" | "light" | "system";
 
-interface ThemeContextType {
-  theme: Theme
-  toggleTheme: () => void
-}
+type ThemeProviderProps = {
+  children: React.ReactNode;
+  defaultTheme?: Theme;
+  storageKey?: string;
+};
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+type ThemeProviderState = {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  toggleTheme: () => void;
+  effectiveTheme: "light" | "dark";
+};
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light')
+const initialState: ThemeProviderState = {
+  theme: "system",
+  setTheme: () => null,
+  toggleTheme: () => null,
+  effectiveTheme: "light",
+};
+
+const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
+
+export function ThemeProvider({
+  children,
+  defaultTheme = "system",
+  storageKey = "shinobi.cash.theme",
+  ...props
+}: ThemeProviderProps) {
+  const [theme, setTheme] = useState<Theme>(
+    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+  );
+
+  // Calculate the effective theme (what's actually applied)
+  const getEffectiveTheme = (): "light" | "dark" => {
+    if (theme === "system") {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    return theme;
+  };
+
+  const [effectiveTheme, setEffectiveTheme] = useState<"light" | "dark">(getEffectiveTheme);
 
   useEffect(() => {
-    // Apply theme to document root
-    document.documentElement.setAttribute('data-theme', theme)
-  }, [theme])
+    const root = window.document.documentElement;
+    const newEffectiveTheme = getEffectiveTheme();
+
+    root.setAttribute("data-theme", newEffectiveTheme);
+    setEffectiveTheme(newEffectiveTheme);
+  }, [theme]);
+
+  useEffect(() => {
+    // Listen for system theme changes when theme is set to "system"
+    if (theme === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      
+      const handleChange = () => {
+        const root = window.document.documentElement;
+        const systemTheme = mediaQuery.matches ? "dark" : "light";
+        root.setAttribute("data-theme", systemTheme);
+        setEffectiveTheme(systemTheme);
+      };
+
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+  }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light')
-  }
+    if (theme === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      const nextTheme = systemTheme === "dark" ? "light" : "dark";
+      localStorage.setItem(storageKey, nextTheme);
+      setTheme(nextTheme);
+    } else {
+      const nextTheme = theme === "dark" ? "light" : "dark";
+      localStorage.setItem(storageKey, nextTheme);
+      setTheme(nextTheme);
+    }
+  };
+
+  const updateTheme = (newTheme: Theme) => {
+    localStorage.setItem(storageKey, newTheme);
+    setTheme(newTheme);
+  };
+
+  const value = {
+    theme,
+    setTheme: updateTheme,
+    toggleTheme,
+    effectiveTheme,
+  };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeProviderContext.Provider {...props} value={value}>
       {children}
-    </ThemeContext.Provider>
-  )
+    </ThemeProviderContext.Provider>
+  );
 }
 
-export function useTheme() {
-  const context = useContext(ThemeContext)
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider')
-  }
-  return context
-}
+export const useTheme = () => {
+  const context = useContext(ThemeProviderContext);
+
+  if (context === undefined)
+    throw new Error("useTheme must be used within a ThemeProvider");
+
+  return context;
+};

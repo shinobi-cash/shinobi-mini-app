@@ -4,14 +4,14 @@ import { WalletDropdown } from './WalletDropdown'
 import { Switch } from './ui/switch'
 
 export const AppHeader = () => {
-  const { theme, toggleTheme } = useTheme()
+  const { effectiveTheme, toggleTheme } = useTheme()
   
   return (
     <header className="sticky top-0 z-50 border-b border-app py-3 px-2 sm:py-4 sm:px-4 bg-app-header">
       <div className="grid grid-cols-3 items-center">
         <div className="flex justify-start">
           <Switch 
-            checked={theme === 'dark'}
+            checked={effectiveTheme === 'dark'}
             onCheckedChange={toggleTheme}
             aria-label="Toggle dark mode"
             className="data-[state=checked]:bg-slate-700 data-[state=unchecked]:bg-amber-200"
