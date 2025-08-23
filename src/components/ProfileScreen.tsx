@@ -39,8 +39,8 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
 
   const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
 
-  // Use the refactored useNotes hook
-  const { data: noteDiscovery, loading, error } = useNotes(publicKey!, poolAddress, accountKey!);
+  // Use the refactored useNotes hook with 10 minute cache to prevent excessive refetching
+  const { data: noteDiscovery, loading, error, refresh } = useNotes(publicKey!, poolAddress, accountKey!, 10 * 60 * 1000);
 
   // Memoize note chains, showing last note of each chain sorted by timestamp
   const noteChains = useMemo(() => {
@@ -98,9 +98,21 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
         {/* Transaction History */}
         <div className="flex-1 flex flex-col min-h-0 gap-2">
           <div className="flex-shrink-0 bg-app-surface border-b border-app shadow-md">
-            <h2 className="text-lg font-semibold py-3 text-app-secondary tracking-tight text-center">
-              Transaction History
-            </h2>
+            <div className="flex items-center justify-between py-3 px-4">
+              <h2 className="text-lg font-semibold text-app-secondary tracking-tight flex-1 text-center">
+                Transaction History
+              </h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={refresh}
+                disabled={loading}
+                className="h-8 w-8 p-0 text-app-secondary hover:text-app-primary"
+                title="Refresh transaction history"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
           </div>
           {/* Scrollable History Table */}
           <div className="flex-1 flex flex-col bg-app-surface border border-app shadow-md overflow-hidden">

@@ -3,6 +3,8 @@ import { ActivityRow } from './ActivityRow'
 import { ActivityDetailDrawer } from './ActivityDetailDrawer'
 import { useState, useRef, useEffect } from 'react'
 import { formatEthAmount } from '@/utils/formatters'
+import { RefreshCw } from 'lucide-react'
+import { Button } from './ui/button'
 
 export interface ActivityFeedProps {
   activities: Activity[]
@@ -112,9 +114,26 @@ export const ActivityFeed = ({
       {/* Activities */}
       <div className="flex-1 flex flex-col min-h-0 gap-2">
         <div className="flex-shrink-0 bg-app-surface border-b border-app shadow-md">
-          <h2 className="text-lg font-semibold py-3 text-app-secondary tracking-tight text-center">
-            Activities
-          </h2>
+          <div className="flex items-center justify-between py-3 px-4">
+            <h2 className="text-lg font-semibold text-app-secondary tracking-tight flex-1 text-center">
+              Activities
+            </h2>
+            {onRefresh && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsRefreshing(true)
+                  onRefresh().finally(() => setIsRefreshing(false))
+                }}
+                disabled={isRefreshing || loading}
+                className="h-8 w-8 p-0 text-app-secondary hover:text-app-primary"
+                title="Refresh activities"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
+            )}
+          </div>
         </div>
         <div className="flex-1 flex flex-col bg-app-surface border border-app shadow-md overflow-hidden">
           <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">

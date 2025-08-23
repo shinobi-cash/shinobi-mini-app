@@ -203,7 +203,8 @@ export async function discoverNotes(
 export function useNotes(
   publicKey: string,
   poolAddress: string,
-  accountKey: bigint
+  accountKey: bigint,
+  cacheTTL: number = 5 * 60 * 1000 // 5 minutes default cache TTL
 ) {
   const [data, setData] = useState<DiscoveryResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -211,23 +212,62 @@ export function useNotes(
 
   useEffect(() => {
     let mounted = true;
-    async function runDiscovery() {
+    
+    async function loadNotes() {
       setLoading(true);
       setError(null);
+      
       try {
+        // First check cache - if data is fresh enough, use it
+        const cached = await noteCache.getCachedNotes(publicKey, poolAddress);
+        const now = Date.now();
+        
+        if (cached && (now - cached.syncTime < cacheTTL)) {
+          if (mounted) {
+            setData(cached);
+            setLoading(false);
+          }
+          return;
+        }
+        
+        // Cache is stale or doesn't exist, run full discovery
         const result = await discoverNotes(publicKey, poolAddress, accountKey);
-        if (mounted) setData(result);
+        if (mounted) {
+          setData(result);
+        }
       } catch (err) {
-        if (mounted) setError(err as Error);
+        if (mounted) {
+          setError(err as Error);
+        }
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
-    runDiscovery();
+    
+    loadNotes();
+    
     return () => {
       mounted = false;
     };
-  }, [publicKey, poolAddress, accountKey]);
+  }, [publicKey, poolAddress, accountKey?.toString(), cacheTTL]);
 
-  return { data, loading, error };
+  const refresh = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const result = await discoverNotes(publicKey, poolAddress, accountKey);
+      setData(result);
+      return result;
+    } catch (err) {
+      setError(err as Error);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { data, loading, error, refresh };
 }
