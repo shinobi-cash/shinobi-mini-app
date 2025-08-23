@@ -13,8 +13,17 @@ export const ActivityRow = ({ activity }: ActivityRowProps) => (
         <div className="font-semibold text-app-primary tracking-tight capitalize text-base sm:text-lg truncate">
           {activity.type.toLowerCase()}
         </div>
-        <div className="text-sm sm:text-base text-app-secondary font-medium tabular-nums">
-          {`${formatEthAmount(activity.amount, { maxDecimals: 6 })} ETH`}
+        <div className={`text-xs sm:text-base font-medium tabular-nums flex items-center gap-1 ${
+          activity.type === 'DEPOSIT' 
+            ? 'text-green-600 dark:text-green-400' 
+            : 'text-red-600 dark:text-red-400'
+        }`}>
+          <span className="font-bold">
+            {activity.type === 'DEPOSIT' ? '+' : '−'}
+          </span>
+          <span>
+            {`${formatEthAmount(activity.amount, { maxDecimals: 6 })} ETH`}
+          </span>
         </div>
       </div>
 
