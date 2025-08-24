@@ -68,7 +68,7 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
 
   return (
     <div className="h-full flex flex-col">
-      <section className="flex flex-col gap-4 flex-1">
+      <section className="flex flex-col gap-2 flex-1">
         {/* Summary Card */}
         <div className="flex-shrink-0">
           <div className="bg-app-surface p-5 border-t border-b border-app shadow-md relative">

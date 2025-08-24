@@ -119,7 +119,7 @@ export const ActivityFeed = ({
   }, [onRefresh, isRefreshing])
 
   return (
-    <div className="flex flex-col h-full gap-4">
+    <div className="flex flex-col h-full gap-2">
       {/* Total Deposits */}
       <div className="flex-shrink-0">
         <div className="bg-app-surface p-5 border-t border-b border-app shadow-md">
