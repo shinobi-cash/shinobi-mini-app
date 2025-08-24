@@ -80,14 +80,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (result.status === 'passkey-ready') {
           // Auto-restore passkey session
           await restoreFromSessionKey(result.result.symmetricKey, result.accountName);
+          setIsRestoringSession(false);
         } else if (result.status === 'password-needed') {
-          // Show password prompt for this specific account
+          // Show password prompt for this specific account - keep splash screen
           setQuickAuthState({ 
             show: true, 
             accountName: result.accountName 
           });
+          // Don't set isRestoringSession to false here - keep splash screen visible
+        } else {
+          // status === 'none', show normal login flow
+          setIsRestoringSession(false);
         }
-        // else: status === 'none', show normal login flow
       } catch (error) {
         console.error('Session restoration failed:', error);
         // Only clear session if it's actually invalid, not if it's a concurrent request error
@@ -98,7 +102,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Clear session for other types of errors (invalid session, timeout, etc.)
           KDF.clearSessionInfo();
         }
-      } finally {
         setIsRestoringSession(false);
       }
     };
@@ -149,6 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       KDF.storeSessionInfo(quickAuthState.accountName, 'password');
       
       setQuickAuthState(null);
+      setIsRestoringSession(false); // Complete the session restoration
     } catch (error) {
       console.error('Quick password auth failed:', error);
       throw error;
@@ -157,6 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const dismissQuickAuth = () => {
     setQuickAuthState(null);
+    setIsRestoringSession(false); // End session restoration when dismissed
     KDF.clearSessionInfo();
   };
 

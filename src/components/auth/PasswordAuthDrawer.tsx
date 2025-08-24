@@ -1,5 +1,5 @@
 /**
- * Quick Auth Modal - For Session Restoration
+ * Quick Auth Drawer - For Session Restoration
  * Shows when user needs to re-enter password for their account after page refresh
  */
 
@@ -8,15 +8,21 @@ import { Button } from '../ui/button';
 import { Lock, Eye, EyeOff, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { 
+  Drawer, 
+  DrawerContent, 
+  DrawerHeader, 
+  DrawerTitle,
+  DrawerDescription,
+  DrawerClose, 
+} from '../ui/drawer';
 
-export function QuickAuthModal() {
+export function PasswordAuthDrawer() {
   const { quickAuthState, handleQuickPasswordAuth, dismissQuickAuth } = useAuth();
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  if (!quickAuthState?.show) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,35 +50,30 @@ export function QuickAuthModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-app-background rounded-2xl border border-app shadow-xl w-full max-w-sm">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-app">
-          <h2 className="text-lg font-semibold text-app-primary">
-            Welcome Back
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDismiss}
-            className="h-8 w-8 p-0 rounded-full"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Content */}
-        <div className="p-4 space-y-4">
-          <div className="text-center">
-            <p className="text-app-secondary">
-              Enter your password for
-            </p>
-            <p className="font-semibold text-app-primary">
-              {quickAuthState.accountName}
-            </p>
+    <Drawer 
+      open={quickAuthState?.show ?? false} 
+      onOpenChange={(open) => !open && handleDismiss()}
+    >
+      <DrawerContent className="bg-app-background border-app max-h-[85vh]">
+        {/* iOS-style drag handle */}
+        <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-app-tertiary/30" />
+        
+        <DrawerHeader className="pb-0 px-4 pt-2">
+          <div className="flex items-center justify-between">
+            <DrawerTitle className="text-lg font-semibold text-app-primary tracking-tight">
+              Welcome Back
+            </DrawerTitle>
+            <DrawerClose className="h-8 w-8 flex items-center justify-center hover:bg-app-surface-hover transition-colors duration-200">
+              <X className="h-4 w-4 text-app-secondary" />
+            </DrawerClose>
           </div>
+          <DrawerDescription className="text-sm items-start text-app-secondary">
+            Detected an old session for '{quickAuthState?.accountName}'
+          </DrawerDescription>
+        </DrawerHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 pb-6">
+          <form onSubmit={handleSubmit} className="space-y-4 pt-4">
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -134,7 +135,7 @@ export function QuickAuthModal() {
             </div>
           </form>
         </div>
-      </div>
-    </div>
+      </DrawerContent>
+    </Drawer>
   );
 }

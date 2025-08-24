@@ -1,6 +1,6 @@
 import { KeyGenerationResult } from '@/utils/crypto';
 import { noteCache } from '@/lib/noteCache';
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Input } from '../ui/input';
 import { AuthSection } from './AuthSection';
 
@@ -16,7 +16,16 @@ export default function SetupConvenientAuth({
   // Account setup state (moved to convenient auth step)
   const [accountName, setAccountName] = useState('')
   const [accountNameError, setAccountNameError] = useState('')
+  const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (validationTimeoutRef.current) {
+        clearTimeout(validationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Account name validation (used in convenient auth step)
   const validateAccountName = async (name: string): Promise<string | null> => {
@@ -45,12 +54,25 @@ export default function SetupConvenientAuth({
         id="account-name"
         type="text"
         value={accountName}
-        onChange={async (e) => {
+        onChange={(e) => {
           setAccountName(e.target.value);
           if (accountNameError) setAccountNameError('');
+          
+          // Debounce the validation to avoid excessive database calls
+          if (validationTimeoutRef.current) {
+            clearTimeout(validationTimeoutRef.current);
+          }
+          
           if (e.target.value.trim()) {
-            const error = await validateAccountName(e.target.value);
-            setAccountNameError(error || '');
+            validationTimeoutRef.current = setTimeout(async () => {
+              try {
+                const error = await validateAccountName(e.target.value);
+                setAccountNameError(error || '');
+              } catch (err) {
+                console.warn('Account validation failed:', err);
+                // Don't set an error - just skip validation if DB is not ready
+              }
+            }, 500); // Wait 500ms after user stops typing
           }
         }}
         placeholder="Account Name"

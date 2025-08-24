@@ -5,6 +5,7 @@ import {
   DrawerContent, 
   DrawerHeader, 
   DrawerTitle,
+  DrawerDescription,
   DrawerClose, 
 } from './ui/drawer'
 import { Key, X, Download, Copy, Eye, EyeOff, Check, FileText} from 'lucide-react'
@@ -372,6 +373,15 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
     }
   }
 
+  const getDescription = () => {
+    switch (currentStep) {
+      case 'KeyGeneration': return 'Generate secure cryptographic keys for your new account'
+      case 'BackupMnemonic': return 'Save your recovery phrase to restore account access'
+      case 'SetupConvenientAuth': return 'Choose your preferred authentication method for account access'
+      default: return 'Create a new secure account'
+    }
+  }
+
   return (
     <Drawer 
       open={open} 
@@ -382,12 +392,17 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-app-tertiary/30" />
         
         <DrawerHeader className="pb-0 px-4 pt-2 flex-row items-center justify-between">
+          <div className="flex-1">
             <DrawerTitle className="text-lg font-semibold text-app-primary tracking-tight">
               {getTitle()}
             </DrawerTitle>
-            <DrawerClose className="h-8 w-8 flex items-center justify-center hover:bg-app-surface-hover transition-colors duration-200">
-              <X className="h-4 w-4 text-app-secondary" />
-            </DrawerClose>
+            <DrawerDescription className="text-sm text-app-secondary mt-1">
+              {getDescription()}
+            </DrawerDescription>
+          </div>
+          <DrawerClose className="h-8 w-8 flex items-center justify-center hover:bg-app-surface-hover transition-colors duration-200 ml-4">
+            <X className="h-4 w-4 text-app-secondary" />
+          </DrawerClose>
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-4 pb-6">

@@ -668,16 +668,30 @@ class NoteCacheService {
    * Check if account name exists
    */
   async accountExists(accountName: string): Promise<boolean> {
-    const accountData = await this.getAccountDataByName(accountName);
-    return accountData !== null;
+    try {
+      const accountData = await this.getAccountDataByName(accountName);
+      return accountData !== null;
+    } catch (error) {
+      console.warn('Failed to check account existence:', error);
+      // Return false if database is not accessible - assume account doesn't exist
+      // This prevents form validation from failing during database initialization
+      return false;
+    }
   }
 
   /**
    * Check if passkey exists for account
    */
   async passkeyExists(accountName: string): Promise<boolean> {
-    const passkeyData = await this.getPasskeyData(accountName);
-    return passkeyData !== null;
+    try {
+      const passkeyData = await this.getPasskeyData(accountName);
+      return passkeyData !== null;
+    } catch (error) {
+      console.warn('Failed to check passkey existence:', error);
+      // Return false if database is not accessible - assume passkey doesn't exist
+      // This prevents form validation from failing during database initialization
+      return false;
+    }
   }
 
   /**
