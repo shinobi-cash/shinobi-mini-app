@@ -201,7 +201,7 @@ export const ActivityFeed = ({
                 )}
 
                 {/* Sentinel div for infinite scroll */}
-                <div ref={sentinelRef} className="h-2" />
+                <div ref={sentinelRef} />
               </>
             )}
           </div>
