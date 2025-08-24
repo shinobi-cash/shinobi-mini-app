@@ -66,6 +66,19 @@ export function PasswordSetupSection({
       return;
     }
 
+    try {
+      // Check for existing account (this also initializes the database)
+      const existingAccount = await noteCache.getAccountDataByName(accountName.trim());
+      if (existingAccount) {
+        toast.error('An account with this name already exists.');
+        return;
+      }
+    } catch (error) {
+      console.error('Failed to check existing account:', error);
+      toast.error('Database initialization failed. Please refresh and try again.');
+      return;
+    }
+
     setIsProcessing(true);
 
     try {

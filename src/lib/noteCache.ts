@@ -88,6 +88,14 @@ class NoteCacheService {
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         this.db = request.result;
+        
+        // Verify all required stores exist
+        if (!this.db.objectStoreNames.contains(STORE_NAME) ||
+            !this.db.objectStoreNames.contains(ACCOUNT_STORE_NAME) ||
+            !this.db.objectStoreNames.contains(PASSKEY_STORE_NAME)) {
+          console.warn('Some object stores are missing. Database may need to be recreated.');
+        }
+        
         resolve();
       };
 
@@ -95,10 +103,13 @@ class NoteCacheService {
         const db = (event.target as IDBOpenDBRequest).result;
         const oldVersion = event.oldVersion;
         
+        console.log(`Upgrading database from version ${oldVersion} to ${DB_VERSION}`);
+        
         // Handle migration from version 0 (new installation) or version 1 (upgrade)
         if (oldVersion < 1) {
           // New installation or very old version - create notes store
           if (!db.objectStoreNames.contains(STORE_NAME)) {
+            console.log('Creating notes store');
             const notesStore = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
             notesStore.createIndex('publicKeyHash', 'publicKeyHash', { unique: false });
             notesStore.createIndex('poolAddressHash', 'poolAddressHash', { unique: false });
@@ -108,6 +119,7 @@ class NoteCacheService {
         if (oldVersion < 2) {
           // Upgrade to version 2 - add account store
           if (!db.objectStoreNames.contains(ACCOUNT_STORE_NAME)) {
+            console.log('Creating account store');
             const accountStore = db.createObjectStore(ACCOUNT_STORE_NAME, { keyPath: 'id' });
             accountStore.createIndex('publicKeyHash', 'publicKeyHash', { unique: false });
           }
@@ -116,11 +128,37 @@ class NoteCacheService {
         if (oldVersion < 3) {
           // Upgrade to version 3 - add passkey store
           if (!db.objectStoreNames.contains(PASSKEY_STORE_NAME)) {
+            console.log('Creating passkey store');
             const passkeyStore = db.createObjectStore(PASSKEY_STORE_NAME, { keyPath: 'accountName' });
             passkeyStore.createIndex('publicKeyHash', 'publicKeyHash', { unique: false });
             passkeyStore.createIndex('credentialId', 'credentialId', { unique: false });
           }
         }
+        
+        console.log('Database upgrade completed');
+      };
+    });
+  }
+
+  /**
+   * Reset the database by deleting and recreating it
+   */
+  async resetDatabase(): Promise<void> {
+    if (this.db) {
+      this.db.close();
+      this.db = null;
+    }
+    
+    return new Promise((resolve, reject) => {
+      const deleteReq = indexedDB.deleteDatabase(DB_NAME);
+      
+      deleteReq.onerror = () => reject(deleteReq.error);
+      deleteReq.onsuccess = () => {
+        console.log('Database deleted successfully');
+        this.init().then(resolve).catch(reject);
+      };
+      deleteReq.onblocked = () => {
+        console.warn('Database deletion blocked. Close other tabs/windows using this app.');
       };
     });
   }
@@ -436,12 +474,33 @@ class NoteCacheService {
     };
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([ACCOUNT_STORE_NAME], 'readwrite');
-      const store = transaction.objectStore(ACCOUNT_STORE_NAME);
-      const request = store.put(storageData);
+      try {
+        // Check if the account store exists
+        if (!this.db!.objectStoreNames.contains(ACCOUNT_STORE_NAME)) {
+          console.error(`${ACCOUNT_STORE_NAME} object store not found. Available stores:`, Array.from(this.db!.objectStoreNames));
+          reject(new Error(`Database corruption: ${ACCOUNT_STORE_NAME} object store missing. Try clearing browser data.`));
+          return;
+        }
 
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve();
+        const transaction = this.db!.transaction([ACCOUNT_STORE_NAME], 'readwrite');
+        
+        transaction.onerror = () => {
+          console.error('Transaction failed:', transaction.error);
+          reject(transaction.error);
+        };
+        
+        const store = transaction.objectStore(ACCOUNT_STORE_NAME);
+        const request = store.put(storageData);
+
+        request.onerror = () => {
+          console.error('Store operation failed:', request.error);
+          reject(request.error);
+        };
+        request.onsuccess = () => resolve();
+      } catch (error) {
+        console.error('Exception in storeAccountData:', error);
+        reject(error);
+      }
     });
   }
 
