@@ -278,7 +278,6 @@ export const GET_POOL_STATS = gql`
       totalWithdrawals
       memberCount
       createdAt
-      lastActivity
     }
   }
 `;

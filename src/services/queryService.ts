@@ -17,6 +17,7 @@ import {
   FETCH_WITHDRAWAL_BY_SPENT_NULLIFIER,
   GET_POOL_DEPOSITS,
   GET_POOL_CONFIG,
+  GET_POOL_STATS,
   HEALTH_CHECK
 } from '../config/queries';
 
@@ -154,6 +155,32 @@ export async function fetchPoolDeposits(poolAddress?: string): Promise<Activity[
   } catch (error) {
     console.error('Failed to fetch pool deposits:', error);
     throw new Error('Failed to fetch pool deposits from indexer');
+  }
+}
+
+/**
+ * Fetch pool statistics (total deposits, withdrawals, member count)
+ */
+export async function fetchPoolStats(poolAddress?: string): Promise<{
+  totalDeposits: string;
+  totalWithdrawals: string;
+  memberCount: number;
+  createdAt: string;
+} | null> {
+  try {
+    const poolId = (poolAddress || CONTRACTS.ETH_PRIVACY_POOL).toLowerCase();
+    
+    const result = await apolloClient.query({
+      query: GET_POOL_STATS,
+      variables: { poolId },
+      fetchPolicy: INDEXER_FETCH_POLICY,
+    });
+
+    return result.data?.pool || null;
+
+  } catch (error) {
+    console.error('Failed to fetch pool stats:', error);
+    return null;
   }
 }
 

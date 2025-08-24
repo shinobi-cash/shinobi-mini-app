@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react'
 import { formatEthAmount } from '@/utils/formatters'
 import { RefreshCw } from 'lucide-react'
 import { Button } from './ui/button'
+import { fetchPoolStats } from '@/services/queryService'
 
 export interface ActivityFeedProps {
   activities: Activity[]
@@ -27,14 +28,37 @@ export const ActivityFeed = ({
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [poolStats, setPoolStats] = useState<{
+    totalDeposits: string;
+    totalWithdrawals: string;
+    memberCount: number;
+    createdAt: string;
+  } | null>(null)
+  const [poolStatsLoading, setPoolStatsLoading] = useState(true)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const sentinelRef = useRef<HTMLDivElement>(null)
 
-  const totalDeposits = activities
-    .filter(a => a.type === 'DEPOSIT' && a.aspStatus === 'approved')
-    .reduce((acc, a) => acc + BigInt(a.amount), 0n)
+  // Fetch pool stats using the service
+  const loadPoolStats = async () => {
+    setPoolStatsLoading(true)
+    try {
+      const stats = await fetchPoolStats()
+      setPoolStats(stats)
+    } catch (error) {
+      console.error('Failed to load pool stats:', error)
+    } finally {
+      setPoolStatsLoading(false)
+    }
+  }
 
-  const depositCount = activities.filter(a => a.type === 'DEPOSIT' && a.aspStatus === 'approved').length
+  // Load pool stats on mount
+  useEffect(() => {
+    loadPoolStats()
+  }, [])
+
+  // Use accurate total from indexer pool stats
+  const totalDeposits = poolStats?.totalDeposits ? BigInt(poolStats.totalDeposits) : 0n
+  const memberCount = poolStats?.memberCount || 0
 
   const handleActivityClick = (activity: Activity) => {
     setSelectedActivity(activity)
@@ -102,10 +126,10 @@ export const ActivityFeed = ({
           <div className="text-center">
             <h3 className="text-base font-semibold text-app-secondary mb-2">Total Deposits</h3>
             <p className="text-3xl font-bold text-app-primary tabular-nums mb-2">
-              {formatEthAmount(totalDeposits)} ETH
+              {poolStatsLoading ? '...' : `${formatEthAmount(totalDeposits)} ETH`}
             </p>
             <p className="text-base text-app-tertiary">
-              {depositCount} deposit{depositCount !== 1 ? 's' : ''} approved
+              {poolStatsLoading ? '...' : `${memberCount} member${memberCount !== 1 ? 's' : ''}`}
             </p>
           </div>
         </div>
@@ -124,11 +148,14 @@ export const ActivityFeed = ({
                 size="sm"
                 onClick={() => {
                   setIsRefreshing(true)
-                  onRefresh().finally(() => setIsRefreshing(false))
+                  Promise.all([
+                    onRefresh(),
+                    loadPoolStats()
+                  ]).finally(() => setIsRefreshing(false))
                 }}
                 disabled={isRefreshing || loading}
                 className="h-8 w-8 p-0 text-app-secondary hover:text-app-primary"
-                title="Refresh activities"
+                title="Refresh activities and pool stats"
               >
                 <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               </Button>
