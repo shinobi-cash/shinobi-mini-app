@@ -71,7 +71,7 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
       <section className="flex flex-col gap-4 flex-1">
         {/* Summary Card */}
         <div className="flex-shrink-0">
-          <div className="bg-app-surface p-5 border border-app shadow-md relative">
+          <div className="bg-app-surface p-5 border-t border-b border-app shadow-md relative">
             {/* Sign Out Button */}
             <Button
               variant="ghost"
@@ -115,7 +115,7 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
             </div>
           </div>
           {/* Scrollable History Table */}
-          <div className="flex-1 flex flex-col bg-app-surface border border-app shadow-md overflow-hidden">
+          <div className="flex-1 flex flex-col bg-app-surface border-t border-b border-app shadow-md overflow-hidden">
             <div className="flex-1 overflow-y-auto">
               {loading ? (
                 <div className="flex items-center justify-center py-8">

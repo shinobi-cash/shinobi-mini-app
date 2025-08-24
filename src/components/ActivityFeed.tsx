@@ -122,7 +122,7 @@ export const ActivityFeed = ({
     <div className="flex flex-col h-full gap-4">
       {/* Total Deposits */}
       <div className="flex-shrink-0">
-        <div className="bg-app-surface p-5 border border-app shadow-md">
+        <div className="bg-app-surface p-5 border-t border-b border-app shadow-md">
           <div className="text-center">
             <h3 className="text-base font-semibold text-app-secondary mb-2">Total Deposits</h3>
             <p className="text-3xl font-bold text-app-primary tabular-nums mb-2">
@@ -162,7 +162,7 @@ export const ActivityFeed = ({
             )}
           </div>
         </div>
-        <div className="flex-1 flex flex-col bg-app-surface border border-app shadow-md overflow-hidden">
+        <div className="flex-1 flex flex-col bg-app-surface border-t border-b border-app shadow-md overflow-hidden">
           <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
             {isRefreshing && (
               <div className="text-center py-2 text-app-tertiary text-sm">Refreshing...</div>
