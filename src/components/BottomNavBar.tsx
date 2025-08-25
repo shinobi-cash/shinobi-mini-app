@@ -21,7 +21,7 @@ export const BottomNavBar = () => {
   <nav 
     className="bg-app-surface border-t border-app-border pb-safe-area-bottom"
   >
-      <div className="flex items-center justify-around px-2">
+      <div className="flex items-center justify-around">
         {navItems.map((item, index) => {
           const isActive = currentScreen === item.screen
           return (
@@ -29,7 +29,7 @@ export const BottomNavBar = () => {
               key={index}
               onClick={() => setCurrentScreen(item.screen)}
               aria-label={item.label}
-              className={`flex flex-col items-center space-y-1 py-4 px-6 min-w-0 flex-1 transition-colors duration-200 rounded-xl active:scale-95 ${
+              className={`flex flex-col items-center space-y-1 py-2 px-3 min-w-0 flex-1 transition-colors duration-200 rounded-xl active:scale-95 ${
                 isActive
                   ? 'text-indigo-600 dark:text-indigo-400 shadow-sm'
                   : 'text-app-secondary hover:text-app-primary active:text-app-primary dark:text-app-secondary dark:hover:text-app-primary dark:active:text-app-primary'
