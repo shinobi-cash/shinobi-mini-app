@@ -2,10 +2,10 @@ import { MainScreen } from "@/components/MainScreen"
 import { SplashScreen } from "@/components/SplashScreen"
 import { ThemeProvider } from "@/contexts/ThemeContext"
 import { AuthProvider, useAuth } from "@/contexts/AuthContext"
+import { BannerProvider } from "@/contexts/BannerContext"
 import { TransactionTrackingProvider } from "@/components/AppBanner"
 import { ErrorBoundary } from "@/components/ErrorBoundary"
 import { PasswordAuthDrawer } from "@/components/auth/PasswordAuthDrawer"
-import { Toaster } from "sonner"
 import { useEffect } from "react"
 import { sdk } from '@farcaster/miniapp-sdk'
 
@@ -32,7 +32,6 @@ function AppContent() {
     <>
       <MainScreen />
       <PasswordAuthDrawer />
-      <Toaster richColors position="top-center" />
     </>
   );
 }
@@ -41,11 +40,13 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        <AuthProvider>
-          <TransactionTrackingProvider>
-            <AppContent />
-          </TransactionTrackingProvider>
-        </AuthProvider>
+        <BannerProvider>
+          <AuthProvider>
+            <TransactionTrackingProvider>
+              <AppContent />
+            </TransactionTrackingProvider>
+          </AuthProvider>
+        </BannerProvider>
       </ThemeProvider>
     </ErrorBoundary>
   )

@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Lock, Eye, EyeOff, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { useBanner } from '@/contexts/BannerContext';
 import { 
   Drawer, 
   DrawerContent, 
@@ -18,6 +18,7 @@ import {
 } from '../ui/drawer';
 
 export function PasswordAuthDrawer() {
+  const { banner } = useBanner();
   const { quickAuthState, handleQuickPasswordAuth, dismissQuickAuth } = useAuth();
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -33,7 +34,7 @@ export function PasswordAuthDrawer() {
 
     try {
       await handleQuickPasswordAuth(password);
-      toast.success('Session restored successfully');
+      banner.success('Session restored successfully');
     } catch (error) {
       console.error('Quick auth failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Authentication failed';

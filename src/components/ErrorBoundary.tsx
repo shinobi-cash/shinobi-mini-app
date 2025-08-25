@@ -4,7 +4,6 @@
  */
 
 import { Component, ErrorInfo, ReactNode } from 'react'
-import { toast } from 'sonner'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -29,19 +28,6 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Uncaught error:', error, errorInfo)
-    
-    // Show toast notification for the error
-    toast.error('An unexpected error occurred', {
-      description: error.message,
-      duration: 5000,
-      action: {
-        label: 'Report Issue',
-        onClick: () => {
-          // In a real app, this would send error reports
-          console.log('Error reported:', { error, errorInfo })
-        }
-      }
-    })
   }
 
   public render() {

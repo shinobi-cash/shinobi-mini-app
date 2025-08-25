@@ -10,7 +10,7 @@ import { KDF } from '@/lib/keyDerivation';
 import { createHash, KeyGenerationResult } from '@/utils/crypto';
 import { noteCache } from '@/lib/noteCache';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { useBanner } from "@/contexts/BannerContext";
 
 interface PasskeySetupSectionProps {
   accountName: string;
@@ -27,6 +27,7 @@ export function PasskeySetupSection({
 }: PasskeySetupSectionProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const { setKeys } = useAuth();
+  const { banner } = useBanner();
 
   const handlePasskeySetup = async () => {
     if (accountNameError || !accountName.trim() || !generatedKeys) {
@@ -36,7 +37,7 @@ export function PasskeySetupSection({
     // Check for existing passkey
     const hasPasskey = await noteCache.passkeyExists(accountName.trim());
     if (hasPasskey) {
-      toast.error('A passkey for this account already exists.');
+      banner.error('Passkey already exists');
       return;
     }
 
@@ -80,14 +81,14 @@ export function PasskeySetupSection({
       // Set keys in auth context
       setKeys(generatedKeys);
       
-      toast.success('Account created successfully with passkey');
+      banner.success('Account created');
       onSuccess();
     } catch (error) {
       console.error('Passkey setup failed:', error);
       if (error instanceof Error && error.message.includes('PRF')) {
-        toast.error('Your device does not support advanced passkey features. Please use password authentication instead.');
+        banner.error('Device not supported');
       } else {
-        toast.error('Failed to set up passkey. Please try again.');
+        banner.error('Passkey setup failed');
       }
     } finally {
       setIsProcessing(false);

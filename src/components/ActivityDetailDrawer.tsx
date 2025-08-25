@@ -9,7 +9,7 @@ import {
 } from './ui/drawer'
 import { X, ExternalLink, Copy } from 'lucide-react'
 import { useState } from 'react'
-import { toast } from 'sonner'
+import { useBanner } from '@/contexts/BannerContext'
 import { NETWORK } from '../config/constants'
 import { formatEthAmount, formatHash, formatTimestamp } from '@/utils/formatters'
 
@@ -21,15 +21,16 @@ interface ActivityDetailDrawerProps {
 
 export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityDetailDrawerProps) => {
   const [, setCopiedField] = useState<string | null>(null)
+  const { banner } = useBanner()
 
   const copyToClipboard = async (text: string, fieldName: string) => {
     try {
       await navigator.clipboard.writeText(text)
       setCopiedField(fieldName)
-      toast.success(`${fieldName} copied!`)
+      banner.success(`${fieldName} copied!`)
       setTimeout(() => setCopiedField(null), 2000)
     } catch (error) {
-      toast.error('Failed to copy')
+      banner.error('Failed to copy')
     }
   }
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { toast } from 'sonner';
+import { useBanner } from '@/contexts/BannerContext';
 import { 
   fetchStateTreeLeaves, 
   fetchApprovedLabelsFromIndexer, 
@@ -23,6 +23,7 @@ interface DataFetchState {
 }
 
 export function useWithdrawalData() {
+  const { banner } = useBanner();
   const [dataFetchState, setDataFetchState] = useState<DataFetchState>({
     isFetching: false,
     isComplete: false,
@@ -73,7 +74,7 @@ export function useWithdrawalData() {
     } catch (error) {
       console.error('Failed to fetch required data:', error);
       const message = error instanceof Error ? error.message : 'Failed to fetch required data from indexer';
-      toast.error(message);
+      banner.error(message);
       
       setDataFetchState(prev => ({
         ...prev,

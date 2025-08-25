@@ -11,7 +11,7 @@ import { KDF } from '@/lib/keyDerivation';
 import { restoreFromMnemonic } from '@/utils/crypto';
 import { noteCache } from '@/lib/noteCache';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { useBanner } from "@/contexts/BannerContext";
 
 interface PasskeyLoginSectionProps {
   onSuccess: () => void;
@@ -24,6 +24,7 @@ export function PasskeyLoginSection({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setKeys } = useAuth();
+  const { banner } = useBanner();
 
   const handlePasskeyLogin = async () => {
     if (!accountName.trim()) {
@@ -65,7 +66,7 @@ export function PasskeyLoginSection({
       // Store session info for future restoration
       KDF.storeSessionInfo(accountName.trim(), 'passkey', { credentialId: passkeyData.credentialId });
 
-      toast.success('Successfully logged in with passkey');
+      banner.success('Passkey login successful');
       onSuccess();
     } catch (error) {
       console.error('Passkey login failed:', error);
@@ -82,7 +83,7 @@ export function PasskeyLoginSection({
       }
 
       setError(errorMessage);
-      toast.error(errorMessage);
+      banner.error('Passkey login failed');
     } finally {
       setIsProcessing(false);
     }

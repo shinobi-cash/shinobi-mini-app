@@ -10,7 +10,7 @@ import {
 } from './ui/drawer'
 import { Key, X, Download, Copy, Eye, EyeOff, Check, FileText, ChevronLeft} from 'lucide-react'
 import { generateKeysFromRandomSeed, KeyGenerationResult} from '../utils/crypto'
-import { toast } from 'sonner'
+import { useBanner } from "@/contexts/BannerContext"
 import SetupConvenientAuth from './auth/SetupConvenientAuth'
 import { getEnvironmentType } from '@/utils/environment'
 
@@ -27,6 +27,7 @@ function KeyGeneration({ onKeyGenerationComplete }: {onKeyGenerationComplete: (k
   const [progress, setProgress] = useState(0)
   const [currentTask, setCurrentTask] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
+  const { banner } = useBanner()
   
   const handleGenerateKeys = async () => {
     setProgress(0)
@@ -69,7 +70,7 @@ function KeyGeneration({ onKeyGenerationComplete }: {onKeyGenerationComplete: (k
       
     } catch (error) {
       console.error('Failed to generate keys:', error)
-      toast.error('Failed to generate keys. Please try again.')
+      banner.error('Key generation failed')
     } 
   }
   if (!isGenerating){
@@ -130,6 +131,7 @@ function BackupMnemonic({
   const [hasConfirmed, setHasConfirmed] = useState(false)
   const [hasCopied, setHasCopied] = useState(false)
   const [canDownload] = useState(getEnvironmentType() === 'web' || getEnvironmentType() === 'standalone')
+  const { banner } = useBanner()
   const displayMnemonic = generatedKeys?.mnemonic
   const handleCopyMnemonic = async () => {
     if (!displayMnemonic) return
@@ -137,15 +139,15 @@ function BackupMnemonic({
     try {
       await navigator.clipboard.writeText(displayMnemonic.join(' '))
       setHasCopied(true)
-      toast.success('Recovery phrase copied to clipboard')
+      banner.success('Copied to clipboard')
       setTimeout(() => setHasCopied(false), 3000)
     } catch (error) {
-      toast.error('Failed to copy to clipboard')
+      banner.error('Copy failed')
     }
   }
    const handleDownloadMnemonic = () => {
     if (!displayMnemonic || !canDownload) {
-      toast.error('Download not available')
+      banner.error('Download unavailable')
       return
     }
     
@@ -177,9 +179,9 @@ function BackupMnemonic({
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
       
-      toast.success('Recovery phrase downloaded')
+      banner.success('Download complete')
     } catch (error) {
-      toast.error('Failed to download file')
+      banner.error('Download failed')
     }
   }
 

@@ -11,7 +11,7 @@ import { KDF } from '@/lib/keyDerivation';
 import { noteCache } from '@/lib/noteCache';
 import { restoreFromMnemonic } from '@/utils/crypto';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { useBanner } from "@/contexts/BannerContext";
 
 interface PasswordLoginSectionProps {
   onSuccess: () => void;
@@ -26,6 +26,7 @@ export function PasswordLoginSection({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setKeys } = useAuth();
+  const { banner } = useBanner();
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,13 +64,13 @@ export function PasswordLoginSection({
       // Store session info for future restoration
       KDF.storeSessionInfo(accountName.trim(), 'password');
 
-      toast.success('Successfully logged in');
+      banner.success('Login successful');
       onSuccess();
     } catch (error) {
       console.error('Password login failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
       setError(errorMessage);
-      toast.error(errorMessage);
+      banner.error('Login failed');
     } finally {
       setIsProcessing(false);
     }

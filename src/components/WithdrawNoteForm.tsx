@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { isAddress } from 'viem';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { useBanner } from '@/contexts/BannerContext';
 import { useTransactionTracking } from '@/hooks/useTransactionTracking';
 import { useAuth } from '../contexts/AuthContext';
 import { TransactionPreviewDrawer } from './TransactionPreviewDrawer';
@@ -25,6 +25,7 @@ interface WithdrawNoteFormProps {
 }
 
 export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
+  const { banner } = useBanner();
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [recipientAddress, setRecipientAddress] = useState('');
   const [showPreview, setShowPreview] = useState(false);
@@ -103,14 +104,14 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
       console.error('❌ Failed to prepare withdrawal:', error);
       setIsPreparing(false);
       setPreparationError(error instanceof Error ? error.message : 'Failed to prepare withdrawal');
-      toast.error('Failed to prepare withdrawal');
+      banner.error('Failed to prepare withdrawal');
     }
   };
 
   // Execute the withdrawal transaction
   const handleExecuteTransaction = async () => {
     if (!preparedWithdrawal) {
-      toast.error('No prepared withdrawal found');
+      banner.error('No prepared withdrawal found');
       return;
     }
 
@@ -122,7 +123,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
       
       console.log('✅ Withdrawal executed successfully:', transactionHash);
       
-      // Track transaction for indexing status (replaces toast)
+      // Track transaction for indexing status (replaces banner)
       trackTransaction(transactionHash);
       
       setShowPreview(false);
@@ -131,7 +132,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
     } catch (error) {
       console.error('❌ Failed to execute withdrawal:', error);
       setIsExecuting(false);
-      toast.error('Failed to execute withdrawal');
+      banner.error('Failed to execute withdrawal');
     }
   };
 

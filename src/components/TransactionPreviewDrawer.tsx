@@ -8,7 +8,7 @@ import {
   DrawerClose, 
   DrawerDescription
 } from './ui/drawer';
-import { toast } from 'sonner';
+import { useBanner } from '@/contexts/BannerContext';
 import { formatEthAmount, formatHash } from '../utils/formatters';
 import { Note } from '@/lib/noteCache';
 
@@ -37,11 +37,12 @@ export const TransactionPreviewDrawer = ({
   remainingBalance,
   isProcessing
 }: TransactionPreviewDrawerProps) => {
+  const { banner } = useBanner();
   const withdrawAmountNum = parseFloat(withdrawAmount) || 0;
 
   const copyToClipboard = (text: string, fieldName: string) => {
     navigator.clipboard.writeText(text);
-    toast.success(`${fieldName} copied!`);
+    banner.success(`${fieldName} copied!`);
   };
 
   // Use consistent ETH formatting with 7 decimal places for precise comparison

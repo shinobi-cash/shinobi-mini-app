@@ -8,7 +8,7 @@ import { formatEther } from 'viem';
 import { NETWORK } from '../config/constants';
 import { useDepositCommitment } from '../hooks/useDepositCommitment';
 import { useDepositTransaction } from '../hooks/useDepositTransaction';
-import { toast } from 'sonner';
+import { useBanner } from "@/contexts/BannerContext";
 import { useTransactionTracking } from '@/hooks/useTransactionTracking';
 
 const DEPOSIT_AMOUNTS= [
@@ -40,9 +40,10 @@ const DepositForm = () => {
   const { data: balance } = useBalance({ address });
   const chainId = useChainId();
   const [amount, setAmount] = useState('');
-  const shownToastsRef = useRef(new Set<string>());
+  const shownBannersRef = useRef(new Set<string>());
   const [selectedAsset] = useState({ symbol: 'ETH', name: 'Ethereum', icon: '⚫' });
   const { trackTransaction } = useTransactionTracking();
+  const { banner } = useBanner();
   
   const isOnCorrectNetwork = chainId === NETWORK.CHAIN_ID;
   const { noteData, isGeneratingNote, error: noteError, regenerateNote } = useDepositCommitment();
@@ -56,13 +57,10 @@ const DepositForm = () => {
     transactionHash 
   } = useDepositTransaction();
 
-  // Handle transaction errors with toast
+  // Handle transaction errors with banner
   useEffect(() => {
     if (error) {
-      toast.error('Transaction Failed', {
-        description: error,
-        duration: 5000,
-      });
+      banner.error('Transaction failed');
     }
   }, [error]);
 
@@ -77,13 +75,13 @@ const DepositForm = () => {
     }
   }, [noteError, regenerateNote]);
 
-  // Handle transaction success with toast and auto-reset
+  // Handle transaction success with banner and auto-reset
   useEffect(() => {
-    if (isSuccess && transactionHash && !shownToastsRef.current.has(transactionHash)) {
+    if (isSuccess && transactionHash && !shownBannersRef.current.has(transactionHash)) {
       // Mark this transaction hash as shown
-      shownToastsRef.current.add(transactionHash);
+      shownBannersRef.current.add(transactionHash);
       
-      // Track transaction for indexing status (replaces toast)
+      // Track transaction for indexing status (replaces banner)
       trackTransaction(transactionHash);
       
       // Reset form for next deposit

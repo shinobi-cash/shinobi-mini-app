@@ -10,7 +10,7 @@ import { KeyGenerationResult } from '@/utils/crypto';
 import { KDF } from '@/lib/keyDerivation';
 import { noteCache } from '@/lib/noteCache';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { useBanner } from "@/contexts/BannerContext";
 
 interface PasswordSetupSectionProps {
   accountName: string;
@@ -31,6 +31,7 @@ export function PasswordSetupSection({
   const [isProcessing, setIsProcessing] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const { setKeys } = useAuth();
+  const { banner } = useBanner();
 
   const validatePassword = (pass: string) => {
     if (pass.length < 8) {
@@ -70,12 +71,12 @@ export function PasswordSetupSection({
       // Check for existing account (this also initializes the database)
       const existingAccount = await noteCache.getAccountDataByName(accountName.trim());
       if (existingAccount) {
-        toast.error('An account with this name already exists.');
+        banner.error('Account already exists');
         return;
       }
     } catch (error) {
       console.error('Failed to check existing account:', error);
-      toast.error('Database initialization failed. Please refresh and try again.');
+      banner.error('Database error');
       return;
     }
 
@@ -102,11 +103,11 @@ export function PasswordSetupSection({
       // Set keys in auth context
       setKeys(generatedKeys);
       
-      toast.success('Account created successfully with password');
+      banner.success('Account created');
       onSuccess();
     } catch (error) {
       console.error('Password setup failed:', error);
-      toast.error(error instanceof Error ? error.message : 'Setup failed');
+      banner.error('Setup failed');
     } finally {
       setIsProcessing(false);
     }
