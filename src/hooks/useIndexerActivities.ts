@@ -1,4 +1,5 @@
 import { useQuery } from '@apollo/client'
+import { useCallback } from 'react'
 import { GET_ACTIVITIES } from '../config/queries'
 import { Activity } from '../types/activity'
 
@@ -42,7 +43,7 @@ export function useIndexerActivities(options: UseIndexerActivitiesOptions = {}) 
   const pageInfo = data?.activitys?.pageInfo
 
   /** Load next page */
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
     if (pageInfo?.hasNextPage && pageInfo?.endCursor) {
       return fetchMore({
         variables: {
@@ -62,15 +63,15 @@ export function useIndexerActivities(options: UseIndexerActivitiesOptions = {}) 
         },
       })
     }
-  }
+  }, [pageInfo?.hasNextPage, pageInfo?.endCursor, fetchMore, limit])
 
   /** Pull-to-refresh: reset to first page */
-  const refresh = () => {
+  const refresh = useCallback(() => {
     return refetch({
       limit,
       after: undefined, // start from beginning
     })
-  }
+  }, [refetch, limit])
 
   return {
     activities,

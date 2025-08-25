@@ -9,7 +9,7 @@ import { NETWORK } from '../config/constants';
 import { useDepositCommitment } from '../hooks/useDepositCommitment';
 import { useDepositTransaction } from '../hooks/useDepositTransaction';
 import { toast } from 'sonner';
-import { useTransactionTracking } from './AppBanner';
+import { useTransactionTracking } from '@/hooks/useTransactionTracking';
 
 const DEPOSIT_AMOUNTS= [
     { value: "0.01", label: "0.01 ETH" },

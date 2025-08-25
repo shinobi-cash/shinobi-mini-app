@@ -5,7 +5,7 @@ import { Input } from './ui/input';
 import { isAddress } from 'viem';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { useTransactionTracking } from './AppBanner';
+import { useTransactionTracking } from '@/hooks/useTransactionTracking';
 import { useAuth } from '../contexts/AuthContext';
 import { TransactionPreviewDrawer } from './TransactionPreviewDrawer';
 import { Note } from '@/lib/noteCache';

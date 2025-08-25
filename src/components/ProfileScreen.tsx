@@ -1,5 +1,5 @@
 import { useAuth } from '../contexts/AuthContext'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AuthenticationGate } from './shared/AuthenticationGate'
 
 import { RefreshCw, UserX, X, ExternalLink } from 'lucide-react'
@@ -17,6 +17,7 @@ import { NETWORK } from '@/config/constants';
 import { CONTRACTS } from '@/config/constants'
 import { Note, NoteChain } from '@/lib/noteCache'
 import { useNotes } from '@/hooks/useDepositDiscovery'
+import { useTransactionTracking } from '@/hooks/useTransactionTracking'
 
 export const ProfileScreen = () => {
   const { signOut } = useAuth()
@@ -37,6 +38,7 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
   const [selectedNoteChain, setSelectedNoteChain] = useState<NoteChain | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { onTransactionIndexed } = useTransactionTracking();
 
   const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
 
@@ -55,6 +57,13 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
       });
   }, [noteDiscovery]);
 
+  // Auto-refresh when transaction gets indexed
+  useEffect(() => {
+    const cleanup = onTransactionIndexed(() => {
+      refresh()
+    })
+    return cleanup
+  }, [onTransactionIndexed, refresh])
 
 
   const unspentNotes = noteChains.filter(noteChain => {

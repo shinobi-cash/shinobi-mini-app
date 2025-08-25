@@ -1,11 +1,12 @@
 import { Activity } from '../types/activity'
 import { ActivityRow } from './ActivityRow'
 import { ActivityDetailDrawer } from './ActivityDetailDrawer'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { formatEthAmount } from '@/utils/formatters'
 import { RefreshCw } from 'lucide-react'
 import { Button } from './ui/button'
 import { fetchPoolStats } from '@/services/queryService'
+import { useTransactionTracking } from '@/hooks/useTransactionTracking'
 
 export interface ActivityFeedProps {
   activities: Activity[]
@@ -37,9 +38,10 @@ export const ActivityFeed = ({
   const [poolStatsLoading, setPoolStatsLoading] = useState(true)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const sentinelRef = useRef<HTMLDivElement>(null)
+  const { onTransactionIndexed } = useTransactionTracking()
 
   // Fetch pool stats using the service
-  const loadPoolStats = async () => {
+  const loadPoolStats = useCallback(async () => {
     setPoolStatsLoading(true)
     try {
       const stats = await fetchPoolStats()
@@ -49,12 +51,21 @@ export const ActivityFeed = ({
     } finally {
       setPoolStatsLoading(false)
     }
-  }
+  }, [])
 
   // Load pool stats on mount
   useEffect(() => {
     loadPoolStats()
   }, [])
+
+  // Auto-refresh when transaction gets indexed
+  useEffect(() => {
+    const cleanup = onTransactionIndexed(() => {
+      onRefresh?.()
+      loadPoolStats()
+    })
+    return cleanup
+  }, [onTransactionIndexed, onRefresh, loadPoolStats])
 
   // Use accurate total from indexer pool stats
   const totalDeposits = poolStats?.totalDeposits ? BigInt(poolStats.totalDeposits) : 0n
