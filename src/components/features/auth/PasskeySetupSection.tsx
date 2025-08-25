@@ -3,7 +3,7 @@
  * Takes provided keys and creates a new passkey for the account
  */
 
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
 import { Fingerprint } from 'lucide-react';
 import { useState } from 'react';
 import { KDF } from '@/lib/keyDerivation';

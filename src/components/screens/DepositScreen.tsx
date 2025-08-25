@@ -1,13 +1,13 @@
 import { useAccount, useBalance, useChainId } from 'wagmi';
-import { AuthenticationGate } from './shared/AuthenticationGate';
-import { WalletGate } from './shared/WalletGate';
+import { AuthenticationGate } from '../shared/AuthenticationGate';
+import { WalletGate } from '../shared/WalletGate';
 import { ChevronDown, AlertTriangle, Loader2 } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { useState, useEffect, useRef } from 'react';
 import { formatEther } from 'viem';
-import { NETWORK } from '../config/constants';
-import { useDepositCommitment } from '../hooks/useDepositCommitment';
-import { useDepositTransaction } from '../hooks/useDepositTransaction';
+import { NETWORK } from '../../config/constants';
+import { useDepositCommitment } from '../../hooks/useDepositCommitment';
+import { useDepositTransaction } from '../../hooks/useDepositTransaction';
 import { useBanner } from "@/contexts/BannerContext";
 import { useTransactionTracking } from '@/hooks/useTransactionTracking';
 

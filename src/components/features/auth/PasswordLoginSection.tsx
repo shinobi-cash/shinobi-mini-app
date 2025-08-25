@@ -4,9 +4,9 @@
  */
 
 import React, { useState } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
 import { Lock, Eye, EyeOff } from 'lucide-react';
-import { Input } from '../ui/input';
+import { Input } from '../../ui/input';
 import { KDF } from '@/lib/keyDerivation';
 import { noteCache } from '@/lib/noteCache';
 import { restoreFromMnemonic } from '@/utils/crypto';

@@ -3,9 +3,9 @@
  * Authenticates with existing passkey and loads account keys from storage
  */
 
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
 import { Fingerprint } from 'lucide-react';
-import { Input } from '../ui/input';
+import { Input } from '../../ui/input';
 import { useState } from 'react';
 import { KDF } from '@/lib/keyDerivation';
 import { restoreFromMnemonic } from '@/utils/crypto';

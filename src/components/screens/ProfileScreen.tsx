@@ -1,9 +1,9 @@
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 import { useEffect, useMemo, useState } from 'react'
-import { AuthenticationGate } from './shared/AuthenticationGate'
+import { AuthenticationGate } from '../shared/AuthenticationGate'
 
 import { RefreshCw, UserX, X, ExternalLink } from 'lucide-react'
-import { Button } from './ui/button'
+import { Button } from '../ui/button'
 import { 
   Drawer, 
   DrawerContent, 
@@ -11,7 +11,7 @@ import {
   DrawerTitle,
   DrawerDescription,
   DrawerClose 
-} from './ui/drawer'
+} from '../ui/drawer'
 import { formatDate, formatEthAmount, formatTimestamp, formatHash } from '@/utils/formatters';
 import { NETWORK } from '@/config/constants';
 import { CONTRACTS } from '@/config/constants'

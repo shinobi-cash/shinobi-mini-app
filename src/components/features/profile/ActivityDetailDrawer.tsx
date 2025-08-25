@@ -1,4 +1,4 @@
-import type { Activity } from '../types/activity'
+import type { Activity } from '@/types/activity'
 import { 
   Drawer, 
   DrawerContent, 
@@ -6,11 +6,11 @@ import {
   DrawerTitle,
   DrawerDescription,
   DrawerClose 
-} from './ui/drawer'
+} from '../../ui/drawer'
 import { X, ExternalLink, Copy } from 'lucide-react'
 import { useState } from 'react'
 import { useBanner } from '@/contexts/BannerContext'
-import { NETWORK } from '../config/constants'
+import { NETWORK } from '@/config/constants'
 import { formatEthAmount, formatHash, formatTimestamp } from '@/utils/formatters'
 
 interface ActivityDetailDrawerProps {

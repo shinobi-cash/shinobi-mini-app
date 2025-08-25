@@ -1,5 +1,5 @@
 import { Copy, Loader2, X, Info } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '../../ui/button';
 import { 
   Drawer, 
   DrawerContent, 
@@ -7,9 +7,9 @@ import {
   DrawerTitle,
   DrawerClose, 
   DrawerDescription
-} from './ui/drawer';
+} from '../../ui/drawer';
 import { useBanner } from '@/contexts/BannerContext';
-import { formatEthAmount, formatHash } from '../utils/formatters';
+import { formatEthAmount, formatHash } from '@/utils/formatters';
 import { Note } from '@/lib/noteCache';
 
 interface TransactionPreviewDrawerProps {

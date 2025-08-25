@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button } from './ui/button'
+import { Button } from '../../ui/button'
 import { 
   Drawer, 
   DrawerContent, 
@@ -7,11 +7,11 @@ import {
   DrawerTitle,
   DrawerDescription,
   DrawerClose, 
-} from './ui/drawer'
+} from '../../ui/drawer'
 import { Key, X, Download, Copy, Eye, EyeOff, Check, FileText, ChevronLeft} from 'lucide-react'
-import { generateKeysFromRandomSeed, KeyGenerationResult} from '../utils/crypto'
+import { generateKeysFromRandomSeed, KeyGenerationResult} from '@/utils/crypto'
 import { useBanner } from "@/contexts/BannerContext"
-import SetupConvenientAuth from './auth/SetupConvenientAuth'
+import SetupConvenientAuth from './SetupConvenientAuth'
 import { getEnvironmentType } from '@/utils/environment'
 
 type CreateAccountStep = 'KeyGeneration' | 'BackupMnemonic' | 'SetupConvenientAuth'

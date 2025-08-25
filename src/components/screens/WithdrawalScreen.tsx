@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { AuthenticationGate } from './shared/AuthenticationGate';
-import { ListUnspentNotes } from './ListUnspentNotes';
-import { WithdrawNoteForm } from './WithdrawNoteForm';
+import { AuthenticationGate } from '../shared/AuthenticationGate';
+import { ListUnspentNotes } from '../features/profile/ListUnspentNotes';
+import { WithdrawNoteForm } from '../features/withdrawal/WithdrawNoteForm';
 import { Note } from '@/lib/noteCache';
 
 export const WithdrawalScreen = () => {

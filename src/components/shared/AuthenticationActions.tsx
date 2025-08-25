@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../ui/button';
-import { CreateAccountDrawer } from '../CreateAccountDrawer';
-import { LogInDrawer } from '../LogInDrawer';
+import { CreateAccountDrawer } from '../features/auth/CreateAccountDrawer';
+import { LogInDrawer } from '../features/auth/LogInDrawer';
 
 interface AuthenticationActionsProps {
   context?: 'profile' | 'deposit' | 'withdraw';

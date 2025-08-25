@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
 import { Lock, Eye, EyeOff, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBanner } from '@/contexts/BannerContext';
@@ -15,7 +15,7 @@ import {
   DrawerTitle,
   DrawerDescription,
   DrawerClose, 
-} from '../ui/drawer';
+} from '../../ui/drawer';
 
 export function PasswordAuthDrawer() {
   const { banner } = useBanner();

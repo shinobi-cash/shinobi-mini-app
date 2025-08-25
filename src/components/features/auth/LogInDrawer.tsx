@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Button } from './ui/button';
+import { Button } from '../../ui/button';
 import { 
   Drawer, 
   DrawerContent, 
@@ -14,12 +14,12 @@ import {
   DrawerTitle,
   DrawerClose,
   DrawerDescription
-} from './ui/drawer';
+} from '../../ui/drawer';
 import { X, Lock, Fingerprint, ChevronLeft } from 'lucide-react';
-import { KeyGenerationResult, restoreFromMnemonic, validateMnemonic } from '../utils/crypto';
-import { noteCache } from '../lib/noteCache';
-import { AuthSection } from './auth/AuthSection';
-import SetupConvenientAuth from './auth/SetupConvenientAuth';
+import { KeyGenerationResult, restoreFromMnemonic, validateMnemonic } from '@/utils/crypto';
+import { noteCache } from '@/lib/noteCache';
+import { AuthSection } from './AuthSection';
+import SetupConvenientAuth from './SetupConvenientAuth';
 import { isPasskeySupported } from '@/utils/environment';
 
 interface LogInDrawerProps {

@@ -1,5 +1,5 @@
 import { Home, Plus, Minus, User } from 'lucide-react'
-import { useNavigation } from '../contexts/NavigationContext'
+import { useNavigation } from '@/contexts/NavigationContext'
 
 interface NavItem {
   icon: React.ReactNode

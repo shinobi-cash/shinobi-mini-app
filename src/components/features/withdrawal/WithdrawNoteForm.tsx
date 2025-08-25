@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
+import { Button } from '../../ui/button';
+import { Input } from '../../ui/input';
 import { isAddress } from 'viem';
 import { cn } from '@/lib/utils';
 import { useBanner } from '@/contexts/BannerContext';
 import { useTransactionTracking } from '@/hooks/useTransactionTracking';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { TransactionPreviewDrawer } from './TransactionPreviewDrawer';
 import { Note } from '@/lib/noteCache';
-import { formatEthAmount } from '../utils/formatters';
+import { formatEthAmount } from '@/utils/formatters';
 import { 
   executePreparedWithdrawal,
   validateWithdrawalRequest,
@@ -17,7 +17,7 @@ import {
   type WithdrawalRequest,
   type PreparedWithdrawal,
   processWithdrawal
-} from '../services/withdrawalService';
+} from '@/services/withdrawalService';
 
 interface WithdrawNoteFormProps {
   note: Note;

@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 import { KeyGenerationResult } from '@/utils/crypto';
 import { KDF } from '@/lib/keyDerivation';

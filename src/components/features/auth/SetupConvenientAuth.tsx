@@ -1,7 +1,7 @@
 import { KeyGenerationResult } from '@/utils/crypto';
 import { noteCache } from '@/lib/noteCache';
 import { useState, useRef, useEffect } from 'react'
-import { Input } from '../ui/input';
+import { Input } from '../../ui/input';
 import { AuthSection } from './AuthSection';
 
 

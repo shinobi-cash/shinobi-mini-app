@@ -1,5 +1,5 @@
-import type { Activity } from '../types/activity'
-import { StatusDot } from './StatusDot'
+import type { Activity } from '@/types/activity'
+import { StatusDot } from '../../StatusDot'
 import { formatEthAmount, formatTimestamp } from '@/utils/formatters'
 interface ActivityRowProps {
   activity: Activity

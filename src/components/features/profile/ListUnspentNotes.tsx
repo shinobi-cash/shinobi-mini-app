@@ -1,5 +1,5 @@
 import { Loader2, Wallet, ChevronRight, Circle } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '../../ui/button';
 import { Note } from '@/lib/noteCache';
 import { useNotes } from '@/hooks/useDepositDiscovery';
 import { useAuth } from '@/contexts/AuthContext';
