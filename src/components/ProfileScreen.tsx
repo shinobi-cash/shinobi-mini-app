@@ -36,6 +36,7 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
   const { publicKey, accountKey } = useAuth();
   const [selectedNoteChain, setSelectedNoteChain] = useState<NoteChain | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
 
@@ -67,8 +68,7 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <section className="flex flex-col gap-2 flex-1">
+    <div className="flex flex-col h-full gap-2">
         {/* Summary Card */}
         <div className="flex-shrink-0">
           <div className="bg-app-surface p-5 border-t border-b border-app shadow-md relative">
@@ -105,12 +105,15 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={refresh}
-                disabled={loading}
+                onClick={() => {
+                  setIsRefreshing(true)
+                  refresh().finally(() => setIsRefreshing(false))
+                }}
+                disabled={isRefreshing || loading}
                 className="h-8 w-8 p-0 text-app-secondary hover:text-app-primary"
                 title="Refresh transaction history"
               >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-4 h-4 ${isRefreshing || loading ? 'animate-spin' : ''}`} />
               </Button>
             </div>
           </div>
@@ -157,7 +160,6 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
             </div>
           </div>
         </div>
-      </section>
 
       {/* Note Chain Detail Drawer */}
       <NoteChainDetailDrawer
@@ -176,7 +178,6 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
           <p className="text-sm text-app-secondary">Create or import an account to generate cash notes</p>
         </div>
       )}
-
     </div>
   );
 }

@@ -79,44 +79,6 @@ export const ActivityFeed = ({
     return () => observer.disconnect()
   }, [onFetchMore, hasNextPage, isFetchingMore])
 
-  // Pull-to-refresh (overscroll detection)
-  useEffect(() => {
-    if (!onRefresh) return
-    let startY = 0
-    let pulling = false
-
-    const handleTouchStart = (e: TouchEvent) => {
-      if ((scrollContainerRef.current?.scrollTop || 0) === 0) {
-        startY = e.touches[0].clientY
-        pulling = true
-      }
-    }
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!pulling) return
-      const diff = e.touches[0].clientY - startY
-      if (diff > 50 && !isRefreshing) {
-        setIsRefreshing(true)
-        onRefresh()
-          .finally(() => setIsRefreshing(false))
-        pulling = false
-      }
-    }
-
-    const handleTouchEnd = () => {
-      pulling = false
-    }
-
-    window.addEventListener('touchstart', handleTouchStart)
-    window.addEventListener('touchmove', handleTouchMove)
-    window.addEventListener('touchend', handleTouchEnd)
-
-    return () => {
-      window.removeEventListener('touchstart', handleTouchStart)
-      window.removeEventListener('touchmove', handleTouchMove)
-      window.removeEventListener('touchend', handleTouchEnd)
-    }
-  }, [onRefresh, isRefreshing])
 
   return (
     <div className="flex flex-col h-full gap-2">
@@ -164,10 +126,6 @@ export const ActivityFeed = ({
         </div>
         <div className="flex-1 flex flex-col bg-app-surface border-t border-b border-app shadow-md overflow-hidden">
           <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
-            {isRefreshing && (
-              <div className="text-center py-2 text-app-tertiary text-sm">Refreshing...</div>
-            )}
-
             {loading && activities.length === 0 ? (
               <div className="flex items-center justify-center py-8">
                 <p className="text-app-secondary">Loading activities...</p>

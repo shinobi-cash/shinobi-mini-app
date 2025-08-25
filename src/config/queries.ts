@@ -290,10 +290,7 @@ export const GET_POOL_STATS = gql`
 export const HEALTH_CHECK = gql`
   query HealthCheck {
     _meta {
-      block {
-        number
-        timestamp
-      }
+      status
     }
   }
 `;

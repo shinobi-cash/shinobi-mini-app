@@ -18,7 +18,8 @@ import {
   GET_POOL_DEPOSITS,
   GET_POOL_CONFIG,
   GET_POOL_STATS,
-  HEALTH_CHECK
+  HEALTH_CHECK,
+  GET_SUBGRAPH_META
 } from '../config/queries';
 
 // ============ TYPES ============
@@ -356,9 +357,46 @@ export async function checkIndexerHealth(): Promise<boolean> {
       fetchPolicy: INDEXER_FETCH_POLICY,
     });
 
-    return !!result.data?._meta?.block;
+    return !!result.data?._meta?.status;
   } catch (error) {
     console.error('Indexer health check failed:', error);
     return false;
+  }
+}
+
+/**
+ * Get latest indexed block from Ponder meta status
+ */
+export async function fetchLatestIndexedBlock(): Promise<{
+  blockNumber: string;
+  timestamp: string;
+} | null> {
+  try {
+    const result = await apolloClient.query({
+      query: HEALTH_CHECK,
+      fetchPolicy: INDEXER_FETCH_POLICY,
+    });
+
+    const status = result.data?._meta?.status;
+    if (!status) {
+      return null;
+    }
+
+    // Find the first chain with block data
+    // Since we don't know the exact chain name, get the first available one
+    for (const chainName of Object.keys(status)) {
+      const chainStatus = status[chainName];
+      if (chainStatus?.block) {
+        return {
+          blockNumber: chainStatus.block.number.toString(),
+          timestamp: chainStatus.block.timestamp.toString(),
+        };
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Failed to fetch latest indexed block:', error);
+    return null;
   }
 }
