@@ -15,11 +15,12 @@ import {
   DrawerClose,
   DrawerDescription
 } from './ui/drawer';
-import { X, Lock, Fingerprint } from 'lucide-react';
+import { X, Lock, Fingerprint, ChevronLeft } from 'lucide-react';
 import { KeyGenerationResult, restoreFromMnemonic, validateMnemonic } from '../utils/crypto';
 import { noteCache } from '../lib/noteCache';
 import { AuthSection } from './auth/AuthSection';
 import SetupConvenientAuth from './auth/SetupConvenientAuth';
+import { isPasskeySupported } from '@/utils/environment';
 
 interface LogInDrawerProps {
   open: boolean;
@@ -133,23 +134,15 @@ function LoginWithBackupPhrase( {onRecoverAccountKey}: {onRecoverAccountKey: (ke
   );
 }
 
-// Detect if running in iframe/Farcaster environment
-const isIframeEnvironment = () => {
-  try {
-    return window.self !== window.top;
-  } catch {
-    return true; // If we can't access window.top, assume iframe
-  }
-};
+// Use centralized environment detection
 
 export function LogInDrawer({ 
   open,
   onOpenChange,
 }: LogInDrawerProps) {
   const [currentStep, setCurrentStep] = useState<AuthStep>('ChooseLoginMethod');
-  const [isIframe] = useState(isIframeEnvironment());
+  const [shouldShowPasskey] = useState(isPasskeySupported());
   const [loginKey, setLoginKey] = useState<KeyGenerationResult | null>(null)
-  const [hasEncryptedAccount, setHasEncryptedAccount] = useState(false);
   const [, setAvailableAccounts] = useState<string[]>([]);
 
   // Load available accounts when drawer opens
@@ -159,7 +152,6 @@ export function LogInDrawer({
         try {
           const accounts = await noteCache.listAccountNames();
           setAvailableAccounts(accounts);
-          setHasEncryptedAccount(accounts.length > 0);
           
         } catch (error) {
           console.error('Failed to load accounts:', error);
@@ -189,50 +181,54 @@ export function LogInDrawer({
     setLoginKey(null)
   }
 
+  const handleBack = () => {
+    switch (currentStep) {
+      case 'LoginWithConvenientAuth':
+      case 'LoginWithBackupPhrase':
+        setCurrentStep('ChooseLoginMethod');
+        break;
+      case 'SetupConvenientAuth':
+        setCurrentStep('LoginWithBackupPhrase');
+        break;
+      default:
+        setCurrentStep('ChooseLoginMethod');
+    }
+  }
+
+  const canGoBack = currentStep !== 'ChooseLoginMethod';
+
   const renderContent = () => {
     switch (currentStep) {
       case 'ChooseLoginMethod':
         return (
           <div className="space-y-4">
+            {/* Always show password/passkey option */}
+            <Button 
+              onClick={() => setCurrentStep('LoginWithConvenientAuth')}
+              className="w-full"
+              size="lg"
+            >
+              {shouldShowPasskey ? (
+                <>
+                  <Fingerprint className="w-4 h-4 mr-2" />
+                  Continue with Passkey
+                </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4 mr-2" />
+                  Continue with Password
+                </>
+              )}
+            </Button>
 
-            {hasEncryptedAccount ? (
-              <>
-                <Button 
-                  onClick={() => setCurrentStep('LoginWithConvenientAuth')}
-                  className="w-full"
-                  size="lg"
-                >
-                  {!isIframe ? (
-                    <>
-                      <Fingerprint className="w-4 h-4 mr-2" />
-                      Continue with Passkey
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-4 h-4 mr-2" />
-                      Continue with Password
-                    </>
-                  )}
-                </Button>
-
-                <Button 
-                  variant="outline"
-                  onClick={() => setCurrentStep('LoginWithBackupPhrase')}
-                  className="w-full"
-                >
-                  Continue with Backup Phrase
-                </Button>
-              </>
-            ) : (
-              <Button 
-                variant="outline"
-                onClick={() => setCurrentStep('LoginWithBackupPhrase')}
-                className="w-full"
-                size="lg"
-              >
-                 Continue with Backup Phrase
-              </Button>
-            )}
+            {/* Always show backup phrase option */}
+            <Button 
+              variant="outline"
+              onClick={() => setCurrentStep('LoginWithBackupPhrase')}
+              className="w-full"
+            >
+              Continue with Backup Phrase
+            </Button>
           </div>
         );
 
@@ -265,7 +261,7 @@ export function LogInDrawer({
   const getTitle = () => {
     switch (currentStep) {
       case 'ChooseLoginMethod': return 'Choose Login Method'
-      case 'LoginWithConvenientAuth': return !isIframe ? 'Passkey' : 'Password'
+      case 'LoginWithConvenientAuth': return shouldShowPasskey ? 'Passkey' : 'Password'
       case 'LoginWithBackupPhrase': return 'Account Recovery'
       case 'SetupConvenientAuth': return 'Setup Passkey'
       default: return 'Authentication'
@@ -275,35 +271,54 @@ export function LogInDrawer({
   const getDescription = () => {
     switch (currentStep) {
       case 'ChooseLoginMethod': return 'Choose how you want to login to your account'
-      case 'LoginWithConvenientAuth': return !isIframe ? 'Use biometric authentication' : 'Enter your password to continue'
-      case 'LoginWithBackupPhrase': return 'Enter your 12-word backup phrase to recover access'
+      case 'LoginWithConvenientAuth': return shouldShowPasskey ? 'Use biometric authentication' : 'Enter your Account name and password to continue'
+      case 'LoginWithBackupPhrase': return 'Enter your mnemonic phrase to recover'
       case 'SetupConvenientAuth': return 'Configure convenient access for future logins'
       default: return ''
     }
   };
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
+    <Drawer open={open} onOpenChange={(newOpen) => {
+      if (!newOpen) {
+        resetState();
+      }
+      onOpenChange(newOpen);
+    }}>
       <DrawerContent className="bg-app-background border-app max-h-[85vh]">
         {/* iOS-style drag handle */}
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-app-tertiary/30" />
         
         <DrawerHeader className="pb-0 px-4 pt-2">
           <div className="flex items-center justify-between">
-            <DrawerTitle className="text-lg font-semibold text-app-primary tracking-tight">
-              {getTitle()}
-            </DrawerTitle>
+            <div className="flex items-center gap-2">
+              {canGoBack && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBack}
+                  className="h-8 w-8 p-0 hover:bg-app-surface-hover transition-colors duration-200"
+                >
+                  <ChevronLeft className="h-4 w-4 text-app-secondary" />
+                </Button>
+              )}
+              <DrawerTitle className="text-lg font-semibold text-app-primary tracking-tight text-left">
+                {getTitle()}
+              </DrawerTitle>
+            </div>
             <DrawerClose className="h-8 w-8 flex items-center justify-center hover:bg-app-surface-hover transition-colors duration-200">
               <X className="h-4 w-4 text-app-secondary" />
             </DrawerClose>
           </div>
-          <DrawerDescription className="text-sm items-start text-app-secondary">
+          <DrawerDescription className="text-sm text-left text-app-secondary">
             {getDescription()}
           </DrawerDescription>
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-4 pb-6">
-          {renderContent()}
+          <div className="p-2">
+            {renderContent()}
+          </div>
 
           <div className="text-center mt-4">
             <p className="text-xs text-app-tertiary">

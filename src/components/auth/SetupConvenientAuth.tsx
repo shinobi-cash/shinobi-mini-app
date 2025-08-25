@@ -49,7 +49,7 @@ export default function SetupConvenientAuth({
     return null;
   };
   return (
-    <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-4">
+    <div className="space-y-4">
       <Input
         id="account-name"
         type="text"

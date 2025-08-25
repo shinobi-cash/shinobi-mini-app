@@ -9,6 +9,7 @@ import { PasskeySetupSection } from './PasskeySetupSection';
 import { PasskeyLoginSection } from './PasskeyLoginSection';
 import { PasswordSetupSection } from './PasswordSetupSection';
 import { PasswordLoginSection } from './PasswordLoginSection';
+import { isPasskeySupported } from '@/utils/environment';
 
 interface AuthSectionSetupProps {
   mode: 'setup';
@@ -25,18 +26,11 @@ interface AuthSectionLoginProps {
 
 type AuthSectionProps = AuthSectionSetupProps | AuthSectionLoginProps;
 
-// Detect if running in iframe/Farcaster environment
-const isIframeEnvironment = () => {
-  try {
-    return window.self !== window.top;
-  } catch {
-    return true; // If we can't access window.top, assume iframe
-  }
-};
+// Use centralized environment detection
 
 export function AuthSection(props: AuthSectionProps) {
   // Determine which auth method to show based on environment
-  const shouldShowPasskey = !isIframeEnvironment();
+  const shouldShowPasskey = isPasskeySupported();
 
   if (props.mode === 'setup') {
     // Setup flow - requires account name and generated keys

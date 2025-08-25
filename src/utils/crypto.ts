@@ -3,6 +3,8 @@
  * Handles passkey creation, message signing, and key generation
  */
 
+import { isPasskeySupported } from './environment'
+
 import * as bip39 from 'bip39'
 import { ethers } from 'ethers'
 
@@ -121,7 +123,7 @@ export async function signWithPasskey(
   credentialId: string,
   message: string
 ): Promise<string> {
-  if (!navigator?.credentials?.get) {
+  if (!isPasskeySupported() || !navigator?.credentials?.get) {
     throw new Error('WebAuthn not supported in this browser')
   }
 

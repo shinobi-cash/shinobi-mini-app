@@ -8,10 +8,11 @@ import {
   DrawerDescription,
   DrawerClose, 
 } from './ui/drawer'
-import { Key, X, Download, Copy, Eye, EyeOff, Check, FileText} from 'lucide-react'
+import { Key, X, Download, Copy, Eye, EyeOff, Check, FileText, ChevronLeft} from 'lucide-react'
 import { generateKeysFromRandomSeed, KeyGenerationResult} from '../utils/crypto'
 import { toast } from 'sonner'
 import SetupConvenientAuth from './auth/SetupConvenientAuth'
+import { getEnvironmentType } from '@/utils/environment'
 
 type CreateAccountStep = 'KeyGeneration' | 'BackupMnemonic' | 'SetupConvenientAuth'
 
@@ -20,14 +21,7 @@ interface CreateAccountDrawerProps {
   onOpenChange: (open: boolean) => void
 }
 
-// Detect if running in iframe/Farcaster environment
-const isIframeEnvironment = () => {
-  try {
-    return window.self !== window.top;
-  } catch {
-    return true; // If we can't access window.top, assume iframe
-  }
-};
+// Use centralized environment detection;
 
 function KeyGeneration({ onKeyGenerationComplete }: {onKeyGenerationComplete: (keys: KeyGenerationResult) => void}) {
   const [progress, setProgress] = useState(0)
@@ -81,7 +75,7 @@ function KeyGeneration({ onKeyGenerationComplete }: {onKeyGenerationComplete: (k
   if (!isGenerating){
     return <div className="space-y-4">
       <div className="bg-app-surface rounded-xl p-4 border border-app shadow-sm">
-        <div className="text-center">
+        <div className="text-left">
           <p className="text-sm text-app-secondary mb-4">
             {`You will receive a secure recovery phrase. Please back it up safely—this is the only way to restore your account.`}
           </p>
@@ -135,7 +129,7 @@ function BackupMnemonic({
   const [isRevealed, setIsRevealed] = useState(false)
   const [hasConfirmed, setHasConfirmed] = useState(false)
   const [hasCopied, setHasCopied] = useState(false)
-  const [canDownload] = useState(!isIframeEnvironment())
+  const [canDownload] = useState(getEnvironmentType() === 'web' || getEnvironmentType() === 'standalone')
   const displayMnemonic = generatedKeys?.mnemonic
   const handleCopyMnemonic = async () => {
     if (!displayMnemonic) return
@@ -338,6 +332,21 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
     setGeneratedKeys(null)
   }
 
+  const handleBack = () => {
+    switch (currentStep) {
+      case 'BackupMnemonic':
+        setCurrentStep('KeyGeneration');
+        break;
+      case 'SetupConvenientAuth':
+        setCurrentStep('BackupMnemonic');
+        break;
+      default:
+        setCurrentStep('KeyGeneration');
+    }
+  }
+
+  const canGoBack = currentStep !== 'KeyGeneration';
+
   const renderContent = () => {
     switch (currentStep) {
       case 'KeyGeneration':
@@ -375,8 +384,8 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
 
   const getDescription = () => {
     switch (currentStep) {
-      case 'KeyGeneration': return 'Generate secure cryptographic keys for your new account'
-      case 'BackupMnemonic': return 'Save your recovery phrase to restore account access'
+      case 'KeyGeneration': return 'Generate cryptographic keys locally'
+      case 'BackupMnemonic': return 'Save your mnemonic phrase to recover account'
       case 'SetupConvenientAuth': return 'Choose your preferred authentication method for account access'
       default: return 'Create a new secure account'
     }
@@ -385,28 +394,49 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
   return (
     <Drawer 
       open={open} 
-      onOpenChange={(_open) => { resetState(); onOpenChange(_open)}}
+      onOpenChange={(newOpen) => {
+        if (!newOpen) {
+          resetState();
+        }
+        onOpenChange(newOpen);
+      }}
     >
       <DrawerContent className="bg-app-background border-app max-h-[85vh]">
         {/* iOS-style drag handle */}
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-app-tertiary/30" />
         
-        <DrawerHeader className="pb-0 px-4 pt-2 flex-row items-center justify-between">
-          <div className="flex-1">
-            <DrawerTitle className="text-lg font-semibold text-app-primary tracking-tight">
-              {getTitle()}
-            </DrawerTitle>
-            <DrawerDescription className="text-sm text-app-secondary mt-1">
-              {getDescription()}
-            </DrawerDescription>
+        <DrawerHeader className="pb-0 px-4 pt-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {canGoBack && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBack}
+                  className="h-8 w-8 p-0 hover:bg-app-surface-hover transition-colors duration-200"
+                >
+                  <ChevronLeft className="h-4 w-4 text-app-secondary" />
+                </Button>
+              )}
+              <div className="flex-1">
+                <DrawerTitle className="text-lg font-semibold text-app-primary tracking-tight text-left">
+                  {getTitle()}
+                </DrawerTitle>
+                <DrawerDescription className="text-sm text-left text-app-secondary mt-1">
+                  {getDescription()}
+                </DrawerDescription>
+              </div>
+            </div>
+            <DrawerClose className="h-8 w-8 flex items-center justify-center hover:bg-app-surface-hover transition-colors duration-200">
+              <X className="h-4 w-4 text-app-secondary" />
+            </DrawerClose>
           </div>
-          <DrawerClose className="h-8 w-8 flex items-center justify-center hover:bg-app-surface-hover transition-colors duration-200 ml-4">
-            <X className="h-4 w-4 text-app-secondary" />
-          </DrawerClose>
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-4 pb-6">
-          {renderContent()}
+          <div className="p-2">
+            {renderContent()}
+          </div>
         </div>
       </DrawerContent>
     </Drawer>
