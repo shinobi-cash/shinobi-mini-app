@@ -9,7 +9,7 @@ import { NETWORK } from '../config/constants';
 import { useDepositCommitment } from '../hooks/useDepositCommitment';
 import { useDepositTransaction } from '../hooks/useDepositTransaction';
 import { toast } from 'sonner';
-import { showTransactionSuccessToast } from '../utils/toastUtils';
+import { useTransactionTracking } from './AppBanner';
 
 const DEPOSIT_AMOUNTS= [
     { value: "0.01", label: "0.01 ETH" },
@@ -42,6 +42,7 @@ const DepositForm = () => {
   const [amount, setAmount] = useState('');
   const shownToastsRef = useRef(new Set<string>());
   const [selectedAsset] = useState({ symbol: 'ETH', name: 'Ethereum', icon: '⚫' });
+  const { trackTransaction } = useTransactionTracking();
   
   const isOnCorrectNetwork = chainId === NETWORK.CHAIN_ID;
   const { noteData, isGeneratingNote, error: noteError, regenerateNote } = useDepositCommitment();
@@ -82,7 +83,8 @@ const DepositForm = () => {
       // Mark this transaction hash as shown
       shownToastsRef.current.add(transactionHash);
       
-      showTransactionSuccessToast(transactionHash, 'Deposit Successful!', 7000);
+      // Track transaction for indexing status (replaces toast)
+      trackTransaction(transactionHash);
       
       // Reset form for next deposit
       setTimeout(() => {

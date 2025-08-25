@@ -5,7 +5,7 @@ import { Input } from './ui/input';
 import { isAddress } from 'viem';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { showTransactionSuccessToast } from '../utils/toastUtils';
+import { useTransactionTracking } from './AppBanner';
 import { useAuth } from '../contexts/AuthContext';
 import { TransactionPreviewDrawer } from './TransactionPreviewDrawer';
 import { Note } from '@/lib/noteCache';
@@ -31,6 +31,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
 
   // Get auth context for account keys
   const { accountKey } = useAuth();
+  const { trackTransaction } = useTransactionTracking();
 
   // State for withdrawal preparation
   const [isPreparing, setIsPreparing] = useState(false);
@@ -121,8 +122,8 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
       
       console.log('✅ Withdrawal executed successfully:', transactionHash);
       
-      // Show success toast with transaction link
-      showTransactionSuccessToast(transactionHash, 'Withdrawal Completed!');
+      // Track transaction for indexing status (replaces toast)
+      trackTransaction(transactionHash);
       
       setShowPreview(false);
       setIsExecuting(false);
