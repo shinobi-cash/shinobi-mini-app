@@ -1,4 +1,5 @@
 import { AppHeader } from './AppHeader';
+import { AppBanner } from './AppBanner';
 import { BottomNavBar } from './BottomNavBar';
 import { AppLayout } from './layout/ScreenLayout';
 import { ScreenManager, ScreenConfig } from './layout/ScreenManager';
@@ -89,6 +90,7 @@ function MainContent() {
   return (
     <AppLayout
       header={<AppHeader />}
+      banner={<AppBanner />}
       bottomNav={<BottomNavBar />}
     >
       <ScreenManager 

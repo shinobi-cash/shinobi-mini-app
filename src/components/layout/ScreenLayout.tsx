@@ -9,21 +9,29 @@ import React from 'react';
 
 /**
  * Main App Container - Fixed viewport like native apps
- * Contains header, content area, and bottom navigation
+ * Contains header, banner, content area, and bottom navigation
  */
 interface AppLayoutProps {
   header?: React.ReactNode;
+  banner?: React.ReactNode;
   bottomNav?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export function AppLayout({ header, bottomNav, children }: AppLayoutProps) {
+export function AppLayout({ header, banner, bottomNav, children }: AppLayoutProps) {
   return (
     <div className="h-screen h-dvh flex flex-col bg-app-background overflow-hidden">
       {/* Header - Fixed at top */}
       {header && (
         <div className="flex-shrink-0">
           {header}
+        </div>
+      )}
+      
+      {/* Banner - Fixed below header */}
+      {banner && (
+        <div className="flex-shrink-0">
+          {banner}
         </div>
       )}
       
