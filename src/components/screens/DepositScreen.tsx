@@ -3,11 +3,12 @@ import { AuthenticationGate } from '../shared/AuthenticationGate';
 import { WalletGate } from '../shared/WalletGate';
 import { ChevronDown, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { formatEther } from 'viem';
 import { NETWORK } from '../../config/constants';
 import { useDepositCommitment } from '../../hooks/useDepositCommitment';
 import { useDepositTransaction } from '../../hooks/useDepositTransaction';
+import { useDepositForm } from '../../hooks/useDepositForm';
 import { useBanner } from "@/contexts/BannerContext";
 import { useTransactionTracking } from '@/hooks/useTransactionTracking';
 
@@ -39,11 +40,12 @@ const DepositForm = () => {
   const { address } = useAccount();
   const { data: balance } = useBalance({ address });
   const chainId = useChainId();
-  const [amount, setAmount] = useState('');
   const shownBannersRef = useRef(new Set<string>());
-  const [selectedAsset] = useState({ symbol: 'ETH', name: 'Ethereum', icon: '⚫' });
   const { trackTransaction } = useTransactionTracking();
   const { banner } = useBanner();
+  
+  // Use deposit form hook for form management
+  const form = useDepositForm({ balance });
   
   const isOnCorrectNetwork = chainId === NETWORK.CHAIN_ID;
   const { noteData, isGeneratingNote, error: noteError, regenerateNote } = useDepositCommitment();
@@ -87,40 +89,32 @@ const DepositForm = () => {
       // Reset form for next deposit
       setTimeout(() => {
         reset();
-        setAmount('');
+        form.reset();
       }, 1000);
     }
-  }, [isSuccess, transactionHash, reset]);
+  }, [isSuccess, transactionHash, reset, form]);
 
-  const handleAmountChange = (value: string) => {
-    // Only allow numbers and decimal point
-    if (/^\d*\.?\d*$/.test(value)) {
-      setAmount(value);
-    }
-  };
-
-  const handleQuickAmount = (quickAmount: string) => {
-    setAmount(quickAmount);
-  };
+  // Extract form handlers
+  const { handleAmountChange, handleQuickAmount } = form;
 
   const handleDeposit = async () => {
-    if (!noteData || !amount) return;
+    if (!noteData || !form.amount) return;
     
     // Clear any previous errors
     clearError();
     
     try {
-      await deposit(amount, noteData);
+      await deposit(form.amount, noteData);
     } catch (error) {
       console.error('Deposit failed:', error);
     }
   };
 
-  const isValidAmount = amount && parseFloat(amount) > 0;
-  const hasBalance = balance && parseFloat(formatEther(balance.value)) > 0;
-  const hasNoteData = noteData !== null;
+  // Extract form validation state
+  const { amount, selectedAsset, isValidAmount, hasBalance } = form;
   const isTransacting = isLoading;
-  const canDeposit = isValidAmount && hasBalance && parseFloat(amount) <= parseFloat(formatEther(balance?.value || 0n)) && isOnCorrectNetwork && hasNoteData && !isTransacting;
+  const hasNoteData = noteData !== null;
+  const canDepositAmount = form.canDeposit(isOnCorrectNetwork, noteData, isTransacting);
 
   return (
     <div className="h-full flex flex-col px-4 py-4">
@@ -212,7 +206,7 @@ const DepositForm = () => {
       {/* Deposit Button */}
       <div className="mt-auto">
         <Button
-          disabled={!canDeposit}
+          disabled={!canDepositAmount}
           onClick={handleDeposit}
           className="w-full h-11 rounded-xl text-sm font-medium"
           size="lg"

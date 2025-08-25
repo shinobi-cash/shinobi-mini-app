@@ -1,23 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
-import { isAddress } from 'viem';
 import { cn } from '@/lib/utils';
-import { useBanner } from '@/contexts/BannerContext';
-import { useTransactionTracking } from '@/hooks/useTransactionTracking';
-import { useAuth } from '@/contexts/AuthContext';
+import { useWithdrawalForm } from '@/hooks/useWithdrawalForm';
+import { useWithdrawalFlow } from '@/hooks/useWithdrawalFlow';
 import { TransactionPreviewDrawer } from './TransactionPreviewDrawer';
 import { Note } from '@/lib/noteCache';
 import { formatEthAmount } from '@/utils/formatters';
-import { 
-  executePreparedWithdrawal,
-  validateWithdrawalRequest,
-  calculateWithdrawalAmounts,
-  type WithdrawalRequest,
-  type PreparedWithdrawal,
-  processWithdrawal
-} from '@/services/withdrawalService';
+import { calculateWithdrawalAmounts } from '@/services/withdrawalService';
 
 interface WithdrawNoteFormProps {
   note: Note;
@@ -25,25 +16,14 @@ interface WithdrawNoteFormProps {
 }
 
 export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
-  const { banner } = useBanner();
-  const [withdrawAmount, setWithdrawAmount] = useState('');
-  const [recipientAddress, setRecipientAddress] = useState('');
-  const [showPreview, setShowPreview] = useState(false);
+  // Use form hook for validation and state management
+  const form = useWithdrawalForm({ note });
+  
+  // Use withdrawal flow hook for transaction management
+  const withdrawalFlow = useWithdrawalFlow({ note });
 
-  // Get auth context for account keys
-  const { accountKey } = useAuth();
-  const { trackTransaction } = useTransactionTracking();
-
-  // State for withdrawal preparation
-  const [isPreparing, setIsPreparing] = useState(false);
-  const [preparationError, setPreparationError] = useState<string | null>(null);
-  const [preparedWithdrawal, setPreparedWithdrawal] = useState<PreparedWithdrawal | null>(null);
-  const [isExecuting, setIsExecuting] = useState(false);
-
-  // Calculate values for validation and display
-  // note.amount is in wei (string), convert to ETH for calculations
-  const availableBalance = parseFloat(formatEthAmount(note.amount));
-  const withdrawAmountNum = parseFloat(withdrawAmount) || 0;
+  // Extract form values for easier access
+  const { withdrawAmount, recipientAddress, withdrawAmountNum, availableBalance, isValidAmount, isValidRecipient } = form;
   
   // Use service to calculate withdrawal amounts
   const { executionFee, youReceive } = withdrawAmount 
@@ -53,99 +33,24 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
   // Remaining balance = original amount - withdrawal amount (execution fee comes from withdrawal)
   const remainingBalance = availableBalance - withdrawAmountNum;
 
-  // Basic form validation (for UI feedback)
-  const isValidAmount = withdrawAmountNum > 0 && withdrawAmountNum <= availableBalance;
-  const isValidRecipient = isAddress(recipientAddress);
-
-  // Handle amount input validation
-  const handleAmountChange = (value: string) => {
-    // Only allow numbers and decimal point
-    if (/^\d*\.?\d*$/.test(value)) {
-      setWithdrawAmount(value);
-    }
-  };
-
-  // Handle max button
-  const handleMaxClick = () => {
-    setWithdrawAmount(availableBalance.toString());
-  };
-
-  // Handle withdrawal preparation using our clean service
-  const handlePreviewWithdrawal = async () => {
-    try {
-      setIsPreparing(true);
-      setPreparationError(null);
-      
-      // Create withdrawal request
-      const withdrawalRequest: WithdrawalRequest = {
-        note,
-        withdrawAmount,
-        recipientAddress,
-        accountKey:accountKey!,
-      };
-      
-      // Validate the request first
-      validateWithdrawalRequest(withdrawalRequest);
-      
-      // Prepare the withdrawal using our service
-      console.log('🚀 Preparing withdrawal...');
-      const prepared = await processWithdrawal(withdrawalRequest);
-      
-      // Set both states together to avoid race condition
-      setPreparedWithdrawal(prepared);
-      setShowPreview(true);
-      setIsPreparing(false);
-      
-      console.log('✅ Withdrawal prepared successfully');
-      console.log('📋 Setting showPreview to true, prepared data:', !!prepared);
-      console.log('💰 Fee calculation debug:', { executionFee, youReceive, withdrawAmount });
-      
-    } catch (error) {
-      console.error('❌ Failed to prepare withdrawal:', error);
-      setIsPreparing(false);
-      setPreparationError(error instanceof Error ? error.message : 'Failed to prepare withdrawal');
-      banner.error('Failed to prepare withdrawal');
-    }
-  };
-
-  // Execute the withdrawal transaction
-  const handleExecuteTransaction = async () => {
-    if (!preparedWithdrawal) {
-      banner.error('No prepared withdrawal found');
-      return;
-    }
-
-    try {
-      setIsExecuting(true);
-      
-      console.log('🚀 Executing withdrawal transaction...');
-      const transactionHash = await executePreparedWithdrawal(preparedWithdrawal);
-      
-      console.log('✅ Withdrawal executed successfully:', transactionHash);
-      
-      // Track transaction for indexing status (replaces banner)
-      trackTransaction(transactionHash);
-      
-      setShowPreview(false);
-      setIsExecuting(false);
-      
-    } catch (error) {
-      console.error('❌ Failed to execute withdrawal:', error);
-      setIsExecuting(false);
-      banner.error('Failed to execute withdrawal');
-    }
-  };
+  // Form handlers now use the extracted hook
+  const { handleAmountChange, handleMaxClick, setRecipientAddress } = form;
+  
+  // Extract withdrawal flow handlers and state
+  const { 
+    showPreview, 
+    isPreparing, 
+    isExecuting, 
+    handlePreviewWithdrawal, 
+    handleExecuteTransaction, 
+    closePreview, 
+    resetStates 
+  } = withdrawalFlow;
 
   // Auto-reset all states when form values change
   useEffect(() => {
-    if (preparedWithdrawal || preparationError) {
-      setPreparedWithdrawal(null);
-      setPreparationError(null);
-    }
-    if (showPreview) {
-      setShowPreview(false);
-    }
-  }, [withdrawAmount, recipientAddress]);
+    resetStates();
+  }, [withdrawAmount, recipientAddress, resetStates]);
 
   return (
     <div className="h-full flex flex-col px-4 py-4">
@@ -195,7 +100,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setWithdrawAmount((availableBalance * 0.5).toString())}
+              onClick={() => form.handlePercentageClick(0.5)}
               className="rounded-full px-3 py-1 text-xs"
             >
               50%
@@ -203,7 +108,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setWithdrawAmount((availableBalance * 0.25).toString())}
+              onClick={() => form.handlePercentageClick(0.25)}
               className="rounded-full px-3 py-1 text-xs"
             >
               25%
@@ -239,7 +144,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
       {/* Action Button */}
       <div className="mt-auto">
         <Button
-          onClick={handlePreviewWithdrawal}
+          onClick={() => handlePreviewWithdrawal(withdrawAmount, recipientAddress)}
           disabled={
             !isValidAmount || 
             !isValidRecipient || 
@@ -269,7 +174,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
       {showPreview && (
         <TransactionPreviewDrawer
           isOpen={showPreview}
-          onClose={() => setShowPreview(false)}
+          onClose={closePreview}
           onConfirm={handleExecuteTransaction}
           note={note}
           withdrawAmount={withdrawAmount}
