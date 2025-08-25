@@ -71,27 +71,31 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
     <div className="flex flex-col h-full gap-2">
         {/* Summary Card */}
         <div className="flex-shrink-0">
-          <div className="bg-app-surface p-5 border-t border-b border-app shadow-md relative">
-            {/* Sign Out Button */}
+          <div className="flex justify-between items-center bg-app-surface p-3 border-t border-b border-app shadow-md">
+            <div className="flex gap-6">
+              <div className="flex flex-col">
+                <p className="text-sm font-semibold text-app-secondary mb-1">Unspent</p>
+                <p className="text-xl font-bold text-app-primary tabular-nums">
+                  {unspentNotes}
+                </p>
+              </div>
+              <div className="flex flex-col">
+                <p className="text-sm font-semibold text-app-secondary mb-1">Spent</p>
+                <p className="text-xl font-bold text-app-primary tabular-nums">
+                  {noteChains.length - unspentNotes}
+                </p>
+              </div>
+            </div>
+            
             <Button
               variant="ghost"
               size="sm"
               onClick={onSignOut}
               title="Sign out of account"
-              className="absolute top-3 right-3 w-8 h-8 p-0 rounded-full text-app-tertiary hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+              className="w-8 h-8 p-0 rounded-full text-app-tertiary hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
             >
               <UserX className="w-4 h-4" />
             </Button>
-            
-            <div className="text-center">
-              <h3 className="text-base font-semibold text-app-secondary mb-2">Privacy Notes</h3>
-              <p className="text-3xl font-bold text-app-primary tabular-nums mb-2">
-                {unspentNotes}
-              </p>
-              <p className="text-base text-app-tertiary">
-                available to withdraw
-              </p>
-            </div>
           </div>
         </div>
 
@@ -99,7 +103,7 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
         <div className="flex-1 flex flex-col min-h-0 gap-2">
           <div className="flex-shrink-0 bg-app-surface border-b border-app shadow-md">
             <div className="flex items-center justify-between py-3 px-4">
-              <h2 className="text-lg font-semibold text-app-secondary tracking-tight flex-1 text-center">
+              <h2 className="text-lg font-semibold text-app-secondary tracking-tight flex-1">
                 Transaction History
               </h2>
               <Button
@@ -118,7 +122,7 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
             </div>
           </div>
           {/* Scrollable History Table */}
-          <div className="flex-1 flex flex-col bg-app-surface border-t border-b border-app shadow-md overflow-hidden">
+          <div className="flex-1 flex flex-col bg-app-surface border-b border-app shadow-md overflow-hidden">
             <div className="flex-1 overflow-y-auto">
               {loading ? (
                 <div className="flex items-center justify-center py-8">

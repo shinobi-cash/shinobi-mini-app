@@ -84,14 +84,17 @@ export const ActivityFeed = ({
     <div className="flex flex-col h-full gap-2">
       {/* Total Deposits */}
       <div className="flex-shrink-0">
-        <div className="bg-app-surface p-5 border-t border-b border-app shadow-md">
-          <div className="text-center">
-            <h3 className="text-base font-semibold text-app-secondary mb-2">Total Deposits</h3>
-            <p className="text-3xl font-bold text-app-primary tabular-nums mb-2">
-              {poolStatsLoading ? '...' : `${formatEthAmount(totalDeposits)} ETH`}
+        <div className="flex justify-between bg-app-surface p-3 border-t border-b border-app shadow-md">
+          <div className="flex flex-col">
+            <p className="text-sm font-semibold text-app-secondary mb-1">Deposits</p>
+            <p className="text-xl font-bold text-app-primary tabular-nums">
+              {poolStatsLoading ? '...' : `${formatEthAmount(totalDeposits, {decimals:4})} ETH`}
             </p>
-            <p className="text-base text-app-tertiary">
-              {poolStatsLoading ? '...' : `${memberCount} member${memberCount !== 1 ? 's' : ''}`}
+          </div>
+          <div className="flex flex-col text-right">
+            <p className="text-sm font-semibold text-app-secondary mb-1">Count</p>
+            <p className="text-xl font-bold text-app-primary tabular-nums">
+              {poolStatsLoading ? '...' : `${memberCount}`}
             </p>
           </div>
         </div>
@@ -101,7 +104,7 @@ export const ActivityFeed = ({
       <div className="flex-1 flex flex-col min-h-0 gap-2">
         <div className="flex-shrink-0 bg-app-surface border-b border-app shadow-md">
           <div className="flex items-center justify-between py-3 px-4">
-            <h2 className="text-lg font-semibold text-app-secondary tracking-tight flex-1 text-center">
+            <h2 className="text-lg font-semibold text-app-secondary tracking-tight flex-1">
               Activities
             </h2>
             {onRefresh && (
@@ -124,7 +127,7 @@ export const ActivityFeed = ({
             )}
           </div>
         </div>
-        <div className="flex-1 flex flex-col bg-app-surface border-t border-b border-app shadow-md overflow-hidden">
+        <div className="flex-1 flex flex-col bg-app-surface border-b border-app shadow-md overflow-hidden">
           <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
             {loading && activities.length === 0 ? (
               <div className="flex items-center justify-center py-8">
