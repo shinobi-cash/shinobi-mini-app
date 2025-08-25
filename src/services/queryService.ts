@@ -19,7 +19,6 @@ import {
   GET_POOL_CONFIG,
   GET_POOL_STATS,
   HEALTH_CHECK,
-  GET_SUBGRAPH_META
 } from '../config/queries';
 
 // ============ TYPES ============
