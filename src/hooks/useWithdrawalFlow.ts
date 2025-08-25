@@ -102,14 +102,10 @@ export function useWithdrawalFlow({ note }: UseWithdrawalFlowProps) {
 
   // Reset withdrawal states when form values change
   const resetStates = useCallback(() => {
-    if (preparedWithdrawal || preparationError) {
-      setPreparedWithdrawal(null);
-      setPreparationError(null);
-    }
-    if (showPreview) {
-      setShowPreview(false);
-    }
-  }, [preparedWithdrawal, preparationError, showPreview]);
+    setPreparedWithdrawal(null);
+    setPreparationError(null);
+    setShowPreview(false);
+  }, []);
 
   return {
     // States
