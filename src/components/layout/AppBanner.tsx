@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react'
-import { fetchLatestIndexedBlock } from '@/services/queryService'
 import { Dot } from 'lucide-react'
 import { useTransactionTracking, TransactionTrackingProvider } from '@/hooks/useTransactionTracking'
+import { useConditionalIndexerHealth } from '@/hooks/useConditionalIndexerHealth'
 import { useBanner } from '@/contexts/BannerContext'
 
 // Re-export the provider for convenience
@@ -10,26 +9,7 @@ export { TransactionTrackingProvider }
 export const AppBanner = () => {
   const { trackingStatus, trackedTxHash } = useTransactionTracking()
   const { currentBanner, dismissBanner } = useBanner()
-  const [indexerHealth, setIndexerHealth] = useState<boolean | null>(null)
-
-  // Periodic health check for indexer status (only when idle)
-  useEffect(() => {
-    if (trackingStatus !== 'idle') return
-
-    const checkIndexerHealth = async () => {
-      try {
-        const latestBlock = await fetchLatestIndexedBlock()
-        setIndexerHealth(latestBlock !== null)
-      } catch (error) {
-        console.error('Indexer health check failed:', error)
-        setIndexerHealth(false)
-      }
-    }
-
-    checkIndexerHealth()
-    const interval = setInterval(checkIndexerHealth, 30000) // Check every 30 seconds
-    return () => clearInterval(interval)
-  }, [trackingStatus])
+  const { indexerHealth } = useConditionalIndexerHealth()
 
   // Show current banner if one exists
   if (currentBanner) {
