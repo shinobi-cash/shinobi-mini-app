@@ -6,7 +6,7 @@ import { formatEthAmount } from '@/utils/formatters'
 import { RefreshCw } from 'lucide-react'
 import { Button } from '../../ui/button'
 import { fetchPoolStats } from '@/services/queryService'
-import { useTransactionTracking } from '@/hooks/useTransactionTracking'
+import { useTransactionTracking } from '@/hooks/transactions/useTransactionTracking'
 
 export interface ActivityFeedProps {
   activities: Activity[]

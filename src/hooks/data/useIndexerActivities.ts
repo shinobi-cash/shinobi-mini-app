@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client'
 import { useCallback } from 'react'
-import { GET_ACTIVITIES } from '../config/queries'
-import { Activity } from '../types/activity'
+import { GET_ACTIVITIES } from '../../config/queries'
+import { Activity } from '../../types/activity'
 
 interface PageInfo {
   hasNextPage: boolean

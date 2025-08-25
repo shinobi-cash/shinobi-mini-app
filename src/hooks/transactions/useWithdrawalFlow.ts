@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useBanner } from '@/contexts/BannerContext';
-import { useTransactionTracking } from '@/hooks/useTransactionTracking';
+import { useTransactionTracking } from '@/hooks/transactions/useTransactionTracking';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   executePreparedWithdrawal,

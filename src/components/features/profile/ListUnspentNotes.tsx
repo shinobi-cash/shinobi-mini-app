@@ -1,7 +1,7 @@
 import { Loader2, Wallet, ChevronRight, Circle } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { Note } from '@/lib/noteCache';
-import { useNotes } from '@/hooks/useDepositDiscovery';
+import { useNotes } from '@/hooks/data/useDepositDiscovery';
 import { useAuth } from '@/contexts/AuthContext';
 import { CONTRACTS } from '@/config/constants';
 import { formatEthAmount, formatTimestamp } from '@/utils/formatters';

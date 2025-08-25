@@ -8,7 +8,7 @@ import { ActivityFeed } from '../features/profile/ActivityFeed';
 import { ProfileScreen } from './ProfileScreen';
 import { DepositScreen } from './DepositScreen';
 import { WithdrawalScreen } from './WithdrawalScreen';
-import { useIndexerActivities } from '../../hooks/useIndexerActivities';
+import { useIndexerActivities } from '../../hooks/data/useIndexerActivities';
 
 /**
  * Home Screen View Controller

@@ -6,11 +6,11 @@ import { Button } from '../ui/button';
 import { useEffect, useRef } from 'react';
 import { formatEther } from 'viem';
 import { NETWORK } from '../../config/constants';
-import { useDepositCommitment } from '../../hooks/useDepositCommitment';
-import { useDepositTransaction } from '../../hooks/useDepositTransaction';
-import { useDepositForm } from '../../hooks/useDepositForm';
+import { useDepositCommitment } from '../../hooks/transactions/useDepositCommitment';
+import { useDepositTransaction } from '../../hooks/transactions/useDepositTransaction';
+import { useDepositForm } from '../../hooks/forms/useDepositForm';
 import { useBanner } from "@/contexts/BannerContext";
-import { useTransactionTracking } from '@/hooks/useTransactionTracking';
+import { useTransactionTracking } from '@/hooks/transactions/useTransactionTracking';
 
 const DEPOSIT_AMOUNTS= [
     { value: "0.01", label: "0.01 ETH" },

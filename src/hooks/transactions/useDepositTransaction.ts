@@ -5,31 +5,15 @@ import { CashNoteData } from './useDepositCommitment';
 import { PRIVACY_POOL_ENTRYPOINT_ABI } from '@/config/abis';
 import { CONTRACTS } from '@/config/constants';
 
-// Types for deposit functionality
-export interface DepositRecord {
-  timestamp: string
-  nullifier: string
-  secret: string
-  precommitment: string
-  commitment: string
-  label: string
-  transactionHash: string
-  blockNumber: string
-  depositIndex: number
-  amount: string
-  status: "deposited" | "asp_approved" | "withdrawn"
-}
 interface DepositState {
   isSuccess: boolean;
   error: string | null;
-  depositRecord: DepositRecord | null;
 }
 
 export function useDepositTransaction() {
   const [state, setState] = useState<DepositState>({
     isSuccess: false,
     error: null,
-    depositRecord: null,
   });
 
   const { 
@@ -44,7 +28,6 @@ export function useDepositTransaction() {
       ...prev, 
       error: null,
       isSuccess: false,
-      depositRecord: null 
     }));
 
     const amountWei = parseEther(amount);
@@ -87,7 +70,6 @@ export function useDepositTransaction() {
     setState({
       isSuccess: false,
       error: null,
-      depositRecord: null,
     });
   }, []);
 

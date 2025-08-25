@@ -1,6 +1,6 @@
 import { Dot } from 'lucide-react'
-import { useTransactionTracking, TransactionTrackingProvider } from '@/hooks/useTransactionTracking'
-import { useConditionalIndexerHealth } from '@/hooks/useConditionalIndexerHealth'
+import { useTransactionTracking, TransactionTrackingProvider } from '@/hooks/transactions/useTransactionTracking'
+import { useConditionalIndexerHealth } from '@/hooks/data/useConditionalIndexerHealth'
 import { useBanner } from '@/contexts/BannerContext'
 
 // Re-export the provider for convenience
