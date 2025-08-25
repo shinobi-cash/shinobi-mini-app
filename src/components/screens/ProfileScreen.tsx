@@ -4,6 +4,7 @@ import { AuthenticationGate } from '../shared/AuthenticationGate'
 import { NoteChain } from '@/lib/noteCache'
 import { useNotes } from '@/hooks/useDepositDiscovery'
 import { useTransactionTracking } from '@/hooks/useTransactionTracking'
+import { useModalWithSelection } from '@/hooks/useModalState'
 import { CONTRACTS } from '@/config/constants'
 import { ProfileSummaryCard } from '../features/profile/ProfileSummaryCard'
 import { TransactionHistorySection } from '../features/profile/TransactionHistorySection'
@@ -25,8 +26,7 @@ export const ProfileScreen = () => {
 
 const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
   const { publicKey, accountKey } = useAuth();
-  const [selectedNoteChain, setSelectedNoteChain] = useState<NoteChain | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const noteChainModal = useModalWithSelection<NoteChain>(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { onTransactionIndexed } = useTransactionTracking();
 
@@ -61,8 +61,7 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
   }).length;
 
   const handleNoteChainClick = (noteChain: NoteChain) => {
-    setSelectedNoteChain(noteChain);
-    setDrawerOpen(true);
+    noteChainModal.openWith(noteChain);
   };
 
   const handleRefresh = () => {
@@ -91,9 +90,9 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
 
       {/* Note Chain Detail Drawer */}
       <NoteChainDetailDrawer
-        noteChain={selectedNoteChain}
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
+        noteChain={noteChainModal.selectedItem}
+        open={noteChainModal.isOpen}
+        onOpenChange={noteChainModal.setOpen}
       />
 
       {/* Empty State for no account keys */}

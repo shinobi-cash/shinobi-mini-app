@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
@@ -25,15 +25,22 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
   // Extract form values for easier access
   const { withdrawAmount, recipientAddress, withdrawAmountNum, availableBalance, isValidAmount, isValidRecipient } = form;
   
-  // Use service to calculate withdrawal amounts
-  const { executionFee, youReceive } = withdrawAmount 
-    ? calculateWithdrawalAmounts(withdrawAmount)
-    : { executionFee: 0, youReceive: 0 };
+  // Memoize expensive calculations to prevent unnecessary recalculations
+  const withdrawalAmounts = useMemo(() => {
+    return withdrawAmount 
+      ? calculateWithdrawalAmounts(withdrawAmount)
+      : { executionFee: 0, youReceive: 0 };
+  }, [withdrawAmount]);
+  
+  const { executionFee, youReceive } = withdrawalAmounts;
     
   // Remaining balance = original amount - withdrawal amount (execution fee comes from withdrawal)
-  const remainingBalance = availableBalance - withdrawAmountNum;
+  const remainingBalance = useMemo(() => 
+    availableBalance - withdrawAmountNum, 
+    [availableBalance, withdrawAmountNum]
+  );
 
-  // Form handlers now use the extracted hook
+  // Extract form handlers 
   const { handleAmountChange, handleMaxClick, setRecipientAddress } = form;
   
   // Extract withdrawal flow handlers and state

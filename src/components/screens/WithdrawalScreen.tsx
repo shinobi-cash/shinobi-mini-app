@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { AuthenticationGate } from '../shared/AuthenticationGate';
 import { ListUnspentNotes } from '../features/profile/ListUnspentNotes';
 import { WithdrawNoteForm } from '../features/withdrawal/WithdrawNoteForm';
+import { useModalWithSelection } from '@/hooks/useModalState';
 import { Note } from '@/lib/noteCache';
 
 export const WithdrawalScreen = () => {
@@ -17,14 +17,14 @@ export const WithdrawalScreen = () => {
 };
 
 const WithdrawalContent = () => {
-  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const noteModal = useModalWithSelection<Note>(false);
 
   // Show withdrawal form if a note is selected
-  if (selectedNote) {
+  if (noteModal.selectedItem) {
     return (
       <WithdrawNoteForm 
-        note={selectedNote} 
-        onBack={() => setSelectedNote(null)} 
+        note={noteModal.selectedItem} 
+        onBack={noteModal.closeAndClear} 
       />
     );
   }
@@ -32,7 +32,7 @@ const WithdrawalContent = () => {
   // Show list of unspent notes for selection
   return (
     <ListUnspentNotes 
-      onNoteSelected={setSelectedNote}
+      onNoteSelected={noteModal.openWith}
     />
   );
 };
