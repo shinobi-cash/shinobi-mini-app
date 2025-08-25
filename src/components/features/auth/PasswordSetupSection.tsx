@@ -7,8 +7,8 @@ import React, { useState } from 'react';
 import { Button } from '../../ui/button';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 import { KeyGenerationResult } from '@/utils/crypto';
-import { KDF } from '@/lib/keyDerivation';
-import { noteCache } from '@/lib/noteCache';
+import { KDF } from "@/lib/auth/keyDerivation";
+import { noteCache } from "@/lib/storage/noteCache";
 import { useAuth } from '@/contexts/AuthContext';
 import { useBanner } from "@/contexts/BannerContext";
 

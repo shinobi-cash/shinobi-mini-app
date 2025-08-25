@@ -10,7 +10,7 @@ import {
 } from '../../ui/drawer';
 import { useBanner } from '@/contexts/BannerContext';
 import { formatEthAmount, formatHash } from '@/utils/formatters';
-import { Note } from '@/lib/noteCache';
+import { Note } from "@/lib/storage/noteCache";
 
 interface TransactionPreviewDrawerProps {
   isOpen: boolean;

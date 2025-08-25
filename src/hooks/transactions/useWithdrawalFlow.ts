@@ -8,8 +8,8 @@ import {
   processWithdrawal,
   type WithdrawalRequest,
   type PreparedWithdrawal,
-} from '@/services/withdrawalService';
-import { Note } from '@/lib/noteCache';
+} from "@/services/privacy/withdrawalService";
+import { Note } from "@/lib/storage/noteCache";
 
 export interface UseWithdrawalFlowProps {
   note: Note;

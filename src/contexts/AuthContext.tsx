@@ -1,8 +1,8 @@
 import { KeyGenerationResult } from '@/utils/crypto';
 import { getAccountKey } from '@/utils/accountKey';
 import { restoreFromMnemonic } from '@/utils/crypto';
-import { KDF } from '@/lib/keyDerivation';
-import { noteCache } from '@/lib/noteCache';
+import { KDF } from "@/lib/auth/keyDerivation";
+import { noteCache } from "@/lib/storage/noteCache";
 import { createContext, useContext, useState, ReactNode, useMemo, useEffect, useRef } from 'react'
 
 

@@ -1,19 +1,19 @@
 /**
- * Contract Service
+ * Blockchain Contract Service
  * 
- * Handles all blockchain contract interactions including:
- * - Privacy pool contract calls
- * - Account abstraction setup
- * - Smart account client creation
- * - Contract parameter fetching
+ * Handles smart contract interactions and account abstraction:
+ * - Privacy pool contract operations
+ * - UserOperation preparation and execution
+ * - Smart account client management
+ * - Contract data encoding/decoding
  */
 
 import { createPublicClient, http, encodeAbiParameters, encodeFunctionData } from 'viem';
 import { baseSepolia } from 'viem/chains';
 import { SmartAccountClient } from "permissionless";
 import { entryPoint07Address, UserOperation } from 'viem/account-abstraction';
-import { PRIVACY_POOL_ABI, PRIVACY_POOL_ENTRYPOINT_ABI } from '../config/abis';
-import { WITHDRAWAL_FEES, CONTRACTS } from '../config/constants';
+import { PRIVACY_POOL_ABI, PRIVACY_POOL_ENTRYPOINT_ABI } from '@/config/abis';
+import { WITHDRAWAL_FEES, CONTRACTS } from '@/config/constants';
 
 // ============ TYPES ============
 

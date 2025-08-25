@@ -3,7 +3,7 @@
  * Stores all sensitive note data encrypted using user-derived keys
  */
 
-import { restoreFromMnemonic } from '../utils/crypto';
+import { restoreFromMnemonic } from '@/utils/crypto';
 
 // Types for discovered notes
 export interface Note {

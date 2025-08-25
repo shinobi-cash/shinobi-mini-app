@@ -1,12 +1,12 @@
 /**
- * Centralized Query Service
+ * Data Query Service
  * 
- * All GraphQL query execution functions in one place for easy maintenance.
- * Handles all interactions with The Graph indexer and IPFS.
+ * Centralized GraphQL and IPFS data fetching service.
+ * Handles all blockchain data queries through The Graph indexer.
  */
 
-import { apolloClient } from '../lib/clients';
-import { INDEXER_FETCH_POLICY, IPFS_GATEWAY_URL, CONTRACTS } from '../config/constants';
+import { apolloClient } from '@/lib/clients';
+import { INDEXER_FETCH_POLICY, IPFS_GATEWAY_URL, CONTRACTS } from '@/config/constants';
 import {
   GET_ACTIVITIES,
   GET_STATE_TREE_COMMITMENTS,
@@ -19,7 +19,7 @@ import {
   GET_POOL_CONFIG,
   GET_POOL_STATS,
   HEALTH_CHECK,
-} from '../config/queries';
+} from '@/config/queries';
 
 // ============ TYPES ============
 

@@ -1,6 +1,10 @@
 /**
- * Service for fetching withdrawal-related data
- * Consolidates data fetching logic from useWithdrawalData hook
+ * Withdrawal Data Fetching Service
+ * 
+ * Optimized data aggregation for withdrawal operations:
+ * - Parallel data fetching for optimal performance
+ * - State tree and ASP data consolidation
+ * - Pool configuration validation
  */
 
 import { 

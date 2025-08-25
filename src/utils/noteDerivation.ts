@@ -1,5 +1,5 @@
 // utils/notes.ts
-import { Note } from '@/lib/noteCache';
+import { Note } from "@/lib/storage/noteCache";
 import { poseidon2, poseidon3 } from 'poseidon-lite';
 import { keccak256, encodePacked, getAddress } from 'viem';
 

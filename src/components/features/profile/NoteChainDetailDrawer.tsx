@@ -7,7 +7,7 @@ import {
   DrawerDescription,
   DrawerClose 
 } from '../../ui/drawer';
-import { NoteChain } from '@/lib/noteCache';
+import { NoteChain } from "@/lib/storage/noteCache";
 import { formatEthAmount, formatTimestamp, formatHash } from '@/utils/formatters';
 import { NETWORK } from '@/config/constants';
 

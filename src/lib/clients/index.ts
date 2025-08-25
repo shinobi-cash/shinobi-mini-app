@@ -3,7 +3,7 @@
  */
 
 import { ApolloClient, InMemoryCache } from '@apollo/client';
-import { BUNDLER_URL, WITHDRAWAL_ACCOUNT_PRIVATE_KEY } from '../config/constants';
+import { BUNDLER_URL, WITHDRAWAL_ACCOUNT_PRIVATE_KEY } from '@/config/constants';
 import { createPublicClient, http } from 'viem';
 import { baseSepolia } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';

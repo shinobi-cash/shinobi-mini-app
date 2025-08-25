@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useBanner } from '@/contexts/BannerContext';
-import { fetchWithdrawalData, type WithdrawalDataResult } from '../../services/withdrawalDataService';
+import { fetchWithdrawalData, type WithdrawalDataResult } from "@/services/data/withdrawalDataService";
 
 interface DataFetchState {
   isFetching: boolean;

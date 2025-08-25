@@ -1,11 +1,15 @@
 /**
- * Service for handling deposit commitment collision detection
- * Extracted from useDepositCommitment hook for better organization
+ * Privacy Deposit Collision Service
+ * 
+ * Handles secure deposit commitment generation:
+ * - Collision detection against existing deposits
+ * - Unique commitment derivation with retry logic
+ * - Note cache management for index tracking
  */
 
-import { noteCache } from '../lib/noteCache';
-import { fetchDepositByPrecommitment } from './queryService';
-import { deriveDepositNullifier, deriveDepositSecret } from '../utils/noteDerivation';
+import { noteCache } from "@/lib/storage/noteCache";
+import { fetchDepositByPrecommitment } from '../data/queryService';
+import { deriveDepositNullifier, deriveDepositSecret } from '@/utils/noteDerivation';
 import { poseidon2 } from 'poseidon-lite';
 
 export interface DepositCommitmentData {

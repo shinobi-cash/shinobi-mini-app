@@ -17,7 +17,7 @@ import {
 } from '../../ui/drawer';
 import { X, Lock, Fingerprint, ChevronLeft } from 'lucide-react';
 import { KeyGenerationResult, restoreFromMnemonic, validateMnemonic } from '@/utils/crypto';
-import { noteCache } from '@/lib/noteCache';
+import { noteCache } from "@/lib/storage/noteCache";
 import { AuthSection } from './AuthSection';
 import SetupConvenientAuth from './SetupConvenientAuth';
 import { isPasskeySupported } from '@/utils/environment';

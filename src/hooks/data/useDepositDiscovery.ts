@@ -1,5 +1,5 @@
 // hooks/useNotes.ts
-import { Note, DiscoveryResult, NoteChain, noteCache } from '@/lib/noteCache';
+import { Note, DiscoveryResult, NoteChain, noteCache } from "@/lib/storage/noteCache";
 import { useState, useEffect } from 'react';
 import { poseidon1, poseidon2 } from 'poseidon-lite';
 import {
@@ -7,7 +7,7 @@ import {
   deriveDepositSecret,
   deriveChangeNullifier
 } from '@/utils/noteDerivation';
-import { fetchDepositByPrecommitment, fetchWithdrawalBySpentNullifier } from '@/services/queryService';
+import { fetchDepositByPrecommitment, fetchWithdrawalBySpentNullifier } from "@/services/data/queryService";
 
 /**
  * Discover a single deposit chain by deposit index with optional cached data optimization

@@ -1,6 +1,6 @@
 import { Loader2, Wallet, ChevronRight, Circle } from 'lucide-react';
 import { Button } from '../../ui/button';
-import { Note } from '@/lib/noteCache';
+import { Note } from "@/lib/storage/noteCache";
 import { useNotes } from '@/hooks/data/useDepositDiscovery';
 import { useAuth } from '@/contexts/AuthContext';
 import { CONTRACTS } from '@/config/constants';

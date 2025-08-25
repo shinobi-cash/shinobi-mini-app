@@ -2,13 +2,13 @@ import { useEffect, useMemo } from 'react';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 import { useWithdrawalForm } from '@/hooks/forms/useWithdrawalForm';
 import { useWithdrawalFlow } from '@/hooks/transactions/useWithdrawalFlow';
 import { TransactionPreviewDrawer } from './TransactionPreviewDrawer';
-import { Note } from '@/lib/noteCache';
+import { Note } from "@/lib/storage/noteCache";
 import { formatEthAmount } from '@/utils/formatters';
-import { calculateWithdrawalAmounts } from '@/services/withdrawalService';
+import { calculateWithdrawalAmounts } from "@/services/privacy/withdrawalService";
 
 interface WithdrawNoteFormProps {
   note: Note;

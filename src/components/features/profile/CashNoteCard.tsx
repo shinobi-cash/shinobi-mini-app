@@ -1,4 +1,4 @@
-import { Note } from '@/lib/noteCache';
+import { Note } from "@/lib/storage/noteCache";
 import { formatEthAmount, formatDate } from '@/utils/formatters';
 
 interface CashNoteCardProps {

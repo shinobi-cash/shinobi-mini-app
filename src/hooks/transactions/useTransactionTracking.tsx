@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, createContext, useContext } from 'react'
-import { fetchLatestIndexedBlock } from '@/services/queryService'
+import { fetchLatestIndexedBlock } from "@/services/data/queryService"
 
 export type TrackingStatus = 'idle' | 'waiting' | 'synced'
 

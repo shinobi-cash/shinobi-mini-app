@@ -5,7 +5,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { formatEthAmount } from '@/utils/formatters'
 import { RefreshCw } from 'lucide-react'
 import { Button } from '../../ui/button'
-import { fetchPoolStats } from '@/services/queryService'
+import { fetchPoolStats } from "@/services/data/queryService"
 import { useTransactionTracking } from '@/hooks/transactions/useTransactionTracking'
 
 export interface ActivityFeedProps {

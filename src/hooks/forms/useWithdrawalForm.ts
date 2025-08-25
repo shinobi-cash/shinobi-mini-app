@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useFormValidation, validationRules } from './useFormValidation';
-import { Note } from '@/lib/noteCache';
+import { Note } from "@/lib/storage/noteCache";
 import { formatEthAmount } from '@/utils/formatters';
 
 interface WithdrawalFormData {

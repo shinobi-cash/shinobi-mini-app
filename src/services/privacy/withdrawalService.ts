@@ -1,17 +1,17 @@
 /**
- * Withdrawal Service
+ * Privacy Withdrawal Service
  * 
- * Orchestrates the complete privacy pool withdrawal flow including:
- * - Data fetching from indexer and contracts
- * - Context calculation and nullifier generation
- * - ZK proof generation
- * - UserOperation preparation and execution
+ * Orchestrates secure privacy pool withdrawals:
+ * - Withdrawal context calculation and validation
+ * - Zero-knowledge proof generation
+ * - Transaction preparation and execution
+ * - Privacy-preserving nullifier management
  */
 
 import { keccak256, parseEther, encodeAbiParameters, isAddress } from 'viem';
-import { SNARK_SCALAR_FIELD, WITHDRAWAL_FEES, CONTRACTS } from '../config/constants';
-import { Note } from '../lib/noteCache';
-import { WithdrawalProofGenerator } from '../utils/WithdrawalProofGenerator';
+import { SNARK_SCALAR_FIELD, WITHDRAWAL_FEES, CONTRACTS } from '@/config/constants';
+import { Note } from "@/lib/storage/noteCache";
+import { WithdrawalProofGenerator } from '@/utils/WithdrawalProofGenerator';
 
 // Import our new services
 import { 
@@ -19,7 +19,7 @@ import {
   fetchASPData,
   type StateTreeLeaf,
   type ASPData 
-} from './queryService';
+} from '../data/queryService';
 import { 
   fetchPoolScope,
   createWithdrawalData,
@@ -28,7 +28,7 @@ import {
   prepareWithdrawalUserOperation,
   executeWithdrawalUserOperation,
   type WithdrawalData,
-} from './contractService';
+} from '../blockchain/contractService';
 import { getWithdrawalSmartAccountClient } from '@/lib/clients';
 import { deriveChangeNullifier, deriveChangeSecret, deriveDepositNullifier, deriveDepositSecret, derivedNoteCommitment } from '@/utils/noteDerivation';
 

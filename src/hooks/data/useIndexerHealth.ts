@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchLatestIndexedBlock } from '@/services/queryService';
+import { fetchLatestIndexedBlock } from "@/services/data/queryService";
 
 export type IndexerHealthStatus = boolean | null; // true = healthy, false = offline, null = checking
 

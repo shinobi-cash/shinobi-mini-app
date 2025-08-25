@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { noteCache } from '../../lib/noteCache';
+import { noteCache } from "@/lib/storage/noteCache";
 
 interface EncryptedStorageState {
   isSessionActive: boolean;

@@ -7,9 +7,9 @@ import { Button } from '../../ui/button';
 import { Fingerprint } from 'lucide-react';
 import { Input } from '../../ui/input';
 import { useState } from 'react';
-import { KDF } from '@/lib/keyDerivation';
+import { KDF } from "@/lib/auth/keyDerivation";
 import { restoreFromMnemonic } from '@/utils/crypto';
-import { noteCache } from '@/lib/noteCache';
+import { noteCache } from "@/lib/storage/noteCache";
 import { useAuth } from '@/contexts/AuthContext';
 import { useBanner } from "@/contexts/BannerContext";
 

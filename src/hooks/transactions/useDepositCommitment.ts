@@ -2,7 +2,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { CONTRACTS } from '../../config/constants';
 import { useState, useEffect, useCallback } from 'react';
 import { useAccount } from 'wagmi';
-import { generateUniqueDepositCommitment } from '../../services/depositCollisionService';
+import { generateUniqueDepositCommitment } from "@/services/privacy/depositCollisionService";
 
 // ---------------------------------------------------------------------------
 // Note interface - uses data from collision service

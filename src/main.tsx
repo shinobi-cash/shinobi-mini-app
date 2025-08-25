@@ -8,7 +8,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 
 import App from "./App.tsx";
 import { config } from "./wagmi.ts";
-import { apolloClient } from "./lib/clients.ts";
+import { apolloClient } from "@/lib/clients";
 import { isFarcasterEnvironment } from "./utils/environment.ts";
 
 import "./index.css";
