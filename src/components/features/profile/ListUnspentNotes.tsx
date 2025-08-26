@@ -14,8 +14,8 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
   const { publicKey, accountKey } = useAuth(); 
   const poolAddress = CONTRACTS.ETH_PRIVACY_POOL; // Assuming this is defined in your constants
 
-  // Use 10 minute cache to prevent excessive refetching when navigating back from withdrawal form
-  const { data: noteDiscovery, loading: isDiscovering, error } = useNotes(publicKey!, poolAddress, accountKey!, 10 * 60 * 1000);
+  // Discovery handles incremental updates automatically - no TTL needed
+  const { data: noteDiscovery, loading: isDiscovering, error } = useNotes(publicKey!, poolAddress, accountKey!);
 
   // Get available unspent notes by filtering the 2D notes array.
   const availableNotes = (noteDiscovery?.notes || [])

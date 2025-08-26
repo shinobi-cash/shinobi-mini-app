@@ -22,13 +22,13 @@ async function discoverSingleDepositChain(
   const depositSecret = deriveDepositSecret(accountKey, poolAddress, depositIndex);
   const precommitment = poseidon2([depositNullifier, depositSecret]);
 
+  if (cachedChain) {
+    console.log(`[Discovery] 📋 Using cached chain for deposit ${depositIndex} with ${cachedChain.length} notes`);
+  } else {
+    console.log(`[Discovery] 🆕 Fresh discovery for deposit index ${depositIndex}`);
+  }
+
   try {
-    const depositData = await fetchDepositByPrecommitment(precommitment.toString());
-
-    if (!depositData) {
-      return null;
-    }
-
     // Start with cached chain if available, otherwise create new deposit note
     let chain: NoteChain;
     let changeIndex: number;
@@ -44,14 +44,18 @@ async function discoverSingleDepositChain(
       changeIndex = lastNote.changeIndex + 1;
       remainingAmount = BigInt(lastNote.amount);
       
+      console.log(`[Discovery] 📋 Last cached note: changeIndex=${lastNote.changeIndex}, amount=${lastNote.amount}, status=${lastNote.status}`);
+      
       // Check if the last cached note has 0 balance and should be marked as spent
       if (remainingAmount <= 0n && lastNote.status === 'unspent') {
         lastNote.status = 'spent';
+        console.log(`[Discovery] ✅ Marked zero-balance note as spent - chain complete`);
         return chain; // Chain is complete
       }
       
       // Only check if the last cached note is actually still unspent and has balance
       if (lastNote.status === 'unspent' && remainingAmount > 0n) {
+        console.log(`[Discovery] 🔍 Continuing from unspent note - checking for new withdrawals`);
         if (lastNote.changeIndex === 0) {
           // Last note is the deposit
           currentNoteNullifier = depositNullifier;
@@ -61,10 +65,17 @@ async function discoverSingleDepositChain(
         }
       } else {
         // All cached notes are spent or have 0 balance, chain is complete
+        console.log(`[Discovery] ✅ Cached chain is complete - no API calls needed`);
         return chain;
       }
     } else {
-      // No cache - start fresh
+      // No cache - start fresh, need to fetch deposit data
+      const depositData = await fetchDepositByPrecommitment(precommitment.toString());
+
+      if (!depositData) {
+        return null;
+      }
+
       let depositNote: Note = {
         poolAddress,
         depositIndex,
@@ -147,7 +158,14 @@ export async function discoverNotes(
   poolAddress: string,
   accountKey: bigint
 ): Promise<DiscoveryResult> {
+  console.log(`\n[Discovery] 🔍 Starting note discovery for pool ${poolAddress.substring(0, 10)}...`);
   const cached = await noteCache.getCachedNotes(publicKey, poolAddress);
+  
+  if (cached) {
+    console.log(`[Discovery] 📦 Found cached data: ${cached.notes.length} note chains, lastUsedIndex: ${cached.lastUsedIndex}, syncTime: ${new Date(cached.syncTime).toLocaleTimeString()}`);
+  } else {
+    console.log(`[Discovery] 📦 No cached data found - starting fresh discovery`);
+  }
   
   let notes: NoteChain[] = [];
   let lastUsedIndex = cached ? cached.lastUsedIndex : -1;
@@ -155,8 +173,10 @@ export async function discoverNotes(
 
   // Step 1: Re-validate and extend existing cached note chains
   if (cached && cached.notes.length > 0) {
+    console.log(`[Discovery] 🔄 Step 1: Re-validating ${cached.notes.length} cached note chains`);
     for (const cachedChain of cached.notes) {
       const depositIndex = cachedChain[0].depositIndex;
+      console.log(`[Discovery] 🔍 Checking cached chain for deposit index ${depositIndex} (${cachedChain.length} notes)`);
       
       // Optimize: pass cached chain to avoid re-fetching spent notes
       const chain = await discoverSingleDepositChain(accountKey, poolAddress, depositIndex, cachedChain);
@@ -164,18 +184,26 @@ export async function discoverNotes(
         notes.push(chain);
         // Count new notes found in this chain
         if (chain.length > cachedChain.length) {
-          newNotesFound += (chain.length - cachedChain.length);
+          const newNotesInChain = chain.length - cachedChain.length;
+          newNotesFound += newNotesInChain;
+          console.log(`[Discovery] ✅ Found ${newNotesInChain} new notes in existing chain ${depositIndex}`);
+        } else {
+          console.log(`[Discovery] ✅ Chain ${depositIndex} unchanged (${chain.length} notes)`);
         }
       }
     }
+  } else {
+    console.log(`[Discovery] 🔄 Step 1: Skipped - no cached chains to re-validate`);
   }
 
   // Step 2: Search for completely new deposits starting from last known index
   const startDepositIndex = cached ? cached.lastUsedIndex + 1 : 0;
+  console.log(`[Discovery] 🔄 Step 2: Searching for new deposits starting from index ${startDepositIndex}`);
   let consecutiveNotFound = 0;
-  const maxGap = 2;
+  const maxGap = 1;
   let depositIndex = startDepositIndex;
   while (consecutiveNotFound < maxGap) {
+    console.log(`[Discovery] 🔍 Checking deposit index ${depositIndex} (gap: ${consecutiveNotFound}/${maxGap})`);
     const chain = await discoverSingleDepositChain(accountKey, poolAddress, depositIndex);
     
     if (chain) {
@@ -183,14 +211,19 @@ export async function discoverNotes(
       newNotesFound += chain.length;
       lastUsedIndex = Math.max(lastUsedIndex, depositIndex);
       consecutiveNotFound = 0;
+      console.log(`[Discovery] ✅ Found new deposit chain at index ${depositIndex} with ${chain.length} notes`);
     } else {
       consecutiveNotFound++;
+      console.log(`[Discovery] ❌ No deposit found at index ${depositIndex}`);
     }
     
     depositIndex++;
   }
 
   await noteCache.storeDiscoveredNotes(publicKey, poolAddress, notes);
+
+  console.log(`[Discovery] ✅ Discovery complete! Total chains: ${notes.length}, New notes found: ${newNotesFound}, Last used index: ${lastUsedIndex}`);
+  console.log(`[Discovery] 💾 Cache updated with ${notes.length} note chains\n`);
 
   return {
     notes: notes,
@@ -204,7 +237,6 @@ export function useNotes(
   publicKey: string,
   poolAddress: string,
   accountKey: bigint,
-  cacheTTL: number = 5 * 60 * 1000 // 5 minutes default cache TTL
 ) {
   const [data, setData] = useState<DiscoveryResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -218,19 +250,7 @@ export function useNotes(
       setError(null);
       
       try {
-        // First check cache - if data is fresh enough, use it
-        const cached = await noteCache.getCachedNotes(publicKey, poolAddress);
-        const now = Date.now();
-        
-        if (cached && (now - cached.syncTime < cacheTTL)) {
-          if (mounted) {
-            setData(cached);
-            setLoading(false);
-          }
-          return;
-        }
-        
-        // Cache is stale or doesn't exist, run full discovery
+        // Run incremental discovery - it uses cache data internally and only fetches new notes
         const result = await discoverNotes(publicKey, poolAddress, accountKey);
         if (mounted) {
           setData(result);
@@ -251,7 +271,7 @@ export function useNotes(
     return () => {
       mounted = false;
     };
-  }, [publicKey, poolAddress, accountKey?.toString(), cacheTTL]);
+  }, [publicKey, poolAddress, accountKey?.toString()]);
 
   const refresh = async () => {
     setLoading(true);

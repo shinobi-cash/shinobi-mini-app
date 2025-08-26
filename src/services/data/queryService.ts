@@ -7,6 +7,7 @@
 
 import { apolloClient } from '@/lib/clients';
 import { INDEXER_FETCH_POLICY, IPFS_GATEWAY_URL, CONTRACTS } from '@/config/constants';
+import { queuedRequest } from '@/lib/apiQueue';
 import {
   GET_ACTIVITIES,
   GET_STATE_TREE_COMMITMENTS,
@@ -85,56 +86,76 @@ export async function fetchActivities(limit: number = 15, after?: string) {
  * Fetch deposit by precommitment hash for specific note data
  */
 export async function fetchDepositByPrecommitment(precommitmentHash: string): Promise<Activity | null> {
-  try {
-    const result = await apolloClient.query({
-      query: GET_DEPOSIT_BY_PRECOMMITMENT,
-      variables: { precommitmentHash },
-      fetchPolicy: INDEXER_FETCH_POLICY,
-    });
-    
-    return result.data?.activitys?.items?.[0] || null;
-  } catch (error) {
-    console.error('Failed to fetch deposit by precommitment:', error);
-    return null;
-  }
+  return queuedRequest(async () => {
+    console.log(`[Discovery] Fetching deposit by precommitment: ${precommitmentHash.substring(0, 10)}...`);
+    try {
+      const result = await apolloClient.query({
+        query: GET_DEPOSIT_BY_PRECOMMITMENT,
+        variables: { precommitmentHash },
+        fetchPolicy: INDEXER_FETCH_POLICY,
+      });
+      
+      const deposit = result.data?.activitys?.items?.[0] || null;
+      if (deposit) {
+        console.log(`[Discovery] ✅ Found deposit: amount=${deposit.amount}, blockNumber=${deposit.blockNumber}`);
+      } else {
+        console.log(`[Discovery] ❌ No deposit found for precommitment`);
+      }
+      return deposit;
+    } catch (error) {
+      console.error('Failed to fetch deposit by precommitment:', error);
+      return null;
+    }
+  });
 }
 
 /**
  * Check if nullifier has been spent in a withdrawal
  */
 export async function isNullifierSpent(spentNullifier: string): Promise<boolean> {
-  try {
-    const result = await apolloClient.query({
-      query: CHECK_NULLIFIER_SPENT,
-      variables: { spentNullifier },
-      fetchPolicy: INDEXER_FETCH_POLICY,
-    });
-    
-    return result.data?.activitys?.items?.length > 0;
-  } catch (error) {
-    console.error('Failed to check withdrawal by nullifier:', error);
-    // On error, assume not spent to avoid marking valid deposits as spent
-    return false;
-  }
+  return queuedRequest(async () => {
+    try {
+      const result = await apolloClient.query({
+        query: CHECK_NULLIFIER_SPENT,
+        variables: { spentNullifier },
+        fetchPolicy: INDEXER_FETCH_POLICY,
+      });
+      
+      return result.data?.activitys?.items?.length > 0;
+    } catch (error) {
+      console.error('Failed to check withdrawal by nullifier:', error);
+      // On error, assume not spent to avoid marking valid deposits as spent
+      return false;
+    }
+  });
 }
 
 /**
  * Fetch withdrawal activity by spent nullifier (for discovering change notes)
  */
 export async function fetchWithdrawalBySpentNullifier(spentNullifier: string): Promise<any | null> {
-  try {
-    const result = await apolloClient.query({
-      query: FETCH_WITHDRAWAL_BY_SPENT_NULLIFIER,
-      variables: { spentNullifier },
-      fetchPolicy: INDEXER_FETCH_POLICY,
-    });
-    
-    const activities = result.data?.activitys?.items || [];
-    return activities.length > 0 ? activities[0] : null;
-  } catch (error) {
-    console.error('Failed to fetch withdrawal by nullifier:', error);
-    return null;
-  }
+  return queuedRequest(async () => {
+    console.log(`[Discovery] Checking withdrawal by spent nullifier: ${spentNullifier.substring(0, 10)}...`);
+    try {
+      const result = await apolloClient.query({
+        query: FETCH_WITHDRAWAL_BY_SPENT_NULLIFIER,
+        variables: { spentNullifier },
+        fetchPolicy: INDEXER_FETCH_POLICY,
+      });
+      
+      const activities = result.data?.activitys?.items || [];
+      const withdrawal = activities.length > 0 ? activities[0] : null;
+      if (withdrawal) {
+        console.log(`[Discovery] ✅ Found withdrawal: amount=${withdrawal.amount}, newCommitment=${withdrawal.newCommitment ? 'Yes' : 'No'}`);
+      } else {
+        console.log(`[Discovery] ❌ No withdrawal found - note remains unspent`);
+      }
+      return withdrawal;
+    } catch (error) {
+      console.error('Failed to fetch withdrawal by nullifier:', error);
+      return null;
+    }
+  });
 }
 
 /**

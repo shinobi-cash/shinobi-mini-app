@@ -32,8 +32,8 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
 
   const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
 
-  // Use the refactored useNotes hook with 10 minute cache to prevent excessive refetching
-  const { data: noteDiscovery, loading, error, refresh } = useNotes(publicKey!, poolAddress, accountKey!, 10 * 60 * 1000);
+  // Use the refactored useNotes hook - discovery handles incremental updates automatically
+  const { data: noteDiscovery, loading, error, refresh } = useNotes(publicKey!, poolAddress, accountKey!);
 
   // Memoize note chains, showing last note of each chain sorted by timestamp
   const noteChains = useMemo(() => {

@@ -27,6 +27,13 @@ export const GAS_LIMITS = {
   PAYMASTER_POST_OP_GAS_LIMIT: 35000n, // Above the 32,000 minimum
 } as const;
 
+/**
+ * Configuration for API request queue rate limiting
+ */
+export const API_QUEUE = {
+  REQUEST_DELAY_MS: 200,            // Delay between API requests (200ms = 5 requests per second)
+} as const;
+
 // ============ ZK CIRCUIT CONSTANTS ============
 
 /**
