@@ -13,9 +13,7 @@ import {
   GET_STATE_TREE_COMMITMENTS,
   GET_LATEST_ASP_ROOT,
   GET_APPROVED_LABELS,
-  GET_DEPOSIT_BY_PRECOMMITMENT,
   CHECK_NULLIFIER_SPENT,
-  FETCH_WITHDRAWAL_BY_SPENT_NULLIFIER,
   GET_POOL_DEPOSITS,
   GET_POOL_CONFIG,
   GET_POOL_STATS,
@@ -44,27 +42,32 @@ export interface ASPData {
   approvedLabels: string[];
 }
 
+export type ActivityType = 'DEPOSIT' | 'WITHDRAWAL' | 'RAGEQUIT'
+export type ActivityStatus = 'pending' | 'approved' | 'rejected'
+
+// Simplified Activity interface (matches indexer data structure)
 export interface Activity {
-  id: string;
-  type: string;
-  aspStatus: string;
-  poolId: string;
-  user: string;
-  recipient?: string;
-  amount: string;
-  originalAmount?: string;
-  vettingFeeAmount?: string;
-  commitment?: string;
-  label?: string;
-  precommitmentHash?: string;
-  spentNullifier?: string;
-  newCommitment?: string;
-  feeAmount?: string;
-  relayer?: string;
-  isSponsored?: boolean;
-  blockNumber: string;
-  timestamp: string;
-  transactionHash: string;
+  id: string
+  type: ActivityType
+  aspStatus: ActivityStatus
+  poolId: string
+  user: string
+  recipient?: string | null
+  amount: string // bigint as string from GraphQL
+  originalAmount?: string | null // bigint as string (deposits only)
+  vettingFeeAmount?: string | null // bigint as string (deposits only)
+  commitment: string // bigint as string
+  label?: string | null // bigint as string
+  precommitmentHash?: string | null // bigint as string
+  spentNullifier?: string | null // bigint as string
+  newCommitment?: string | null // bigint as string
+  feeAmount?: string | null // bigint as string
+  feeRefund?: string | null // bigint as string
+  relayer?: string | null
+  isSponsored: boolean
+  blockNumber: string // bigint as string
+  timestamp: string // bigint as string
+  transactionHash: string
 }
 
 // ============ ACTIVITY QUERIES ============
@@ -82,32 +85,6 @@ export async function fetchActivities(limit: number = 15, after?: string) {
   return result.data?.activitys || { items: [], pageInfo: {} };
 }
 
-/**
- * Fetch deposit by precommitment hash for specific note data
- */
-export async function fetchDepositByPrecommitment(precommitmentHash: string): Promise<Activity | null> {
-  return queuedRequest(async () => {
-    console.log(`[Discovery] Fetching deposit by precommitment: ${precommitmentHash.substring(0, 10)}...`);
-    try {
-      const result = await apolloClient.query({
-        query: GET_DEPOSIT_BY_PRECOMMITMENT,
-        variables: { precommitmentHash },
-        fetchPolicy: INDEXER_FETCH_POLICY,
-      });
-      
-      const deposit = result.data?.activitys?.items?.[0] || null;
-      if (deposit) {
-        console.log(`[Discovery] ✅ Found deposit: amount=${deposit.amount}, blockNumber=${deposit.blockNumber}`);
-      } else {
-        console.log(`[Discovery] ❌ No deposit found for precommitment`);
-      }
-      return deposit;
-    } catch (error) {
-      console.error('Failed to fetch deposit by precommitment:', error);
-      return null;
-    }
-  });
-}
 
 /**
  * Check if nullifier has been spent in a withdrawal
@@ -130,33 +107,6 @@ export async function isNullifierSpent(spentNullifier: string): Promise<boolean>
   });
 }
 
-/**
- * Fetch withdrawal activity by spent nullifier (for discovering change notes)
- */
-export async function fetchWithdrawalBySpentNullifier(spentNullifier: string): Promise<any | null> {
-  return queuedRequest(async () => {
-    console.log(`[Discovery] Checking withdrawal by spent nullifier: ${spentNullifier.substring(0, 10)}...`);
-    try {
-      const result = await apolloClient.query({
-        query: FETCH_WITHDRAWAL_BY_SPENT_NULLIFIER,
-        variables: { spentNullifier },
-        fetchPolicy: INDEXER_FETCH_POLICY,
-      });
-      
-      const activities = result.data?.activitys?.items || [];
-      const withdrawal = activities.length > 0 ? activities[0] : null;
-      if (withdrawal) {
-        console.log(`[Discovery] ✅ Found withdrawal: amount=${withdrawal.amount}, newCommitment=${withdrawal.newCommitment ? 'Yes' : 'No'}`);
-      } else {
-        console.log(`[Discovery] ❌ No withdrawal found - note remains unspent`);
-      }
-      return withdrawal;
-    } catch (error) {
-      console.error('Failed to fetch withdrawal by nullifier:', error);
-      return null;
-    }
-  });
-}
 
 /**
  * Fetch all deposits for a specific pool

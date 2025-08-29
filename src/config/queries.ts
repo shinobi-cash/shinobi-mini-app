@@ -16,6 +16,7 @@ export const GET_STATE_TREE_COMMITMENTS = gql`
   query GetStateTreeCommitments($poolId: String!) {
     merkleTreeLeafs(
       where: { poolId: $poolId }
+      limit: 1000
       orderBy: "leafIndex"
       orderDirection: "asc"
     ) {
@@ -93,6 +94,7 @@ export const GET_ACTIVITIES = gql`
         spentNullifier
         newCommitment
         feeAmount
+        feeRefund
         relayer
         isSponsored
         blockNumber
@@ -109,41 +111,6 @@ export const GET_ACTIVITIES = gql`
   }
 `;
 
-/**
- * Get deposit by precommitment hash
- */
-export const GET_DEPOSIT_BY_PRECOMMITMENT = gql`
-  query GetDepositByPrecommitment($precommitmentHash: BigInt!) {
-    activitys(
-      where: { 
-        precommitmentHash: $precommitmentHash 
-      }
-      limit: 1
-    ) {
-      items {
-        id
-        type
-        aspStatus
-        poolId
-        user
-        amount
-        originalAmount
-        vettingFeeAmount
-        commitment
-        label
-        precommitmentHash
-        spentNullifier
-        newCommitment
-        feeAmount
-        relayer
-        isSponsored
-        blockNumber
-        timestamp
-        transactionHash
-      }
-    }
-  }
-`;
 
 /**
  * Check if nullifier is spent (withdrawal exists)
@@ -163,34 +130,6 @@ export const CHECK_NULLIFIER_SPENT = gql`
         blockNumber
         timestamp
         transactionHash
-      }
-    }
-  }
-`;
-
-/**
- * Fetch withdrawal activity with change note details by spent nullifier
- */
-export const FETCH_WITHDRAWAL_BY_SPENT_NULLIFIER = gql`
-  query FetchWithdrawalBySpentNullifier($spentNullifier: BigInt!) {
-    activitys(
-      where: { 
-        type: "WITHDRAWAL"
-        spentNullifier: $spentNullifier 
-      }
-      limit: 1
-    ) {
-      items {
-        id
-        type
-        amount
-        spentNullifier
-        newCommitment
-        feeAmount
-        blockNumber
-        timestamp
-        transactionHash
-        aspStatus
       }
     }
   }
@@ -333,6 +272,41 @@ export const GET_ACTIVITY_BY_TX_HASH = gql`
         transactionHash
         blockNumber
         aspStatus
+      }
+    }
+  }
+`;
+
+/**
+ * Get all activities with pagination support (for V2 privacy-first discovery)
+ */
+export const GET_ALL_ACTIVITIES_PAGINATED = gql`
+  query GetAllActivitiesPaginated($poolId: String!, $limit: Int!, $after: String) {
+    activitys(
+      where: { poolId: $poolId }
+      limit: $limit
+      after: $after
+      orderBy: "timestamp"
+      orderDirection: "asc"
+    ) {
+      items {
+        id
+        type
+        poolId
+        amount
+        label
+        precommitmentHash
+        spentNullifier
+        newCommitment
+        blockNumber
+        timestamp
+        transactionHash
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
       }
     }
   }

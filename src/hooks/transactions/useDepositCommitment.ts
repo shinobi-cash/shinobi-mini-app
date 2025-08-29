@@ -2,7 +2,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import { CONTRACTS } from '../../config/constants';
 import { useState, useEffect, useCallback } from 'react';
 import { useAccount } from 'wagmi';
-import { generateUniqueDepositCommitment } from "@/services/privacy/depositCollisionService";
+import { noteCache } from "@/lib/storage/noteCache";
+import { deriveDepositNullifier, deriveDepositSecret } from "@/utils/noteDerivation";
+import { poseidon2 } from "poseidon-lite";
 
 // ---------------------------------------------------------------------------
 // Note interface - uses data from collision service
@@ -51,18 +53,19 @@ export function useDepositCommitment(): DepositCashNoteResult {
     try {
       const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
       
-      // Use the collision service to generate unique commitment
-      const commitmentData = await generateUniqueDepositCommitment(
-        accountKey,
-        poolAddress,
-        publicKey
-      );
+      // Use local cache to get next deposit index (privacy-first)
+      const depositIndex = await noteCache.getNextDepositIndex(publicKey, poolAddress);
+      
+      // Generate precommitment using local derivation
+      const depositNullifier = deriveDepositNullifier(accountKey, poolAddress, depositIndex);
+      const depositSecret = deriveDepositSecret(accountKey, poolAddress, depositIndex);
+      const precommitment = poseidon2([depositNullifier, depositSecret]);
 
       const noteData: CashNoteData = {
-        poolAddress: commitmentData.poolAddress,
-        depositIndex: commitmentData.depositIndex,
-        changeIndex: commitmentData.changeIndex,
-        precommitment: commitmentData.precommitment,
+        poolAddress,
+        depositIndex,
+        changeIndex: 0,
+        precommitment,
       };
 
       setState(prev => ({

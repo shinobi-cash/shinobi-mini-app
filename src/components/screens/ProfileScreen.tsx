@@ -2,7 +2,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useEffect, useMemo, useState } from 'react'
 import { AuthenticationGate } from '../shared/AuthenticationGate'
 import { NoteChain } from "@/lib/storage/noteCache"
-import { useNotes } from '@/hooks/data/useDepositDiscoveryV2'
+import { useNotes } from '@/hooks/data/useDepositDiscovery'
 import { useTransactionTracking } from '@/hooks/transactions/useTransactionTracking'
 import { useModalWithSelection } from '@/hooks/ui/useModalState'
 import { CONTRACTS } from '@/config/constants'
