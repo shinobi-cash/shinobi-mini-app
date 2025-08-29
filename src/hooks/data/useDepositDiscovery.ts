@@ -162,7 +162,7 @@ export async function discoverNotes(
   const cached = await noteCache.getCachedNotes(publicKey, poolAddress);
   
   if (cached) {
-    console.log(`[Discovery] 📦 Found cached data: ${cached.notes.length} note chains, lastUsedIndex: ${cached.lastUsedIndex}, syncTime: ${new Date(cached.syncTime).toLocaleTimeString()}`);
+    console.log(`[Discovery] 📦 Found cached data: ${cached.notes.length} note chains, lastUsedIndex: ${cached.lastUsedIndex}`);
   } else {
     console.log(`[Discovery] 📦 No cached data found - starting fresh discovery`);
   }
@@ -229,7 +229,6 @@ export async function discoverNotes(
     notes: notes,
     lastUsedIndex,
     newNotesFound,
-    syncTime: Date.now(),
   };
 }
 

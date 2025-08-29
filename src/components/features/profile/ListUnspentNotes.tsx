@@ -15,7 +15,7 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
   const poolAddress = CONTRACTS.ETH_PRIVACY_POOL; // Assuming this is defined in your constants
 
   // Discovery handles incremental updates automatically - no TTL needed
-  const { data: noteDiscovery, loading: isDiscovering, error, progress } = useNotes(publicKey!, poolAddress, accountKey!);
+  const { data: noteDiscovery, loading: isDiscovering, error } = useNotes(publicKey!, poolAddress, accountKey!);
 
   // Get available unspent notes by filtering the 2D notes array.
   const availableNotes = (noteDiscovery?.notes || [])

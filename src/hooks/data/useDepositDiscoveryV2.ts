@@ -373,7 +373,7 @@ export async function discoverNotes(
   }
   
   // Step 8: Cache results and return DiscoveryResult
-  await noteCache.storeDiscoveredNotes(publicKey, poolAddress, notes);
+  await noteCache.storeDiscoveredNotes(publicKey, poolAddress, notes, pageData.pageInfo.endCursor);
   
   console.log(`[DiscoveryV2] ✅ Complete: ${notes.length} chains, ${newNotesFound} notes, lastUsedIndex: ${lastUsedIndex}`);
   
@@ -381,7 +381,7 @@ export async function discoverNotes(
     notes: notes,
     lastUsedIndex,
     newNotesFound,
-    syncTime: Date.now(),
+    lastProcessedCursor: pageData.pageInfo.endCursor,
   };
 }
 
@@ -415,16 +415,13 @@ export function useNotes(
   // Guard to prevent StrictMode double-invoke (dev only)
   const didRunRef = useRef(false);
 
-  async function fetchNotes(signal?: AbortSignal) {
+  async function fetchNotes() {
     return discoverNotes(publicKey, poolAddress, accountKey);
   }
 
   useEffect(() => {
     if (didRunRef.current) return; // ✅ skip second StrictMode run
     didRunRef.current = true;
-
-    const controller = new AbortController();
-    const signal = controller.signal;
 
     async function loadNotesV2() {
       setLoading(true);
@@ -435,25 +432,21 @@ export function useNotes(
           `[DiscoveryV2] 🔒 Starting discovery for ${poolAddress.substring(0, 6)}...`
         );
 
-        const result = await fetchNotes(signal);
+        const result = await fetchNotes();
 
         setData(result);
         console.log(
           `[DiscoveryV2] ✅ Complete: ${result.notes.length} chains, ${result.newNotesFound} notes`
         );
       } catch (err) {
-        if (!(err instanceof DOMException && err.name === "AbortError")) {
-          console.error(`[DiscoveryV2] ❌ Discovery failed:`, err);
-          setError(err as Error);
-        }
+        console.error(`[DiscoveryV2] ❌ Discovery failed:`, err);
+        setError(err as Error);
       } finally {
         setLoading(false);
       }
     }
 
     loadNotesV2();
-
-    return () => controller.abort();
   }, [publicKey, poolAddress, accountKeyString]);
 
   const refresh = async () => {

@@ -26,6 +26,7 @@ export interface CachedNoteData {
   notes: NoteChain[];
   lastUsedDepositIndex: number;
   lastSyncTime: number;
+  lastProcessedCursor?: string; // V2 pagination cursor
 }
 
 export interface CachedAccountData {
@@ -46,7 +47,7 @@ export interface DiscoveryResult {
   notes: NoteChain[];
   lastUsedIndex: number;
   newNotesFound: number;
-  syncTime: number;
+  lastProcessedCursor?: string; // Pagination cursor for V2 discovery
 }
 
 interface EncryptedData {
@@ -281,7 +282,7 @@ class NoteCacheService {
         notes: cached.notes,
         lastUsedIndex: cached.lastUsedDepositIndex,
         newNotesFound: 0,
-        syncTime: cached.lastSyncTime,
+        lastProcessedCursor: cached.lastProcessedCursor,
       };
     }
 
@@ -291,7 +292,8 @@ class NoteCacheService {
   async storeDiscoveredNotes(
     publicKey: string,
     poolAddress: string,
-    notes: NoteChain[]
+    notes: NoteChain[],
+    lastProcessedCursor?: string
   ): Promise<void> {
     if (!this.db) await this.init();
     if (!this.encryptionKey) throw new Error('Session not initialized');
@@ -300,14 +302,15 @@ class NoteCacheService {
       ? Math.max(...notes.map(chain => chain[0].depositIndex))
       : -1;
 
-    await this.storeData(publicKey, poolAddress, notes, lastUsedIndex);
+    await this.storeData(publicKey, poolAddress, notes, lastUsedIndex, lastProcessedCursor);
   }
 
   private async storeData(
     publicKey: string,
     poolAddress: string,
     notes: NoteChain[],
-    lastUsedDepositIndex: number
+    lastUsedDepositIndex: number,
+    lastProcessedCursor?: string
   ): Promise<void> {
     if (!this.db) await this.init();
 
@@ -317,6 +320,7 @@ class NoteCacheService {
       notes,
       lastUsedDepositIndex,
       lastSyncTime: Date.now(),
+      lastProcessedCursor,
     };
 
     const encrypted = await this.encrypt(sensitiveData);
@@ -394,8 +398,9 @@ class NoteCacheService {
 
     const notes = cached ? cached.notes : [];
     const lastUsedIndex = cached ? Math.max(cached.lastUsedDepositIndex, depositIndex) : depositIndex;
+    const lastProcessedCursor = cached ? cached.lastProcessedCursor : undefined;
 
-    await this.storeData(publicKey, poolAddress, notes, lastUsedIndex);
+    await this.storeData(publicKey, poolAddress, notes, lastUsedIndex, lastProcessedCursor);
   }
 
   /**
