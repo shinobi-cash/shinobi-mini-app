@@ -1,4 +1,4 @@
-import { ActivityType, ActivityStatus } from '../types/activity'
+import { ActivityStatus, ActivityType } from "@/services/data"
 
 interface StatusDotProps {
   type: ActivityType

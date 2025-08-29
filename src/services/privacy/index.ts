@@ -5,4 +5,3 @@
  */
 
 export * from './withdrawalService';
-export * from './depositCollisionService';

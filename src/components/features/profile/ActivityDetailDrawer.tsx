@@ -1,4 +1,4 @@
-import type { Activity } from '@/types/activity'
+import type { Activity } from '@/services/data'
 import { 
   Drawer, 
   DrawerContent, 
@@ -213,7 +213,17 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                     <div className="px-3 py-2 flex items-center justify-between">
                       <span className="text-xs font-medium text-app-secondary">Relay Fee</span>
                       <span className="text-xs font-mono text-app-primary">
-                        {formatEthAmount(activity.feeAmount, { maxDecimals: 6 })} ETH
+                        {formatEthAmount(BigInt(activity.feeAmount) - BigInt(activity.feeRefund || 0), { maxDecimals: 6 })} ETH
+                        {activity.feeRefund && BigInt(activity.feeRefund) > 0n && (() => {
+                          const feeAmount = Number(activity.feeAmount);
+                          const feeRefund = Number(activity.feeRefund);
+                          const savingsPercent = ((feeRefund / feeAmount) * 100).toFixed(2);
+                          return (
+                            <span className="ml-1 text-green-600 dark:text-green-400 font-medium">
+                              ({savingsPercent}% saved)
+                            </span>
+                          );
+                        })()}
                       </span>
                     </div>
                   )}

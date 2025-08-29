@@ -39,7 +39,6 @@ export class ApiExecutionQueue {
       };
 
       this.queue.push(request);
-      console.log(`[API Queue] Request ${request.id} queued. Queue length: ${this.queue.length}`);
       
       // Start processing if not already running
       if (!this.processing) {
@@ -56,7 +55,6 @@ export class ApiExecutionQueue {
       return;
     }
 
-    console.log(`[API Queue] Starting queue processing. Queue length: ${this.queue.length}`);
     this.processing = true;
 
     while (this.queue.length > 0) {
@@ -66,7 +64,6 @@ export class ApiExecutionQueue {
       // If not enough time has passed since last execution, wait
       if (timeSinceLastExecution < this.delayMs) {
         const waitTime = this.delayMs - timeSinceLastExecution;
-        console.log(`[API Queue] Rate limiting: waiting ${waitTime}ms`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
       }
 
@@ -74,25 +71,18 @@ export class ApiExecutionQueue {
       const request = this.queue.shift();
       if (!request) break;
 
-      console.log(`[API Queue] Executing request ${request.id}. Remaining in queue: ${this.queue.length}`);
       
       // Execute the request
       this.lastExecutionTime = Date.now();
-      const startTime = Date.now();
       
       try {
         const result = await request.executor();
-        const duration = Date.now() - startTime;
-        console.log(`[API Queue] Request ${request.id} completed in ${duration}ms`);
         request.resolve(result);
       } catch (error) {
-        const duration = Date.now() - startTime;
-        console.log(`[API Queue] Request ${request.id} failed after ${duration}ms:`, error);
         request.reject(error as Error);
       }
     }
 
-    console.log(`[API Queue] Queue processing completed. Queue is now empty.`);
     this.processing = false;
   }
 
