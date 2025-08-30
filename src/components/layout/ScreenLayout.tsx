@@ -1,11 +1,11 @@
 /**
  * Native App Screen Layout System
- * 
+ *
  * Implements iOS/Android-style view controller pattern where each screen
  * has defined boundaries and manages its own content within a fixed viewport.
  */
 
-import React from 'react';
+import React from "react";
 
 /**
  * Main App Container - Fixed viewport like native apps
@@ -22,30 +22,16 @@ export function AppLayout({ header, banner, bottomNav, children }: AppLayoutProp
   return (
     <div className="h-screen flex flex-col bg-app-background overflow-hidden">
       {/* Header - Fixed at top */}
-      {header && (
-        <div className="flex-shrink-0">
-          {header}
-        </div>
-      )}
-      
+      {header && <div className="flex-shrink-0">{header}</div>}
+
       {/* Banner - Fixed below header */}
-      {banner && (
-        <div className="flex-shrink-0">
-          {banner}
-        </div>
-      )}
-      
+      {banner && <div className="flex-shrink-0">{banner}</div>}
+
       {/* Main content area - Takes remaining space */}
-      <main className="flex-1 overflow-hidden relative">
-        {children}
-      </main>
-      
+      <main className="flex-1 overflow-hidden relative">{children}</main>
+
       {/* Bottom navigation - Fixed at bottom */}
-      {bottomNav && (
-        <div className="flex-shrink-0">
-          {bottomNav}
-        </div>
-      )}
+      {bottomNav && <div className="flex-shrink-0">{bottomNav}</div>}
     </div>
   );
 }
@@ -60,17 +46,13 @@ interface ScreenProps {
   scrollable?: boolean;
 }
 
-export function Screen({ children, className = '', scrollable = true }: ScreenProps) {
+export function Screen({ children, className = "", scrollable = true }: ScreenProps) {
   return (
     <div className={`absolute inset-0 flex flex-col ${className}`}>
       {scrollable ? (
-        <div className="flex-1 overflow-y-auto scrollbar-hide">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto scrollbar-hide">{children}</div>
       ) : (
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {children}
-        </div>
+        <div className="flex-1 flex flex-col overflow-hidden">{children}</div>
       )}
     </div>
   );
@@ -82,26 +64,18 @@ export function Screen({ children, className = '', scrollable = true }: ScreenPr
 interface ScreenContentProps {
   children: React.ReactNode;
   className?: string;
-  padding?: 'none' | 'sm' | 'md' | 'lg';
+  padding?: "none" | "sm" | "md" | "lg";
 }
 
-export function ScreenContent({ 
-  children, 
-  className = '', 
-  padding = 'md' 
-}: ScreenContentProps) {
+export function ScreenContent({ children, className = "", padding = "md" }: ScreenContentProps) {
   const paddingClasses = {
-    none: '',
-    sm: 'p-3',
-    md: 'p-4',
-    lg: 'p-6'
+    none: "",
+    sm: "p-3",
+    md: "p-4",
+    lg: "p-6",
   };
 
-  return (
-    <div className={`${paddingClasses[padding]} ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`${paddingClasses[padding]} ${className}`}>{children}</div>;
 }
 
 /**
@@ -114,22 +88,13 @@ interface ScreenSectionProps {
   flex?: boolean;
 }
 
-export function ScreenSection({ 
-  children, 
-  className = '', 
-  title,
-  flex = false 
-}: ScreenSectionProps) {
-  const Container = flex ? 'div' : 'section';
-  const containerClass = flex ? 'flex-1 flex flex-col' : '';
+export function ScreenSection({ children, className = "", title, flex = false }: ScreenSectionProps) {
+  const Container = flex ? "div" : "section";
+  const containerClass = flex ? "flex-1 flex flex-col" : "";
 
   return (
     <Container className={`${containerClass} ${className}`}>
-      {title && (
-        <h2 className="text-lg font-semibold text-app-primary mb-4">
-          {title}
-        </h2>
-      )}
+      {title && <h2 className="text-lg font-semibold text-app-primary mb-4">{title}</h2>}
       {children}
     </Container>
   );
@@ -144,22 +109,16 @@ interface ScrollableListProps {
   emptyState?: React.ReactNode;
 }
 
-export function ScrollableList({ children, className = '', emptyState }: ScrollableListProps) {
+export function ScrollableList({ children, className = "", emptyState }: ScrollableListProps) {
   const hasChildren = React.Children.count(children) > 0;
 
   if (!hasChildren && emptyState) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        {emptyState}
-      </div>
-    );
+    return <div className="flex-1 flex items-center justify-center">{emptyState}</div>;
   }
 
   return (
     <div className={`flex-1 overflow-y-auto scrollbar-hide ${className}`}>
-      <div className="space-y-2">
-        {children}
-      </div>
+      <div className="space-y-2">{children}</div>
     </div>
   );
 }

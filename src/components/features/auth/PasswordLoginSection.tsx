@@ -3,25 +3,23 @@
  * Authenticates with password and loads account keys from storage
  */
 
-import React, { useState } from 'react';
-import { Button } from '../../ui/button';
-import { Lock, Eye, EyeOff } from 'lucide-react';
-import { Input } from '../../ui/input';
+import React, { useState } from "react";
+import { Button } from "../../ui/button";
+import { Lock, Eye, EyeOff } from "lucide-react";
+import { Input } from "../../ui/input";
 import { KDF } from "@/lib/auth/keyDerivation";
 import { noteCache } from "@/lib/storage/noteCache";
-import { restoreFromMnemonic } from '@/utils/crypto';
-import { useAuth } from '@/contexts/AuthContext';
+import { restoreFromMnemonic } from "@/utils/crypto";
+import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
 
 interface PasswordLoginSectionProps {
   onSuccess: () => void;
 }
 
-export function PasswordLoginSection({
-  onSuccess
-}: PasswordLoginSectionProps) {
-  const [accountName, setAccountName] = useState('');
-  const [password, setPassword] = useState('');
+export function PasswordLoginSection({ onSuccess }: PasswordLoginSectionProps) {
+  const [accountName, setAccountName] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,9 +28,9 @@ export function PasswordLoginSection({
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!password.trim() || !accountName.trim()) {
-      setError('Please enter both account name and password');
+      setError("Please enter both account name and password");
       return;
     }
 
@@ -42,14 +40,14 @@ export function PasswordLoginSection({
     try {
       // Derive encryption key from password
       const { symmetricKey } = await KDF.deriveKeyFromPassword(password, accountName.trim());
-      
+
       // Initialize account-scoped session with derived key
       await noteCache.initializeAccountSession(accountName.trim(), symmetricKey);
 
       // Retrieve and restore account keys
       const accountData = await noteCache.getAccountData();
       if (!accountData) {
-        throw new Error('Account not found or incorrect password');
+        throw new Error("Account not found or incorrect password");
       }
 
       // Derive all keys from the stored mnemonic
@@ -58,19 +56,19 @@ export function PasswordLoginSection({
         publicKey,
         privateKey,
         mnemonic: accountData.mnemonic,
-        address
+        address,
       });
 
       // Store session info for future restoration
-      KDF.storeSessionInfo(accountName.trim(), 'password');
+      KDF.storeSessionInfo(accountName.trim(), "password");
 
-      banner.success('Login successful');
+      banner.success("Login successful");
       onSuccess();
     } catch (error) {
-      console.error('Password login failed:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+      console.error("Password login failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Authentication failed";
       setError(errorMessage);
-      banner.error('Login failed');
+      banner.error("Login failed");
     } finally {
       setIsProcessing(false);
     }
@@ -95,7 +93,7 @@ export function PasswordLoginSection({
       <div className="relative">
         <input
           id="login-password"
-          type={showPassword ? 'text' : 'password'}
+          type={showPassword ? "text" : "password"}
           value={password}
           onChange={(e) => {
             setPassword(e.target.value);
@@ -121,9 +119,7 @@ export function PasswordLoginSection({
         </button>
       </div>
 
-      {error && (
-        <p className="text-red-600 text-xs">{error}</p>
-      )}
+      {error && <p className="text-red-600 text-xs">{error}</p>}
 
       <Button
         type="submit"

@@ -1,13 +1,13 @@
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 import { http, createConfig } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
-import { getDefaultConfig } from '@rainbow-me/rainbowkit';
-import { isFarcasterEnvironment } from './utils/environment';
+import { getDefaultConfig } from "@rainbow-me/rainbowkit";
+import { isFarcasterEnvironment } from "./utils/environment";
 
 // For browser usage - Rainbow wallet configuration
 const rainbowConfig = getDefaultConfig({
-  appName: 'shinobi.cash',
-  projectId: import.meta.env.VITE_WC_PROJECT_ID || '',
+  appName: "shinobi.cash",
+  projectId: import.meta.env.VITE_WC_PROJECT_ID || "",
   chains: [baseSepolia],
   ssr: false,
 });

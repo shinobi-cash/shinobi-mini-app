@@ -14,7 +14,7 @@ export const PRIVACY_POOL_ABI = [
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
-  }
+  },
 ] as const;
 
 /**
@@ -84,7 +84,7 @@ export const PRIVACY_POOL_ENTRYPOINT_ABI = [
     outputs: [{ name: "_commitment", type: "uint256" }],
     stateMutability: "payable",
     type: "function",
-  }
+  },
 ] as const;
 
 // ============ UTILITY TYPES ============

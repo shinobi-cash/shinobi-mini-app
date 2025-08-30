@@ -1,13 +1,13 @@
-import { useEffect, useMemo } from 'react';
-import { ArrowLeft, Loader2 } from 'lucide-react';
-import { Button } from '../../ui/button';
-import { Input } from '../../ui/input';
+import { useEffect, useMemo } from "react";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
 import { cn } from "@/lib/utils";
-import { useWithdrawalForm } from '@/hooks/forms/useWithdrawalForm';
-import { useWithdrawalFlow } from '@/hooks/transactions/useWithdrawalFlow';
-import { TransactionPreviewDrawer } from './TransactionPreviewDrawer';
+import { useWithdrawalForm } from "@/hooks/forms/useWithdrawalForm";
+import { useWithdrawalFlow } from "@/hooks/transactions/useWithdrawalFlow";
+import { TransactionPreviewDrawer } from "./TransactionPreviewDrawer";
 import { Note } from "@/lib/storage/noteCache";
-import { formatEthAmount } from '@/utils/formatters';
+import { formatEthAmount } from "@/utils/formatters";
 import { calculateWithdrawalAmounts } from "@/services/privacy/withdrawalService";
 
 interface WithdrawNoteFormProps {
@@ -18,40 +18,36 @@ interface WithdrawNoteFormProps {
 export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
   // Use form hook for validation and state management
   const form = useWithdrawalForm({ note });
-  
+
   // Use withdrawal flow hook for transaction management
   const withdrawalFlow = useWithdrawalFlow({ note });
 
   // Extract form values for easier access
-  const { withdrawAmount, recipientAddress, withdrawAmountNum, availableBalance, isValidAmount, isValidRecipient } = form;
-  
+  const { withdrawAmount, recipientAddress, withdrawAmountNum, availableBalance, isValidAmount, isValidRecipient } =
+    form;
+
   // Memoize expensive calculations to prevent unnecessary recalculations
   const withdrawalAmounts = useMemo(() => {
-    return withdrawAmount 
-      ? calculateWithdrawalAmounts(withdrawAmount)
-      : { executionFee: 0, youReceive: 0 };
+    return withdrawAmount ? calculateWithdrawalAmounts(withdrawAmount) : { executionFee: 0, youReceive: 0 };
   }, [withdrawAmount]);
-  
-  const { executionFee, youReceive } = withdrawalAmounts;
-    
-  // Remaining balance = original amount - withdrawal amount (execution fee comes from withdrawal)
-  const remainingBalance = useMemo(() => 
-    availableBalance - withdrawAmountNum, 
-    [availableBalance, withdrawAmountNum]
-  );
 
-  // Extract form handlers 
+  const { executionFee, youReceive } = withdrawalAmounts;
+
+  // Remaining balance = original amount - withdrawal amount (execution fee comes from withdrawal)
+  const remainingBalance = useMemo(() => availableBalance - withdrawAmountNum, [availableBalance, withdrawAmountNum]);
+
+  // Extract form handlers
   const { handleAmountChange, handleMaxClick, setRecipientAddress } = form;
-  
+
   // Extract withdrawal flow handlers and state
-  const { 
-    showPreview, 
-    isPreparing, 
-    isExecuting, 
-    handlePreviewWithdrawal, 
-    handleExecuteTransaction, 
-    closePreview, 
-    resetStates 
+  const {
+    showPreview,
+    isPreparing,
+    isExecuting,
+    handlePreviewWithdrawal,
+    handleExecuteTransaction,
+    closePreview,
+    resetStates,
   } = withdrawalFlow;
 
   // Auto-reset all states when form values change
@@ -86,22 +82,20 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
             />
             <p className="text-base text-app-secondary mt-1">ETH</p>
           </div>
-          
+
           {/* Available Balance */}
           <div className="text-center mb-3">
             <p className="text-xs text-app-secondary">
-              Available: <span className="text-app-primary font-medium">{formatEthAmount(note.amount, { maxDecimals: 6 })} ETH</span>
+              Available:{" "}
+              <span className="text-app-primary font-medium">
+                {formatEthAmount(note.amount, { maxDecimals: 6 })} ETH
+              </span>
             </p>
           </div>
-          
+
           {/* Quick Amount Buttons */}
           <div className="flex gap-2 justify-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleMaxClick}
-              className="rounded-full px-3 py-1 text-xs"
-            >
+            <Button variant="outline" size="sm" onClick={handleMaxClick} className="rounded-full px-3 py-1 text-xs">
               MAX
             </Button>
             <Button
@@ -121,7 +115,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
               25%
             </Button>
           </div>
-          
+
           {!isValidAmount && withdrawAmount && (
             <p className="text-xs text-destructive mt-2 text-center">
               Amount must be between 0 and {formatEthAmount(note.amount)} ETH
@@ -139,7 +133,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
             onChange={(e) => setRecipientAddress(e.target.value)}
             className={cn(
               "font-mono text-xs",
-              !isValidRecipient && recipientAddress && "border-destructive focus:border-destructive"
+              !isValidRecipient && recipientAddress && "border-destructive focus:border-destructive",
             )}
           />
           {!isValidRecipient && recipientAddress && (
@@ -152,12 +146,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
       <div className="mt-auto">
         <Button
           onClick={() => handlePreviewWithdrawal(withdrawAmount, recipientAddress)}
-          disabled={
-            !isValidAmount || 
-            !isValidRecipient || 
-            isPreparing ||
-            isExecuting
-          }
+          disabled={!isValidAmount || !isValidRecipient || isPreparing || isExecuting}
           className="w-full h-11 rounded-xl text-sm font-medium"
           size="lg"
         >
@@ -172,7 +161,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
               Executing...
             </>
           ) : (
-            'Preview Withdrawal'
+            "Preview Withdrawal"
           )}
         </Button>
       </div>

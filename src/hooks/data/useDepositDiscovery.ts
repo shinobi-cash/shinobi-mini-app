@@ -2,13 +2,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Note, DiscoveryResult, NoteChain, noteCache } from "@/lib/storage/noteCache";
 import { poseidon1, poseidon2 } from "poseidon-lite";
-import {
-  deriveDepositNullifier,
-  deriveDepositSecret,
-  deriveChangeNullifier,
-} from "@/utils/noteDerivation";
+import { deriveDepositNullifier, deriveDepositSecret, deriveChangeNullifier } from "@/utils/noteDerivation";
 import { fetchActivities } from "@/services/data/queryService";
-import type { Activity } from '@/services/data/queryService'
+import type { Activity } from "@/services/data/queryService";
 
 /* ---------- Configuration ---------- */
 const ACTIVITIES_PER_PAGE = 100;
@@ -16,12 +12,11 @@ const ACTIVITIES_PER_PAGE = 100;
 export type DiscoveryProgress = {
   pagesProcessed: number;
   currentPageActivityCount: number;
-  depositsChecked: number;   // derived deposit indices checked
-  depositsMatched: number;   // deposit indices that matched (new deposits discovered)
+  depositsChecked: number; // derived deposit indices checked
+  depositsMatched: number; // deposit indices that matched (new deposits discovered)
   lastCursor?: string;
   complete: boolean;
 };
-
 
 /* ---------- Helper: extend an existing chain IN-PLACE using activities from a page ----------
    - Mutates the provided `chain` (pushes change notes).
@@ -31,7 +26,7 @@ function extendChainInPlace(
   chain: NoteChain,
   pageActivities: Activity[],
   accountKey: bigint,
-  poolAddress: string
+  poolAddress: string,
 ): number {
   // Start from the last note in the chain
   let withdrawalsMatched = 0;
@@ -46,12 +41,7 @@ function extendChainInPlace(
   if (lastNote.changeIndex === 0) {
     currentNullifier = deriveDepositNullifier(accountKey, poolAddress, chain[0].depositIndex);
   } else {
-    currentNullifier = deriveChangeNullifier(
-      accountKey,
-      poolAddress,
-      chain[0].depositIndex,
-      lastNote.changeIndex
-    );
+    currentNullifier = deriveChangeNullifier(accountKey, poolAddress, chain[0].depositIndex, lastNote.changeIndex);
   }
 
   // Repeatedly try to find a withdrawal that spends the current nullifier in this page.
@@ -61,7 +51,9 @@ function extendChainInPlace(
 
     // Find withdrawal in this page that spends this nullifier.
     // Use find() so we only match the earliest relevant withdrawal in this page.
-    const withdrawal = pageActivities.find((activity) => activity.type === "WITHDRAWAL" && activity.spentNullifier === nullifierHash);
+    const withdrawal = pageActivities.find(
+      (activity) => activity.type === "WITHDRAWAL" && activity.spentNullifier === nullifierHash,
+    );
 
     if (!withdrawal || !withdrawal.newCommitment) {
       // No matching withdrawal found in this page for the current nullifier
@@ -110,7 +102,7 @@ function buildChainForDepositInPage(
   depositIndex: number,
   pageActivitiesAfter: Activity[],
   accountKey: bigint,
-  poolAddress: string
+  poolAddress: string,
 ): { chain: NoteChain } {
   const depositNote: Note = {
     poolAddress,
@@ -139,7 +131,7 @@ export async function discoverNotes(
   opts?: {
     signal?: AbortSignal;
     onProgress?: (p: DiscoveryProgress) => void;
-  }
+  },
 ): Promise<DiscoveryResult> {
   const signal = opts?.signal;
   const onProgress = opts?.onProgress;
@@ -192,7 +184,7 @@ export async function discoverNotes(
 
     // Fetch one page of generic activities (rate-limited via apiQueue)
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-    
+
     const activitiesResult = await fetchActivities(poolAddress, ACTIVITIES_PER_PAGE, cursor, "asc");
     const activities: Activity[] = activitiesResult.items;
     pagesProcessed++;
@@ -222,7 +214,8 @@ export async function discoverNotes(
           if (lastNote.status === "spent" || BigInt(lastNote.amount) <= 0n) {
             // fully spent => remove from liveDeposits
             liveDeposits = liveDeposits.filter(
-              (deposit) => !(deposit.depositIndex === liveDeposit.depositIndex && deposit.chainIndex === liveDeposit.chainIndex)
+              (deposit) =>
+                !(deposit.depositIndex === liveDeposit.depositIndex && deposit.chainIndex === liveDeposit.chainIndex),
             );
           } else {
             // update remaining in liveDeposits
@@ -230,7 +223,7 @@ export async function discoverNotes(
             liveDeposits = liveDeposits.map((deposit) =>
               deposit.depositIndex === liveDeposit.depositIndex && deposit.chainIndex === liveDeposit.chainIndex
                 ? { ...deposit, remaining: newRemaining }
-                : deposit
+                : deposit,
             );
           }
         }
@@ -254,7 +247,9 @@ export async function discoverNotes(
       onProgress?.({ ...progress });
 
       // Find deposit activity in this page
-      const depositPosition = activities.findIndex((activity) => activity.type === "DEPOSIT" && activity.precommitmentHash === targetPrecommitment);
+      const depositPosition = activities.findIndex(
+        (activity) => activity.type === "DEPOSIT" && activity.precommitmentHash === targetPrecommitment,
+      );
 
       if (depositPosition === -1) {
         // Not found in this page: stop trying more candidates here
@@ -271,7 +266,7 @@ export async function discoverNotes(
         candidateDepositIndex,
         activitiesAfter,
         accountKey,
-        poolAddress
+        poolAddress,
       );
 
       // Append chain to notes (chain is independent array)
@@ -316,7 +311,7 @@ export async function discoverNotes(
 
   // Logging summary
   console.log(
-    `[DiscoveryV2] ✅ Done: ${notes.length} chains, +${progress.depositsMatched} deposits matched, lastUsedIndex=${lastUsedIndex}, lastCursor=${cursor}`
+    `[DiscoveryV2] ✅ Done: ${notes.length} chains, +${progress.depositsMatched} deposits matched, lastUsedIndex=${lastUsedIndex}, lastCursor=${cursor}`,
   );
 
   // Return discovery result (noteCache already persisted per page)
@@ -329,12 +324,7 @@ export async function discoverNotes(
 }
 
 /* ---------- React hook: useNotes (complete) ---------- */
-export function useNotes(
-  publicKey: string,
-  poolAddress: string,
-  accountKey: bigint,
-  options?: { autoScan?: boolean }
-) {
+export function useNotes(publicKey: string, poolAddress: string, accountKey: bigint, options?: { autoScan?: boolean }) {
   const [data, setData] = useState<DiscoveryResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -350,12 +340,12 @@ export function useNotes(
     async (signal?: AbortSignal, onProgress?: (p: DiscoveryProgress) => void) => {
       return discoverNotes(publicKey, poolAddress, accountKey, { signal, onProgress });
     },
-    [publicKey, poolAddress, accountKey]
+    [publicKey, poolAddress, accountKey],
   );
 
   useEffect(() => {
     const autoScan = options?.autoScan ?? true;
-    
+
     // Load cache first
     const loadCache = async () => {
       try {
@@ -365,12 +355,12 @@ export function useNotes(
           setLoading(false);
         }
       } catch (error) {
-        console.error('Failed to load cached notes:', error);
+        console.error("Failed to load cached notes:", error);
       }
     };
-    
+
     loadCache();
-    
+
     // Only run discovery if autoScan is enabled
     if (!autoScan) return;
 

@@ -1,11 +1,11 @@
 /**
  * API Execution Queue
- * 
+ *
  * Manages rate-limited execution of API requests to prevent overwhelming the indexer.
  * Requests are queued and executed with configurable delays between calls.
  */
 
-import { API_QUEUE } from '@/config/constants';
+import { API_QUEUE } from "@/config/constants";
 
 interface QueuedRequest<T> {
   id: string;
@@ -22,7 +22,7 @@ export class ApiExecutionQueue {
   private requestCounter = 0;
 
   constructor(
-    private delayMs: number = 200 // Default 200ms between requests (5 requests per second)
+    private delayMs: number = 200, // Default 200ms between requests (5 requests per second)
   ) {}
 
   /**
@@ -35,11 +35,11 @@ export class ApiExecutionQueue {
         executor,
         resolve,
         reject,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       this.queue.push(request);
-      
+
       // Start processing if not already running
       if (!this.processing) {
         this.processQueue();
@@ -64,17 +64,16 @@ export class ApiExecutionQueue {
       // If not enough time has passed since last execution, wait
       if (timeSinceLastExecution < this.delayMs) {
         const waitTime = this.delayMs - timeSinceLastExecution;
-        await new Promise(resolve => setTimeout(resolve, waitTime));
+        await new Promise((resolve) => setTimeout(resolve, waitTime));
       }
 
       // Get the next request
       const request = this.queue.shift();
       if (!request) break;
 
-      
       // Execute the request
       this.lastExecutionTime = Date.now();
-      
+
       try {
         const result = await request.executor();
         request.resolve(result);
@@ -94,7 +93,7 @@ export class ApiExecutionQueue {
       queueLength: this.queue.length,
       processing: this.processing,
       lastExecutionTime: this.lastExecutionTime,
-      delayMs: this.delayMs
+      delayMs: this.delayMs,
     };
   }
 
@@ -110,8 +109,8 @@ export class ApiExecutionQueue {
    */
   clear() {
     // Reject all pending requests
-    this.queue.forEach(request => {
-      request.reject(new Error('Queue cleared'));
+    this.queue.forEach((request) => {
+      request.reject(new Error("Queue cleared"));
     });
     this.queue = [];
     this.processing = false;
@@ -120,6 +119,5 @@ export class ApiExecutionQueue {
 
 // Create singleton instance with configurable settings
 export const apiQueue = new ApiExecutionQueue(
-  API_QUEUE.REQUEST_DELAY_MS // Configurable delay between requests
+  API_QUEUE.REQUEST_DELAY_MS, // Configurable delay between requests
 );
-

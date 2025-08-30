@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Button } from '../../ui/button';
-import { Key } from 'lucide-react';
-import { generateKeysFromRandomSeed, KeyGenerationResult } from '@/utils/crypto';
+import { useState } from "react";
+import { Button } from "../../ui/button";
+import { Key } from "lucide-react";
+import { generateKeysFromRandomSeed, KeyGenerationResult } from "@/utils/crypto";
 import { useBanner } from "@/contexts/BannerContext";
 
 interface KeyGenerationSectionProps {
@@ -10,60 +10,59 @@ interface KeyGenerationSectionProps {
 
 export function KeyGenerationSection({ onKeyGenerationComplete }: KeyGenerationSectionProps) {
   const [progress, setProgress] = useState(0);
-  const [currentTask, setCurrentTask] = useState('');
+  const [currentTask, setCurrentTask] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const { banner } = useBanner();
-  
+
   const handleGenerateKeys = async () => {
     setProgress(0);
     setIsGenerating(true);
     try {
       // Simulate progress for better UX
       const tasks = [
-        { name: 'Generating entropy...', duration: 600 },
-        { name: 'Creating mnemonic...', duration: 700 },
-        { name: 'Deriving keys...', duration: 500 },
-        { name: 'Validating security...', duration: 400 },
+        { name: "Generating entropy...", duration: 600 },
+        { name: "Creating mnemonic...", duration: 700 },
+        { name: "Deriving keys...", duration: 500 },
+        { name: "Validating security...", duration: 400 },
       ];
-      
+
       let completedProgress = 0;
       for (let i = 0; i < tasks.length; i++) {
         const task = tasks[i];
         setCurrentTask(task.name);
         const taskProgress = 100 / tasks.length;
         const startProgress = completedProgress;
-        
+
         // Animate progress within this task
         const steps = 10;
         for (let step = 0; step <= steps; step++) {
           const stepProgress = (step / steps) * taskProgress;
           setProgress(startProgress + stepProgress);
-          await new Promise(resolve => setTimeout(resolve, task.duration / steps));
+          await new Promise((resolve) => setTimeout(resolve, task.duration / steps));
         }
-        
+
         completedProgress += taskProgress;
       }
-      
-      setCurrentTask('Finalizing...');
-      
+
+      setCurrentTask("Finalizing...");
+
       // Generate secure random seed
       const randomBytes = crypto.getRandomValues(new Uint8Array(32));
       const randomSeed = Array.from(randomBytes)
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-      
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+
       const keys = generateKeysFromRandomSeed(randomSeed);
       setProgress(100);
-      
+
       setTimeout(() => {
         setIsGenerating(false);
         onKeyGenerationComplete(keys);
       }, 500);
-      
     } catch (error) {
-      console.error('Key generation failed:', error);
+      console.error("Key generation failed:", error);
       setIsGenerating(false);
-      banner.error('Key generation failed. Please try again.');
+      banner.error("Key generation failed. Please try again.");
     }
   };
 
@@ -73,17 +72,12 @@ export function KeyGenerationSection({ onKeyGenerationComplete }: KeyGenerationS
         <div className="bg-app-surface rounded-xl p-4 border border-app shadow-sm">
           <div className="text-center">
             <div className="w-full h-2 bg-gray-200 rounded-full mb-4">
-              <div
-                className="h-2 bg-violet-500 rounded-full transition-all"
-                style={{ width: `${progress}%` }}
-              />
+              <div className="h-2 bg-violet-500 rounded-full transition-all" style={{ width: `${progress}%` }} />
             </div>
             <p className="text-sm font-medium text-app-primary text-center mb-2">
-              {currentTask || 'Preparing key generation...'}
+              {currentTask || "Preparing key generation..."}
             </p>
-            <p className="text-xs text-app-secondary">
-              Please wait while we generate your secure keys...
-            </p>
+            <p className="text-xs text-app-secondary">Please wait while we generate your secure keys...</p>
           </div>
         </div>
       </div>
@@ -110,9 +104,7 @@ export function KeyGenerationSection({ onKeyGenerationComplete }: KeyGenerationS
             <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full" />
           </div>
           <div>
-            <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">
-              What happens next?
-            </p>
+            <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">What happens next?</p>
             <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
               <li>• Generate cryptographically secure keys</li>
               <li>• Create a 12-word recovery phrase</li>
@@ -122,11 +114,7 @@ export function KeyGenerationSection({ onKeyGenerationComplete }: KeyGenerationS
         </div>
       </div>
 
-      <Button 
-        onClick={handleGenerateKeys}
-        className="w-full"
-        size="lg"
-      >
+      <Button onClick={handleGenerateKeys} className="w-full" size="lg">
         Generate My Keys
       </Button>
     </div>

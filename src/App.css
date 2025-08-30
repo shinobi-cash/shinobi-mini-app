@@ -3,7 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
   font-synthesis: none;
   font-weight: 400;
   line-height: 1.5;
@@ -32,7 +32,7 @@
   --border: #e5e7eb;
   --input: #e5e7eb;
   --ring: #6366f1;
-  
+
   /* Custom app colors */
   --app-background: #f9fafb;
   --app-surface: #ffffff;
@@ -42,7 +42,7 @@
   --app-text-secondary: #6b7280;
   --app-text-tertiary: #9ca3af;
   --app-header-bg: rgba(255, 255, 255, 0.8);
-  
+
   /* Status colors */
   --status-success: #16a34a;
   --status-warning: #f59e0b;
@@ -68,7 +68,7 @@
   --border: #404040;
   --input: #404040;
   --ring: #6366f1;
-  
+
   /* Custom app colors */
   --app-background: #000000;
   --app-surface: #262626;
@@ -78,7 +78,7 @@
   --app-text-secondary: #a3a3a3;
   --app-text-tertiary: #737373;
   --app-header-bg: #1a1a1a;
-  
+
   /* Status colors */
   --status-success: #22c55e;
   --status-warning: #f59e0b;
@@ -175,19 +175,43 @@
 }
 
 @layer utilities {
-  .bg-app-background { background-color: var(--app-background); }
-  .bg-app-surface { background-color: var(--app-surface); }
-  .bg-app-surface-hover { background-color: var(--app-surface-hover); }
-  .bg-app-header { background-color: var(--app-header-bg); }
-  
-  .border-app { border-color: var(--app-border); }
-  
-  .text-app-primary { color: var(--app-text-primary); }
-  .text-app-secondary { color: var(--app-text-secondary); }
-  .text-app-tertiary { color: var(--app-text-tertiary); }
-  
-  .bg-status-success { background-color: var(--status-success); }
-  .bg-status-warning { background-color: var(--status-warning); }
-  .bg-status-error { background-color: var(--status-error); }
-  .bg-status-neutral { background-color: var(--status-neutral); }
+  .bg-app-background {
+    background-color: var(--app-background);
+  }
+  .bg-app-surface {
+    background-color: var(--app-surface);
+  }
+  .bg-app-surface-hover {
+    background-color: var(--app-surface-hover);
+  }
+  .bg-app-header {
+    background-color: var(--app-header-bg);
+  }
+
+  .border-app {
+    border-color: var(--app-border);
+  }
+
+  .text-app-primary {
+    color: var(--app-text-primary);
+  }
+  .text-app-secondary {
+    color: var(--app-text-secondary);
+  }
+  .text-app-tertiary {
+    color: var(--app-text-tertiary);
+  }
+
+  .bg-status-success {
+    background-color: var(--status-success);
+  }
+  .bg-status-warning {
+    background-color: var(--status-warning);
+  }
+  .bg-status-error {
+    background-color: var(--status-error);
+  }
+  .bg-status-neutral {
+    background-color: var(--status-neutral);
+  }
 }

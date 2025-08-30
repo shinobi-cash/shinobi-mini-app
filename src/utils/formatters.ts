@@ -2,8 +2,8 @@
  * Utility functions for formatting values in the application
  */
 
-import { formatEther, parseEther } from 'viem';
-import { formatDistance } from 'date-fns';
+import { formatEther, parseEther } from "viem";
+import { formatDistance } from "date-fns";
 
 export interface EthFormattingOptions {
   /** Number of decimal places to show. If undefined, removes trailing zeros */
@@ -17,29 +17,29 @@ export interface EthFormattingOptions {
 /**
  * Format ETH amounts with consistent precision using viem for accuracy
  * Handles multiple input types and provides flexible decimal formatting
- * 
+ *
  * @param amount - Amount to format (wei string, ETH number/string, or bigint)
  * @param options - Formatting options
  * @returns Formatted ETH amount string
  */
 export function formatEthAmount(
   amount: string | number | bigint | undefined,
-  options: EthFormattingOptions = {}
+  options: EthFormattingOptions = {},
 ): string {
   if (!amount || amount === 0) {
     const { decimals = 0 } = options;
-    return decimals > 0 ? `0.${'0'.repeat(decimals)}` : '0';
+    return decimals > 0 ? `0.${"0".repeat(decimals)}` : "0";
   }
 
   try {
     let weiAmount: bigint;
 
     // Handle different input types
-    if (typeof amount === 'bigint') {
+    if (typeof amount === "bigint") {
       weiAmount = amount;
-    } else if (typeof amount === 'string') {
+    } else if (typeof amount === "string") {
       // Check if it's already in wei (large number) or ETH (small number with decimals)
-      if (amount.includes('.') || parseFloat(amount) < 1000) {
+      if (amount.includes(".") || parseFloat(amount) < 1000) {
         // Treat as ETH amount, convert to wei
         weiAmount = parseEther(amount);
       } else {
@@ -62,30 +62,30 @@ export function formatEthAmount(
     } else {
       // Dynamic decimal formatting
       const { minDecimals = 0, maxDecimals = 18 } = options;
-      
+
       // Remove trailing zeros but respect minimum decimals
-      let formatted = ethString.replace(/\.?0+$/, '') || '0';
-      
+      let formatted = ethString.replace(/\.?0+$/, "") || "0";
+
       // Ensure minimum decimal places
       if (minDecimals > 0) {
-        const parts = formatted.split('.');
+        const parts = formatted.split(".");
         if (parts.length === 1) {
-          formatted += '.' + '0'.repeat(minDecimals);
+          formatted += "." + "0".repeat(minDecimals);
         } else {
           const currentDecimals = parts[1].length;
           if (currentDecimals < minDecimals) {
-            formatted += '0'.repeat(minDecimals - currentDecimals);
+            formatted += "0".repeat(minDecimals - currentDecimals);
           }
         }
       }
 
       // Limit maximum decimal places
       if (maxDecimals < 18) {
-        const parts = formatted.split('.');
+        const parts = formatted.split(".");
         if (parts.length > 1 && parts[1].length > maxDecimals) {
-          formatted = parts[0] + '.' + parts[1].substring(0, maxDecimals);
+          formatted = parts[0] + "." + parts[1].substring(0, maxDecimals);
           // Remove trailing zeros after truncation
-          formatted = formatted.replace(/\.?0+$/, '') || parts[0];
+          formatted = formatted.replace(/\.?0+$/, "") || parts[0];
         }
       }
 
@@ -93,13 +93,13 @@ export function formatEthAmount(
     }
   } catch {
     const { decimals = 0 } = options;
-    return decimals > 0 ? `0.${'0'.repeat(decimals)}` : '0';
+    return decimals > 0 ? `0.${"0".repeat(decimals)}` : "0";
   }
 }
 
 /**
  * Format hash strings for display (6 chars + ... + 4 chars)
- * 
+ *
  * @param hash - Hash string to format
  * @param startChars - Number of characters to show at start (default: 6)
  * @param endChars - Number of characters to show at end (default: 4)
@@ -123,6 +123,6 @@ export function formatTimestamp(timestamp: string): string {
  * Format timestamp as a date (e.g., "12/25/2023")
  */
 export function formatDate(timestamp: string | number): string {
-  const date = typeof timestamp === 'string' ? new Date(parseInt(timestamp) * 1000) : new Date(timestamp);
+  const date = typeof timestamp === "string" ? new Date(parseInt(timestamp) * 1000) : new Date(timestamp);
   return date.toLocaleDateString();
 }

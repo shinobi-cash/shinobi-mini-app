@@ -1,13 +1,13 @@
 /**
  * Screen Manager - Native app style screen switching
- * 
+ *
  * Manages which screen is active and provides smooth transitions
  * Each screen is mounted/unmounted based on navigation state
  */
 
-import React from 'react';
-import { useNavigation } from '@/contexts/NavigationContext';
-import { Screen } from './ScreenLayout';
+import React from "react";
+import { useNavigation } from "@/contexts/NavigationContext";
+import { Screen } from "./ScreenLayout";
 
 /**
  * Screen Registration System
@@ -27,10 +27,10 @@ interface ScreenManagerProps {
 
 export function ScreenManager({ screens, fallbackScreen: FallbackScreen }: ScreenManagerProps) {
   const { currentScreen } = useNavigation();
-  
+
   // Find the active screen configuration
-  const activeScreen = screens.find(screen => screen.id === currentScreen);
-  
+  const activeScreen = screens.find((screen) => screen.id === currentScreen);
+
   if (!activeScreen) {
     if (FallbackScreen) {
       return (
@@ -39,30 +39,23 @@ export function ScreenManager({ screens, fallbackScreen: FallbackScreen }: Scree
         </Screen>
       );
     }
-    
+
     return (
       <Screen>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-app-primary mb-2">
-              Screen Not Found
-            </h2>
-            <p className="text-app-secondary">
-              The requested screen "{currentScreen}" could not be found.
-            </p>
+            <h2 className="text-xl font-semibold text-app-primary mb-2">Screen Not Found</h2>
+            <p className="text-app-secondary">The requested screen "{currentScreen}" could not be found.</p>
           </div>
         </div>
       </Screen>
     );
   }
-  
+
   const { component: ScreenComponent, props = {}, scrollable = true } = activeScreen;
-  
+
   return (
-    <Screen 
-      key={activeScreen.id} 
-      scrollable={scrollable}
-    >
+    <Screen key={activeScreen.id} scrollable={scrollable}>
       <ScreenComponent {...props} />
     </Screen>
   );
@@ -84,8 +77,8 @@ interface SimpleScreenRouterProps {
 }
 
 export function SimpleScreenRouter({ routes, currentPath }: SimpleScreenRouterProps) {
-  const currentRoute = routes.find(route => route.path === currentPath);
-  
+  const currentRoute = routes.find((route) => route.path === currentPath);
+
   if (!currentRoute) {
     return (
       <Screen>
@@ -95,9 +88,9 @@ export function SimpleScreenRouter({ routes, currentPath }: SimpleScreenRouterPr
       </Screen>
     );
   }
-  
+
   const { component: Component, scrollable = true } = currentRoute;
-  
+
   return (
     <Screen scrollable={scrollable}>
       <Component />
@@ -110,20 +103,20 @@ export function SimpleScreenRouter({ routes, currentPath }: SimpleScreenRouterPr
  */
 export function useScreenRegistry() {
   const [screens, setScreens] = React.useState<ScreenConfig[]>([]);
-  
+
   const registerScreen = React.useCallback((config: ScreenConfig) => {
-    setScreens(prev => {
-      const existing = prev.find(s => s.id === config.id);
+    setScreens((prev) => {
+      const existing = prev.find((s) => s.id === config.id);
       if (existing) {
-        return prev.map(s => s.id === config.id ? config : s);
+        return prev.map((s) => (s.id === config.id ? config : s));
       }
       return [...prev, config];
     });
   }, []);
-  
+
   const unregisterScreen = React.useCallback((id: string) => {
-    setScreens(prev => prev.filter(s => s.id !== id));
+    setScreens((prev) => prev.filter((s) => s.id !== id));
   }, []);
-  
+
   return { screens, registerScreen, unregisterScreen };
 }

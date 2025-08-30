@@ -1,47 +1,47 @@
-import { useState, useRef, useEffect } from 'react'
-import { Wallet, ChevronDown, LogOut } from 'lucide-react'
-import { useAccount, useDisconnect } from 'wagmi'
+import { useState, useRef, useEffect } from "react";
+import { Wallet, ChevronDown, LogOut } from "lucide-react";
+import { useAccount, useDisconnect } from "wagmi";
 
 export const WalletDropdown = () => {
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const { isConnected, address } = useAccount()
-  const { disconnect } = useDisconnect()
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { isConnected, address } = useAccount();
+  const { disconnect } = useDisconnect();
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
-    }
+    };
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleDisconnect = () => {
-    disconnect()
-    setIsOpen(false)
-  }
+    disconnect();
+    setIsOpen(false);
+  };
 
   if (!isConnected) {
-    return null
+    return null;
   }
 
   const shortenAddress = (addr: string) => {
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`
-  }
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Wallet menu"
         className="flex items-center gap-1 p-2 hover:bg-app-surface-hover rounded-lg active:scale-95 transition-all"
       >
         <Wallet className="w-5 h-5 text-app-secondary" />
-        <ChevronDown className={`w-4 h-4 text-app-secondary transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 text-app-secondary transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {/* Dropdown Menu */}
@@ -50,11 +50,9 @@ export const WalletDropdown = () => {
           {/* Connected Address */}
           <div className="px-3 py-2 border-b border-app">
             <p className="text-xs text-app-tertiary mb-1">Connected Wallet</p>
-            <p className="text-sm font-mono text-app-primary truncate">
-              {address && shortenAddress(address)}
-            </p>
+            <p className="text-sm font-mono text-app-primary truncate">{address && shortenAddress(address)}</p>
           </div>
-          
+
           {/* Disconnect Option */}
           <button
             onClick={handleDisconnect}
@@ -66,5 +64,5 @@ export const WalletDropdown = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { fetchLatestIndexedBlock } from "@/services/data/queryService";
-import { useTransactionTracking } from '../transactions/useTransactionTracking';
+import { useTransactionTracking } from "../transactions/useTransactionTracking";
 
 export function useConditionalIndexerHealth() {
   const { trackingStatus } = useTransactionTracking();
@@ -8,7 +8,7 @@ export function useConditionalIndexerHealth() {
 
   // Only check indexer health when transaction tracking is idle
   useEffect(() => {
-    if (trackingStatus !== 'idle') {
+    if (trackingStatus !== "idle") {
       // Reset health status when tracking is active
       setIndexerHealth(null);
       return;
@@ -19,7 +19,7 @@ export function useConditionalIndexerHealth() {
         const latestBlock = await fetchLatestIndexedBlock();
         setIndexerHealth(latestBlock !== null);
       } catch (error) {
-        console.error('Indexer health check failed:', error);
+        console.error("Indexer health check failed:", error);
         setIndexerHealth(false);
       }
     };
@@ -27,15 +27,15 @@ export function useConditionalIndexerHealth() {
     // Check immediately and then every 30 seconds
     checkIndexerHealth();
     const interval = setInterval(checkIndexerHealth, 30000);
-    
+
     return () => clearInterval(interval);
   }, [trackingStatus]);
 
   return {
     indexerHealth,
-    shouldShowHealth: trackingStatus === 'idle',
+    shouldShowHealth: trackingStatus === "idle",
     isHealthy: indexerHealth === true,
     isOffline: indexerHealth === false,
-    isChecking: indexerHealth === null
+    isChecking: indexerHealth === null,
   };
 }

@@ -1,154 +1,153 @@
-import React, { useState, useEffect, useCallback, useRef, createContext, useContext } from 'react'
-import { fetchLatestIndexedBlock } from "@/services/data/queryService"
+import React, { useState, useEffect, useCallback, useRef, createContext, useContext } from "react";
+import { fetchLatestIndexedBlock } from "@/services/data/queryService";
 
-export type TrackingStatus = 'idle' | 'waiting' | 'synced'
+export type TrackingStatus = "idle" | "waiting" | "synced";
 
 interface TransactionInfo {
-  hash: string
-  blockNumber: number | null
+  hash: string;
+  blockNumber: number | null;
 }
 
 interface TransactionTrackingContextType {
-  trackTransaction: (txHash: string) => void
-  onTransactionIndexed: (callback: () => void) => () => void
-  trackingStatus: TrackingStatus
-  trackedTxHash: string | null
+  trackTransaction: (txHash: string) => void;
+  onTransactionIndexed: (callback: () => void) => () => void;
+  trackingStatus: TrackingStatus;
+  trackedTxHash: string | null;
 }
 
-const TransactionTrackingContext = createContext<TransactionTrackingContextType | null>(null)
+const TransactionTrackingContext = createContext<TransactionTrackingContextType | null>(null);
 
 export function useTransactionTracking() {
-  const context = useContext(TransactionTrackingContext)
+  const context = useContext(TransactionTrackingContext);
   if (!context) {
-    throw new Error('useTransactionTracking must be used within TransactionTrackingProvider')
+    throw new Error("useTransactionTracking must be used within TransactionTrackingProvider");
   }
-  return context
+  return context;
 }
 
 export function TransactionTrackingProvider({ children }: { children: React.ReactNode }) {
-  const [trackingStatus, setTrackingStatus] = useState<TrackingStatus>('idle')
-  const [trackedTransaction, setTrackedTransaction] = useState<TransactionInfo | null>(null)
-  const eventTargetRef = useRef(new EventTarget())
-  const timeoutRef = useRef<NodeJS.Timeout>()
-  const intervalRef = useRef<NodeJS.Timeout>()
+  const [trackingStatus, setTrackingStatus] = useState<TrackingStatus>("idle");
+  const [trackedTransaction, setTrackedTransaction] = useState<TransactionInfo | null>(null);
+  const eventTargetRef = useRef(new EventTarget());
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const intervalRef = useRef<NodeJS.Timeout>();
 
   const trackTransaction = useCallback((txHash: string) => {
     // Clear any existing tracking
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    if (intervalRef.current) clearInterval(intervalRef.current)
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (intervalRef.current) clearInterval(intervalRef.current);
 
-    setTrackedTransaction({ hash: txHash, blockNumber: null })
-    setTrackingStatus('waiting')
+    setTrackedTransaction({ hash: txHash, blockNumber: null });
+    setTrackingStatus("waiting");
 
     // Auto-clear tracking after 5 minutes
-    timeoutRef.current = setTimeout(() => {
-      setTrackedTransaction(null)
-      setTrackingStatus('idle')
-    }, 5 * 60 * 1000)
-  }, [])
+    timeoutRef.current = setTimeout(
+      () => {
+        setTrackedTransaction(null);
+        setTrackingStatus("idle");
+      },
+      5 * 60 * 1000,
+    );
+  }, []);
 
   const onTransactionIndexed = useCallback((callback: () => void) => {
-    const eventTarget = eventTargetRef.current
-    const handler = () => callback()
-    
-    eventTarget.addEventListener('indexed', handler)
-    
+    const eventTarget = eventTargetRef.current;
+    const handler = () => callback();
+
+    eventTarget.addEventListener("indexed", handler);
+
     // Return cleanup function
     return () => {
-      eventTarget.removeEventListener('indexed', handler)
-    }
-  }, [])
+      eventTarget.removeEventListener("indexed", handler);
+    };
+  }, []);
 
   // Fetch transaction receipt
   useEffect(() => {
-    if (!trackedTransaction?.hash || trackingStatus !== 'waiting' || trackedTransaction.blockNumber !== null) {
-      return
+    if (!trackedTransaction?.hash || trackingStatus !== "waiting" || trackedTransaction.blockNumber !== null) {
+      return;
     }
 
     const fetchTransactionReceipt = async () => {
       try {
         const response = await fetch(`https://sepolia.base.org`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            jsonrpc: '2.0',
-            method: 'eth_getTransactionReceipt',
+            jsonrpc: "2.0",
+            method: "eth_getTransactionReceipt",
             params: [trackedTransaction.hash],
-            id: 1
-          })
-        })
-        
-        const rpcResult = await response.json()
+            id: 1,
+          }),
+        });
+
+        const rpcResult = await response.json();
         if (rpcResult.result) {
-          const blockNumber = parseInt(rpcResult.result.blockNumber, 16)
-          setTrackedTransaction(prev => prev ? { ...prev, blockNumber } : null)
+          const blockNumber = parseInt(rpcResult.result.blockNumber, 16);
+          setTrackedTransaction((prev) => (prev ? { ...prev, blockNumber } : null));
         } else {
           // Receipt not available yet, retry in 3 seconds
-          timeoutRef.current = setTimeout(fetchTransactionReceipt, 3000)
+          timeoutRef.current = setTimeout(fetchTransactionReceipt, 3000);
         }
       } catch (error) {
-        console.error('Failed to fetch transaction receipt:', error)
+        console.error("Failed to fetch transaction receipt:", error);
         // Retry after error in 5 seconds
-        timeoutRef.current = setTimeout(fetchTransactionReceipt, 5000)
+        timeoutRef.current = setTimeout(fetchTransactionReceipt, 5000);
       }
-    }
+    };
 
-    fetchTransactionReceipt()
-  }, [trackedTransaction?.hash, trackingStatus, trackedTransaction?.blockNumber])
+    fetchTransactionReceipt();
+  }, [trackedTransaction?.hash, trackingStatus, trackedTransaction?.blockNumber]);
 
   // Check if transaction is indexed
   useEffect(() => {
-    if (!trackedTransaction?.hash || trackingStatus !== 'waiting' || trackedTransaction.blockNumber === null) {
-      return
+    if (!trackedTransaction?.hash || trackingStatus !== "waiting" || trackedTransaction.blockNumber === null) {
+      return;
     }
 
     const checkTransactionIndexed = async () => {
       try {
-        const indexedBlockInfo = await fetchLatestIndexedBlock()
+        const indexedBlockInfo = await fetchLatestIndexedBlock();
         if (indexedBlockInfo && parseInt(indexedBlockInfo.blockNumber) >= trackedTransaction.blockNumber!) {
-          setTrackingStatus('synced')
-          
+          setTrackingStatus("synced");
+
           // Emit the indexed event
-          eventTargetRef.current.dispatchEvent(new CustomEvent('indexed'))
-          
+          eventTargetRef.current.dispatchEvent(new CustomEvent("indexed"));
+
           // Clear after 10 seconds
           timeoutRef.current = setTimeout(() => {
-            setTrackedTransaction(null)
-            setTrackingStatus('idle')
-          }, 10000)
+            setTrackedTransaction(null);
+            setTrackingStatus("idle");
+          }, 10000);
         }
       } catch (error) {
-        console.error('Failed to check transaction status:', error)
+        console.error("Failed to check transaction status:", error);
       }
-    }
+    };
 
     // Check immediately, then every 5 seconds
-    checkTransactionIndexed()
-    intervalRef.current = setInterval(checkTransactionIndexed, 5000)
-    
+    checkTransactionIndexed();
+    intervalRef.current = setInterval(checkTransactionIndexed, 5000);
+
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current)
-    }
-  }, [trackedTransaction?.hash, trackingStatus, trackedTransaction?.blockNumber])
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [trackedTransaction?.hash, trackingStatus, trackedTransaction?.blockNumber]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-      if (intervalRef.current) clearInterval(intervalRef.current)
-    }
-  }, [])
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
 
   const contextValue = {
     trackTransaction,
     onTransactionIndexed,
     trackingStatus,
-    trackedTxHash: trackedTransaction?.hash || null
-  }
+    trackedTxHash: trackedTransaction?.hash || null,
+  };
 
-  return (
-    <TransactionTrackingContext.Provider value={contextValue}>
-      {children}
-    </TransactionTrackingContext.Provider>
-  )
+  return <TransactionTrackingContext.Provider value={contextValue}>{children}</TransactionTrackingContext.Provider>;
 }

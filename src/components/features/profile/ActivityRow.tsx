@@ -1,8 +1,8 @@
-import type { Activity } from '@/services/data/queryService'
-import { StatusDot } from '../../StatusDot'
-import { formatEthAmount, formatTimestamp } from '@/utils/formatters'
+import type { Activity } from "@/services/data/queryService";
+import { StatusDot } from "../../StatusDot";
+import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
 interface ActivityRowProps {
-  activity: Activity
+  activity: Activity;
 }
 
 export const ActivityRow = ({ activity }: ActivityRowProps) => (
@@ -13,17 +13,13 @@ export const ActivityRow = ({ activity }: ActivityRowProps) => (
         <div className="font-semibold text-app-primary tracking-tight capitalize text-base sm:text-lg truncate">
           {activity.type.toLowerCase()}
         </div>
-        <div className={`text-xs sm:text-base font-medium tabular-nums flex items-center gap-1 ${
-          activity.type === 'DEPOSIT' 
-            ? 'text-green-600 dark:text-green-400' 
-            : 'text-red-600 dark:text-red-400'
-        }`}>
-          <span className="font-bold">
-            {activity.type === 'DEPOSIT' ? '+' : '−'}
-          </span>
-          <span>
-            {`${formatEthAmount(activity.amount, { maxDecimals: 6 })} ETH`}
-          </span>
+        <div
+          className={`text-xs sm:text-base font-medium tabular-nums flex items-center gap-1 ${
+            activity.type === "DEPOSIT" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+          }`}
+        >
+          <span className="font-bold">{activity.type === "DEPOSIT" ? "+" : "−"}</span>
+          <span>{`${formatEthAmount(activity.amount, { maxDecimals: 6 })} ETH`}</span>
         </div>
       </div>
 
@@ -38,4 +34,4 @@ export const ActivityRow = ({ activity }: ActivityRowProps) => (
       </div>
     </div>
   </div>
-)
+);

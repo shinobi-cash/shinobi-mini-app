@@ -7,9 +7,7 @@ export const SplashScreen = ({ subtitle }: SplashScreenProps) => (
     <div className="text-center">
       <div className="text-8xl mb-8 animate-bounce">🥷</div>
       <h1 className="text-4xl sm:text-5xl font-bold text-app-primary mb-3 font-sans">shinobi.cash</h1>
-      {subtitle && (
-        <p className="text-app-secondary text-lg animate-pulse">{subtitle}</p>
-      )}
+      {subtitle && <p className="text-app-secondary text-lg animate-pulse">{subtitle}</p>}
     </div>
   </div>
-)
+);

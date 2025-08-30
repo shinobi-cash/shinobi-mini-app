@@ -1,8 +1,8 @@
-import { useConnect, useAccount } from 'wagmi';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Button } from '../ui/button';
-import { Loader2 } from 'lucide-react';
-import { isFarcasterEnvironment } from '@/utils/environment';
+import { useConnect, useAccount } from "wagmi";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { Button } from "../ui/button";
+import { Loader2 } from "lucide-react";
+import { isFarcasterEnvironment } from "@/utils/environment";
 
 export const WalletConnectionActions = () => {
   const { connect, connectors, isPending } = useConnect();
@@ -13,30 +13,19 @@ export const WalletConnectionActions = () => {
     return (
       <div className="w-full max-w-sm space-y-3">
         <ConnectButton.Custom>
-          {({
-            account,
-            chain,
-            openAccountModal,
-            openChainModal,
-            openConnectModal,
-            authenticationStatus,
-            mounted,
-          }) => {
-            const ready = mounted && authenticationStatus !== 'loading';
+          {({ account, chain, openAccountModal, openChainModal, openConnectModal, authenticationStatus, mounted }) => {
+            const ready = mounted && authenticationStatus !== "loading";
             const connected =
-              ready &&
-              account &&
-              chain &&
-              (!authenticationStatus || authenticationStatus === 'authenticated');
+              ready && account && chain && (!authenticationStatus || authenticationStatus === "authenticated");
 
             return (
               <div
                 {...(!ready && {
-                  'aria-hidden': true,
+                  "aria-hidden": true,
                   style: {
                     opacity: 0,
-                    pointerEvents: 'none',
-                    userSelect: 'none',
+                    pointerEvents: "none",
+                    userSelect: "none",
                   },
                 })}
               >
@@ -78,11 +67,7 @@ export const WalletConnectionActions = () => {
                         {chain.hasIcon && (
                           <div className="w-4 h-4 mr-2">
                             {chain.iconUrl && (
-                              <img
-                                alt={chain.name ?? 'Chain icon'}
-                                src={chain.iconUrl}
-                                className="w-4 h-4"
-                              />
+                              <img alt={chain.name ?? "Chain icon"} src={chain.iconUrl} className="w-4 h-4" />
                             )}
                           </div>
                         )}
@@ -96,9 +81,7 @@ export const WalletConnectionActions = () => {
                         size="lg"
                       >
                         {account.displayName}
-                        {account.displayBalance
-                          ? ` (${account.displayBalance})`
-                          : ''}
+                        {account.displayBalance ? ` (${account.displayBalance})` : ""}
                       </Button>
                     </div>
                   );
@@ -107,17 +90,15 @@ export const WalletConnectionActions = () => {
             );
           }}
         </ConnectButton.Custom>
-        
-        <p className="text-xs text-center text-app-secondary">
-          Connect your wallet to proceed with deposits
-        </p>
+
+        <p className="text-xs text-center text-app-secondary">Connect your wallet to proceed with deposits</p>
       </div>
     );
   }
 
   // In Farcaster environment, use simple connector approach
   const handleConnect = () => {
-    const farcasterConnector = connectors[0]; 
+    const farcasterConnector = connectors[0];
     if (farcasterConnector) {
       connect({ connector: farcasterConnector });
     }
@@ -140,14 +121,12 @@ export const WalletConnectionActions = () => {
             Connecting...
           </>
         ) : (
-          'Connect Wallet'
+          "Connect Wallet"
         )}
       </Button>
-      
+
       {connectors.length > 0 && (
-        <p className="text-xs text-center text-app-secondary">
-          Connect your wallet to proceed with deposits
-        </p>
+        <p className="text-xs text-center text-app-secondary">Connect your wallet to proceed with deposits</p>
       )}
     </div>
   );

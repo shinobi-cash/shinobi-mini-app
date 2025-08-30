@@ -1,6 +1,6 @@
 /**
  * Blockchain Contract Service
- * 
+ *
  * Handles smart contract interactions and account abstraction:
  * - Privacy pool contract operations
  * - UserOperation preparation and execution
@@ -8,12 +8,12 @@
  * - Contract data encoding/decoding
  */
 
-import { createPublicClient, http, encodeAbiParameters, encodeFunctionData } from 'viem';
-import { baseSepolia } from 'viem/chains';
+import { createPublicClient, http, encodeAbiParameters, encodeFunctionData } from "viem";
+import { baseSepolia } from "viem/chains";
 import { SmartAccountClient } from "permissionless";
-import { entryPoint07Address, UserOperation } from 'viem/account-abstraction';
-import { PRIVACY_POOL_ABI, PRIVACY_POOL_ENTRYPOINT_ABI } from '@/config/abis';
-import { WITHDRAWAL_FEES, CONTRACTS } from '@/config/constants';
+import { entryPoint07Address, UserOperation } from "viem/account-abstraction";
+import { PRIVACY_POOL_ABI, PRIVACY_POOL_ENTRYPOINT_ABI } from "@/config/abis";
+import { WITHDRAWAL_FEES, CONTRACTS } from "@/config/constants";
 
 // ============ TYPES ============
 
@@ -50,22 +50,21 @@ const publicClient = createPublicClient({
  */
 export async function fetchPoolScope(): Promise<string> {
   try {
-    console.log('⚙️ Fetching pool scope via contract call...');
-    
-    const scope = await publicClient.readContract({
+    console.log("⚙️ Fetching pool scope via contract call...");
+
+    const scope = (await publicClient.readContract({
       address: CONTRACTS.ETH_PRIVACY_POOL as `0x${string}`,
       abi: PRIVACY_POOL_ABI,
       functionName: "SCOPE",
-    }) as bigint;
+    })) as bigint;
 
     const scopeString = scope.toString();
     console.log(`✅ Pool scope fetched: ${scopeString}`);
-    
-    return scopeString;
 
+    return scopeString;
   } catch (error) {
-    console.error('Failed to fetch pool scope:', error);
-    throw new Error('Failed to fetch pool scope from contract');
+    console.error("Failed to fetch pool scope:", error);
+    throw new Error("Failed to fetch pool scope from contract");
   }
 }
 
@@ -87,7 +86,7 @@ export function createWithdrawalData(
         { type: "address", name: "feeRecipient" },
         { type: "uint256", name: "relayFeeBPS" },
       ],
-      [recipientAddress as `0x${string}`, feeRecipient as `0x${string}`, relayFeeBPS]
+      [recipientAddress as `0x${string}`, feeRecipient as `0x${string}`, relayFeeBPS],
     ),
   ] as const;
 }
@@ -98,7 +97,7 @@ export function createWithdrawalData(
 export function encodeRelayCallData(
   withdrawalData: WithdrawalData,
   proof: WithdrawalProof,
-  scope: bigint
+  scope: bigint,
 ): `0x${string}` {
   return encodeFunctionData({
     abi: PRIVACY_POOL_ENTRYPOINT_ABI,
@@ -122,11 +121,14 @@ export function encodeRelayCallData(
 /**
  * Format ZK proof from snarkjs format to contract format
  */
-export function formatProofForContract(proof: {
-  pi_a: string[];
-  pi_b: string[][];
-  pi_c: string[];
-}, publicSignals: string[]): WithdrawalProof {
+export function formatProofForContract(
+  proof: {
+    pi_a: string[];
+    pi_b: string[][];
+    pi_c: string[];
+  },
+  publicSignals: string[],
+): WithdrawalProof {
   return {
     pA: [BigInt(proof.pi_a[0]), BigInt(proof.pi_a[1])],
     pB: [
@@ -153,11 +155,11 @@ export function formatProofForContract(proof: {
  */
 export async function prepareWithdrawalUserOperation(
   smartAccountClient: SmartAccountClient,
-  relayCallData: `0x${string}`
+  relayCallData: `0x${string}`,
 ): Promise<any> {
   try {
-    console.log('📤 Preparing UserOperation for withdrawal...');
-    
+    console.log("📤 Preparing UserOperation for withdrawal...");
+
     const preparedUserOperation = await smartAccountClient.prepareUserOperation({
       account: smartAccountClient.account!,
       calls: [
@@ -169,15 +171,14 @@ export async function prepareWithdrawalUserOperation(
       ],
     });
 
-    console.log('✅ UserOperation prepared successfully');
+    console.log("✅ UserOperation prepared successfully");
     console.log(`   Target: ${CONTRACTS.PRIVACY_POOL_ENTRYPOINT}`);
     console.log(`   Account: ${smartAccountClient.account!.address}`);
-    
-    return preparedUserOperation;
 
+    return preparedUserOperation;
   } catch (error) {
-    console.error('Failed to prepare UserOperation:', error);
-    throw new Error('Failed to prepare UserOperation');
+    console.error("Failed to prepare UserOperation:", error);
+    throw new Error("Failed to prepare UserOperation");
   }
 }
 
@@ -186,30 +187,28 @@ export async function prepareWithdrawalUserOperation(
  */
 export async function executeWithdrawalUserOperation(
   smartAccountClient: SmartAccountClient,
-  userOperation: UserOperation
+  userOperation: UserOperation,
 ): Promise<string> {
   try {
-    console.log('🚀 Executing withdrawal UserOperation...');
+    console.log("🚀 Executing withdrawal UserOperation...");
     const signature = await smartAccountClient.account?.signUserOperation(userOperation);
     const userOpHash = await smartAccountClient.sendUserOperation({
-        entryPointAddress: entryPoint07Address,
-        ...userOperation,
-        signature,
+      entryPointAddress: entryPoint07Address,
+      ...userOperation,
+      signature,
     });
-    
-    console.log(`✅ UserOperation sent with hash: ${userOpHash}`);
-    
-    // Wait for transaction to be mined
-    console.log('⏳ Waiting for transaction to be mined...');
-    const receipt = await smartAccountClient.waitForUserOperationReceipt({ hash: userOpHash });
-    
-    console.log(`   Transaction hash: ${receipt.receipt.transactionHash}`);
-    
-    return receipt.receipt.transactionHash;
 
+    console.log(`✅ UserOperation sent with hash: ${userOpHash}`);
+
+    // Wait for transaction to be mined
+    console.log("⏳ Waiting for transaction to be mined...");
+    const receipt = await smartAccountClient.waitForUserOperationReceipt({ hash: userOpHash });
+
+    console.log(`   Transaction hash: ${receipt.receipt.transactionHash}`);
+
+    return receipt.receipt.transactionHash;
   } catch (error) {
-    console.error('Failed to execute UserOperation:', error);
-    throw new Error('Failed to execute withdrawal transaction');
+    console.error("Failed to execute UserOperation:", error);
+    throw new Error("Failed to execute withdrawal transaction");
   }
 }
-

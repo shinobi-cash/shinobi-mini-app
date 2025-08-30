@@ -1,5 +1,5 @@
 import { Note } from "@/lib/storage/noteCache";
-import { formatEthAmount, formatDate } from '@/utils/formatters';
+import { formatEthAmount, formatDate } from "@/utils/formatters";
 
 interface CashNoteCardProps {
   note: Note;
@@ -9,13 +9,14 @@ interface CashNoteCardProps {
 
 export function CashNoteCard({ note, chainLength, onClick }: CashNoteCardProps) {
   // Show user-friendly labels based on chain progression
-  const noteLabel = chainLength === 1 
-    ? "Transaction Balance"  // Simple case: only one note in chain
-    : note.changeIndex === 0 
-      ? "Original Deposit" 
-      : "Current Balance";
-  
-  const isSpent = note.status === 'spent';
+  const noteLabel =
+    chainLength === 1
+      ? "Transaction Balance" // Simple case: only one note in chain
+      : note.changeIndex === 0
+        ? "Original Deposit"
+        : "Current Balance";
+
+  const isSpent = note.status === "spent";
 
   return (
     <button
@@ -37,15 +38,15 @@ export function CashNoteCard({ note, chainLength, onClick }: CashNoteCardProps) 
         {/* Right side: Status and timestamp */}
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="text-right">
-            <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium mb-1 ${
-              isSpent 
-                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-            }`}>
-              <div className={`w-1 h-1 rounded-full ${
-                isSpent ? 'bg-red-500' : 'bg-green-500'
-              }`} />
-              {isSpent ? 'Spent' : 'Unspent'}
+            <div
+              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium mb-1 ${
+                isSpent
+                  ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                  : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+              }`}
+            >
+              <div className={`w-1 h-1 rounded-full ${isSpent ? "bg-red-500" : "bg-green-500"}`} />
+              {isSpent ? "Spent" : "Unspent"}
             </div>
             <div className="text-xs sm:text-sm text-app-tertiary font-medium whitespace-nowrap">
               {formatDate(note.timestamp)}

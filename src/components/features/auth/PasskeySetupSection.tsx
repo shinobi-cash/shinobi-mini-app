@@ -3,13 +3,13 @@
  * Takes provided keys and creates a new passkey for the account
  */
 
-import { Button } from '../../ui/button';
-import { Fingerprint } from 'lucide-react';
-import { useState } from 'react';
+import { Button } from "../../ui/button";
+import { Fingerprint } from "lucide-react";
+import { useState } from "react";
 import { KDF } from "@/lib/auth/keyDerivation";
-import { createHash, KeyGenerationResult } from '@/utils/crypto';
+import { createHash, KeyGenerationResult } from "@/utils/crypto";
 import { noteCache } from "@/lib/storage/noteCache";
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
 
 interface PasskeySetupSectionProps {
@@ -23,7 +23,7 @@ export function PasskeySetupSection({
   accountName,
   accountNameError,
   generatedKeys,
-  onSuccess
+  onSuccess,
 }: PasskeySetupSectionProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const { setKeys } = useAuth();
@@ -37,7 +37,7 @@ export function PasskeySetupSection({
     // Check for existing passkey
     const hasPasskey = await noteCache.passkeyExists(accountName.trim());
     if (hasPasskey) {
-      banner.error('Passkey already exists');
+      banner.error("Passkey already exists");
       return;
     }
 
@@ -47,13 +47,13 @@ export function PasskeySetupSection({
       // Derive public key hash as user handle for WebAuthn
       const { publicKey } = generatedKeys;
       const userHandle = await createHash(publicKey);
-      
+
       // Create passkey credential
       const { credentialId } = await KDF.createPasskeyCredential(accountName.trim(), userHandle);
-      
+
       // Derive encryption key from the passkey
       const { symmetricKey } = await KDF.deriveKeyFromPasskey(accountName.trim(), credentialId);
-      
+
       // Initialize session with the derived key
       await noteCache.initializeAccountSession(accountName.trim(), symmetricKey);
 
@@ -61,7 +61,7 @@ export function PasskeySetupSection({
       const accountData = {
         accountName: accountName.trim(),
         mnemonic: generatedKeys.mnemonic,
-        createdAt: Date.now()
+        createdAt: Date.now(),
       };
       await noteCache.storeAccountData(accountData);
 
@@ -69,26 +69,26 @@ export function PasskeySetupSection({
       const passkeyData = {
         accountName: accountName.trim(),
         credentialId: credentialId,
-        challenge: '', // Not needed with PRF
+        challenge: "", // Not needed with PRF
         publicKeyHash: userHandle,
-        created: Date.now()
+        created: Date.now(),
       };
       await noteCache.storePasskeyData(passkeyData);
 
       // Store session info for restoration
-      KDF.storeSessionInfo(accountName.trim(), 'passkey', { credentialId });
-        
+      KDF.storeSessionInfo(accountName.trim(), "passkey", { credentialId });
+
       // Set keys in auth context
       setKeys(generatedKeys);
-      
-      banner.success('Account created');
+
+      banner.success("Account created");
       onSuccess();
     } catch (error) {
-      console.error('Passkey setup failed:', error);
-      if (error instanceof Error && error.message.includes('PRF')) {
-        banner.error('Device not supported');
+      console.error("Passkey setup failed:", error);
+      if (error instanceof Error && error.message.includes("PRF")) {
+        banner.error("Device not supported");
       } else {
-        banner.error('Passkey setup failed');
+        banner.error("Passkey setup failed");
       }
     } finally {
       setIsProcessing(false);

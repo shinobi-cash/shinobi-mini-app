@@ -3,17 +3,17 @@
  * Shows temporary messages in app banner area like transaction tracking
  */
 
-import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef } from "react";
 
 export interface BannerMessage {
   id: string;
-  type: 'error' | 'success' | 'warning' | 'info';
+  type: "error" | "success" | "warning" | "info";
   message: string;
 }
 
 interface BannerContextValue {
   currentBanner: BannerMessage | null;
-  showBanner: (banner: Omit<BannerMessage, 'id'>, duration?: number) => void;
+  showBanner: (banner: Omit<BannerMessage, "id">, duration?: number) => void;
   dismissBanner: () => void;
   banner: {
     error: (message: string, options?: { duration?: number }) => void;
@@ -31,14 +31,14 @@ const generateId = () => `banner-${++bannerId}-${Date.now()}`;
 // Simple message shortening - inline since it's just one function
 const shortenMessage = (message: string, maxLength: number = 60): string => {
   if (message.length <= maxLength) return message;
-  return message.substring(0, maxLength - 3).trim() + '...';
+  return message.substring(0, maxLength - 3).trim() + "...";
 };
 
 export const BannerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentBanner, setCurrentBanner] = useState<BannerMessage | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
-  const showBanner = useCallback((banner: Omit<BannerMessage, 'id'>, duration = 4000) => {
+  const showBanner = useCallback((banner: Omit<BannerMessage, "id">, duration = 4000) => {
     const id = generateId();
     const newBanner: BannerMessage = {
       ...banner,
@@ -61,7 +61,7 @@ export const BannerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const dismissBanner = useCallback(() => {
     setCurrentBanner(null);
-    
+
     // Clear timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -71,25 +71,37 @@ export const BannerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Direct banner API
   const banner = {
-    error: useCallback((message: string, options?: { duration?: number }) => {
-      const shortMessage = shortenMessage(message);
-      showBanner({ type: 'error', message: shortMessage }, options?.duration);
-    }, [showBanner]),
+    error: useCallback(
+      (message: string, options?: { duration?: number }) => {
+        const shortMessage = shortenMessage(message);
+        showBanner({ type: "error", message: shortMessage }, options?.duration);
+      },
+      [showBanner],
+    ),
 
-    success: useCallback((message: string, options?: { duration?: number }) => {
-      const shortMessage = shortenMessage(message);
-      showBanner({ type: 'success', message: shortMessage }, options?.duration);
-    }, [showBanner]),
+    success: useCallback(
+      (message: string, options?: { duration?: number }) => {
+        const shortMessage = shortenMessage(message);
+        showBanner({ type: "success", message: shortMessage }, options?.duration);
+      },
+      [showBanner],
+    ),
 
-    warning: useCallback((message: string, options?: { duration?: number }) => {
-      const shortMessage = shortenMessage(message);
-      showBanner({ type: 'warning', message: shortMessage }, options?.duration);
-    }, [showBanner]),
+    warning: useCallback(
+      (message: string, options?: { duration?: number }) => {
+        const shortMessage = shortenMessage(message);
+        showBanner({ type: "warning", message: shortMessage }, options?.duration);
+      },
+      [showBanner],
+    ),
 
-    info: useCallback((message: string, options?: { duration?: number }) => {
-      const shortMessage = shortenMessage(message);
-      showBanner({ type: 'info', message: shortMessage }, options?.duration);
-    }, [showBanner]),
+    info: useCallback(
+      (message: string, options?: { duration?: number }) => {
+        const shortMessage = shortenMessage(message);
+        showBanner({ type: "info", message: shortMessage }, options?.duration);
+      },
+      [showBanner],
+    ),
   };
 
   const value: BannerContextValue = {
@@ -99,17 +111,13 @@ export const BannerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     banner,
   };
 
-  return (
-    <BannerContext.Provider value={value}>
-      {children}
-    </BannerContext.Provider>
-  );
+  return <BannerContext.Provider value={value}>{children}</BannerContext.Provider>;
 };
 
 export const useBanner = () => {
   const context = useContext(BannerContext);
   if (!context) {
-    throw new Error('useBanner must be used within BannerProvider');
+    throw new Error("useBanner must be used within BannerProvider");
   }
   return context;
 };

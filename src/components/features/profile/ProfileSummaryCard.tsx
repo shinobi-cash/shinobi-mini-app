@@ -1,5 +1,5 @@
-import { Button } from '../../ui/button';
-import { UserX } from 'lucide-react';
+import { Button } from "../../ui/button";
+import { UserX } from "lucide-react";
 
 interface ProfileSummaryCardProps {
   unspentNotes: number;
@@ -7,11 +7,7 @@ interface ProfileSummaryCardProps {
   onSignOut: () => void;
 }
 
-export function ProfileSummaryCard({ 
-  unspentNotes, 
-  totalNotes, 
-  onSignOut 
-}: ProfileSummaryCardProps) {
+export function ProfileSummaryCard({ unspentNotes, totalNotes, onSignOut }: ProfileSummaryCardProps) {
   const spentNotes = totalNotes - unspentNotes;
 
   return (
@@ -20,18 +16,14 @@ export function ProfileSummaryCard({
         <div className="flex gap-6">
           <div className="flex flex-col">
             <p className="text-sm font-semibold text-app-secondary mb-1">Unspent</p>
-            <p className="text-xl font-bold text-app-primary tabular-nums">
-              {unspentNotes}
-            </p>
+            <p className="text-xl font-bold text-app-primary tabular-nums">{unspentNotes}</p>
           </div>
           <div className="flex flex-col">
             <p className="text-sm font-semibold text-app-secondary mb-1">Spent</p>
-            <p className="text-xl font-bold text-app-primary tabular-nums">
-              {spentNotes}
-            </p>
+            <p className="text-xl font-bold text-app-primary tabular-nums">{spentNotes}</p>
           </div>
         </div>
-        
+
         <Button
           variant="ghost"
           size="sm"

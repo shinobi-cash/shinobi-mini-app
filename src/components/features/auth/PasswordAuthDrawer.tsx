@@ -3,24 +3,17 @@
  * Shows when user needs to re-enter password for their account after page refresh
  */
 
-import React, { useState } from 'react';
-import { Button } from '../../ui/button';
-import { Lock, Eye, EyeOff, X } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useBanner } from '@/contexts/BannerContext';
-import { 
-  Drawer, 
-  DrawerContent, 
-  DrawerHeader, 
-  DrawerTitle,
-  DrawerDescription,
-  DrawerClose, 
-} from '../../ui/drawer';
+import React, { useState } from "react";
+import { Button } from "../../ui/button";
+import { Lock, Eye, EyeOff, X } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useBanner } from "@/contexts/BannerContext";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from "../../ui/drawer";
 
 export function PasswordAuthDrawer() {
   const { banner } = useBanner();
   const { quickAuthState, handleQuickPasswordAuth, dismissQuickAuth } = useAuth();
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,10 +27,10 @@ export function PasswordAuthDrawer() {
 
     try {
       await handleQuickPasswordAuth(password);
-      banner.success('Session restored successfully');
+      banner.success("Session restored successfully");
     } catch (error) {
-      console.error('Quick auth failed:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+      console.error("Quick auth failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Authentication failed";
       setError(errorMessage);
     } finally {
       setIsProcessing(false);
@@ -46,24 +39,19 @@ export function PasswordAuthDrawer() {
 
   const handleDismiss = () => {
     dismissQuickAuth();
-    setPassword('');
+    setPassword("");
     setError(null);
   };
 
   return (
-    <Drawer 
-      open={quickAuthState?.show ?? false} 
-      onOpenChange={(open) => !open && handleDismiss()}
-    >
+    <Drawer open={quickAuthState?.show ?? false} onOpenChange={(open) => !open && handleDismiss()}>
       <DrawerContent className="bg-app-background border-app max-h-[85vh]">
         {/* iOS-style drag handle */}
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-app-tertiary/30" />
-        
+
         <DrawerHeader className="pb-0 px-4 pt-2">
           <div className="flex items-center justify-between">
-            <DrawerTitle className="text-lg font-semibold text-app-primary tracking-tight">
-              Welcome Back
-            </DrawerTitle>
+            <DrawerTitle className="text-lg font-semibold text-app-primary tracking-tight">Welcome Back</DrawerTitle>
             <DrawerClose className="h-8 w-8 flex items-center justify-center hover:bg-app-surface-hover transition-colors duration-200">
               <X className="h-4 w-4 text-app-secondary" />
             </DrawerClose>
@@ -77,7 +65,7 @@ export function PasswordAuthDrawer() {
           <form onSubmit={handleSubmit} className="space-y-4 pt-4">
             <div className="relative">
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
@@ -102,9 +90,7 @@ export function PasswordAuthDrawer() {
               </button>
             </div>
 
-            {error && (
-              <p className="text-red-600 text-sm">{error}</p>
-            )}
+            {error && <p className="text-red-600 text-sm">{error}</p>}
 
             <div className="flex gap-2">
               <Button
@@ -116,11 +102,7 @@ export function PasswordAuthDrawer() {
               >
                 Use Different Account
               </Button>
-              <Button
-                type="submit"
-                disabled={isProcessing || !password.trim()}
-                className="flex-1"
-              >
+              <Button type="submit" disabled={isProcessing || !password.trim()} className="flex-1">
                 {isProcessing ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>

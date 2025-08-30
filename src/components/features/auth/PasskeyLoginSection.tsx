@@ -3,24 +3,22 @@
  * Authenticates with existing passkey and loads account keys from storage
  */
 
-import { Button } from '../../ui/button';
-import { Fingerprint } from 'lucide-react';
-import { Input } from '../../ui/input';
-import { useState } from 'react';
+import { Button } from "../../ui/button";
+import { Fingerprint } from "lucide-react";
+import { Input } from "../../ui/input";
+import { useState } from "react";
 import { KDF } from "@/lib/auth/keyDerivation";
-import { restoreFromMnemonic } from '@/utils/crypto';
+import { restoreFromMnemonic } from "@/utils/crypto";
 import { noteCache } from "@/lib/storage/noteCache";
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
 
 interface PasskeyLoginSectionProps {
   onSuccess: () => void;
 }
 
-export function PasskeyLoginSection({
-  onSuccess
-}: PasskeyLoginSectionProps) {
-  const [accountName, setAccountName] = useState('');
+export function PasskeyLoginSection({ onSuccess }: PasskeyLoginSectionProps) {
+  const [accountName, setAccountName] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setKeys } = useAuth();
@@ -28,7 +26,7 @@ export function PasskeyLoginSection({
 
   const handlePasskeyLogin = async () => {
     if (!accountName.trim()) {
-      setError('Please enter an account name');
+      setError("Please enter an account name");
       return;
     }
 
@@ -44,14 +42,14 @@ export function PasskeyLoginSection({
 
       // Derive encryption key from passkey
       const { symmetricKey } = await KDF.deriveKeyFromPasskey(accountName.trim(), passkeyData.credentialId);
-      
+
       // Initialize account-scoped session
       await noteCache.initializeAccountSession(accountName.trim(), symmetricKey);
 
       // Retrieve and restore account keys
       const accountData = await noteCache.getAccountData();
       if (!accountData) {
-        throw new Error('Account data not found');
+        throw new Error("Account data not found");
       }
 
       // Derive all keys from the stored mnemonic
@@ -60,30 +58,31 @@ export function PasskeyLoginSection({
         publicKey,
         privateKey,
         mnemonic: accountData.mnemonic,
-        address
+        address,
       });
 
       // Store session info for future restoration
-      KDF.storeSessionInfo(accountName.trim(), 'passkey', { credentialId: passkeyData.credentialId });
+      KDF.storeSessionInfo(accountName.trim(), "passkey", { credentialId: passkeyData.credentialId });
 
-      banner.success('Passkey login successful');
+      banner.success("Passkey login successful");
       onSuccess();
     } catch (error) {
-      console.error('Passkey login failed:', error);
-      let errorMessage = 'Authentication failed. Please try again.';
-      
+      console.error("Passkey login failed:", error);
+      let errorMessage = "Authentication failed. Please try again.";
+
       if (error instanceof Error) {
-        if (error.message.includes('PRF')) {
-          errorMessage = 'Your device does not support advanced passkey features. Please use password authentication instead.';
-        } else if (error.message.includes('No passkey found')) {
+        if (error.message.includes("PRF")) {
+          errorMessage =
+            "Your device does not support advanced passkey features. Please use password authentication instead.";
+        } else if (error.message.includes("No passkey found")) {
           errorMessage = error.message;
-        } else if (error.message.includes('canceled') || error.message.includes('not allowed')) {
-          errorMessage = 'Authentication was cancelled. Please try again.';
+        } else if (error.message.includes("canceled") || error.message.includes("not allowed")) {
+          errorMessage = "Authentication was cancelled. Please try again.";
         }
       }
 
       setError(errorMessage);
-      banner.error('Passkey login failed');
+      banner.error("Passkey login failed");
     } finally {
       setIsProcessing(false);
     }
@@ -105,16 +104,9 @@ export function PasskeyLoginSection({
         disabled={isProcessing}
       />
 
-      {error && (
-        <p className="text-red-600 text-xs mb-2">{error}</p>
-      )}
+      {error && <p className="text-red-600 text-xs mb-2">{error}</p>}
 
-      <Button
-        onClick={handlePasskeyLogin}
-        disabled={isProcessing || !accountName.trim()}
-        className="w-full"
-        size="lg"
-      >
+      <Button onClick={handlePasskeyLogin} disabled={isProcessing || !accountName.trim()} className="w-full" size="lg">
         {isProcessing ? (
           <>
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>

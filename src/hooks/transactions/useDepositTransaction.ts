@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useWriteContract } from 'wagmi';
-import { parseEther } from 'viem';
-import { CashNoteData } from './useDepositCommitment';
-import { PRIVACY_POOL_ENTRYPOINT_ABI } from '@/config/abis';
-import { CONTRACTS } from '@/config/constants';
+import { useState, useEffect, useCallback } from "react";
+import { useWriteContract } from "wagmi";
+import { parseEther } from "viem";
+import { CashNoteData } from "./useDepositCommitment";
+import { PRIVACY_POOL_ENTRYPOINT_ABI } from "@/config/abis";
+import { CONTRACTS } from "@/config/constants";
 
 interface DepositState {
   isSuccess: boolean;
@@ -16,16 +16,11 @@ export function useDepositTransaction() {
     error: null,
   });
 
-  const { 
-    writeContract, 
-    data: hash, 
-    isPending: isLoading, 
-    error: writeError 
-  } = useWriteContract();
-  
+  const { writeContract, data: hash, isPending: isLoading, error: writeError } = useWriteContract();
+
   const deposit = (amount: string, cashNoteData: CashNoteData) => {
-    setState(prev => ({ 
-      ...prev, 
+    setState((prev) => ({
+      ...prev,
       error: null,
       isSuccess: false,
     }));
@@ -37,7 +32,7 @@ export function useDepositTransaction() {
     writeContract({
       address: CONTRACTS.PRIVACY_POOL_ENTRYPOINT as `0x${string}`,
       abi: PRIVACY_POOL_ENTRYPOINT_ABI,
-      functionName: 'deposit',
+      functionName: "deposit",
       args: [precommitmentBigInt],
       value: amountWei,
     });
@@ -46,7 +41,7 @@ export function useDepositTransaction() {
   // Handle transaction success
   useEffect(() => {
     if (hash) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         isSuccess: true,
         error: null,
@@ -58,7 +53,7 @@ export function useDepositTransaction() {
   useEffect(() => {
     const error = writeError;
     if (error) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         error: error.message,
         isSuccess: false,
@@ -76,7 +71,7 @@ export function useDepositTransaction() {
   // Clear error when starting new transaction
   const clearError = () => {
     if (state.error) {
-      setState(prev => ({ ...prev, error: null }));
+      setState((prev) => ({ ...prev, error: null }));
     }
   };
 
@@ -89,5 +84,3 @@ export function useDepositTransaction() {
     ...state,
   };
 }
-
-

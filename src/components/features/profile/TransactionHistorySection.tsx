@@ -1,7 +1,7 @@
-import { Button } from '../../ui/button';
-import { RefreshCw } from 'lucide-react';
+import { Button } from "../../ui/button";
+import { RefreshCw } from "lucide-react";
 import { NoteChain } from "@/lib/storage/noteCache";
-import { CashNoteCard } from './CashNoteCard';
+import { CashNoteCard } from "./CashNoteCard";
 
 interface TransactionHistorySectionProps {
   noteChains: NoteChain[];
@@ -12,21 +12,19 @@ interface TransactionHistorySectionProps {
   onNoteChainClick: (noteChain: NoteChain) => void;
 }
 
-export function TransactionHistorySection({ 
-  noteChains, 
-  loading, 
-  error, 
-  isRefreshing, 
-  onRefresh, 
-  onNoteChainClick 
+export function TransactionHistorySection({
+  noteChains,
+  loading,
+  error,
+  isRefreshing,
+  onRefresh,
+  onNoteChainClick,
 }: TransactionHistorySectionProps) {
   return (
     <div className="flex-1 flex flex-col min-h-0 gap-2">
       <div className="flex-shrink-0 bg-app-surface border-b border-app shadow-md">
         <div className="flex items-center justify-between py-3 px-4">
-          <h2 className="text-lg font-semibold text-app-secondary tracking-tight flex-1">
-            Transaction History
-          </h2>
+          <h2 className="text-lg font-semibold text-app-secondary tracking-tight flex-1">Transaction History</h2>
           <Button
             variant="ghost"
             size="sm"
@@ -35,7 +33,7 @@ export function TransactionHistorySection({
             className="h-8 w-8 p-0 text-app-secondary hover:text-app-primary"
             title="Refresh transaction history"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing || loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isRefreshing || loading ? "animate-spin" : ""}`} />
           </Button>
         </div>
       </div>
@@ -70,7 +68,7 @@ export function TransactionHistorySection({
               {noteChains.map((noteChain, index) => {
                 const lastNote = noteChain[noteChain.length - 1];
                 return (
-                  <CashNoteCard 
+                  <CashNoteCard
                     key={`chain-${index}-${lastNote.depositIndex}-${lastNote.changeIndex}`}
                     note={lastNote}
                     chainLength={noteChain.length}

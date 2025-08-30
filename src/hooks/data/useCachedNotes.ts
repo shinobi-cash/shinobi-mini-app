@@ -1,11 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import { DiscoveryResult, noteCache } from '@/lib/storage/noteCache';
+import { useEffect, useMemo, useState } from "react";
+import { DiscoveryResult, noteCache } from "@/lib/storage/noteCache";
 
-export function useCachedNotes(
-  publicKey: string,
-  poolAddress: string,
-  accountKey: bigint
-) {
+export function useCachedNotes(publicKey: string, poolAddress: string, accountKey: bigint) {
   const [data, setData] = useState<DiscoveryResult | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -18,12 +14,12 @@ export function useCachedNotes(
         const cached = await noteCache.getCachedNotes(publicKey, poolAddress);
         setData(cached);
       } catch (error) {
-        console.error('Failed to load cached notes:', error);
+        console.error("Failed to load cached notes:", error);
       } finally {
         setLoading(false);
       }
     };
-    
+
     loadCache();
   }, [publicKey, poolAddress, accountKeyString]);
 

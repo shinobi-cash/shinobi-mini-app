@@ -1,111 +1,107 @@
-import { useState } from 'react'
-import { 
-  Drawer, 
-  DrawerContent, 
-  DrawerHeader, 
-  DrawerTitle,
-  DrawerDescription,
-  DrawerClose, 
-} from '../../ui/drawer'
-import { Button } from '../../ui/button'
-import { X, ChevronLeft } from 'lucide-react'
-import { KeyGenerationResult } from '@/utils/crypto'
-import { KeyGenerationSection } from './KeyGenerationSection'
-import { BackupMnemonicSection } from './BackupMnemonicSection'
-import SetupConvenientAuth from './SetupConvenientAuth'
+import { useState } from "react";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from "../../ui/drawer";
+import { Button } from "../../ui/button";
+import { X, ChevronLeft } from "lucide-react";
+import { KeyGenerationResult } from "@/utils/crypto";
+import { KeyGenerationSection } from "./KeyGenerationSection";
+import { BackupMnemonicSection } from "./BackupMnemonicSection";
+import SetupConvenientAuth from "./SetupConvenientAuth";
 
-type CreateAccountStep = 'KeyGeneration' | 'BackupMnemonic' | 'SetupConvenientAuth'
+type CreateAccountStep = "KeyGeneration" | "BackupMnemonic" | "SetupConvenientAuth";
 
 interface CreateAccountDrawerProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerProps) => {
-  const [currentStep, setCurrentStep] = useState<CreateAccountStep>('KeyGeneration')
-  const [generatedKeys, setGeneratedKeys] = useState<KeyGenerationResult | null>(null)
-  
+  const [currentStep, setCurrentStep] = useState<CreateAccountStep>("KeyGeneration");
+  const [generatedKeys, setGeneratedKeys] = useState<KeyGenerationResult | null>(null);
+
   const onKeyGenerationComplete = (keys: KeyGenerationResult) => {
-    setGeneratedKeys(keys)
-    setCurrentStep('BackupMnemonic')
-  }
+    setGeneratedKeys(keys);
+    setCurrentStep("BackupMnemonic");
+  };
 
   const onBackupMnemonicComplete = () => {
-    setCurrentStep('SetupConvenientAuth')
-  }
+    setCurrentStep("SetupConvenientAuth");
+  };
 
   const onSetupConvenientAuthComplete = () => {
-    resetState()
-    onOpenChange(false)
-  }
+    resetState();
+    onOpenChange(false);
+  };
 
   const resetState = () => {
-    setCurrentStep('KeyGeneration')
-    setGeneratedKeys(null)
-  }
+    setCurrentStep("KeyGeneration");
+    setGeneratedKeys(null);
+  };
 
   const handleBack = () => {
     switch (currentStep) {
-      case 'BackupMnemonic':
-        setCurrentStep('KeyGeneration');
+      case "BackupMnemonic":
+        setCurrentStep("KeyGeneration");
         break;
-      case 'SetupConvenientAuth':
-        setCurrentStep('BackupMnemonic');
+      case "SetupConvenientAuth":
+        setCurrentStep("BackupMnemonic");
         break;
       default:
-        setCurrentStep('KeyGeneration');
+        setCurrentStep("KeyGeneration");
     }
-  }
+  };
 
-  const canGoBack = currentStep !== 'KeyGeneration';
+  const canGoBack = currentStep !== "KeyGeneration";
 
   const renderContent = () => {
     switch (currentStep) {
-      case 'KeyGeneration':
+      case "KeyGeneration":
+        return <KeyGenerationSection onKeyGenerationComplete={onKeyGenerationComplete} />;
+      case "BackupMnemonic":
         return (
-          <KeyGenerationSection onKeyGenerationComplete={onKeyGenerationComplete} />
-        )
-      case 'BackupMnemonic':
-        return (
-          <BackupMnemonicSection
-            generatedKeys={generatedKeys}
-            onBackupMnemonicComplete={onBackupMnemonicComplete}
-          />
-        )
-      case 'SetupConvenientAuth':
+          <BackupMnemonicSection generatedKeys={generatedKeys} onBackupMnemonicComplete={onBackupMnemonicComplete} />
+        );
+      case "SetupConvenientAuth":
         return (
           <SetupConvenientAuth
             generatedKeys={generatedKeys}
             onSetupConvenientAuthComplete={onSetupConvenientAuthComplete}
           />
-        )
+        );
 
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   const getTitle = () => {
     switch (currentStep) {
-      case 'KeyGeneration': return 'Generate Account Keys'
-      case 'BackupMnemonic': return 'Backup Recovery Phrase'
-      case 'SetupConvenientAuth': return 'Setup Passkey'
-      default: return 'Create Account'
+      case "KeyGeneration":
+        return "Generate Account Keys";
+      case "BackupMnemonic":
+        return "Backup Recovery Phrase";
+      case "SetupConvenientAuth":
+        return "Setup Passkey";
+      default:
+        return "Create Account";
     }
-  }
+  };
 
   const getDescription = () => {
     switch (currentStep) {
-      case 'KeyGeneration': return 'Generate cryptographic keys locally'
-      case 'BackupMnemonic': return 'Save your mnemonic phrase to recover account'
-      case 'SetupConvenientAuth': return 'Choose your preferred authentication method for account access'
-      default: return 'Create a new secure account'
+      case "KeyGeneration":
+        return "Generate cryptographic keys locally";
+      case "BackupMnemonic":
+        return "Save your mnemonic phrase to recover account";
+      case "SetupConvenientAuth":
+        return "Choose your preferred authentication method for account access";
+      default:
+        return "Create a new secure account";
     }
-  }
+  };
 
   return (
-    <Drawer 
-      open={open} 
+    <Drawer
+      open={open}
       onOpenChange={(newOpen) => {
         if (!newOpen) {
           resetState();
@@ -116,7 +112,7 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
       <DrawerContent className="bg-app-background border-app max-h-[85vh]">
         {/* iOS-style drag handle */}
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-app-tertiary/30" />
-        
+
         <DrawerHeader className="pb-0 px-4 pt-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -146,11 +142,9 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-4 pb-6">
-          <div className="p-2">
-            {renderContent()}
-          </div>
+          <div className="p-2">{renderContent()}</div>
         </div>
       </DrawerContent>
     </Drawer>
-  )
-}
+  );
+};

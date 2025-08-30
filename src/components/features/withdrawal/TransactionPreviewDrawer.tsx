@@ -1,15 +1,8 @@
-import { Copy, Loader2, X, Info } from 'lucide-react';
-import { Button } from '../../ui/button';
-import { 
-  Drawer, 
-  DrawerContent, 
-  DrawerHeader, 
-  DrawerTitle,
-  DrawerClose, 
-  DrawerDescription
-} from '../../ui/drawer';
-import { useBanner } from '@/contexts/BannerContext';
-import { formatEthAmount, formatHash } from '@/utils/formatters';
+import { Copy, Loader2, X, Info } from "lucide-react";
+import { Button } from "../../ui/button";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose, DrawerDescription } from "../../ui/drawer";
+import { useBanner } from "@/contexts/BannerContext";
+import { formatEthAmount, formatHash } from "@/utils/formatters";
 import { Note } from "@/lib/storage/noteCache";
 
 interface TransactionPreviewDrawerProps {
@@ -35,7 +28,7 @@ export const TransactionPreviewDrawer = ({
   executionFee,
   youReceive,
   remainingBalance,
-  isProcessing
+  isProcessing,
 }: TransactionPreviewDrawerProps) => {
   const { banner } = useBanner();
   const withdrawAmountNum = parseFloat(withdrawAmount) || 0;
@@ -68,9 +61,7 @@ export const TransactionPreviewDrawer = ({
           {/* Amount Section */}
           <div className="bg-app-surface rounded-xl p-3 border border-app shadow-sm">
             <div className="text-center">
-              <p className="text-sm font-medium text-app-secondary mb-1">
-                You will receive
-              </p>
+              <p className="text-sm font-medium text-app-secondary mb-1">You will receive</p>
               <p className="text-2xl font-bold text-app-primary tabular-nums">
                 {formatEthAmount(youReceive, { decimals: 7 })} ETH
               </p>
@@ -82,7 +73,7 @@ export const TransactionPreviewDrawer = ({
             <div className="px-3 py-2 border-b border-app">
               <h3 className="text-sm font-semibold text-app-primary">Fee Breakdown</h3>
             </div>
-            
+
             <div className="divide-y divide-app-border">
               <div className="px-3 py-2 flex items-center justify-between">
                 <span className="text-xs font-medium text-app-secondary">Note Balance</span>
@@ -90,14 +81,14 @@ export const TransactionPreviewDrawer = ({
                   {formatEthAmount(note.amount, { decimals: 7 })} ETH
                 </span>
               </div>
-              
+
               <div className="px-3 py-2 flex items-center justify-between">
                 <span className="text-xs font-medium text-app-secondary">Withdrawal Amount</span>
                 <span className="text-xs font-mono  text-red-500  tabular-nums">
                   -{formatEthAmount(withdrawAmountNum, { decimals: 7 })} ETH
                 </span>
               </div>
-              
+
               <div className="px-3 py-2 flex items-center justify-between">
                 <div className="flex items-center gap-1">
                   <span className="text-xs font-medium text-app-secondary">Execution Fee (Max)</span>
@@ -130,16 +121,14 @@ export const TransactionPreviewDrawer = ({
             <div className="px-3 py-2 border-b border-app">
               <h3 className="text-sm font-semibold text-app-primary">Recipient Details</h3>
             </div>
-            
+
             <div className="divide-y divide-app-border">
               <div className="px-3 py-2 flex items-center justify-between">
                 <span className="text-xs font-medium text-app-secondary">To Address</span>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-mono text-app-primary">
-                    {formatHash(recipientAddress)}
-                  </span>
+                  <span className="text-xs font-mono text-app-primary">{formatHash(recipientAddress)}</span>
                   <button
-                    onClick={() => copyToClipboard(recipientAddress, 'Recipient Address')}
+                    onClick={() => copyToClipboard(recipientAddress, "Recipient Address")}
                     className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
                   >
                     <Copy className="h-3.5 w-3.5 text-app-tertiary" />
@@ -164,7 +153,7 @@ export const TransactionPreviewDrawer = ({
                 Processing...
               </div>
             ) : (
-              'Confirm Withdrawal'
+              "Confirm Withdrawal"
             )}
           </Button>
         </div>

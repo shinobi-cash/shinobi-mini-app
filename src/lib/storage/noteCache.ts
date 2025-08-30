@@ -3,7 +3,7 @@
  * Stores all sensitive note data encrypted using user-derived keys
  */
 
-import { restoreFromMnemonic } from '@/utils/crypto';
+import { restoreFromMnemonic } from "@/utils/crypto";
 
 // Types for discovered notes
 export interface Note {
@@ -14,7 +14,7 @@ export interface Note {
   transactionHash: string;
   blockNumber: string;
   timestamp: string;
-  status: 'unspent' | 'spent';
+  status: "unspent" | "spent";
   label: string;
 }
 
@@ -68,14 +68,14 @@ interface StoredEncryptedData {
   lastSyncTime: number;
 }
 
-const DB_NAME = 'shinobi.cash';
+const DB_NAME = "shinobi.cash";
 const DB_VERSION = 3; // Incremented to add passkey store
-const STORE_NAME = 'encrypted-notes';
-const ACCOUNT_STORE_NAME = 'encrypted-account';
-const PASSKEY_STORE_NAME = 'passkey-credentials';
-const STORAGE_KEY = 'shinobi.encrypted.session';
-const CRYPTO_ALGO = 'AES-GCM';
-const HASH_ALGO = 'SHA-256';
+const STORE_NAME = "encrypted-notes";
+const ACCOUNT_STORE_NAME = "encrypted-account";
+const PASSKEY_STORE_NAME = "passkey-credentials";
+const STORAGE_KEY = "shinobi.encrypted.session";
+const CRYPTO_ALGO = "AES-GCM";
+const HASH_ALGO = "SHA-256";
 
 class NoteCacheService {
   private db: IDBDatabase | null = null;
@@ -89,54 +89,56 @@ class NoteCacheService {
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         this.db = request.result;
-        
+
         // Verify all required stores exist
-        if (!this.db.objectStoreNames.contains(STORE_NAME) ||
-            !this.db.objectStoreNames.contains(ACCOUNT_STORE_NAME) ||
-            !this.db.objectStoreNames.contains(PASSKEY_STORE_NAME)) {
-          console.warn('Some object stores are missing. Database may need to be recreated.');
+        if (
+          !this.db.objectStoreNames.contains(STORE_NAME) ||
+          !this.db.objectStoreNames.contains(ACCOUNT_STORE_NAME) ||
+          !this.db.objectStoreNames.contains(PASSKEY_STORE_NAME)
+        ) {
+          console.warn("Some object stores are missing. Database may need to be recreated.");
         }
-        
+
         resolve();
       };
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
         const oldVersion = event.oldVersion;
-        
+
         console.log(`Upgrading database from version ${oldVersion} to ${DB_VERSION}`);
-        
+
         // Handle migration from version 0 (new installation) or version 1 (upgrade)
         if (oldVersion < 1) {
           // New installation or very old version - create notes store
           if (!db.objectStoreNames.contains(STORE_NAME)) {
-            console.log('Creating notes store');
-            const notesStore = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-            notesStore.createIndex('publicKeyHash', 'publicKeyHash', { unique: false });
-            notesStore.createIndex('poolAddressHash', 'poolAddressHash', { unique: false });
+            console.log("Creating notes store");
+            const notesStore = db.createObjectStore(STORE_NAME, { keyPath: "id" });
+            notesStore.createIndex("publicKeyHash", "publicKeyHash", { unique: false });
+            notesStore.createIndex("poolAddressHash", "poolAddressHash", { unique: false });
           }
         }
-        
+
         if (oldVersion < 2) {
           // Upgrade to version 2 - add account store
           if (!db.objectStoreNames.contains(ACCOUNT_STORE_NAME)) {
-            console.log('Creating account store');
-            const accountStore = db.createObjectStore(ACCOUNT_STORE_NAME, { keyPath: 'id' });
-            accountStore.createIndex('publicKeyHash', 'publicKeyHash', { unique: false });
+            console.log("Creating account store");
+            const accountStore = db.createObjectStore(ACCOUNT_STORE_NAME, { keyPath: "id" });
+            accountStore.createIndex("publicKeyHash", "publicKeyHash", { unique: false });
           }
         }
-        
+
         if (oldVersion < 3) {
           // Upgrade to version 3 - add passkey store
           if (!db.objectStoreNames.contains(PASSKEY_STORE_NAME)) {
-            console.log('Creating passkey store');
-            const passkeyStore = db.createObjectStore(PASSKEY_STORE_NAME, { keyPath: 'accountName' });
-            passkeyStore.createIndex('publicKeyHash', 'publicKeyHash', { unique: false });
-            passkeyStore.createIndex('credentialId', 'credentialId', { unique: false });
+            console.log("Creating passkey store");
+            const passkeyStore = db.createObjectStore(PASSKEY_STORE_NAME, { keyPath: "accountName" });
+            passkeyStore.createIndex("publicKeyHash", "publicKeyHash", { unique: false });
+            passkeyStore.createIndex("credentialId", "credentialId", { unique: false });
           }
         }
-        
-        console.log('Database upgrade completed');
+
+        console.log("Database upgrade completed");
       };
     });
   }
@@ -149,17 +151,17 @@ class NoteCacheService {
       this.db.close();
       this.db = null;
     }
-    
+
     return new Promise((resolve, reject) => {
       const deleteReq = indexedDB.deleteDatabase(DB_NAME);
-      
+
       deleteReq.onerror = () => reject(deleteReq.error);
       deleteReq.onsuccess = () => {
-        console.log('Database deleted successfully');
+        console.log("Database deleted successfully");
         this.init().then(resolve).catch(reject);
       };
       deleteReq.onblocked = () => {
-        console.warn('Database deletion blocked. Close other tabs/windows using this app.');
+        console.warn("Database deletion blocked. Close other tabs/windows using this app.");
       };
     });
   }
@@ -171,15 +173,14 @@ class NoteCacheService {
     // Store current account context and derived key
     this.currentAccountName = accountName;
     this.encryptionKey = symmetricKey;
-    
+
     // Mark that encrypted session exists (for hasEncryptedData check)
     try {
-      localStorage.setItem(`${STORAGE_KEY}_${accountName}`, 'initialized');
+      localStorage.setItem(`${STORAGE_KEY}_${accountName}`, "initialized");
     } catch (error) {
-      console.warn('Failed to set session marker:', error);
+      console.warn("Failed to set session marker:", error);
     }
   }
-
 
   /**
    * Clear session data from memory
@@ -194,7 +195,7 @@ class NoteCacheService {
    */
   private getEncryptionKey(): CryptoKey {
     if (!this.encryptionKey) {
-      throw new Error('Session not initialized - call initializeAccountSession() first');
+      throw new Error("Session not initialized - call initializeAccountSession() first");
     }
     return this.encryptionKey;
   }
@@ -207,7 +208,9 @@ class NoteCacheService {
     const data = encoder.encode(input.toLowerCase());
     const hashBuffer = await crypto.subtle.digest(HASH_ALGO, data);
     const hashArray = new Uint8Array(hashBuffer);
-    return Array.from(hashArray).map(b => b.toString(16).padStart(2, '0')).join('');
+    return Array.from(hashArray)
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
   }
 
   /**
@@ -217,20 +220,16 @@ class NoteCacheService {
     const salt = crypto.getRandomValues(new Uint8Array(32)); // Random salt for this encryption
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const key = this.getEncryptionKey();
-    
+
     const encoder = new TextEncoder();
     const jsonData = encoder.encode(JSON.stringify(data));
-    
-    const encryptedData = await crypto.subtle.encrypt(
-      { name: CRYPTO_ALGO, iv: iv } as AesGcmParams,
-      key,
-      jsonData
-    );
+
+    const encryptedData = await crypto.subtle.encrypt({ name: CRYPTO_ALGO, iv: iv } as AesGcmParams, key, jsonData);
 
     return {
       iv,
       data: new Uint8Array(encryptedData),
-      salt
+      salt,
     };
   }
 
@@ -239,11 +238,11 @@ class NoteCacheService {
    */
   private async decrypt(encryptedData: EncryptedData): Promise<CachedNoteData> {
     const key = this.getEncryptionKey();
-    
+
     const decryptedBuffer = await crypto.subtle.decrypt(
       { name: CRYPTO_ALGO, iv: encryptedData.iv } as AesGcmParams,
       key,
-      new Uint8Array(encryptedData.data)
+      new Uint8Array(encryptedData.data),
     );
 
     const decoder = new TextDecoder();
@@ -262,7 +261,11 @@ class NoteCacheService {
    * Convert base64 back to binary data
    */
   private base64ToArrayBuffer(base64: string): Uint8Array {
-    return new Uint8Array(atob(base64).split('').map(c => c.charCodeAt(0)));
+    return new Uint8Array(
+      atob(base64)
+        .split("")
+        .map((c) => c.charCodeAt(0)),
+    );
   }
 
   private async getKey(publicKey: string, poolAddress: string): Promise<string> {
@@ -273,7 +276,7 @@ class NoteCacheService {
 
   async getCachedNotes(publicKey: string, poolAddress: string): Promise<DiscoveryResult | null> {
     if (!this.db) await this.init();
-    if (!this.encryptionKey) throw new Error('Session not initialized');
+    if (!this.encryptionKey) throw new Error("Session not initialized");
 
     const cached = await this.getCachedData(publicKey, poolAddress);
 
@@ -293,14 +296,12 @@ class NoteCacheService {
     publicKey: string,
     poolAddress: string,
     notes: NoteChain[],
-    lastProcessedCursor?: string
+    lastProcessedCursor?: string,
   ): Promise<void> {
     if (!this.db) await this.init();
-    if (!this.encryptionKey) throw new Error('Session not initialized');
+    if (!this.encryptionKey) throw new Error("Session not initialized");
 
-    const lastUsedIndex = notes.length > 0
-      ? Math.max(...notes.map(chain => chain[0].depositIndex))
-      : -1;
+    const lastUsedIndex = notes.length > 0 ? Math.max(...notes.map((chain) => chain[0].depositIndex)) : -1;
 
     await this.storeData(publicKey, poolAddress, notes, lastUsedIndex, lastProcessedCursor);
   }
@@ -310,7 +311,7 @@ class NoteCacheService {
     poolAddress: string,
     notes: NoteChain[],
     lastUsedDepositIndex: number,
-    lastProcessedCursor?: string
+    lastProcessedCursor?: string,
   ): Promise<void> {
     if (!this.db) await this.init();
 
@@ -324,7 +325,7 @@ class NoteCacheService {
     };
 
     const encrypted = await this.encrypt(sensitiveData);
-    
+
     const storageData: StoredEncryptedData = {
       id: await this.getKey(publicKey, poolAddress),
       publicKeyHash: await this.createHash(publicKey),
@@ -332,13 +333,13 @@ class NoteCacheService {
       encryptedPayload: {
         iv: this.arrayBufferToBase64(encrypted.iv),
         data: this.arrayBufferToBase64(encrypted.data),
-        salt: this.arrayBufferToBase64(encrypted.salt)
+        salt: this.arrayBufferToBase64(encrypted.salt),
       },
-      lastSyncTime: sensitiveData.lastSyncTime
+      lastSyncTime: sensitiveData.lastSyncTime,
     };
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([STORE_NAME], 'readwrite');
+      const transaction = this.db!.transaction([STORE_NAME], "readwrite");
       const store = transaction.objectStore(STORE_NAME);
       const request = store.put(storageData);
 
@@ -353,7 +354,7 @@ class NoteCacheService {
     return new Promise(async (resolve, reject) => {
       try {
         const key = await this.getKey(publicKey, poolAddress);
-        const transaction = this.db!.transaction([STORE_NAME], 'readonly');
+        const transaction = this.db!.transaction([STORE_NAME], "readonly");
         const store = transaction.objectStore(STORE_NAME);
         const request = store.get(key);
 
@@ -365,13 +366,13 @@ class NoteCacheService {
               const encryptedData: EncryptedData = {
                 iv: this.base64ToArrayBuffer(result.encryptedPayload.iv),
                 data: this.base64ToArrayBuffer(result.encryptedPayload.data),
-                salt: this.base64ToArrayBuffer(result.encryptedPayload.salt)
+                salt: this.base64ToArrayBuffer(result.encryptedPayload.salt),
               };
-              
+
               const decryptedData = await this.decrypt(encryptedData);
               resolve(decryptedData);
             } catch (decryptionError) {
-              console.error('Failed to decrypt cached data:', decryptionError);
+              console.error("Failed to decrypt cached data:", decryptionError);
               resolve(null); // Return null if decryption fails (wrong password)
             }
           } else {
@@ -389,11 +390,7 @@ class NoteCacheService {
     return cached ? cached.lastUsedDepositIndex + 1 : 0;
   }
 
-  async updateLastUsedDepositIndex(
-    publicKey: string,
-    poolAddress: string,
-    depositIndex: number
-  ): Promise<void> {
+  async updateLastUsedDepositIndex(publicKey: string, poolAddress: string, depositIndex: number): Promise<void> {
     const cached = await this.getCachedData(publicKey, poolAddress);
 
     const notes = cached ? cached.notes : [];
@@ -410,14 +407,14 @@ class NoteCacheService {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([STORE_NAME, ACCOUNT_STORE_NAME, PASSKEY_STORE_NAME], 'readwrite');
+      const transaction = this.db!.transaction([STORE_NAME, ACCOUNT_STORE_NAME, PASSKEY_STORE_NAME], "readwrite");
       const notesStore = transaction.objectStore(STORE_NAME);
       const accountStore = transaction.objectStore(ACCOUNT_STORE_NAME);
       const passkeyStore = transaction.objectStore(PASSKEY_STORE_NAME);
-      
+
       let completed = 0;
       const total = 3;
-      
+
       const checkComplete = () => {
         completed++;
         if (completed === total) {
@@ -431,9 +428,9 @@ class NoteCacheService {
                 keysToRemove.push(key);
               }
             }
-            keysToRemove.forEach(key => localStorage.removeItem(key));
+            keysToRemove.forEach((key) => localStorage.removeItem(key));
           } catch (error) {
-            console.warn('Failed to clear session markers:', error);
+            console.warn("Failed to clear session markers:", error);
           }
           resolve();
         }
@@ -445,10 +442,10 @@ class NoteCacheService {
 
       notesRequest.onerror = () => reject(notesRequest.error);
       notesRequest.onsuccess = checkComplete;
-      
+
       accountRequest.onerror = () => reject(accountRequest.error);
       accountRequest.onsuccess = checkComplete;
-      
+
       passkeyRequest.onerror = () => reject(passkeyRequest.error);
       passkeyRequest.onsuccess = checkComplete;
     });
@@ -459,51 +456,56 @@ class NoteCacheService {
    */
   async storeAccountData(accountData: CachedAccountData): Promise<void> {
     if (!this.db) await this.init();
-    if (!this.encryptionKey) throw new Error('Session not initialized');
+    if (!this.encryptionKey) throw new Error("Session not initialized");
 
     // Derive public key from mnemonic for indexing
     const { publicKey } = restoreFromMnemonic(accountData.mnemonic);
-    
+
     const encrypted = await this.encryptAccountData(accountData);
     const publicKeyHash = await this.createHash(publicKey);
-    
+
     const storageData = {
       id: accountData.accountName, // Use account name as primary key
       publicKeyHash,
       encryptedPayload: {
         iv: this.arrayBufferToBase64(encrypted.iv),
         data: this.arrayBufferToBase64(encrypted.data),
-        salt: this.arrayBufferToBase64(encrypted.salt)
+        salt: this.arrayBufferToBase64(encrypted.salt),
       },
-      createdAt: accountData.createdAt
+      createdAt: accountData.createdAt,
     };
 
     return new Promise((resolve, reject) => {
       try {
         // Check if the account store exists
         if (!this.db!.objectStoreNames.contains(ACCOUNT_STORE_NAME)) {
-          console.error(`${ACCOUNT_STORE_NAME} object store not found. Available stores:`, Array.from(this.db!.objectStoreNames));
-          reject(new Error(`Database corruption: ${ACCOUNT_STORE_NAME} object store missing. Try clearing browser data.`));
+          console.error(
+            `${ACCOUNT_STORE_NAME} object store not found. Available stores:`,
+            Array.from(this.db!.objectStoreNames),
+          );
+          reject(
+            new Error(`Database corruption: ${ACCOUNT_STORE_NAME} object store missing. Try clearing browser data.`),
+          );
           return;
         }
 
-        const transaction = this.db!.transaction([ACCOUNT_STORE_NAME], 'readwrite');
-        
+        const transaction = this.db!.transaction([ACCOUNT_STORE_NAME], "readwrite");
+
         transaction.onerror = () => {
-          console.error('Transaction failed:', transaction.error);
+          console.error("Transaction failed:", transaction.error);
           reject(transaction.error);
         };
-        
+
         const store = transaction.objectStore(ACCOUNT_STORE_NAME);
         const request = store.put(storageData);
 
         request.onerror = () => {
-          console.error('Store operation failed:', request.error);
+          console.error("Store operation failed:", request.error);
           reject(request.error);
         };
         request.onsuccess = () => resolve();
       } catch (error) {
-        console.error('Exception in storeAccountData:', error);
+        console.error("Exception in storeAccountData:", error);
         reject(error);
       }
     });
@@ -516,7 +518,7 @@ class NoteCacheService {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([ACCOUNT_STORE_NAME], 'readonly');
+      const transaction = this.db!.transaction([ACCOUNT_STORE_NAME], "readonly");
       const store = transaction.objectStore(ACCOUNT_STORE_NAME);
       const request = store.get(accountName);
 
@@ -529,7 +531,7 @@ class NoteCacheService {
             // This method is used during authentication setup
             resolve(result); // Return the raw encrypted data for now
           } catch (error) {
-            console.error('Failed to retrieve account data:', error);
+            console.error("Failed to retrieve account data:", error);
             resolve(null);
           }
         } else {
@@ -544,11 +546,11 @@ class NoteCacheService {
    */
   async getAccountData(): Promise<CachedAccountData | null> {
     if (!this.db) await this.init();
-    if (!this.encryptionKey) throw new Error('Session not initialized');
-    if (!this.currentAccountName) throw new Error('No current account context');
+    if (!this.encryptionKey) throw new Error("Session not initialized");
+    if (!this.currentAccountName) throw new Error("No current account context");
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([ACCOUNT_STORE_NAME], 'readonly');
+      const transaction = this.db!.transaction([ACCOUNT_STORE_NAME], "readonly");
       const store = transaction.objectStore(ACCOUNT_STORE_NAME);
       const request = store.get(this.currentAccountName!);
 
@@ -560,13 +562,13 @@ class NoteCacheService {
             const encryptedData = {
               iv: this.base64ToArrayBuffer(result.encryptedPayload.iv),
               data: this.base64ToArrayBuffer(result.encryptedPayload.data),
-              salt: this.base64ToArrayBuffer(result.encryptedPayload.salt)
+              salt: this.base64ToArrayBuffer(result.encryptedPayload.salt),
             };
-            
+
             const decryptedData = await this.decryptAccountData(encryptedData);
             resolve(decryptedData);
           } catch (decryptionError) {
-            console.error('Failed to decrypt account data:', decryptionError);
+            console.error("Failed to decrypt account data:", decryptionError);
             resolve(null);
           }
         } else {
@@ -583,20 +585,16 @@ class NoteCacheService {
     const salt = crypto.getRandomValues(new Uint8Array(32)); // Random salt for this encryption
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const key = this.getEncryptionKey();
-    
+
     const encoder = new TextEncoder();
     const jsonData = encoder.encode(JSON.stringify(data));
-    
-    const encryptedData = await crypto.subtle.encrypt(
-      { name: CRYPTO_ALGO, iv: iv } as AesGcmParams,
-      key,
-      jsonData
-    );
+
+    const encryptedData = await crypto.subtle.encrypt({ name: CRYPTO_ALGO, iv: iv } as AesGcmParams, key, jsonData);
 
     return {
       iv,
       data: new Uint8Array(encryptedData),
-      salt
+      salt,
     };
   }
 
@@ -605,11 +603,11 @@ class NoteCacheService {
    */
   private async decryptAccountData(encryptedData: EncryptedData): Promise<CachedAccountData> {
     const key = this.getEncryptionKey();
-    
+
     const decryptedBuffer = await crypto.subtle.decrypt(
       { name: CRYPTO_ALGO, iv: encryptedData.iv } as AesGcmParams,
       key,
-      new Uint8Array(encryptedData.data)
+      new Uint8Array(encryptedData.data),
     );
 
     const decoder = new TextDecoder();
@@ -624,7 +622,7 @@ class NoteCacheService {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([PASSKEY_STORE_NAME], 'readwrite');
+      const transaction = this.db!.transaction([PASSKEY_STORE_NAME], "readwrite");
       const store = transaction.objectStore(PASSKEY_STORE_NAME);
       const request = store.put(passkeyData);
 
@@ -640,7 +638,7 @@ class NoteCacheService {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([PASSKEY_STORE_NAME], 'readonly');
+      const transaction = this.db!.transaction([PASSKEY_STORE_NAME], "readonly");
       const store = transaction.objectStore(PASSKEY_STORE_NAME);
       const request = store.get(accountName);
 
@@ -658,7 +656,7 @@ class NoteCacheService {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([ACCOUNT_STORE_NAME], 'readonly');
+      const transaction = this.db!.transaction([ACCOUNT_STORE_NAME], "readonly");
       const store = transaction.objectStore(ACCOUNT_STORE_NAME);
       const request = store.getAllKeys();
 
@@ -677,7 +675,7 @@ class NoteCacheService {
       const accountData = await this.getAccountDataByName(accountName);
       return accountData !== null;
     } catch (error) {
-      console.warn('Failed to check account existence:', error);
+      console.warn("Failed to check account existence:", error);
       // Return false if database is not accessible - assume account doesn't exist
       // This prevents form validation from failing during database initialization
       return false;
@@ -692,7 +690,7 @@ class NoteCacheService {
       const passkeyData = await this.getPasskeyData(accountName);
       return passkeyData !== null;
     } catch (error) {
-      console.warn('Failed to check passkey existence:', error);
+      console.warn("Failed to check passkey existence:", error);
       // Return false if database is not accessible - assume passkey doesn't exist
       // This prevents form validation from failing during database initialization
       return false;
@@ -718,7 +716,7 @@ class NoteCacheService {
         return false;
       }
     } catch (error) {
-      console.warn('Failed to check encrypted data:', error);
+      console.warn("Failed to check encrypted data:", error);
       return false;
     }
   }

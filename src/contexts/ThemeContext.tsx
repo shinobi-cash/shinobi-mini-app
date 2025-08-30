@@ -30,9 +30,7 @@ export function ThemeProvider({
   storageKey = "shinobi.cash.theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  );
+  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem(storageKey) as Theme) || defaultTheme);
 
   // Calculate the effective theme (what's actually applied)
   const getEffectiveTheme = (): "light" | "dark" => {
@@ -56,7 +54,7 @@ export function ThemeProvider({
     // Listen for system theme changes when theme is set to "system"
     if (theme === "system") {
       const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      
+
       const handleChange = () => {
         const root = window.document.documentElement;
         const systemTheme = mediaQuery.matches ? "dark" : "light";
@@ -104,8 +102,7 @@ export function ThemeProvider({
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext);
 
-  if (context === undefined)
-    throw new Error("useTheme must be used within a ThemeProvider");
+  if (context === undefined) throw new Error("useTheme must be used within a ThemeProvider");
 
   return context;
 };

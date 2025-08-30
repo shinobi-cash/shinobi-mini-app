@@ -2,7 +2,7 @@
  * GraphQL Queries
  */
 
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 // ============ STATE TREE QUERIES ============
 

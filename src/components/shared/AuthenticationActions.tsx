@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { Button } from '../ui/button';
-import { CreateAccountDrawer } from '../features/auth/CreateAccountDrawer';
-import { LogInDrawer } from '../features/auth/LogInDrawer';
+import { useState } from "react";
+import { Button } from "../ui/button";
+import { CreateAccountDrawer } from "../features/auth/CreateAccountDrawer";
+import { LogInDrawer } from "../features/auth/LogInDrawer";
 
 interface AuthenticationActionsProps {
-  context?: 'profile' | 'deposit' | 'withdraw';
+  context?: "profile" | "deposit" | "withdraw";
 }
 
 export const AuthenticationActions = ({ context: _ }: AuthenticationActionsProps) => {
@@ -23,7 +23,7 @@ export const AuthenticationActions = ({ context: _ }: AuthenticationActionsProps
       >
         Log In
       </Button>
-      
+
       <Button
         variant="outline"
         className="w-full h-12 text-base font-medium rounded-2xl border border-app"
@@ -35,10 +35,7 @@ export const AuthenticationActions = ({ context: _ }: AuthenticationActionsProps
         Create Account
       </Button>
 
-      <CreateAccountDrawer 
-        open={openCreateAccount}
-        onOpenChange={setOpenCreateAccount}
-      />
+      <CreateAccountDrawer open={openCreateAccount} onOpenChange={setOpenCreateAccount} />
 
       <LogInDrawer
         open={openAccountLogin}

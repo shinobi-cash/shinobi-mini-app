@@ -1,17 +1,7 @@
 import { X, ExternalLink } from "lucide-react";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerClose,
-} from "../../ui/drawer";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from "../../ui/drawer";
 import { NoteChain } from "@/lib/storage/noteCache";
-import {
-  formatEthAmount,
-  formatTimestamp,
-} from "@/utils/formatters";
+import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
 import { NETWORK } from "@/config/constants";
 
 interface NoteChainDetailDrawerProps {
@@ -20,11 +10,7 @@ interface NoteChainDetailDrawerProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function NoteChainDetailDrawer({
-  noteChain,
-  open,
-  onOpenChange,
-}: NoteChainDetailDrawerProps) {
+export function NoteChainDetailDrawer({ noteChain, open, onOpenChange }: NoteChainDetailDrawerProps) {
   if (!noteChain) return null;
   const lastNote = noteChain[noteChain.length - 1];
 
@@ -48,9 +34,7 @@ export function NoteChainDetailDrawer({
         <div className="flex-1 overflow-y-auto px-4 pb-6">
           {/* Balance Summary */}
           <div className="bg-app-surface rounded-xl p-4 border border-app shadow mb-6 text-center">
-            <p className="text-sm font-medium text-app-secondary mb-1">
-              Current Balance
-            </p>
+            <p className="text-sm font-medium text-app-secondary mb-1">Current Balance</p>
             <p className="text-2xl font-bold text-app-primary tabular-nums mb-2">
               {formatEthAmount(lastNote.amount)} ETH
             </p>
@@ -62,9 +46,7 @@ export function NoteChainDetailDrawer({
               }`}
             >
               <div
-                className={`w-1.5 h-1.5 rounded-full ${
-                  lastNote.status === "spent" ? "bg-red-500" : "bg-green-500"
-                }`}
+                className={`w-1.5 h-1.5 rounded-full ${lastNote.status === "spent" ? "bg-red-500" : "bg-green-500"}`}
               />
               {lastNote.status === "spent" ? "Fully Spent" : "Available"}
             </div>
@@ -95,11 +77,7 @@ export function NoteChainDetailDrawer({
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-medium text-app-primary">
-                            {index === 0
-                              ? `Deposited: `
-                              : isLast
-                              ? `Final Balance: `
-                              : `Balance: `}
+                            {index === 0 ? `Deposited: ` : isLast ? `Final Balance: ` : `Balance: `}
                             <a
                               href={`${NETWORK.EXPLORER_URL}/tx/${note.transactionHash}`}
                               target="_blank"

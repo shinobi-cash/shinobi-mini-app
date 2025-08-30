@@ -3,31 +3,31 @@
  * Catches JavaScript errors anywhere in the child component tree
  */
 
-import { Component, ErrorInfo, ReactNode } from 'react'
-import { AlertTriangle, RefreshCw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Component, ErrorInfo, ReactNode } from "react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Props {
-  children: ReactNode
+  children: ReactNode;
 }
 
 interface State {
-  hasError: boolean
-  error?: Error
+  hasError: boolean;
+  error?: Error;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
-    hasError: false
-  }
+    hasError: false,
+  };
 
   public static getDerivedStateFromError(error: Error): State {
     // Update state so the next render will show the fallback UI
-    return { hasError: true, error }
+    return { hasError: true, error };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo)
+    console.error("Uncaught error:", error, errorInfo);
   }
 
   public render() {
@@ -39,36 +39,28 @@ export class ErrorBoundary extends Component<Props, State> {
               <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
             </div>
             <div className="space-y-3">
-              <h1 className="text-2xl sm:text-3xl font-bold text-app-primary font-sans">
-                Something went wrong
-              </h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-app-primary font-sans">Something went wrong</h1>
               <p className="text-base text-app-secondary">
                 The app encountered an unexpected error. Please try refreshing the page.
               </p>
             </div>
-            
+
             {this.state.error && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-3">
-                <p className="text-sm text-red-700 dark:text-red-300 font-mono">
-                  {this.state.error.message}
-                </p>
+                <p className="text-sm text-red-700 dark:text-red-300 font-mono">{this.state.error.message}</p>
               </div>
             )}
-            
+
             <div className="space-y-3">
-              <Button 
-                onClick={() => window.location.reload()}
-                className="w-full h-12"
-                size="lg"
-              >
+              <Button onClick={() => window.location.reload()} className="w-full h-12" size="lg">
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Refresh Page
               </Button>
-              
-              <Button 
+
+              <Button
                 variant="outline"
                 onClick={() => {
-                  this.setState({ hasError: false, error: undefined })
+                  this.setState({ hasError: false, error: undefined });
                 }}
                 className="w-full h-10"
               >
@@ -77,9 +69,9 @@ export class ErrorBoundary extends Component<Props, State> {
             </div>
           </div>
         </div>
-      )
+      );
     }
 
-    return this.props.children
+    return this.props.children;
   }
 }

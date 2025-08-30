@@ -1,16 +1,16 @@
-import { Loader2, Wallet, ChevronRight } from 'lucide-react';
+import { Loader2, Wallet, ChevronRight } from "lucide-react";
 import { Note } from "@/lib/storage/noteCache";
-import { useCachedNotes } from '@/hooks/data/useCachedNotes';
-import { useAuth } from '@/contexts/AuthContext';
-import { CONTRACTS } from '@/config/constants';
-import { formatEthAmount, formatTimestamp } from '@/utils/formatters';
+import { useCachedNotes } from "@/hooks/data/useCachedNotes";
+import { useAuth } from "@/contexts/AuthContext";
+import { CONTRACTS } from "@/config/constants";
+import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
 
 interface ListUnspentNotesProps {
   onNoteSelected: (note: Note) => void;
 }
 
 export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
-  const { publicKey, accountKey } = useAuth(); 
+  const { publicKey, accountKey } = useAuth();
   const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
 
   // Use cached notes for immediate display
@@ -18,11 +18,11 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
 
   // Get available unspent notes by filtering the 2D notes array.
   const availableNotes = (noteDiscovery?.notes || [])
-    .map(noteChain => {
+    .map((noteChain) => {
       // An unspent note is always the last note in a chain
       const lastNote = noteChain[noteChain.length - 1];
       // Only include the note if it is unspent
-      return lastNote.status === 'unspent' ? lastNote : null;
+      return lastNote.status === "unspent" ? lastNote : null;
     })
     .filter(Boolean) as Note[];
 
@@ -39,7 +39,6 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
       </div>
     );
   }
-
 
   if (availableNotes.length === 0) {
     return (
@@ -87,9 +86,8 @@ interface NoteCardProps {
 }
 
 const NoteCard = ({ note, onSelect }: NoteCardProps) => {
-  const noteLabel = note.changeIndex === 0
-    ? `Deposit #${note.depositIndex}`
-    : `Change #${note.depositIndex}.${note.changeIndex}`;
+  const noteLabel =
+    note.changeIndex === 0 ? `Deposit #${note.depositIndex}` : `Change #${note.depositIndex}.${note.changeIndex}`;
 
   return (
     <button

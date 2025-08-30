@@ -1,28 +1,27 @@
-import { KeyGenerationResult } from '@/utils/crypto';
-import { getAccountKey } from '@/utils/accountKey';
-import { restoreFromMnemonic } from '@/utils/crypto';
+import { KeyGenerationResult } from "@/utils/crypto";
+import { getAccountKey } from "@/utils/accountKey";
+import { restoreFromMnemonic } from "@/utils/crypto";
 import { KDF } from "@/lib/auth/keyDerivation";
 import { noteCache } from "@/lib/storage/noteCache";
-import { createContext, useContext, useState, ReactNode, useMemo, useEffect, useRef } from 'react'
-
+import { createContext, useContext, useState, ReactNode, useMemo, useEffect, useRef } from "react";
 
 interface AuthContextType {
   // Authentication state
   isAuthenticated: boolean;
   isRestoringSession: boolean;
-  
+
   // Account keys
   publicKey: string | null;
   privateKey: string | null;
   mnemonic: string[] | null;
-  accountKey: bigint | null; 
-  
+  accountKey: bigint | null;
+
   // Session restoration state
   quickAuthState: {
     show: boolean;
     accountName: string;
   } | null;
-  
+
   // Actions
   setKeys: (keys: KeyGenerationResult) => void;
   signOut: () => void;
@@ -30,7 +29,7 @@ interface AuthContextType {
   dismissQuickAuth: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [keys, setKeysState] = useState<{
@@ -76,16 +75,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const restoreSession = async () => {
       try {
         const result = await KDF.resumeAuth();
-        
-        if (result.status === 'passkey-ready') {
+
+        if (result.status === "passkey-ready") {
           // Auto-restore passkey session
           await restoreFromSessionKey(result.result.symmetricKey, result.accountName);
           setIsRestoringSession(false);
-        } else if (result.status === 'password-needed') {
+        } else if (result.status === "password-needed") {
           // Show password prompt for this specific account - keep splash screen
-          setQuickAuthState({ 
-            show: true, 
-            accountName: result.accountName 
+          setQuickAuthState({
+            show: true,
+            accountName: result.accountName,
           });
           // Don't set isRestoringSession to false here - keep splash screen visible
         } else {
@@ -93,11 +92,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setIsRestoringSession(false);
         }
       } catch (error) {
-        console.error('Session restoration failed:', error);
+        console.error("Session restoration failed:", error);
         // Only clear session if it's actually invalid, not if it's a concurrent request error
-        if (error instanceof Error && error.message.includes('A request is already pending')) {
+        if (error instanceof Error && error.message.includes("A request is already pending")) {
           // Don't clear session for concurrent WebAuthn requests - just log and continue
-          console.warn('WebAuthn request collision detected, skipping session clear');
+          console.warn("WebAuthn request collision detected, skipping session clear");
         } else {
           // Clear session for other types of errors (invalid session, timeout, etc.)
           KDF.clearSessionInfo();
@@ -117,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Retrieve and restore account keys
       const accountData = await noteCache.getAccountData();
       if (!accountData) {
-        throw new Error('Account data not found');
+        throw new Error("Account data not found");
       }
 
       // Restore keys from mnemonic
@@ -128,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         mnemonic: accountData.mnemonic,
       });
     } catch (error) {
-      console.error('Failed to restore from session key:', error);
+      console.error("Failed to restore from session key:", error);
       throw error;
     }
   };
@@ -147,14 +146,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { symmetricKey } = await KDF.deriveKeyFromPassword(password, quickAuthState.accountName);
       await restoreFromSessionKey(symmetricKey, quickAuthState.accountName);
-      
+
       // Update session timestamp
-      KDF.storeSessionInfo(quickAuthState.accountName, 'password');
-      
+      KDF.storeSessionInfo(quickAuthState.accountName, "password");
+
       setQuickAuthState(null);
       setIsRestoringSession(false); // Complete the session restoration
     } catch (error) {
-      console.error('Quick password auth failed:', error);
+      console.error("Quick password auth failed:", error);
       throw error;
     }
   };
@@ -177,29 +176,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{
-      isAuthenticated,
-      isRestoringSession,
-      publicKey: keys.publicKey,
-      privateKey: keys.privateKey,
-      mnemonic: keys.mnemonic,
-      accountKey,
-      quickAuthState,
-      setKeys,
-      signOut,
-      handleQuickPasswordAuth,
-      dismissQuickAuth,
-    }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        isRestoringSession,
+        publicKey: keys.publicKey,
+        privateKey: keys.privateKey,
+        mnemonic: keys.mnemonic,
+        accountKey,
+        quickAuthState,
+        setKeys,
+        signOut,
+        handleQuickPasswordAuth,
+        dismissQuickAuth,
+      }}
+    >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext)
+  const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
+    throw new Error("useAuth must be used within an AuthProvider");
   }
-  return context
+  return context;
 }
-

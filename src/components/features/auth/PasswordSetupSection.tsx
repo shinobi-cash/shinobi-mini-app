@@ -3,13 +3,13 @@
  * Takes provided keys and creates password-based encryption for the account
  */
 
-import React, { useState } from 'react';
-import { Button } from '../../ui/button';
-import { Lock, Eye, EyeOff } from 'lucide-react';
-import { KeyGenerationResult } from '@/utils/crypto';
+import React, { useState } from "react";
+import { Button } from "../../ui/button";
+import { Lock, Eye, EyeOff } from "lucide-react";
+import { KeyGenerationResult } from "@/utils/crypto";
 import { KDF } from "@/lib/auth/keyDerivation";
 import { noteCache } from "@/lib/storage/noteCache";
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
 
 interface PasswordSetupSectionProps {
@@ -23,35 +23,35 @@ export function PasswordSetupSection({
   accountName,
   accountNameError,
   generatedKeys,
-  onSuccess
+  onSuccess,
 }: PasswordSetupSectionProps) {
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [passwordError, setPasswordError] = useState('');
+  const [passwordError, setPasswordError] = useState("");
   const { setKeys } = useAuth();
   const { banner } = useBanner();
 
   const validatePassword = (pass: string) => {
     if (pass.length < 8) {
-      return 'Password must be at least 8 characters long';
+      return "Password must be at least 8 characters long";
     }
     if (!/(?=.*[a-z])/.test(pass)) {
-      return 'Password must contain at least one lowercase letter';
+      return "Password must contain at least one lowercase letter";
     }
     if (!/(?=.*[A-Z])/.test(pass)) {
-      return 'Password must contain at least one uppercase letter';
+      return "Password must contain at least one uppercase letter";
     }
     if (!/(?=.*\d)/.test(pass)) {
-      return 'Password must contain at least one number';
+      return "Password must contain at least one number";
     }
-    return '';
+    return "";
   };
 
   const handlePasswordSetup = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (accountNameError || !accountName.trim() || !generatedKeys) {
       return;
     }
@@ -63,7 +63,7 @@ export function PasswordSetupSection({
     }
 
     if (password !== confirmPassword) {
-      setPasswordError('Passwords do not match');
+      setPasswordError("Passwords do not match");
       return;
     }
 
@@ -71,12 +71,12 @@ export function PasswordSetupSection({
       // Check for existing account (this also initializes the database)
       const existingAccount = await noteCache.getAccountDataByName(accountName.trim());
       if (existingAccount) {
-        banner.error('Account already exists');
+        banner.error("Account already exists");
         return;
       }
     } catch (error) {
-      console.error('Failed to check existing account:', error);
-      banner.error('Database error');
+      console.error("Failed to check existing account:", error);
+      banner.error("Database error");
       return;
     }
 
@@ -85,7 +85,7 @@ export function PasswordSetupSection({
     try {
       // Derive encryption key from password
       const { symmetricKey } = await KDF.deriveKeyFromPassword(password, accountName.trim());
-      
+
       // Initialize session with the derived key
       await noteCache.initializeAccountSession(accountName.trim(), symmetricKey);
 
@@ -93,21 +93,21 @@ export function PasswordSetupSection({
       const accountData = {
         accountName: accountName.trim(),
         mnemonic: generatedKeys.mnemonic,
-        createdAt: Date.now()
+        createdAt: Date.now(),
       };
       await noteCache.storeAccountData(accountData);
 
       // Store session info for future restoration
-      KDF.storeSessionInfo(accountName.trim(), 'password');
-        
+      KDF.storeSessionInfo(accountName.trim(), "password");
+
       // Set keys in auth context
       setKeys(generatedKeys);
-      
-      banner.success('Account created');
+
+      banner.success("Account created");
       onSuccess();
     } catch (error) {
-      console.error('Password setup failed:', error);
-      banner.error('Setup failed');
+      console.error("Password setup failed:", error);
+      banner.error("Setup failed");
     } finally {
       setIsProcessing(false);
     }
@@ -119,11 +119,11 @@ export function PasswordSetupSection({
         <div className="relative">
           <input
             id="setup-password"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
-              if (passwordError) setPasswordError('');
+              if (passwordError) setPasswordError("");
             }}
             className="w-full px-3 py-2 pr-10 border border-app rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-app-background text-app-primary"
             placeholder="Create a secure password"
@@ -147,11 +147,11 @@ export function PasswordSetupSection({
         <div className="relative">
           <input
             id="confirm-password"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             value={confirmPassword}
             onChange={(e) => {
               setConfirmPassword(e.target.value);
-              if (passwordError) setPasswordError('');
+              if (passwordError) setPasswordError("");
             }}
             className="w-full px-3 py-2 border border-app rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-app-background text-app-primary"
             placeholder="Confirm your password"
@@ -161,9 +161,7 @@ export function PasswordSetupSection({
         </div>
       </div>
 
-      {passwordError && (
-        <p className="text-red-600 text-xs">{passwordError}</p>
-      )}
+      {passwordError && <p className="text-red-600 text-xs">{passwordError}</p>}
 
       <div className="text-xs text-app-tertiary space-y-1">
         <p>Password requirements:</p>

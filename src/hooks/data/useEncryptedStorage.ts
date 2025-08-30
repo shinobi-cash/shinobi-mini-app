@@ -3,7 +3,7 @@
  * Handles password-based encryption/decryption of sensitive note data
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 import { noteCache } from "@/lib/storage/noteCache";
 
 interface EncryptedStorageState {
@@ -26,7 +26,7 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
     isSessionActive: false,
     isInitialized: false,
     isLoading: false,
-    error: null
+    error: null,
   });
 
   const [sessionTimeout, setSessionTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -34,12 +34,12 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
   // Clear session automatically after timeout
   const clearSession = useCallback(() => {
     noteCache.clearSession();
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       isSessionActive: false,
-      error: null
+      error: null,
     }));
-    
+
     if (sessionTimeout) {
       clearTimeout(sessionTimeout);
       setSessionTimeout(null);
@@ -52,25 +52,22 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
       await noteCache.clearAllData();
       clearSession();
     } catch (error) {
-      console.error('Failed to clear all data:', error);
+      console.error("Failed to clear all data:", error);
     }
   }, [clearSession]);
-
 
   // Reset session timeout
   const resetSessionTimeout = useCallback(() => {
     if (sessionTimeout) {
       clearTimeout(sessionTimeout);
     }
-    
+
     const timeout = setTimeout(() => {
       clearSession();
     }, SESSION_TIMEOUT);
-    
+
     setSessionTimeout(timeout);
   }, [sessionTimeout, clearSession]);
-
-
 
   // Reset session timeout on user activity
   useEffect(() => {
@@ -79,13 +76,13 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
         resetSessionTimeout();
       };
 
-      const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
-      events.forEach(event => {
+      const events = ["mousedown", "mousemove", "keypress", "scroll", "touchstart"];
+      events.forEach((event) => {
         document.addEventListener(event, handleUserActivity, true);
       });
 
       return () => {
-        events.forEach(event => {
+        events.forEach((event) => {
           document.removeEventListener(event, handleUserActivity, true);
         });
       };
@@ -106,7 +103,7 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
     try {
       return noteCache.hasEncryptedData();
     } catch (error) {
-      console.warn('Failed to check encrypted data:', error);
+      console.warn("Failed to check encrypted data:", error);
       return false;
     }
   }, []);
@@ -115,20 +112,20 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
     ...state,
     clearSession,
     clearAllData,
-    hasEncryptedData
+    hasEncryptedData,
   };
 }
 
 // Helper hook for components that need encrypted storage
 export function useRequireEncryptedSession() {
   const storage = useEncryptedStorage();
-  
+
   useEffect(() => {
     if (storage.isInitialized && !storage.isSessionActive && !storage.isLoading) {
       // Redirect to password prompt or show modal
-      console.warn('Encrypted session required but not active');
+      console.warn("Encrypted session required but not active");
     }
   }, [storage.isInitialized, storage.isSessionActive, storage.isLoading]);
-  
+
   return storage;
 }

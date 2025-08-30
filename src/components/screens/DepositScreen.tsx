@@ -1,23 +1,23 @@
-import { useAccount, useBalance, useChainId } from 'wagmi';
-import { AuthenticationGate } from '../shared/AuthenticationGate';
-import { WalletGate } from '../shared/WalletGate';
-import { ChevronDown, AlertTriangle, Loader2 } from 'lucide-react';
-import { Button } from '../ui/button';
-import { useEffect, useRef } from 'react';
-import { formatEther } from 'viem';
-import { NETWORK } from '../../config/constants';
-import { useDepositCommitment } from '../../hooks/transactions/useDepositCommitment';
-import { useDepositTransaction } from '../../hooks/transactions/useDepositTransaction';
-import { useDepositForm } from '../../hooks/forms/useDepositForm';
+import { useAccount, useBalance, useChainId } from "wagmi";
+import { AuthenticationGate } from "../shared/AuthenticationGate";
+import { WalletGate } from "../shared/WalletGate";
+import { ChevronDown, AlertTriangle, Loader2 } from "lucide-react";
+import { Button } from "../ui/button";
+import { useEffect, useRef } from "react";
+import { formatEther } from "viem";
+import { NETWORK } from "../../config/constants";
+import { useDepositCommitment } from "../../hooks/transactions/useDepositCommitment";
+import { useDepositTransaction } from "../../hooks/transactions/useDepositTransaction";
+import { useDepositForm } from "../../hooks/forms/useDepositForm";
 import { useBanner } from "@/contexts/BannerContext";
-import { useTransactionTracking } from '@/hooks/transactions/useTransactionTracking';
+import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 
-const DEPOSIT_AMOUNTS= [
-    { value: "0.01", label: "0.01 ETH" },
-    { value: "0.05", label: "0.05 ETH" },
-    { value: "0.1", label: "0.1 ETH" },
-    { value: "0.5", label: "0.5 ETH" },
-  ]
+const DEPOSIT_AMOUNTS = [
+  { value: "0.01", label: "0.01 ETH" },
+  { value: "0.05", label: "0.05 ETH" },
+  { value: "0.1", label: "0.1 ETH" },
+  { value: "0.5", label: "0.5 ETH" },
+];
 
 export const DepositScreen = () => {
   return (
@@ -26,10 +26,7 @@ export const DepositScreen = () => {
       description="Create or load your account to access privacy features"
       context="deposit"
     >
-      <WalletGate
-        title="Connect Wallet"
-        description="Connect your wallet to fund privacy pool deposits"
-      >
+      <WalletGate title="Connect Wallet" description="Connect your wallet to fund privacy pool deposits">
         <DepositForm />
       </WalletGate>
     </AuthenticationGate>
@@ -43,33 +40,25 @@ const DepositForm = () => {
   const shownBannersRef = useRef(new Set<string>());
   const { trackTransaction } = useTransactionTracking();
   const { banner } = useBanner();
-  
+
   // Use deposit form hook for form management
   const form = useDepositForm({ balance });
-  
+
   const isOnCorrectNetwork = chainId === NETWORK.CHAIN_ID;
   const { noteData, isGeneratingNote, error: noteError, regenerateNote } = useDepositCommitment();
-  const { 
-    deposit, 
-    reset,
-    clearError,
-    isLoading, 
-    isSuccess, 
-    error, 
-    transactionHash 
-  } = useDepositTransaction();
+  const { deposit, reset, clearError, isLoading, isSuccess, error, transactionHash } = useDepositTransaction();
 
   // Handle transaction errors with banner
   useEffect(() => {
     if (error) {
-      banner.error('Transaction failed');
+      banner.error("Transaction failed");
     }
   }, [error]);
 
   // Handle note generation errors silently - auto-retry without user notification
   useEffect(() => {
     if (noteError) {
-      console.warn('Note generation failed, auto-retrying:', noteError);
+      console.warn("Note generation failed, auto-retrying:", noteError);
       // Silently retry after a short delay
       setTimeout(() => {
         regenerateNote();
@@ -82,10 +71,10 @@ const DepositForm = () => {
     if (isSuccess && transactionHash && !shownBannersRef.current.has(transactionHash)) {
       // Mark this transaction hash as shown
       shownBannersRef.current.add(transactionHash);
-      
+
       // Track transaction for indexing status (replaces banner)
       trackTransaction(transactionHash);
-      
+
       // Reset form for next deposit
       setTimeout(() => {
         reset();
@@ -99,14 +88,14 @@ const DepositForm = () => {
 
   const handleDeposit = async () => {
     if (!noteData || !form.amount) return;
-    
+
     // Clear any previous errors
     clearError();
-    
+
     try {
       await deposit(form.amount, noteData);
     } catch (error) {
-      console.error('Deposit failed:', error);
+      console.error("Deposit failed:", error);
     }
   };
 
@@ -121,9 +110,7 @@ const DepositForm = () => {
       {/* Header with wallet info */}
       <div className="mb-6">
         <h1 className="text-xl font-bold text-app-primary">Deposit</h1>
-        <p className="text-xs text-app-secondary mt-1 font-mono">
-          {address}
-        </p>
+        <p className="text-xs text-app-secondary mt-1 font-mono">{address}</p>
       </div>
 
       {/* Asset Selection */}
@@ -156,7 +143,7 @@ const DepositForm = () => {
           />
           <p className="text-base text-app-secondary mt-1">{selectedAsset.symbol}</p>
         </div>
-        
+
         {/* Quick Amount Buttons */}
         <div className="flex gap-2 justify-center">
           {DEPOSIT_AMOUNTS.map((deposit) => (
@@ -179,12 +166,8 @@ const DepositForm = () => {
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
             <div>
-              <p className="text-xs font-medium text-orange-800 dark:text-orange-200">
-                Wrong Network
-              </p>
-              <p className="text-xs text-orange-600 dark:text-orange-400">
-                Please switch to {NETWORK.NAME}
-              </p>
+              <p className="text-xs font-medium text-orange-800 dark:text-orange-200">Wrong Network</p>
+              <p className="text-xs text-orange-600 dark:text-orange-400">Please switch to {NETWORK.NAME}</p>
             </div>
           </div>
         </div>
@@ -195,13 +178,12 @@ const DepositForm = () => {
         <div className="flex justify-between text-xs">
           <span className="text-app-secondary">Available</span>
           <span className="text-app-primary font-medium">
-            {balance ? `${parseFloat(formatEther(balance.value)).toFixed(4)} ${selectedAsset.symbol}` : `0.000 ${selectedAsset.symbol}`}
+            {balance
+              ? `${parseFloat(formatEther(balance.value)).toFixed(4)} ${selectedAsset.symbol}`
+              : `0.000 ${selectedAsset.symbol}`}
           </span>
         </div>
       </div>
-
-
-
 
       {/* Deposit Button */}
       <div className="mt-auto">
@@ -216,16 +198,17 @@ const DepositForm = () => {
               <Loader2 className="w-4 h-4 animate-spin" />
               Preparing Transaction...
             </div>
-          ) : isGeneratingNote || !hasNoteData
-          ? 'Preparing...'
-          : !isOnCorrectNetwork 
-          ? `Switch to ${NETWORK.NAME}`
-          : !hasBalance 
-          ? 'Insufficient Balance' 
-          : !isValidAmount 
-          ? 'Enter Amount' 
-          : 'Deposit to Privacy Pool'
-          }
+          ) : isGeneratingNote || !hasNoteData ? (
+            "Preparing..."
+          ) : !isOnCorrectNetwork ? (
+            `Switch to ${NETWORK.NAME}`
+          ) : !hasBalance ? (
+            "Insufficient Balance"
+          ) : !isValidAmount ? (
+            "Enter Amount"
+          ) : (
+            "Deposit to Privacy Pool"
+          )}
         </Button>
       </div>
     </div>
