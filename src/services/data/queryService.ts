@@ -13,8 +13,6 @@ import {
   GET_STATE_TREE_COMMITMENTS,
   GET_LATEST_ASP_ROOT,
   GET_APPROVED_LABELS,
-  CHECK_NULLIFIER_SPENT,
-  GET_POOL_DEPOSITS,
   GET_POOL_CONFIG,
   GET_POOL_STATS,
   HEALTH_CHECK,
@@ -75,61 +73,20 @@ export interface Activity {
 /**
  * Get all activities with pagination support
  */
-export async function fetchActivities(poolAddress?: string, limit: number = 15, after?: string) {
-  const poolId = (poolAddress || CONTRACTS.ETH_PRIVACY_POOL).toLowerCase();
-  
-  const result = await apolloClient.query({
-    query: GET_ACTIVITIES,
-    variables: { poolId, limit, after },
-    fetchPolicy: INDEXER_FETCH_POLICY,
-  });
-  
-  return result.data?.activitys || { items: [], pageInfo: {} };
-}
-
-
-/**
- * Check if nullifier has been spent in a withdrawal
- */
-export async function isNullifierSpent(spentNullifier: string): Promise<boolean> {
-  return queuedRequest(async () => {
-    try {
+export async function fetchActivities(poolAddress?: string, limit: number = 15, after?: string, orderDirection: string = "desc") {
+   return queuedRequest(async () => {
+      const poolId = (poolAddress || CONTRACTS.ETH_PRIVACY_POOL).toLowerCase();
+      
       const result = await apolloClient.query({
-        query: CHECK_NULLIFIER_SPENT,
-        variables: { spentNullifier },
+        query: GET_ACTIVITIES,
+        variables: { poolId, limit, after, orderDirection },
         fetchPolicy: INDEXER_FETCH_POLICY,
       });
       
-      return result.data?.activitys?.items?.length > 0;
-    } catch (error) {
-      console.error('Failed to check withdrawal by nullifier:', error);
-      // On error, assume not spent to avoid marking valid deposits as spent
-      return false;
-    }
+      return result.data?.activitys || { items: [], pageInfo: {} };
   });
 }
 
-
-/**
- * Fetch all deposits for a specific pool
- */
-export async function fetchPoolDeposits(poolAddress?: string): Promise<Activity[]> {
-  try {
-    const poolId = (poolAddress || CONTRACTS.ETH_PRIVACY_POOL).toLowerCase();
-    
-    const result = await apolloClient.query({
-      query: GET_POOL_DEPOSITS,
-      variables: { poolId },
-      fetchPolicy: INDEXER_FETCH_POLICY,
-    });
-
-    return result.data?.activitys?.items || [];
-
-  } catch (error) {
-    console.error('Failed to fetch pool deposits:', error);
-    throw new Error('Failed to fetch pool deposits from indexer');
-  }
-}
 
 /**
  * Fetch pool statistics (total deposits, withdrawals, member count)

@@ -1,6 +1,5 @@
-import { useQuery } from '@apollo/client'
-import { useCallback } from 'react'
-import { GET_ACTIVITIES } from '../../config/queries'
+import { useCallback, useEffect, useState } from 'react'
+import { fetchActivities } from '@/services/data/queryService'
 import type { Activity } from '@/services/data'
 import { CONTRACTS } from '@/config/constants'
 
@@ -11,13 +10,6 @@ interface PageInfo {
   endCursor?: string
 }
 
-interface ActivitiesResponse {
-  activitys: {
-    items: Activity[]
-    pageInfo: PageInfo
-  }
-}
-
 interface UseIndexerActivitiesOptions {
   limit?: number
   after?: string
@@ -25,59 +17,50 @@ interface UseIndexerActivitiesOptions {
 
 export function useIndexerActivities(options: UseIndexerActivitiesOptions = {}) {
   const { limit = 10, after } = options
-
-  const {
-    loading,
-    error,
-    data,
-    fetchMore,
-    refetch,
-    networkStatus,
-  } = useQuery<ActivitiesResponse>(GET_ACTIVITIES, {
-    variables: { 
-      poolId: CONTRACTS.ETH_PRIVACY_POOL.toLowerCase(),
-      limit, 
-      after 
-    },
-    errorPolicy: 'all',
-    notifyOnNetworkStatusChange: true,
+  const [activities, setActivities] = useState<Activity[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const [pageInfo, setPageInfo] = useState<PageInfo>({
+    hasNextPage: false,
+    hasPreviousPage: false
   })
 
-  // Activities directly from indexer
-  const activities: Activity[] = data?.activitys?.items || []
-  const pageInfo = data?.activitys?.pageInfo
+  const fetchData = useCallback(async (after?: string, append = false) => {
+    try {
+      if (!append) setLoading(true)
+      setError(null)
+      
+      const result = await fetchActivities(CONTRACTS.ETH_PRIVACY_POOL, limit, after)
+      
+      if (append) {
+        setActivities(prev => [...prev, ...result.items])
+      } else {
+        setActivities(result.items)
+      }
+      
+      setPageInfo(result.pageInfo)
+    } catch (err) {
+      setError(err as Error)
+    } finally {
+      setLoading(false)
+    }
+  }, [limit])
+
+  useEffect(() => {
+    fetchData(after)
+  }, [fetchData, after])
 
   /** Load next page */
   const loadMore = useCallback(() => {
     if (pageInfo?.hasNextPage && pageInfo?.endCursor) {
-      return fetchMore({
-        variables: {
-          after: pageInfo.endCursor,
-          limit,
-        },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          if (!fetchMoreResult) return prev
-
-          return {
-            activitys: {
-              ...fetchMoreResult.activitys,
-              items: [...prev.activitys.items, ...fetchMoreResult.activitys.items],
-              pageInfo: fetchMoreResult.activitys.pageInfo,
-            },
-          }
-        },
-      })
+      return fetchData(pageInfo.endCursor, true)
     }
-  }, [pageInfo?.hasNextPage, pageInfo?.endCursor, fetchMore, limit])
+  }, [pageInfo?.hasNextPage, pageInfo?.endCursor, fetchData])
 
   /** Pull-to-refresh: reset to first page */
   const refresh = useCallback(() => {
-    return refetch({
-      poolId: CONTRACTS.ETH_PRIVACY_POOL.toLowerCase(),
-      limit,
-      after: undefined, // start from beginning
-    })
-  }, [refetch, limit])
+    return fetchData(undefined, false)
+  }, [fetchData])
 
   return {
     activities,
@@ -88,6 +71,6 @@ export function useIndexerActivities(options: UseIndexerActivitiesOptions = {}) 
     loadMore,
     refresh,
     hasNextPage: pageInfo?.hasNextPage || false,
-    networkStatus,
+    networkStatus: loading ? 1 : 7, // Compatible with Apollo's networkStatus
   }
 }

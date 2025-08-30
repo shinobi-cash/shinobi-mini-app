@@ -7,25 +7,11 @@ import {
   deriveDepositSecret,
   deriveChangeNullifier,
 } from "@/utils/noteDerivation";
-import { queuedRequest } from "@/lib/apiQueue";
-import { apolloClient } from "@/lib/clients";
-import { INDEXER_FETCH_POLICY } from "@/config/constants";
-import { GET_ACTIVITIES } from "@/config/queries";
+import { fetchActivities } from "@/services/data/queryService";
 import type { Activity } from '@/services/data'
 
 /* ---------- Configuration ---------- */
 const ACTIVITIES_PER_PAGE = 100;
-
-
-interface ActivityPage {
-  activities: Activity[];
-  pageInfo: {
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
-    startCursor: string;
-    endCursor: string;
-  };
-}
 
 export type DiscoveryProgress = {
   pagesProcessed: number;
@@ -36,45 +22,6 @@ export type DiscoveryProgress = {
   complete: boolean;
 };
 
-/* ---------- Helpers: fetch a single page (uses queuedRequest) ---------- */
-/**
- * Fetch one page of activities for the pool.
- * The queuedRequest wrapper is used to rate-limit calls.
- * The executor closure is where we can check signal early.
- */
-async function fetchActivitiesPage(
-  poolAddress: string,
-  cursor?: string,
-  pageSize: number = ACTIVITIES_PER_PAGE,
-  opts?: { signal?: AbortSignal }
-): Promise<ActivityPage> {
-  return queuedRequest(async () => {
-    // Respect AbortSignal early to avoid unnecessary request scheduling
-    if (opts?.signal?.aborted) {
-      throw new DOMException("Aborted", "AbortError");
-    }
-
-    const poolId = poolAddress.toLowerCase();
-    const result = await apolloClient.query({
-      query: GET_ACTIVITIES,
-      variables: { poolId, limit: pageSize, after: cursor || null, orderDirection: "asc" },
-      fetchPolicy: INDEXER_FETCH_POLICY,
-    });
-
-    const activities = result.data?.activitys?.items || [];
-    const pageInfo = result.data?.activitys?.pageInfo || {};
-
-    return {
-      activities,
-      pageInfo: {
-        hasNextPage: !!pageInfo.hasNextPage,
-        hasPreviousPage: !!pageInfo.hasPreviousPage,
-        startCursor: pageInfo.startCursor || "",
-        endCursor: pageInfo.endCursor || "",
-      },
-    };
-  });
-}
 
 /* ---------- Helper: extend an existing chain IN-PLACE using activities from a page ----------
    - Mutates the provided `chain` (pushes change notes).
@@ -114,9 +61,9 @@ function extendChainInPlace(
 
     // Find withdrawal in this page that spends this nullifier.
     // Use find() so we only match the earliest relevant withdrawal in this page.
-    const w = pageActivities.find((a) => a.type === "WITHDRAWAL" && a.spentNullifier === nullifierHash);
+    const withdrawal = pageActivities.find((activity) => activity.type === "WITHDRAWAL" && activity.spentNullifier === nullifierHash);
 
-    if (!w || !w.newCommitment) {
+    if (!withdrawal || !withdrawal.newCommitment) {
       // No matching withdrawal found in this page for the current nullifier
       break;
     }
@@ -125,16 +72,16 @@ function extendChainInPlace(
     chain[chain.length - 1].status = "spent";
 
     // Subtract amount and create a change note if remaining > 0
-    remaining -= BigInt(w.amount);
+    remaining -= BigInt(withdrawal.amount);
 
     const changeNote: Note = {
       poolAddress: chain[0].poolAddress,
       depositIndex: chain[0].depositIndex,
       changeIndex,
       amount: remaining.toString(),
-      transactionHash: w.transactionHash,
-      blockNumber: w.blockNumber,
-      timestamp: w.timestamp,
+      transactionHash: withdrawal.transactionHash,
+      blockNumber: withdrawal.blockNumber,
+      timestamp: withdrawal.timestamp,
       status: remaining > 0n ? "unspent" : "spent",
       label: chain[0].label,
     };
@@ -244,14 +191,16 @@ export async function discoverNotes(
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
 
     // Fetch one page of generic activities (rate-limited via queuedRequest)
-    const page = await fetchActivitiesPage(poolAddress, cursor, ACTIVITIES_PER_PAGE, { signal });
-    const acts = page.activities;
+    if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+    
+    const activitiesResult = await fetchActivities(poolAddress, ACTIVITIES_PER_PAGE, cursor, "asc");
+    const activities: Activity[] = activitiesResult.items;
     pagesProcessed++;
 
     // Update progress for page fetch
     progress.pagesProcessed = pagesProcessed;
-    progress.currentPageActivityCount = acts.length;
-    progress.lastCursor = page.pageInfo.endCursor;
+    progress.currentPageActivityCount = activities.length;
+    progress.lastCursor = activitiesResult.pageInfo.endCursor;
     onProgress?.({ ...progress });
 
     // 1) Extend live deposits in-place using this page's activities
@@ -259,29 +208,29 @@ export async function discoverNotes(
       let withdrawalsThisPage = 0;
 
       // iterate over a shallow copy since we may modify liveDeposits within loop
-      for (const ld of [...liveDeposits]) {
-        const chain = notes[ld.chainIndex];
+      for (const liveDeposit of [...liveDeposits]) {
+        const chain = notes[liveDeposit.chainIndex];
         if (!chain) continue; // defensive
 
         // Mutates chain in-place and returns number of new change notes appended
-        const matched = extendChainInPlace(chain, acts, accountKey, poolAddress);
-        if (matched > 0) {
-          withdrawalsThisPage += matched;
+        const withdrawalsMatched = extendChainInPlace(chain, activities, accountKey, poolAddress);
+        if (withdrawalsMatched > 0) {
+          withdrawalsThisPage += withdrawalsMatched;
 
           // Recompute last note and remaining balance
-          const last = chain[chain.length - 1];
-          if (last.status === "spent" || BigInt(last.amount) <= 0n) {
+          const lastNote = chain[chain.length - 1];
+          if (lastNote.status === "spent" || BigInt(lastNote.amount) <= 0n) {
             // fully spent => remove from liveDeposits
             liveDeposits = liveDeposits.filter(
-              (x) => !(x.depositIndex === ld.depositIndex && x.chainIndex === ld.chainIndex)
+              (deposit) => !(deposit.depositIndex === liveDeposit.depositIndex && deposit.chainIndex === liveDeposit.chainIndex)
             );
           } else {
             // update remaining in liveDeposits
-            const newRemaining = BigInt(last.amount);
-            liveDeposits = liveDeposits.map((x) =>
-              x.depositIndex === ld.depositIndex && x.chainIndex === ld.chainIndex
-                ? { ...x, remaining: newRemaining }
-                : x
+            const newRemaining = BigInt(lastNote.amount);
+            liveDeposits = liveDeposits.map((deposit) =>
+              deposit.depositIndex === liveDeposit.depositIndex && deposit.chainIndex === liveDeposit.chainIndex
+                ? { ...deposit, remaining: newRemaining }
+                : deposit
             );
           }
         }
@@ -295,31 +244,31 @@ export async function discoverNotes(
     while (true) {
       if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
 
-      const candidate = nextDepositIndex;
+      const candidateDepositIndex = nextDepositIndex;
       // Derive target precommitment for candidate deposit index
-      const depNull = deriveDepositNullifier(accountKey, poolAddress, candidate);
-      const depSec = deriveDepositSecret(accountKey, poolAddress, candidate);
-      const targetPrecommitment = poseidon2([depNull, depSec]).toString();
+      const depositNullifier = deriveDepositNullifier(accountKey, poolAddress, candidateDepositIndex);
+      const depositSecret = deriveDepositSecret(accountKey, poolAddress, candidateDepositIndex);
+      const targetPrecommitment = poseidon2([depositNullifier, depositSecret]).toString();
 
       progress.depositsChecked++;
       onProgress?.({ ...progress });
 
       // Find deposit activity in this page
-      const pos = acts.findIndex((a) => a.type === "DEPOSIT" && a.precommitmentHash === targetPrecommitment);
+      const depositPosition = activities.findIndex((activity) => activity.type === "DEPOSIT" && activity.precommitmentHash === targetPrecommitment);
 
-      if (pos === -1) {
+      if (depositPosition === -1) {
         // Not found in this page: stop trying more candidates here
         break;
       }
 
       // Found deposit for candidate on this page
-      const depositActivity = acts[pos];
-      const activitiesAfter = acts.slice(pos + 1);
+      const depositActivity = activities[depositPosition];
+      const activitiesAfter = activities.slice(depositPosition + 1);
 
       // Build chain and extend with withdrawals that are in this page after the deposit
       const { chain: newChain } = buildChainForDepositInPage(
         depositActivity,
-        candidate,
+        candidateDepositIndex,
         activitiesAfter,
         accountKey,
         poolAddress
@@ -333,31 +282,31 @@ export async function discoverNotes(
       const lastNote = newChain[newChain.length - 1];
       if (lastNote.status === "unspent" && BigInt(lastNote.amount) > 0n) {
         liveDeposits.push({
-          depositIndex: candidate,
+          depositIndex: candidateDepositIndex,
           chainIndex: newChainIndex,
           remaining: BigInt(lastNote.amount),
         });
       }
 
       progress.depositsMatched++;
-      lastUsedIndex = Math.max(lastUsedIndex, candidate);
+      lastUsedIndex = Math.max(lastUsedIndex, candidateDepositIndex);
 
       // Advance to next deposit index and attempt to find it still within this page
-      nextDepositIndex = candidate + 1;
+      nextDepositIndex = candidateDepositIndex + 1;
     }
 
     // 3) Persist after processing this page so we can resume later
-    cursor = page.pageInfo.endCursor || cursor;
+    cursor = activitiesResult.pageInfo.endCursor || cursor;
     await noteCache.storeDiscoveredNotes(publicKey, poolAddress, notes, cursor);
 
     // Re-emit progress after persistence
     progress.pagesProcessed = pagesProcessed;
-    progress.currentPageActivityCount = acts.length;
+    progress.currentPageActivityCount = activities.length;
     progress.lastCursor = cursor;
     onProgress?.({ ...progress });
 
     // 4) Advance to next page
-    hasNext = page.pageInfo.hasNextPage;
+    hasNext = activitiesResult.pageInfo.hasNextPage;
     if (!hasNext) break;
   }
 
