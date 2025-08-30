@@ -128,6 +128,7 @@ export const TransactionPreviewDrawer = ({
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-mono text-app-primary">{formatHash(recipientAddress)}</span>
                   <button
+                    type="button"
                     onClick={() => copyToClipboard(recipientAddress, "Recipient Address")}
                     className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
                   >

@@ -24,7 +24,8 @@ export const BottomNavBar = () => {
           const isActive = currentScreen === item.screen;
           return (
             <button
-              key={index}
+              type="button"
+              key={item.screen}
               onClick={() => setCurrentScreen(item.screen)}
               aria-label={item.label}
               className={`flex flex-col items-center space-y-1 py-2 px-3 min-w-0 flex-1 transition-colors duration-200 rounded-xl active:scale-95 ${

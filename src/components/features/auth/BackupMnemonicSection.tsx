@@ -87,7 +87,7 @@ Shinobi Privacy App`;
             <div className="mb-3">
               <div className="grid grid-cols-3 gap-1">
                 {displayMnemonic.map((word, index) => (
-                  <div key={index} className="bg-app-background rounded-lg text-center border border-app">
+                  <div key={`mnemonic-${index}`} className="bg-app-background rounded-lg text-center border border-app">
                     <span className="text-xs text-app-tertiary block mb-0.5">{index + 1}</span>
                     <span className="font-mono text-xs text-app-primary font-medium">{word}</span>
                   </div>
@@ -118,8 +118,9 @@ Shinobi Privacy App`;
             </div>
           </div>
         ) : (
-          <div
-            className="py-8 flex items-center justify-center cursor-pointer bg-orange-50 rounded-xl border-2 border-dashed border-orange-300 hover:border-orange-400 hover:bg-orange-100 transition-all"
+          <button
+            type="button"
+            className="w-full py-8 flex items-center justify-center cursor-pointer bg-orange-50 rounded-xl border-2 border-dashed border-orange-300 hover:border-orange-400 hover:bg-orange-100 transition-all"
             onClick={() => setIsRevealed(true)}
           >
             <div className="text-center space-y-3">
@@ -134,7 +135,7 @@ Shinobi Privacy App`;
                 <p className="text-xs text-orange-600/80">Required to continue</p>
               </div>
             </div>
-          </div>
+          </button>
         )}
       </div>
 

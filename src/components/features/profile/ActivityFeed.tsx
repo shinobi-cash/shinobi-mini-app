@@ -56,7 +56,7 @@ export const ActivityFeed = ({
   // Load pool stats on mount
   useEffect(() => {
     loadPoolStats();
-  }, []);
+  }, [loadPoolStats]);
 
   // Auto-refresh when transaction gets indexed
   useEffect(() => {
@@ -154,7 +154,13 @@ export const ActivityFeed = ({
             ) : (
               <>
                 {activities.map((activity) => (
-                  <div key={activity.id} onClick={() => handleActivityClick(activity)}>
+                  <div 
+                    key={activity.id} 
+                    onClick={() => handleActivityClick(activity)}
+                    onKeyDown={(e) => e.key === "Enter" && handleActivityClick(activity)}
+                    role="button"
+                    tabIndex={0}
+                  >
                     <ActivityRow activity={activity} />
                   </div>
                 ))}

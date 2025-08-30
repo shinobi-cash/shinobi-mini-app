@@ -52,16 +52,14 @@ export const AppBanner = () => {
 
     return (
       <div className={`${styles.bg} border-b ${styles.border}`}>
-        <div
-          className={`flex items-center justify-center gap-1 text-[10px] ${styles.text} font-mono cursor-pointer`}
+        <button
+          type="button"
+          className={`w-full flex items-center justify-center gap-1 text-[10px] ${styles.text} font-mono cursor-pointer`}
           onClick={dismissBanner}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === "Enter" && dismissBanner()}
         >
           <div className="w-1 h-1 bg-current rounded-full" />
           {currentBanner.message}
-        </div>
+        </button>
       </div>
     );
   }

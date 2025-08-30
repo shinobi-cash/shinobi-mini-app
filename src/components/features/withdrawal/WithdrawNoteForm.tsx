@@ -53,7 +53,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
   // Auto-reset all states when form values change
   useEffect(() => {
     resetStates();
-  }, [withdrawAmount, recipientAddress, resetStates]);
+  }, [resetStates]);
 
   return (
     <div className="h-full flex flex-col px-4 py-4">
@@ -125,8 +125,9 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
 
         {/* Recipient Address */}
         <div className="mb-4">
-          <label className="text-sm font-medium text-app-primary mb-2 block">Recipient Address</label>
+          <label htmlFor="recipient-address" className="text-sm font-medium text-app-primary mb-2 block">Recipient Address</label>
           <Input
+            id="recipient-address"
             type="text"
             placeholder="0x..."
             value={recipientAddress}

@@ -111,6 +111,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-mono text-app-primary">{formatHash(activity.transactionHash)}</span>
                     <button
+                      type="button"
                       onClick={() => copyToClipboard(activity.transactionHash, "Transaction Hash")}
                       className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
                     >
@@ -176,6 +177,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs font-mono text-app-primary">{formatHash(activity.recipient)}</span>
                         <button
+                          type="button"
                           onClick={() => copyToClipboard(activity.recipient || "", "Recipient")}
                           className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
                         >
@@ -235,6 +237,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-mono text-app-primary">{formatHash(activity.poolId || "")}</span>
                   <button
+                    type="button"
                     onClick={() => copyToClipboard(activity.poolId || "", "Pool Address")}
                     className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
                   >

@@ -20,6 +20,7 @@ export function CashNoteCard({ note, chainLength, onClick }: CashNoteCardProps) 
 
   return (
     <button
+      type="button"
       className="w-full bg-app-surface border-b border-app px-3 py-3 sm:px-4 sm:py-4 transition-all duration-150 hover:bg-app-surface-hover text-left group"
       onClick={onClick}
     >
