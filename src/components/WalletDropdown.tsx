@@ -36,6 +36,7 @@ export const WalletDropdown = () => {
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Wallet menu"
         className="flex items-center gap-1 p-2 hover:bg-app-surface-hover rounded-lg active:scale-95 transition-all"
@@ -55,6 +56,7 @@ export const WalletDropdown = () => {
 
           {/* Disconnect Option */}
           <button
+            type="button"
             onClick={handleDisconnect}
             className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-secondary hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20 transition-colors"
           >
