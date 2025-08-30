@@ -45,24 +45,21 @@ export function AuthSection(props: AuthSectionProps) {
           onSuccess={onSuccess}
         />
       );
-    } else {
-      return (
-        <PasswordSetupSection
-          accountName={accountName}
-          accountNameError={accountNameError}
-          generatedKeys={generatedKeys}
-          onSuccess={onSuccess}
-        />
-      );
     }
-  } else {
-    // Login flow - only needs success callback
-    const { onSuccess } = props;
-
-    if (shouldShowPasskey) {
-      return <PasskeyLoginSection onSuccess={onSuccess} />;
-    } else {
-      return <PasswordLoginSection onSuccess={onSuccess} />;
-    }
+    return (
+      <PasswordSetupSection
+        accountName={accountName}
+        accountNameError={accountNameError}
+        generatedKeys={generatedKeys}
+        onSuccess={onSuccess}
+      />
+    );
   }
+  // Login flow - only needs success callback
+  const { onSuccess } = props;
+
+  if (shouldShowPasskey) {
+    return <PasskeyLoginSection onSuccess={onSuccess} />;
+  }
+  return <PasswordLoginSection onSuccess={onSuccess} />;
 }

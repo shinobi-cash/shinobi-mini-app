@@ -53,7 +53,7 @@ export function NoteChainDetailDrawer({ noteChain, open, onOpenChange }: NoteCha
           </div>
 
           {/* Feed */}
-          <ul role="list" className="-mb-8">
+          <ul className="-mb-8">
             {noteChain.map((note, index) => {
               const isLast = index === noteChain.length - 1;
               return (
@@ -77,7 +77,7 @@ export function NoteChainDetailDrawer({ noteChain, open, onOpenChange }: NoteCha
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-medium text-app-primary">
-                            {index === 0 ? `Deposited: ` : isLast ? `Final Balance: ` : `Balance: `}
+                            {index === 0 ? "Deposited: " : isLast ? "Final Balance: " : "Balance: "}
                             <a
                               href={`${NETWORK.EXPLORER_URL}/tx/${note.transactionHash}`}
                               target="_blank"

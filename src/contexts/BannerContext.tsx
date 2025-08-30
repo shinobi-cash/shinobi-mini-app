@@ -32,7 +32,7 @@ const generateId = () => `banner-${++bannerId}-${Date.now()}`;
 // Simple message shortening - inline since it's just one function
 const shortenMessage = (message: string, maxLength = 60): string => {
   if (message.length <= maxLength) return message;
-  return message.substring(0, maxLength - 3).trim() + "...";
+  return `${message.substring(0, maxLength - 3).trim()}...`;
 };
 
 export const BannerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

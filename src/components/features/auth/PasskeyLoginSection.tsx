@@ -109,7 +109,7 @@ export function PasskeyLoginSection({ onSuccess }: PasskeyLoginSectionProps) {
       <Button onClick={handlePasskeyLogin} disabled={isProcessing || !accountName.trim()} className="w-full" size="lg">
         {isProcessing ? (
           <>
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
             Authenticating...
           </>
         ) : (

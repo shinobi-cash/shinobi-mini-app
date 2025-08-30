@@ -75,7 +75,6 @@ export function PasswordAuthDrawer() {
                 placeholder="Enter your password"
                 className="w-full px-3 py-2 pr-10 border border-app rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-app-background text-app-primary"
                 disabled={isProcessing}
-                autoFocus
               />
               <button
                 type="button"
@@ -106,7 +105,7 @@ export function PasswordAuthDrawer() {
               <Button type="submit" disabled={isProcessing || !password.trim()} className="flex-1">
                 {isProcessing ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                     Signing In...
                   </>
                 ) : (

@@ -339,7 +339,7 @@ class NoteCacheService {
     };
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([STORE_NAME], "readwrite");
+      const transaction = this.db?.transaction([STORE_NAME], "readwrite");
       const store = transaction.objectStore(STORE_NAME);
       const request = store.put(storageData);
 
@@ -354,7 +354,7 @@ class NoteCacheService {
     return new Promise(async (resolve, reject) => {
       try {
         const key = await this.getKey(publicKey, poolAddress);
-        const transaction = this.db!.transaction([STORE_NAME], "readonly");
+        const transaction = this.db?.transaction([STORE_NAME], "readonly");
         const store = transaction.objectStore(STORE_NAME);
         const request = store.get(key);
 
@@ -407,7 +407,7 @@ class NoteCacheService {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([STORE_NAME, ACCOUNT_STORE_NAME, PASSKEY_STORE_NAME], "readwrite");
+      const transaction = this.db?.transaction([STORE_NAME, ACCOUNT_STORE_NAME, PASSKEY_STORE_NAME], "readwrite");
       const notesStore = transaction.objectStore(STORE_NAME);
       const accountStore = transaction.objectStore(ACCOUNT_STORE_NAME);
       const passkeyStore = transaction.objectStore(PASSKEY_STORE_NAME);
@@ -478,10 +478,10 @@ class NoteCacheService {
     return new Promise((resolve, reject) => {
       try {
         // Check if the account store exists
-        if (!this.db!.objectStoreNames.contains(ACCOUNT_STORE_NAME)) {
+        if (!this.db?.objectStoreNames.contains(ACCOUNT_STORE_NAME)) {
           console.error(
             `${ACCOUNT_STORE_NAME} object store not found. Available stores:`,
-            Array.from(this.db!.objectStoreNames),
+            Array.from(this.db?.objectStoreNames),
           );
           reject(
             new Error(`Database corruption: ${ACCOUNT_STORE_NAME} object store missing. Try clearing browser data.`),
@@ -489,7 +489,7 @@ class NoteCacheService {
           return;
         }
 
-        const transaction = this.db!.transaction([ACCOUNT_STORE_NAME], "readwrite");
+        const transaction = this.db?.transaction([ACCOUNT_STORE_NAME], "readwrite");
 
         transaction.onerror = () => {
           console.error("Transaction failed:", transaction.error);
@@ -518,7 +518,7 @@ class NoteCacheService {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([ACCOUNT_STORE_NAME], "readonly");
+      const transaction = this.db?.transaction([ACCOUNT_STORE_NAME], "readonly");
       const store = transaction.objectStore(ACCOUNT_STORE_NAME);
       const request = store.get(accountName);
 
@@ -550,7 +550,7 @@ class NoteCacheService {
     if (!this.currentAccountName) throw new Error("No current account context");
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([ACCOUNT_STORE_NAME], "readonly");
+      const transaction = this.db?.transaction([ACCOUNT_STORE_NAME], "readonly");
       const store = transaction.objectStore(ACCOUNT_STORE_NAME);
       const request = store.get(this.currentAccountName!);
 
@@ -622,7 +622,7 @@ class NoteCacheService {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([PASSKEY_STORE_NAME], "readwrite");
+      const transaction = this.db?.transaction([PASSKEY_STORE_NAME], "readwrite");
       const store = transaction.objectStore(PASSKEY_STORE_NAME);
       const request = store.put(passkeyData);
 
@@ -638,7 +638,7 @@ class NoteCacheService {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([PASSKEY_STORE_NAME], "readonly");
+      const transaction = this.db?.transaction([PASSKEY_STORE_NAME], "readonly");
       const store = transaction.objectStore(PASSKEY_STORE_NAME);
       const request = store.get(accountName);
 
@@ -656,7 +656,7 @@ class NoteCacheService {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([ACCOUNT_STORE_NAME], "readonly");
+      const transaction = this.db?.transaction([ACCOUNT_STORE_NAME], "readonly");
       const store = transaction.objectStore(ACCOUNT_STORE_NAME);
       const request = store.getAllKeys();
 
@@ -705,16 +705,15 @@ class NoteCacheService {
       if (accountName) {
         const stored = localStorage.getItem(`${STORAGE_KEY}_${accountName}`);
         return stored !== null && stored.length > 0;
-      } else {
-        // Check for any account session
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key?.startsWith(STORAGE_KEY)) {
-            return true;
-          }
-        }
-        return false;
       }
+      // Check for any account session
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith(STORAGE_KEY)) {
+          return true;
+        }
+      }
+      return false;
     } catch (error) {
       console.warn("Failed to check encrypted data:", error);
       return false;

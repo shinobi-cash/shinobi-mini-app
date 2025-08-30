@@ -46,7 +46,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
               <X className="h-3.5 w-3.5 text-app-secondary" />
             </DrawerClose>
           </div>
-          <DrawerDescription className="text-sm items-start text-app-secondary"></DrawerDescription>
+          <DrawerDescription className="text-sm items-start text-app-secondary" />
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-4">
@@ -75,7 +75,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                 </div>
 
                 {/* Divider */}
-                <div className="border-t border-app-border my-1"></div>
+                <div className="border-t border-app-border my-1" />
 
                 {/* Final Amount */}
                 <div className="flex justify-between items-center">

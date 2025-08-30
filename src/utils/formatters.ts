@@ -59,38 +59,37 @@ export function formatEthAmount(
       // Fixed decimal places
       const num = Number.parseFloat(ethString);
       return num.toFixed(options.decimals);
-    } else {
-      // Dynamic decimal formatting
-      const { minDecimals = 0, maxDecimals = 18 } = options;
-
-      // Remove trailing zeros but respect minimum decimals
-      let formatted = ethString.replace(/\.?0+$/, "") || "0";
-
-      // Ensure minimum decimal places
-      if (minDecimals > 0) {
-        const parts = formatted.split(".");
-        if (parts.length === 1) {
-          formatted += "." + "0".repeat(minDecimals);
-        } else {
-          const currentDecimals = parts[1].length;
-          if (currentDecimals < minDecimals) {
-            formatted += "0".repeat(minDecimals - currentDecimals);
-          }
-        }
-      }
-
-      // Limit maximum decimal places
-      if (maxDecimals < 18) {
-        const parts = formatted.split(".");
-        if (parts.length > 1 && parts[1].length > maxDecimals) {
-          formatted = parts[0] + "." + parts[1].substring(0, maxDecimals);
-          // Remove trailing zeros after truncation
-          formatted = formatted.replace(/\.?0+$/, "") || parts[0];
-        }
-      }
-
-      return formatted;
     }
+    // Dynamic decimal formatting
+    const { minDecimals = 0, maxDecimals = 18 } = options;
+
+    // Remove trailing zeros but respect minimum decimals
+    let formatted = ethString.replace(/\.?0+$/, "") || "0";
+
+    // Ensure minimum decimal places
+    if (minDecimals > 0) {
+      const parts = formatted.split(".");
+      if (parts.length === 1) {
+        formatted += `.${"0".repeat(minDecimals)}`;
+      } else {
+        const currentDecimals = parts[1].length;
+        if (currentDecimals < minDecimals) {
+          formatted += "0".repeat(minDecimals - currentDecimals);
+        }
+      }
+    }
+
+    // Limit maximum decimal places
+    if (maxDecimals < 18) {
+      const parts = formatted.split(".");
+      if (parts.length > 1 && parts[1].length > maxDecimals) {
+        formatted = `${parts[0]}.${parts[1].substring(0, maxDecimals)}`;
+        // Remove trailing zeros after truncation
+        formatted = formatted.replace(/\.?0+$/, "") || parts[0];
+      }
+    }
+
+    return formatted;
   } catch {
     const { decimals = 0 } = options;
     return decimals > 0 ? `0.${"0".repeat(decimals)}` : "0";

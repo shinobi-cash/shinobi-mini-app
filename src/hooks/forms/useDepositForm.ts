@@ -21,7 +21,7 @@ export function useDepositForm({ balance }: UseDepositFormProps) {
   const [selectedAsset] = useState({ symbol: "ETH", name: "Ethereum", icon: "⚫" });
 
   // Calculate available balance for validation
-  const availableBalance = balance && balance.value ? Number.parseFloat(formatEther(balance.value)) : 0;
+  const availableBalance = balance?.value ? Number.parseFloat(formatEther(balance.value)) : 0;
 
   const formConfig = {
     amount: {
@@ -61,7 +61,7 @@ export function useDepositForm({ balance }: UseDepositFormProps) {
 
   // Validation checks for UI feedback
   const isValidAmount = amountNum > 0 && amountNum <= availableBalance;
-  const hasBalance = balance && balance.value ? Number.parseFloat(formatEther(balance.value)) > 0 : false;
+  const hasBalance = balance?.value ? Number.parseFloat(formatEther(balance.value)) > 0 : false;
   const hasNoteData = (noteData: any) => noteData !== null;
 
   // Check if deposit can be executed

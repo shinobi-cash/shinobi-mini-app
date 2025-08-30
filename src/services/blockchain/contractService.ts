@@ -173,7 +173,7 @@ export async function prepareWithdrawalUserOperation(
 
     console.log("✅ UserOperation prepared successfully");
     console.log(`   Target: ${CONTRACTS.PRIVACY_POOL_ENTRYPOINT}`);
-    console.log(`   Account: ${smartAccountClient.account!.address}`);
+    console.log(`   Account: ${smartAccountClient.account?.address}`);
 
     return preparedUserOperation;
   } catch (error) {

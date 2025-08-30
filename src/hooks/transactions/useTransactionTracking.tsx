@@ -71,7 +71,7 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
 
     const fetchTransactionReceipt = async () => {
       try {
-        const response = await fetch(`https://sepolia.base.org`, {
+        const response = await fetch("https://sepolia.base.org", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
