@@ -113,16 +113,6 @@ export function formatHash(hash: string, startChars: number = 6, endChars: numbe
 }
 
 /**
- * Parse ETH amount string to wei bigint
- * 
- * @param ethAmount - ETH amount as string
- * @returns Wei amount as bigint
- */
-export function parseEthAmount(ethAmount: string): bigint {
-  return parseEther(ethAmount);
-}
-
-/**
  * Format timestamp for relative display (e.g., "2 hours ago")
  */
 export function formatTimestamp(timestamp: string): string {
