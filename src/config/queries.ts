@@ -170,31 +170,6 @@ export const GET_POOL_DEPOSITS = gql`
   }
 `;
 
-/**
- * Get all withdrawals for a specific pool
- */
-export const GET_POOL_WITHDRAWALS = gql`
-  query GetPoolWithdrawals($poolId: String!) {
-    activitys(
-      where: { 
-        type: "WITHDRAWAL"
-        poolId: $poolId
-      }
-      orderBy: "timestamp"
-      orderDirection: "desc"
-    ) {
-      items {
-        id
-        nullifierHash
-        amount
-        timestamp
-        transactionHash
-        blockNumber
-        type
-      }
-    }
-  }
-`;
 
 // ============ POOL INFORMATION QUERIES ============
 
@@ -240,81 +215,9 @@ export const HEALTH_CHECK = gql`
   }
 `;
 
-/**
- * Get subgraph meta information
- */
-export const GET_SUBGRAPH_META = gql`
-  query GetSubgraphMeta {
-    _meta {
-      block {
-        number
-        timestamp
-        hash
-      }
-      deployment
-      hasIndexingErrors
-    }
-  }
-`;
 
 // ============ SEARCH AND FILTER QUERIES ============
 
-/**
- * Search activities by transaction hash
- */
-export const GET_ACTIVITY_BY_TX_HASH = gql`
-  query GetActivityByTxHash($transactionHash: String!) {
-    activitys(
-      where: { transactionHash: $transactionHash }
-    ) {
-      items {
-        id
-        type
-        commitment
-        nullifierHash
-        label
-        amount
-        timestamp
-        transactionHash
-        blockNumber
-        aspStatus
-      }
-    }
-  }
-`;
 
 
 
-/**
- * Get activities within a date range
- */
-export const GET_ACTIVITIES_BY_DATE_RANGE = gql`
-  query GetActivitiesByDateRange(
-    $poolId: String!
-    $startTimestamp: String!
-    $endTimestamp: String!
-  ) {
-    activitys(
-      where: { 
-        poolId: $poolId
-        timestamp_gte: $startTimestamp
-        timestamp_lte: $endTimestamp
-      }
-      orderBy: "timestamp"
-      orderDirection: "desc"
-    ) {
-      items {
-        id
-        type
-        commitment
-        nullifierHash
-        label
-        amount
-        timestamp
-        transactionHash
-        blockNumber
-        aspStatus
-      }
-    }
-  }
-`;
