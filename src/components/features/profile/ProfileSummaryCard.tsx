@@ -1,5 +1,5 @@
-import { Button } from "../../ui/button";
 import { UserX } from "lucide-react";
+import { Button } from "../../ui/button";
 
 interface ProfileSummaryCardProps {
   unspentNotes: number;

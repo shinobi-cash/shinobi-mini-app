@@ -1,6 +1,6 @@
-import { KeyGenerationResult } from "@/utils/crypto";
 import { noteCache } from "@/lib/storage/noteCache";
-import { useState, useRef, useEffect } from "react";
+import type { KeyGenerationResult } from "@/utils/crypto";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "../../ui/input";
 import { AuthSection } from "./AuthSection";
 

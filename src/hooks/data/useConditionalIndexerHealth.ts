@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
 import { fetchLatestIndexedBlock } from "@/services/data/queryService";
+import { useEffect, useState } from "react";
 import { useTransactionTracking } from "../transactions/useTransactionTracking";
 
 export function useConditionalIndexerHealth() {

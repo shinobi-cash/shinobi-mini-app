@@ -3,7 +3,8 @@
  * Shows temporary messages in app banner area like transaction tracking
  */
 
-import React, { createContext, useContext, useState, useCallback, useRef } from "react";
+import type React from "react";
+import { createContext, useCallback, useContext, useRef, useState } from "react";
 
 export interface BannerMessage {
   id: string;
@@ -29,7 +30,7 @@ let bannerId = 0;
 const generateId = () => `banner-${++bannerId}-${Date.now()}`;
 
 // Simple message shortening - inline since it's just one function
-const shortenMessage = (message: string, maxLength: number = 60): string => {
+const shortenMessage = (message: string, maxLength = 60): string => {
   if (message.length <= maxLength) return message;
   return message.substring(0, maxLength - 3).trim() + "...";
 };

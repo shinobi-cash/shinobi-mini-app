@@ -1,13 +1,13 @@
-import { MainScreen } from "@/components/screens/MainScreen";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SplashScreen } from "@/components/SplashScreen";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import { PasswordAuthDrawer } from "@/components/features/auth/PasswordAuthDrawer";
+import { TransactionTrackingProvider } from "@/components/layout/AppBanner";
+import { MainScreen } from "@/components/screens/MainScreen";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { BannerProvider } from "@/contexts/BannerContext";
-import { TransactionTrackingProvider } from "@/components/layout/AppBanner";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { PasswordAuthDrawer } from "@/components/features/auth/PasswordAuthDrawer";
-import { useEffect } from "react";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { sdk } from "@farcaster/miniapp-sdk";
+import { useEffect } from "react";
 
 function AppContent() {
   const { isRestoringSession, quickAuthState } = useAuth();

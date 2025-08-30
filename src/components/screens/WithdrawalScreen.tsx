@@ -1,8 +1,8 @@
-import { AuthenticationGate } from "../shared/AuthenticationGate";
+import { useModalWithSelection } from "@/hooks/ui/useModalState";
+import type { Note } from "@/lib/storage/noteCache";
 import { ListUnspentNotes } from "../features/profile/ListUnspentNotes";
 import { WithdrawNoteForm } from "../features/withdrawal/WithdrawNoteForm";
-import { useModalWithSelection } from "@/hooks/ui/useModalState";
-import { Note } from "@/lib/storage/noteCache";
+import { AuthenticationGate } from "../shared/AuthenticationGate";
 
 export const WithdrawalScreen = () => {
   return (

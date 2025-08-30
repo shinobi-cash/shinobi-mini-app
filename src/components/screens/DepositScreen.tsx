@@ -1,16 +1,16 @@
-import { useAccount, useBalance, useChainId } from "wagmi";
-import { AuthenticationGate } from "../shared/AuthenticationGate";
-import { WalletGate } from "../shared/WalletGate";
-import { ChevronDown, AlertTriangle, Loader2 } from "lucide-react";
-import { Button } from "../ui/button";
-import { useEffect, useRef } from "react";
-import { formatEther } from "viem";
-import { NETWORK } from "../../config/constants";
-import { useDepositCommitment } from "../../hooks/transactions/useDepositCommitment";
-import { useDepositTransaction } from "../../hooks/transactions/useDepositTransaction";
-import { useDepositForm } from "../../hooks/forms/useDepositForm";
 import { useBanner } from "@/contexts/BannerContext";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
+import { AlertTriangle, ChevronDown, Loader2 } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { formatEther } from "viem";
+import { useAccount, useBalance, useChainId } from "wagmi";
+import { NETWORK } from "../../config/constants";
+import { useDepositForm } from "../../hooks/forms/useDepositForm";
+import { useDepositCommitment } from "../../hooks/transactions/useDepositCommitment";
+import { useDepositTransaction } from "../../hooks/transactions/useDepositTransaction";
+import { AuthenticationGate } from "../shared/AuthenticationGate";
+import { WalletGate } from "../shared/WalletGate";
+import { Button } from "../ui/button";
 
 const DEPOSIT_AMOUNTS = [
   { value: "0.01", label: "0.01 ETH" },
@@ -179,7 +179,7 @@ const DepositForm = () => {
           <span className="text-app-secondary">Available</span>
           <span className="text-app-primary font-medium">
             {balance
-              ? `${parseFloat(formatEther(balance.value)).toFixed(4)} ${selectedAsset.symbol}`
+              ? `${Number.parseFloat(formatEther(balance.value)).toFixed(4)} ${selectedAsset.symbol}`
               : `0.000 ${selectedAsset.symbol}`}
           </span>
         </div>

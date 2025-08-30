@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
-import { useWriteContract } from "wagmi";
-import { parseEther } from "viem";
-import { CashNoteData } from "./useDepositCommitment";
 import { PRIVACY_POOL_ENTRYPOINT_ABI } from "@/config/abis";
 import { CONTRACTS } from "@/config/constants";
+import { useCallback, useEffect, useState } from "react";
+import { parseEther } from "viem";
+import { useWriteContract } from "wagmi";
+import type { CashNoteData } from "./useDepositCommitment";
 
 interface DepositState {
   isSuccess: boolean;

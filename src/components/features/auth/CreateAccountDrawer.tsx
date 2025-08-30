@@ -1,10 +1,10 @@
+import type { KeyGenerationResult } from "@/utils/crypto";
+import { ChevronLeft, X } from "lucide-react";
 import { useState } from "react";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from "../../ui/drawer";
 import { Button } from "../../ui/button";
-import { X, ChevronLeft } from "lucide-react";
-import { KeyGenerationResult } from "@/utils/crypto";
-import { KeyGenerationSection } from "./KeyGenerationSection";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "../../ui/drawer";
 import { BackupMnemonicSection } from "./BackupMnemonicSection";
+import { KeyGenerationSection } from "./KeyGenerationSection";
 import SetupConvenientAuth from "./SetupConvenientAuth";
 
 type CreateAccountStep = "KeyGeneration" | "BackupMnemonic" | "SetupConvenientAuth";

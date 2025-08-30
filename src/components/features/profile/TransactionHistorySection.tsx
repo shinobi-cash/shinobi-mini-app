@@ -1,6 +1,6 @@
-import { Button } from "../../ui/button";
+import type { NoteChain } from "@/lib/storage/noteCache";
 import { RefreshCw } from "lucide-react";
-import { NoteChain } from "@/lib/storage/noteCache";
+import { Button } from "../../ui/button";
 import { CashNoteCard } from "./CashNoteCard";
 
 interface TransactionHistorySectionProps {

@@ -1,9 +1,9 @@
+import { useBanner } from "@/contexts/BannerContext";
+import type { KeyGenerationResult } from "@/utils/crypto";
+import { getEnvironmentType } from "@/utils/environment";
+import { Check, Copy, Download, Eye, EyeOff, FileText } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../../ui/button";
-import { Download, Copy, Eye, EyeOff, Check, FileText } from "lucide-react";
-import { KeyGenerationResult } from "@/utils/crypto";
-import { useBanner } from "@/contexts/BannerContext";
-import { getEnvironmentType } from "@/utils/environment";
 
 interface BackupMnemonicSectionProps {
   generatedKeys: KeyGenerationResult | null;

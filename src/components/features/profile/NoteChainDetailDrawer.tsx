@@ -1,8 +1,8 @@
-import { X, ExternalLink } from "lucide-react";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from "../../ui/drawer";
-import { NoteChain } from "@/lib/storage/noteCache";
-import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
 import { NETWORK } from "@/config/constants";
+import type { NoteChain } from "@/lib/storage/noteCache";
+import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
+import { ExternalLink, X } from "lucide-react";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "../../ui/drawer";
 
 interface NoteChainDetailDrawerProps {
   noteChain: NoteChain | null;

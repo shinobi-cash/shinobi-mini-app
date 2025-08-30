@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef, createContext, useContext } from "react";
 import { fetchLatestIndexedBlock } from "@/services/data/queryService";
+import type React from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
 export type TrackingStatus = "idle" | "waiting" | "synced";
 
@@ -83,7 +84,7 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
 
         const rpcResult = await response.json();
         if (rpcResult.result) {
-          const blockNumber = parseInt(rpcResult.result.blockNumber, 16);
+          const blockNumber = Number.parseInt(rpcResult.result.blockNumber, 16);
           setTrackedTransaction((prev) => (prev ? { ...prev, blockNumber } : null));
         } else {
           // Receipt not available yet, retry in 3 seconds
@@ -108,7 +109,7 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
     const checkTransactionIndexed = async () => {
       try {
         const indexedBlockInfo = await fetchLatestIndexedBlock();
-        if (indexedBlockInfo && parseInt(indexedBlockInfo.blockNumber) >= trackedTransaction.blockNumber!) {
+        if (indexedBlockInfo && Number.parseInt(indexedBlockInfo.blockNumber) >= trackedTransaction.blockNumber!) {
           setTrackingStatus("synced");
 
           // Emit the indexed event

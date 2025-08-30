@@ -3,8 +3,8 @@
  * Handles password-based encryption/decryption of sensitive note data
  */
 
-import { useState, useEffect, useCallback } from "react";
 import { noteCache } from "@/lib/storage/noteCache";
+import { useCallback, useEffect, useState } from "react";
 
 interface EncryptedStorageState {
   isSessionActive: boolean;

@@ -2,8 +2,8 @@
  * Utility functions for formatting values in the application
  */
 
-import { formatEther, parseEther } from "viem";
 import { formatDistance } from "date-fns";
+import { formatEther, parseEther } from "viem";
 
 export interface EthFormattingOptions {
   /** Number of decimal places to show. If undefined, removes trailing zeros */
@@ -39,7 +39,7 @@ export function formatEthAmount(
       weiAmount = amount;
     } else if (typeof amount === "string") {
       // Check if it's already in wei (large number) or ETH (small number with decimals)
-      if (amount.includes(".") || parseFloat(amount) < 1000) {
+      if (amount.includes(".") || Number.parseFloat(amount) < 1000) {
         // Treat as ETH amount, convert to wei
         weiAmount = parseEther(amount);
       } else {
@@ -57,7 +57,7 @@ export function formatEthAmount(
     // Apply decimal formatting
     if (options.decimals !== undefined) {
       // Fixed decimal places
-      const num = parseFloat(ethString);
+      const num = Number.parseFloat(ethString);
       return num.toFixed(options.decimals);
     } else {
       // Dynamic decimal formatting
@@ -105,7 +105,7 @@ export function formatEthAmount(
  * @param endChars - Number of characters to show at end (default: 4)
  * @returns Formatted hash string
  */
-export function formatHash(hash: string, startChars: number = 6, endChars: number = 4): string {
+export function formatHash(hash: string, startChars = 6, endChars = 4): string {
   if (!hash || hash.length <= startChars + endChars) {
     return hash;
   }
@@ -116,13 +116,13 @@ export function formatHash(hash: string, startChars: number = 6, endChars: numbe
  * Format timestamp for relative display (e.g., "2 hours ago")
  */
 export function formatTimestamp(timestamp: string): string {
-  return formatDistance(new Date(parseInt(timestamp) * 1000), new Date(), { addSuffix: true });
+  return formatDistance(new Date(Number.parseInt(timestamp) * 1000), new Date(), { addSuffix: true });
 }
 
 /**
  * Format timestamp as a date (e.g., "12/25/2023")
  */
 export function formatDate(timestamp: string | number): string {
-  const date = typeof timestamp === "string" ? new Date(parseInt(timestamp) * 1000) : new Date(timestamp);
+  const date = typeof timestamp === "string" ? new Date(Number.parseInt(timestamp) * 1000) : new Date(timestamp);
   return date.toLocaleDateString();
 }

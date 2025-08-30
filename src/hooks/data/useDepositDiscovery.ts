@@ -1,10 +1,10 @@
-// discoverNotesV2.ts
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Note, DiscoveryResult, NoteChain, noteCache } from "@/lib/storage/noteCache";
-import { poseidon1, poseidon2 } from "poseidon-lite";
-import { deriveDepositNullifier, deriveDepositSecret, deriveChangeNullifier } from "@/utils/noteDerivation";
+import { type DiscoveryResult, type Note, type NoteChain, noteCache } from "@/lib/storage/noteCache";
 import { fetchActivities } from "@/services/data/queryService";
 import type { Activity } from "@/services/data/queryService";
+import { deriveChangeNullifier, deriveDepositNullifier, deriveDepositSecret } from "@/utils/noteDerivation";
+import { poseidon1, poseidon2 } from "poseidon-lite";
+// discoverNotesV2.ts
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /* ---------- Configuration ---------- */
 const ACTIVITIES_PER_PAGE = 100;
@@ -32,7 +32,7 @@ function extendChainInPlace(
   let withdrawalsMatched = 0;
 
   // Compute remaining amount and changeIndex starting point based on last note
-  let lastNote = chain[chain.length - 1];
+  const lastNote = chain[chain.length - 1];
   let remaining = BigInt(lastNote.amount);
   let changeIndex = lastNote.changeIndex === 0 ? 1 : lastNote.changeIndex + 1;
 
@@ -151,7 +151,7 @@ export async function discoverNotes(
 
   // Load cache (resume state)
   const cached = await noteCache.getCachedNotes(publicKey, poolAddress);
-  let notes: NoteChain[] = cached?.notes ? [...cached.notes] : [];
+  const notes: NoteChain[] = cached?.notes ? [...cached.notes] : [];
   let lastUsedIndex = cached?.lastUsedIndex ?? -1;
   let nextDepositIndex = lastUsedIndex + 1;
 

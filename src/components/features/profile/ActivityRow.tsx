@@ -1,6 +1,6 @@
 import type { Activity } from "@/services/data/queryService";
-import { StatusDot } from "../../StatusDot";
 import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
+import { StatusDot } from "../../StatusDot";
 interface ActivityRowProps {
   activity: Activity;
 }

@@ -3,12 +3,13 @@
  * Shows when user needs to re-enter password for their account after page refresh
  */
 
-import React, { useState } from "react";
-import { Button } from "../../ui/button";
-import { Lock, Eye, EyeOff, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from "../../ui/drawer";
+import { Eye, EyeOff, Lock, X } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
+import { Button } from "../../ui/button";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "../../ui/drawer";
 
 export function PasswordAuthDrawer() {
   const { banner } = useBanner();

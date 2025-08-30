@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import { isAddress } from "viem";
 
 export interface ValidationRule<T = any> {
@@ -130,7 +130,7 @@ export const validationRules = {
 
   positiveNumber: (message = "Must be a positive number"): ValidationRule<string | number> => ({
     validate: (value: string | number) => {
-      const num = typeof value === "string" ? parseFloat(value) : value;
+      const num = typeof value === "string" ? Number.parseFloat(value) : value;
       return !isNaN(num) && num > 0;
     },
     message,
@@ -138,7 +138,7 @@ export const validationRules = {
 
   maxAmount: (max: number, message?: string): ValidationRule<string | number> => ({
     validate: (value: string | number) => {
-      const num = typeof value === "string" ? parseFloat(value) : value;
+      const num = typeof value === "string" ? Number.parseFloat(value) : value;
       return isNaN(num) || num <= max;
     },
     message: message || `Amount cannot exceed ${max}`,
@@ -146,7 +146,7 @@ export const validationRules = {
 
   minAmount: (min: number, message?: string): ValidationRule<string | number> => ({
     validate: (value: string | number) => {
-      const num = typeof value === "string" ? parseFloat(value) : value;
+      const num = typeof value === "string" ? Number.parseFloat(value) : value;
       return isNaN(num) || num >= min;
     },
     message: message || `Amount must be at least ${min}`,

@@ -3,7 +3,7 @@
  * Consolidates common open/close state management used across UI components
  */
 
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 
 export interface ModalStateActions {
   open: () => void;
@@ -16,7 +16,7 @@ export interface ModalState {
   isOpen: boolean;
 }
 
-export function useModalState(initialState: boolean = false): ModalState & ModalStateActions {
+export function useModalState(initialState = false): ModalState & ModalStateActions {
   const [isOpen, setIsOpen] = useState(initialState);
 
   const open = useCallback(() => {
@@ -48,7 +48,7 @@ export function useModalState(initialState: boolean = false): ModalState & Modal
  * Hook for managing modal state with selected item pattern
  * Common pattern where opening a modal also sets a selected item
  */
-export function useModalWithSelection<T = any>(initialState: boolean = false) {
+export function useModalWithSelection<T = any>(initialState = false) {
   const modal = useModalState(initialState);
   const [selectedItem, setSelectedItem] = useState<T | null>(null);
 

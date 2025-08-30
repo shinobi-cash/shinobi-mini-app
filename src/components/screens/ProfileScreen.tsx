@@ -1,15 +1,15 @@
-import { useAuth } from "../../contexts/AuthContext";
-import { useEffect, useMemo, useState, useRef } from "react";
-import { AuthenticationGate } from "../shared/AuthenticationGate";
-import { NoteChain } from "@/lib/storage/noteCache";
+import { CONTRACTS } from "@/config/constants";
+import { useBanner } from "@/contexts/BannerContext";
 import { useNotes } from "@/hooks/data/useDepositDiscovery";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { useModalWithSelection } from "@/hooks/ui/useModalState";
-import { CONTRACTS } from "@/config/constants";
+import type { NoteChain } from "@/lib/storage/noteCache";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { NoteChainDetailDrawer } from "../features/profile/NoteChainDetailDrawer";
 import { ProfileSummaryCard } from "../features/profile/ProfileSummaryCard";
 import { TransactionHistorySection } from "../features/profile/TransactionHistorySection";
-import { NoteChainDetailDrawer } from "../features/profile/NoteChainDetailDrawer";
-import { useBanner } from "@/contexts/BannerContext";
+import { AuthenticationGate } from "../shared/AuthenticationGate";
 
 export const ProfileScreen = () => {
   const { signOut } = useAuth();

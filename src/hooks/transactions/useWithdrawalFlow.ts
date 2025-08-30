@@ -1,15 +1,15 @@
-import { useState, useCallback } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
-import { useAuth } from "@/contexts/AuthContext";
+import type { Note } from "@/lib/storage/noteCache";
 import {
-  executePreparedWithdrawal,
-  validateWithdrawalRequest,
-  processWithdrawal,
-  type WithdrawalRequest,
   type PreparedWithdrawal,
+  type WithdrawalRequest,
+  executePreparedWithdrawal,
+  processWithdrawal,
+  validateWithdrawalRequest,
 } from "@/services/privacy/withdrawalService";
-import { Note } from "@/lib/storage/noteCache";
+import { useCallback, useState } from "react";
 
 export interface UseWithdrawalFlowProps {
   note: Note;

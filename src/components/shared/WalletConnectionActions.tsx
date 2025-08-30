@@ -1,8 +1,8 @@
-import { useConnect, useAccount } from "wagmi";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Button } from "../ui/button";
-import { Loader2 } from "lucide-react";
 import { isFarcasterEnvironment } from "@/utils/environment";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { Loader2 } from "lucide-react";
+import { useAccount, useConnect } from "wagmi";
+import { Button } from "../ui/button";
 
 export const WalletConnectionActions = () => {
   const { connect, connectors, isPending } = useConnect();

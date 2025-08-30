@@ -1,7 +1,7 @@
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
+import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { http, createConfig } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
-import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { isFarcasterEnvironment } from "./utils/environment";
 
 // For browser usage - Rainbow wallet configuration

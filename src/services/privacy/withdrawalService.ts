@@ -8,22 +8,11 @@
  * - Privacy-preserving nullifier management
  */
 
-import { keccak256, parseEther, encodeAbiParameters, isAddress } from "viem";
-import { SNARK_SCALAR_FIELD, WITHDRAWAL_FEES, CONTRACTS } from "@/config/constants";
-import { Note } from "@/lib/storage/noteCache";
+import { CONTRACTS, SNARK_SCALAR_FIELD, WITHDRAWAL_FEES } from "@/config/constants";
+import type { Note } from "@/lib/storage/noteCache";
 import { WithdrawalProofGenerator } from "@/utils/WithdrawalProofGenerator";
+import { encodeAbiParameters, isAddress, keccak256, parseEther } from "viem";
 
-// Import our new services
-import { fetchStateTreeLeaves, fetchASPData, type StateTreeLeaf, type ASPData } from "../data/queryService";
-import {
-  fetchPoolScope,
-  createWithdrawalData,
-  formatProofForContract,
-  encodeRelayCallData,
-  prepareWithdrawalUserOperation,
-  executeWithdrawalUserOperation,
-  type WithdrawalData,
-} from "../blockchain/contractService";
 import { getWithdrawalSmartAccountClient } from "@/lib/clients";
 import {
   deriveChangeNullifier,
@@ -32,6 +21,17 @@ import {
   deriveDepositSecret,
   derivedNoteCommitment,
 } from "@/utils/noteDerivation";
+import {
+  type WithdrawalData,
+  createWithdrawalData,
+  encodeRelayCallData,
+  executeWithdrawalUserOperation,
+  fetchPoolScope,
+  formatProofForContract,
+  prepareWithdrawalUserOperation,
+} from "../blockchain/contractService";
+// Import our new services
+import { type ASPData, type StateTreeLeaf, fetchASPData, fetchStateTreeLeaves } from "../data/queryService";
 
 // ============ TYPES ============
 
@@ -315,11 +315,11 @@ export function validateWithdrawalRequest(request: WithdrawalRequest): void {
     throw new Error("Invalid note data");
   }
 
-  if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) {
+  if (!withdrawAmount || Number.parseFloat(withdrawAmount) <= 0) {
     throw new Error("Invalid withdrawal amount");
   }
 
-  if (parseFloat(withdrawAmount) > parseFloat(note.amount)) {
+  if (Number.parseFloat(withdrawAmount) > Number.parseFloat(note.amount)) {
     throw new Error("Withdrawal amount exceeds note balance");
   }
 
@@ -340,7 +340,7 @@ export function validateWithdrawalRequest(request: WithdrawalRequest): void {
  * remainingInNote: What's left in the note (noteBalance - withdrawAmount)
  */
 export function calculateWithdrawalAmounts(withdrawAmount: string) {
-  const withdrawAmountNum = parseFloat(withdrawAmount);
+  const withdrawAmountNum = Number.parseFloat(withdrawAmount);
   const relayFeeBPS = Number(WITHDRAWAL_FEES.DEFAULT_RELAY_FEE_BPS); // 1000 BPS = 10%
 
   // Execution fee = withdrawAmount * relayFeeBPS / 10000 (basis points to decimal)

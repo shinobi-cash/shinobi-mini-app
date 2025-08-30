@@ -1,7 +1,7 @@
+import { CheckCircle, ExternalLink, Wallet } from "lucide-react";
 import { useAccount, useDisconnect } from "wagmi";
-import { Wallet, CheckCircle, ExternalLink } from "lucide-react";
-import { WalletConnectionActions } from "./WalletConnectionActions";
 import { Button } from "../ui/button";
+import { WalletConnectionActions } from "./WalletConnectionActions";
 
 interface WalletGateProps {
   children: React.ReactNode;

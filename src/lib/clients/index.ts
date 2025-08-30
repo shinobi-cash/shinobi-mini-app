@@ -2,15 +2,15 @@
  * Singleton Client Instances
  */
 
-import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { BUNDLER_URL, WITHDRAWAL_ACCOUNT_PRIVATE_KEY } from "@/config/constants";
-import { createPublicClient, http } from "viem";
-import { baseSepolia } from "viem/chains";
-import { privateKeyToAccount } from "viem/accounts";
-import { toSimpleSmartAccount } from "permissionless/accounts";
-import { createSmartAccountClient } from "permissionless";
-import { entryPoint07Address } from "viem/account-abstraction";
 import { CONTRACTS } from "@/config/constants";
+import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { createSmartAccountClient } from "permissionless";
+import { toSimpleSmartAccount } from "permissionless/accounts";
+import { http, createPublicClient } from "viem";
+import { entryPoint07Address } from "viem/account-abstraction";
+import { privateKeyToAccount } from "viem/accounts";
+import { baseSepolia } from "viem/chains";
 
 // ============ APOLLO GRAPHQL CLIENT ============
 

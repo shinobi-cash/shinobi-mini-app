@@ -3,9 +3,9 @@
  * Catches JavaScript errors anywhere in the child component tree
  */
 
-import { Component, ErrorInfo, ReactNode } from "react";
-import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AlertTriangle, RefreshCw } from "lucide-react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 
 interface Props {
   children: ReactNode;

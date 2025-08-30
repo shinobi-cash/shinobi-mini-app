@@ -1,9 +1,9 @@
-import { Loader2, Wallet, ChevronRight } from "lucide-react";
-import { Note } from "@/lib/storage/noteCache";
-import { useCachedNotes } from "@/hooks/data/useCachedNotes";
-import { useAuth } from "@/contexts/AuthContext";
 import { CONTRACTS } from "@/config/constants";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCachedNotes } from "@/hooks/data/useCachedNotes";
+import type { Note } from "@/lib/storage/noteCache";
 import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
+import { ChevronRight, Loader2, Wallet } from "lucide-react";
 
 interface ListUnspentNotesProps {
   onNoteSelected: (note: Note) => void;

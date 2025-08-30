@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { CONTRACTS } from "@/config/constants";
 import { fetchActivities } from "@/services/data/queryService";
 import type { Activity } from "@/services/data/queryService";
-import { CONTRACTS } from "@/config/constants";
+import { useCallback, useEffect, useState } from "react";
 
 interface PageInfo {
   hasNextPage: boolean;

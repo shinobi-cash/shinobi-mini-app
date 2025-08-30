@@ -5,15 +5,16 @@
  * Follows mobile-first drawer design patterns
  */
 
-import React, { useState, useEffect, useRef } from "react";
-import { Button } from "../../ui/button";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose, DrawerDescription } from "../../ui/drawer";
-import { X, Lock, Fingerprint, ChevronLeft } from "lucide-react";
-import { KeyGenerationResult, restoreFromMnemonic, validateMnemonic } from "@/utils/crypto";
 import { noteCache } from "@/lib/storage/noteCache";
+import { type KeyGenerationResult, restoreFromMnemonic, validateMnemonic } from "@/utils/crypto";
+import { isPasskeySupported } from "@/utils/environment";
+import { ChevronLeft, Fingerprint, Lock, X } from "lucide-react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import { Button } from "../../ui/button";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "../../ui/drawer";
 import { AuthSection } from "./AuthSection";
 import SetupConvenientAuth from "./SetupConvenientAuth";
-import { isPasskeySupported } from "@/utils/environment";
 
 interface LogInDrawerProps {
   open: boolean;

@@ -1,12 +1,12 @@
+import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import type { Activity } from "@/services/data/queryService";
-import { ActivityRow } from "./ActivityRow";
-import { ActivityDetailDrawer } from "./ActivityDetailDrawer";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { fetchPoolStats } from "@/services/data/queryService";
 import { formatEthAmount } from "@/utils/formatters";
 import { RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
-import { fetchPoolStats } from "@/services/data/queryService";
-import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
+import { ActivityDetailDrawer } from "./ActivityDetailDrawer";
+import { ActivityRow } from "./ActivityRow";
 
 export interface ActivityFeedProps {
   activities: Activity[];

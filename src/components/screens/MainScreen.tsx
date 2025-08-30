@@ -1,14 +1,14 @@
-import { AppHeader } from "../layout/AppHeader";
+import { NavigationProvider } from "../../contexts/NavigationContext";
+import { useIndexerActivities } from "../../hooks/data/useIndexerActivities";
+import { ActivityFeed } from "../features/profile/ActivityFeed";
 import { AppBanner } from "../layout/AppBanner";
+import { AppHeader } from "../layout/AppHeader";
 import { BottomNavBar } from "../layout/BottomNavBar";
 import { AppLayout } from "../layout/ScreenLayout";
-import { ScreenManager, ScreenConfig } from "../layout/ScreenManager";
-import { NavigationProvider } from "../../contexts/NavigationContext";
-import { ActivityFeed } from "../features/profile/ActivityFeed";
-import { ProfileScreen } from "./ProfileScreen";
+import { type ScreenConfig, ScreenManager } from "../layout/ScreenManager";
 import { DepositScreen } from "./DepositScreen";
+import { ProfileScreen } from "./ProfileScreen";
 import { WithdrawalScreen } from "./WithdrawalScreen";
-import { useIndexerActivities } from "../../hooks/data/useIndexerActivities";
 
 /**
  * Home Screen View Controller

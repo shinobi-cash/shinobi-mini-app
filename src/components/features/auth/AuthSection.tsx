@@ -4,12 +4,12 @@
  * Routes to setup vs login components based on mode
  */
 
-import { KeyGenerationResult } from "@/utils/crypto";
-import { PasskeySetupSection } from "./PasskeySetupSection";
-import { PasskeyLoginSection } from "./PasskeyLoginSection";
-import { PasswordSetupSection } from "./PasswordSetupSection";
-import { PasswordLoginSection } from "./PasswordLoginSection";
+import type { KeyGenerationResult } from "@/utils/crypto";
 import { isPasskeySupported } from "@/utils/environment";
+import { PasskeyLoginSection } from "./PasskeyLoginSection";
+import { PasskeySetupSection } from "./PasskeySetupSection";
+import { PasswordLoginSection } from "./PasswordLoginSection";
+import { PasswordSetupSection } from "./PasswordSetupSection";
 
 interface AuthSectionSetupProps {
   mode: "setup";

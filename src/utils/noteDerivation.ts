@@ -1,7 +1,7 @@
 // utils/notes.ts
-import { Note } from "@/lib/storage/noteCache";
+import type { Note } from "@/lib/storage/noteCache";
 import { poseidon2, poseidon3 } from "poseidon-lite";
-import { keccak256, encodePacked, getAddress } from "viem";
+import { encodePacked, getAddress, keccak256 } from "viem";
 
 // BN254 scalar field (same as SNARK_SCALAR_FIELD)
 const F = 21888242871839275222246405745257275088548364400416034343698204186575808495617n as const;

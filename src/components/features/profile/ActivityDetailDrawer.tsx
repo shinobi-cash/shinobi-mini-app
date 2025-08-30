@@ -1,10 +1,10 @@
-import type { Activity } from "@/services/data/queryService";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from "../../ui/drawer";
-import { X, ExternalLink, Copy } from "lucide-react";
-import { useState } from "react";
-import { useBanner } from "@/contexts/BannerContext";
 import { NETWORK } from "@/config/constants";
+import { useBanner } from "@/contexts/BannerContext";
+import type { Activity } from "@/services/data/queryService";
 import { formatEthAmount, formatHash, formatTimestamp } from "@/utils/formatters";
+import { Copy, ExternalLink, X } from "lucide-react";
+import { useState } from "react";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "../../ui/drawer";
 
 interface ActivityDetailDrawerProps {
   activity: Activity | null;

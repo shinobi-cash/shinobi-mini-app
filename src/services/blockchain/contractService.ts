@@ -8,12 +8,12 @@
  * - Contract data encoding/decoding
  */
 
-import { createPublicClient, http, encodeAbiParameters, encodeFunctionData } from "viem";
-import { baseSepolia } from "viem/chains";
-import { SmartAccountClient } from "permissionless";
-import { entryPoint07Address, UserOperation } from "viem/account-abstraction";
 import { PRIVACY_POOL_ABI, PRIVACY_POOL_ENTRYPOINT_ABI } from "@/config/abis";
-import { WITHDRAWAL_FEES, CONTRACTS } from "@/config/constants";
+import { CONTRACTS, WITHDRAWAL_FEES } from "@/config/constants";
+import type { SmartAccountClient } from "permissionless";
+import { http, createPublicClient, encodeAbiParameters, encodeFunctionData } from "viem";
+import { type UserOperation, entryPoint07Address } from "viem/account-abstraction";
+import { baseSepolia } from "viem/chains";
 
 // ============ TYPES ============
 

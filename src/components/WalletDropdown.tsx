@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { Wallet, ChevronDown, LogOut } from "lucide-react";
+import { ChevronDown, LogOut, Wallet } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useAccount, useDisconnect } from "wagmi";
 
 export const WalletDropdown = () => {

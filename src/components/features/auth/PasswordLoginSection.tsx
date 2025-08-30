@@ -3,15 +3,16 @@
  * Authenticates with password and loads account keys from storage
  */
 
-import React, { useState } from "react";
-import { Button } from "../../ui/button";
-import { Lock, Eye, EyeOff } from "lucide-react";
-import { Input } from "../../ui/input";
+import { useAuth } from "@/contexts/AuthContext";
+import { useBanner } from "@/contexts/BannerContext";
 import { KDF } from "@/lib/auth/keyDerivation";
 import { noteCache } from "@/lib/storage/noteCache";
 import { restoreFromMnemonic } from "@/utils/crypto";
-import { useAuth } from "@/contexts/AuthContext";
-import { useBanner } from "@/contexts/BannerContext";
+import { Eye, EyeOff, Lock } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
 
 interface PasswordLoginSectionProps {
   onSuccess: () => void;

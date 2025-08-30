@@ -5,18 +5,18 @@
  * Handles all blockchain data queries through The Graph indexer.
  */
 
-import { apolloClient } from "@/lib/clients";
-import { INDEXER_FETCH_POLICY, IPFS_GATEWAY_URL, CONTRACTS } from "@/config/constants";
-import { apiQueue } from "@/lib/apiQueue";
+import { CONTRACTS, INDEXER_FETCH_POLICY, IPFS_GATEWAY_URL } from "@/config/constants";
 import {
   GET_ACTIVITIES,
-  GET_STATE_TREE_COMMITMENTS,
-  GET_LATEST_ASP_ROOT,
   GET_APPROVED_LABELS,
+  GET_LATEST_ASP_ROOT,
   GET_POOL_CONFIG,
   GET_POOL_STATS,
+  GET_STATE_TREE_COMMITMENTS,
   HEALTH_CHECK,
 } from "@/config/queries";
+import { apiQueue } from "@/lib/apiQueue";
+import { apolloClient } from "@/lib/clients";
 
 // ============ CONSTANTS ============
 
@@ -81,7 +81,7 @@ export async function fetchActivities(
   poolAddress?: string,
   limit: number = DEFAULT_LIMIT,
   after?: string,
-  orderDirection: string = "desc",
+  orderDirection = "desc",
 ) {
   return apiQueue.submit(async () => {
     const poolId = (poolAddress || CONTRACTS.ETH_PRIVACY_POOL).toLowerCase();
@@ -130,7 +130,7 @@ export async function fetchStateTreeLeaves(poolId: string, limit: number = DEFAU
   try {
     console.log("📊 Fetching state tree commitments...");
 
-    let allLeaves: StateTreeLeaf[] = [];
+    const allLeaves: StateTreeLeaf[] = [];
     let cursor: string | undefined;
     let hasNext = true;
 

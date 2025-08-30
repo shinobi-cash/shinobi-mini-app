@@ -1,9 +1,9 @@
-import { KeyGenerationResult } from "@/utils/crypto";
-import { getAccountKey } from "@/utils/accountKey";
-import { restoreFromMnemonic } from "@/utils/crypto";
 import { KDF } from "@/lib/auth/keyDerivation";
 import { noteCache } from "@/lib/storage/noteCache";
-import { createContext, useContext, useState, ReactNode, useMemo, useEffect, useRef } from "react";
+import { getAccountKey } from "@/utils/accountKey";
+import type { KeyGenerationResult } from "@/utils/crypto";
+import { restoreFromMnemonic } from "@/utils/crypto";
+import { type ReactNode, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 interface AuthContextType {
   // Authentication state

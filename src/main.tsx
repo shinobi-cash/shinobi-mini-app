@@ -1,15 +1,15 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ApolloProvider } from "@apollo/client";
+import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { WagmiProvider } from "wagmi";
-import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
 
-import App from "./App.tsx";
-import { config } from "./wagmi.ts";
 import { apolloClient } from "@/lib/clients";
+import App from "./App.tsx";
 import { isFarcasterEnvironment } from "./utils/environment.ts";
+import { config } from "./wagmi.ts";
 
 import "./index.css";
 

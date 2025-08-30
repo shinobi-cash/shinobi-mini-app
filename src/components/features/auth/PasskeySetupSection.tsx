@@ -3,14 +3,14 @@
  * Takes provided keys and creates a new passkey for the account
  */
 
-import { Button } from "../../ui/button";
-import { Fingerprint } from "lucide-react";
-import { useState } from "react";
-import { KDF } from "@/lib/auth/keyDerivation";
-import { createHash, KeyGenerationResult } from "@/utils/crypto";
-import { noteCache } from "@/lib/storage/noteCache";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
+import { KDF } from "@/lib/auth/keyDerivation";
+import { noteCache } from "@/lib/storage/noteCache";
+import { type KeyGenerationResult, createHash } from "@/utils/crypto";
+import { Fingerprint } from "lucide-react";
+import { useState } from "react";
+import { Button } from "../../ui/button";
 
 interface PasskeySetupSectionProps {
   accountName: string;

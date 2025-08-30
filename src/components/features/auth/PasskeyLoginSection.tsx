@@ -3,15 +3,15 @@
  * Authenticates with existing passkey and loads account keys from storage
  */
 
-import { Button } from "../../ui/button";
-import { Fingerprint } from "lucide-react";
-import { Input } from "../../ui/input";
-import { useState } from "react";
-import { KDF } from "@/lib/auth/keyDerivation";
-import { restoreFromMnemonic } from "@/utils/crypto";
-import { noteCache } from "@/lib/storage/noteCache";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
+import { KDF } from "@/lib/auth/keyDerivation";
+import { noteCache } from "@/lib/storage/noteCache";
+import { restoreFromMnemonic } from "@/utils/crypto";
+import { Fingerprint } from "lucide-react";
+import { useState } from "react";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
 
 interface PasskeyLoginSectionProps {
   onSuccess: () => void;

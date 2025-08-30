@@ -22,7 +22,7 @@ export class ApiExecutionQueue {
   private requestCounter = 0;
 
   constructor(
-    private delayMs: number = 200, // Default 200ms between requests (5 requests per second)
+    private delayMs = 200, // Default 200ms between requests (5 requests per second)
   ) {}
 
   /**

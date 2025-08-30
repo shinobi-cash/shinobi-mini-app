@@ -1,7 +1,7 @@
+import type { Note } from "@/lib/storage/noteCache";
+import { formatEthAmount } from "@/utils/formatters";
 import { useCallback } from "react";
 import { useFormValidation, validationRules } from "./useFormValidation";
-import { Note } from "@/lib/storage/noteCache";
-import { formatEthAmount } from "@/utils/formatters";
 
 interface WithdrawalFormData {
   withdrawAmount: string;
@@ -14,7 +14,7 @@ interface UseWithdrawalFormProps {
 
 export function useWithdrawalForm({ note }: UseWithdrawalFormProps) {
   // Calculate available balance for validation
-  const availableBalance = parseFloat(formatEthAmount(note.amount));
+  const availableBalance = Number.parseFloat(formatEthAmount(note.amount));
 
   const formConfig = {
     withdrawAmount: {
@@ -60,7 +60,7 @@ export function useWithdrawalForm({ note }: UseWithdrawalFormProps) {
   );
 
   // Get computed values
-  const withdrawAmountNum = parseFloat(form.values.withdrawAmount) || 0;
+  const withdrawAmountNum = Number.parseFloat(form.values.withdrawAmount) || 0;
 
   // Basic validation checks for UI feedback
   const isValidAmount = withdrawAmountNum > 0 && withdrawAmountNum <= availableBalance;

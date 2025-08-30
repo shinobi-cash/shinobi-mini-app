@@ -1,5 +1,5 @@
+import { type DiscoveryResult, noteCache } from "@/lib/storage/noteCache";
 import { useEffect, useMemo, useState } from "react";
-import { DiscoveryResult, noteCache } from "@/lib/storage/noteCache";
 
 export function useCachedNotes(publicKey: string, poolAddress: string, accountKey: bigint) {
   const [data, setData] = useState<DiscoveryResult | null>(null);

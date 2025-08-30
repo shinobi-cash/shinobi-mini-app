@@ -1,10 +1,10 @@
-import { useAuth } from "../../contexts/AuthContext";
-import { CONTRACTS } from "../../config/constants";
-import { useState, useEffect, useCallback } from "react";
-import { useAccount } from "wagmi";
 import { noteCache } from "@/lib/storage/noteCache";
 import { deriveDepositNullifier, deriveDepositSecret } from "@/utils/noteDerivation";
 import { poseidon2 } from "poseidon-lite";
+import { useCallback, useEffect, useState } from "react";
+import { useAccount } from "wagmi";
+import { CONTRACTS } from "../../config/constants";
+import { useAuth } from "../../contexts/AuthContext";
 
 // ---------------------------------------------------------------------------
 // Note interface - uses data from collision service

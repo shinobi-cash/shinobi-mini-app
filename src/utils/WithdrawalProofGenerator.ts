@@ -10,8 +10,8 @@
  * - Proof verification using verification keys
  */
 
-import { poseidon2 } from "poseidon-lite";
 import { LeanIMT } from "@zk-kit/lean-imt";
+import { poseidon2 } from "poseidon-lite";
 import * as snarkjs from "snarkjs";
 
 // ============ TYPES ============
@@ -166,8 +166,8 @@ export class WithdrawalProofGenerator {
       aspProof,
       stateTreeDepth: stateTree.depth,
       ASPTreeDepth: aspTree.depth,
-      stateIndex: Object.is(stateProof.index, NaN) ? 0 : stateProof.index,
-      aspIndex: Object.is(aspProof.index, NaN) ? 0 : aspProof.index,
+      stateIndex: Object.is(stateProof.index, Number.NaN) ? 0 : stateProof.index,
+      aspIndex: Object.is(aspProof.index, Number.NaN) ? 0 : aspProof.index,
     });
 
     // Generate proof

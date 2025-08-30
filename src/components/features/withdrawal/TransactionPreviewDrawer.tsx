@@ -1,9 +1,9 @@
-import { Copy, Loader2, X, Info } from "lucide-react";
-import { Button } from "../../ui/button";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose, DrawerDescription } from "../../ui/drawer";
 import { useBanner } from "@/contexts/BannerContext";
+import type { Note } from "@/lib/storage/noteCache";
 import { formatEthAmount, formatHash } from "@/utils/formatters";
-import { Note } from "@/lib/storage/noteCache";
+import { Copy, Info, Loader2, X } from "lucide-react";
+import { Button } from "../../ui/button";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "../../ui/drawer";
 
 interface TransactionPreviewDrawerProps {
   isOpen: boolean;
@@ -31,7 +31,7 @@ export const TransactionPreviewDrawer = ({
   isProcessing,
 }: TransactionPreviewDrawerProps) => {
   const { banner } = useBanner();
-  const withdrawAmountNum = parseFloat(withdrawAmount) || 0;
+  const withdrawAmountNum = Number.parseFloat(withdrawAmount) || 0;
 
   const copyToClipboard = (text: string, fieldName: string) => {
     navigator.clipboard.writeText(text);

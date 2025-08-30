@@ -1,8 +1,8 @@
+import { useBanner } from "@/contexts/BannerContext";
+import { type KeyGenerationResult, generateKeysFromRandomSeed } from "@/utils/crypto";
+import { Key } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../../ui/button";
-import { Key } from "lucide-react";
-import { generateKeysFromRandomSeed, KeyGenerationResult } from "@/utils/crypto";
-import { useBanner } from "@/contexts/BannerContext";
 
 interface KeyGenerationSectionProps {
   onKeyGenerationComplete: (keys: KeyGenerationResult) => void;
