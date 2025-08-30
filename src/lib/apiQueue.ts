@@ -123,9 +123,3 @@ export const apiQueue = new ApiExecutionQueue(
   API_QUEUE.REQUEST_DELAY_MS // Configurable delay between requests
 );
 
-/**
- * Convenience wrapper for queueing GraphQL requests
- */
-export async function queuedRequest<T>(executor: () => Promise<T>): Promise<T> {
-  return apiQueue.submit(executor);
-}

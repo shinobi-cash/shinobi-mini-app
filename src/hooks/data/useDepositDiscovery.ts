@@ -190,7 +190,7 @@ export async function discoverNotes(
   while (hasNext) {
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
 
-    // Fetch one page of generic activities (rate-limited via queuedRequest)
+    // Fetch one page of generic activities (rate-limited via apiQueue)
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
     
     const activitiesResult = await fetchActivities(poolAddress, ACTIVITIES_PER_PAGE, cursor, "asc");

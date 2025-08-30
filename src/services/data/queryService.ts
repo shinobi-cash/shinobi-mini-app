@@ -7,7 +7,7 @@
 
 import { apolloClient } from '@/lib/clients';
 import { INDEXER_FETCH_POLICY, IPFS_GATEWAY_URL, CONTRACTS } from '@/config/constants';
-import { queuedRequest } from '@/lib/apiQueue';
+import { apiQueue } from '@/lib/apiQueue';
 import {
   GET_ACTIVITIES,
   GET_STATE_TREE_COMMITMENTS,
@@ -78,7 +78,7 @@ export interface Activity {
  * Get all activities with pagination support
  */
 export async function fetchActivities(poolAddress?: string, limit: number = DEFAULT_LIMIT, after?: string, orderDirection: string = "desc") {
-   return queuedRequest(async () => {
+   return apiQueue.submit(async () => {
       const poolId = (poolAddress || CONTRACTS.ETH_PRIVACY_POOL).toLowerCase();
       
       const result = await apolloClient.query({
