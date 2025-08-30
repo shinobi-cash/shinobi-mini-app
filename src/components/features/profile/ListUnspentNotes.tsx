@@ -1,7 +1,6 @@
-import { Loader2, Wallet, ChevronRight, Circle } from 'lucide-react';
-import { Button } from '../../ui/button';
+import { Loader2, Wallet, ChevronRight } from 'lucide-react';
 import { Note } from "@/lib/storage/noteCache";
-import { useNotes } from '@/hooks/data/useDepositDiscovery';
+import { useCachedNotes } from '@/hooks/data/useCachedNotes';
 import { useAuth } from '@/contexts/AuthContext';
 import { CONTRACTS } from '@/config/constants';
 import { formatEthAmount, formatTimestamp } from '@/utils/formatters';
@@ -12,10 +11,10 @@ interface ListUnspentNotesProps {
 
 export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
   const { publicKey, accountKey } = useAuth(); 
-  const poolAddress = CONTRACTS.ETH_PRIVACY_POOL; // Assuming this is defined in your constants
+  const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
 
-  // Discovery handles incremental updates automatically - no TTL needed
-  const { data: noteDiscovery, loading: isDiscovering, error } = useNotes(publicKey!, poolAddress, accountKey!);
+  // Use cached notes for immediate display
+  const { data: noteDiscovery, loading: isLoading } = useCachedNotes(publicKey!, poolAddress, accountKey!);
 
   // Get available unspent notes by filtering the 2D notes array.
   const availableNotes = (noteDiscovery?.notes || [])
@@ -27,7 +26,7 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
     })
     .filter(Boolean) as Note[];
 
-  if (isDiscovering) {
+  if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <div className="relative">
@@ -35,31 +34,12 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
             <Loader2 className="w-6 h-6 animate-spin text-blue-600 dark:text-blue-400" />
           </div>
         </div>
-        <h3 className="text-base font-semibold text-app-primary mb-1">Discovering Notes</h3>
-        <p className="text-sm text-app-secondary">Scanning the blockchain for your privacy notes...</p>
+        <h3 className="text-base font-semibold text-app-primary mb-1">Loading Notes</h3>
+        <p className="text-sm text-app-secondary">Loading your cached privacy notes...</p>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
-          <Circle className="w-6 h-6 text-red-600 dark:text-red-400 fill-current" />
-        </div>
-        <h3 className="text-base font-semibold text-app-primary mb-1">Discovery Failed</h3>
-        <p className="text-sm text-app-secondary mb-6 text-center max-w-xs leading-relaxed">
-          Unable to discover your notes. Check your connection and try again.
-        </p>
-        <Button 
-          onClick={() => window.location.reload()}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-medium active:scale-95 transition-all"
-        >
-          Try Again
-        </Button>
-      </div>
-    );
-  }
 
   if (availableNotes.length === 0) {
     return (

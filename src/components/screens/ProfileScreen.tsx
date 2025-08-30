@@ -1,5 +1,5 @@
 import { useAuth } from '../../contexts/AuthContext'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { AuthenticationGate } from '../shared/AuthenticationGate'
 import { NoteChain } from "@/lib/storage/noteCache"
 import { useNotes } from '@/hooks/data/useDepositDiscovery'
@@ -9,6 +9,7 @@ import { CONTRACTS } from '@/config/constants'
 import { ProfileSummaryCard } from '../features/profile/ProfileSummaryCard'
 import { TransactionHistorySection } from '../features/profile/TransactionHistorySection'
 import { NoteChainDetailDrawer } from '../features/profile/NoteChainDetailDrawer'
+import { useBanner } from '@/contexts/BannerContext'
 
 export const ProfileScreen = () => {
   const { signOut } = useAuth()
@@ -29,11 +30,12 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
   const noteChainModal = useModalWithSelection<NoteChain>(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { onTransactionIndexed } = useTransactionTracking();
+  const { banner } = useBanner();
 
   const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
 
-  // Use the refactored useNotes hook - discovery handles incremental updates automatically
-  const { data: noteDiscovery, loading, error, refresh } = useNotes(publicKey!, poolAddress, accountKey!);
+  // Use discovery with autoScan enabled for profile screen
+  const { data: noteDiscovery, loading, error, progress, refresh } = useNotes(publicKey!, poolAddress, accountKey!, { autoScan: true });
 
   // Memoize note chains, showing last note of each chain sorted by timestamp
   const noteChains = useMemo(() => {
@@ -54,6 +56,48 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
     })
     return cleanup
   }, [onTransactionIndexed, refresh])
+
+  // Track shown banners to prevent infinite loops
+  const shownBannersRef = useRef({ scanning: false, error: false, lastProgressId: '', lastErrorId: '' });
+
+  // Banner feedback for note discovery
+  useEffect(() => {
+    if (!progress) return;
+    
+    const progressId = `${progress.pagesProcessed}-${progress.complete}`;
+    if (progressId === shownBannersRef.current.lastProgressId) return;
+    
+    if (progress.pagesProcessed === 1 && !shownBannersRef.current.scanning) {
+      banner.info("Scanning blockchain for notes...");
+      shownBannersRef.current.scanning = true;
+    }
+    
+    if (progress.complete) {
+      shownBannersRef.current.scanning = false;
+      if (noteDiscovery && noteDiscovery.newNotesFound > 0) {
+        banner.success(`Found ${noteDiscovery.newNotesFound} new notes`);
+      }
+    }
+    
+    shownBannersRef.current.lastProgressId = progressId;
+  }, [progress, noteDiscovery?.newNotesFound])
+
+  // Banner feedback for discovery errors
+  useEffect(() => {
+    const errorId = error ? error.message : 'no-error';
+    if (errorId === shownBannersRef.current.lastErrorId) return;
+    
+    if (error && !shownBannersRef.current.error) {
+      banner.error("Note discovery failed");
+      shownBannersRef.current.error = true;
+    }
+    
+    if (!error) {
+      shownBannersRef.current.error = false;
+    }
+    
+    shownBannersRef.current.lastErrorId = errorId;
+  }, [error])
 
   const unspentNotes = noteChains.filter(noteChain => {
     const lastNote = noteChain[noteChain.length - 1];

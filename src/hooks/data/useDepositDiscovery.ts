@@ -383,7 +383,8 @@ export async function discoverNotes(
 export function useNotes(
   publicKey: string,
   poolAddress: string,
-  accountKey: bigint
+  accountKey: bigint,
+  options?: { autoScan?: boolean }
 ) {
   const [data, setData] = useState<DiscoveryResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -404,12 +405,29 @@ export function useNotes(
   );
 
   useEffect(() => {
+    const autoScan = options?.autoScan ?? true;
+    
+    // Load cache first
+    const loadCache = async () => {
+      try {
+        const cached = await noteCache.getCachedNotes(publicKey, poolAddress);
+        if (cached) {
+          setData(cached);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Failed to load cached notes:', error);
+      }
+    };
+    
+    loadCache();
+    
+    // Only run discovery if autoScan is enabled
+    if (!autoScan) return;
+
     const controller = new AbortController();
     const signal = controller.signal;
     const runId = ++refreshIdRef.current;
-
-    setLoading(true);
-    setError(null);
 
     const onProgress = (p: DiscoveryProgress) => {
       if (runId === refreshIdRef.current) setProgress(p);
@@ -428,7 +446,7 @@ export function useNotes(
       });
 
     return () => controller.abort();
-  }, [accountKeyString, poolAddress, publicKey, runDiscovery]);
+  }, [accountKeyString, poolAddress, publicKey, runDiscovery, options?.autoScan]);
 
   const refresh = useCallback(async () => {
     const runId = ++refreshIdRef.current;
