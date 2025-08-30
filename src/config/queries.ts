@@ -1,8 +1,5 @@
 /**
  * GraphQL Queries
- * 
- * Centralized GraphQL queries for The Graph indexer interactions.
- * All queries used for privacy pool data fetching.
  */
 
 import { gql } from '@apollo/client';
@@ -117,60 +114,6 @@ export const GET_ACTIVITIES = gql`
   }
 `;
 
-
-/**
- * Check if nullifier is spent (withdrawal exists)
- */
-export const CHECK_NULLIFIER_SPENT = gql`
-  query CheckNullifierSpent($spentNullifier: BigInt!) {
-    activitys(
-      where: { 
-        spentNullifier: $spentNullifier 
-      }
-      limit: 1
-    ) {
-      items {
-        id
-        type
-        spentNullifier
-        blockNumber
-        timestamp
-        transactionHash
-      }
-    }
-  }
-`;
-
-/**
- * Get all deposits for a specific pool
- */
-export const GET_POOL_DEPOSITS = gql`
-  query GetPoolDeposits($poolId: String!) {
-    activitys(
-      where: { 
-        type: "DEPOSIT"
-        poolId: $poolId
-      }
-      orderBy: "timestamp"
-      orderDirection: "desc"
-    ) {
-      items {
-        id
-        commitment
-        label
-        amount
-        timestamp
-        transactionHash
-        blockNumber
-        type
-        aspStatus
-        precommitmentHash
-      }
-    }
-  }
-`;
-
-
 // ============ POOL INFORMATION QUERIES ============
 
 /**
@@ -214,10 +157,3 @@ export const HEALTH_CHECK = gql`
     }
   }
 `;
-
-
-// ============ SEARCH AND FILTER QUERIES ============
-
-
-
-
