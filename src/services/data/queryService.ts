@@ -18,6 +18,10 @@ import {
   HEALTH_CHECK,
 } from '@/config/queries';
 
+// ============ CONSTANTS ============
+
+const DEFAULT_LIMIT = 100;
+
 // ============ TYPES ============
 
 export interface StateTreeLeaf {
@@ -73,7 +77,7 @@ export interface Activity {
 /**
  * Get all activities with pagination support
  */
-export async function fetchActivities(poolAddress?: string, limit: number = 15, after?: string, orderDirection: string = "desc") {
+export async function fetchActivities(poolAddress?: string, limit: number = DEFAULT_LIMIT, after?: string, orderDirection: string = "desc") {
    return queuedRequest(async () => {
       const poolId = (poolAddress || CONTRACTS.ETH_PRIVACY_POOL).toLowerCase();
       
@@ -117,28 +121,43 @@ export async function fetchPoolStats(poolAddress?: string): Promise<{
 // ============ STATE TREE QUERIES ============
 
 /**
- * Fetch state tree commitments ordered by leafIndex
+ * Fetch all state tree commitments ordered by leafIndex (with pagination)
  */
-export async function fetchStateTreeLeaves(): Promise<StateTreeLeaf[]> {
+export async function fetchStateTreeLeaves(poolAddress?: string, limit: number = DEFAULT_LIMIT): Promise<StateTreeLeaf[]> {
   try {
     console.log('📊 Fetching state tree commitments...');
     
-    const poolId = CONTRACTS.ETH_PRIVACY_POOL.toLowerCase();
+    const poolId = (poolAddress || CONTRACTS.ETH_PRIVACY_POOL).toLowerCase();
+    let allLeaves: StateTreeLeaf[] = [];
+    let cursor: string | undefined;
+    let hasNext = true;
     
-    const result = await apolloClient.query({
-      query: GET_STATE_TREE_COMMITMENTS,
-      variables: { poolId },
-      fetchPolicy: INDEXER_FETCH_POLICY,
-    });
+    while (hasNext) {
+      const result = await apolloClient.query({
+        query: GET_STATE_TREE_COMMITMENTS,
+        variables: { poolId, limit, after: cursor },
+        fetchPolicy: INDEXER_FETCH_POLICY,
+      });
 
-    const stateTreeLeaves = result.data?.merkleTreeLeafs?.items || [];
+      const pageLeaves = result.data?.merkleTreeLeafs?.items || [];
+      const pageInfo = result.data?.merkleTreeLeafs?.pageInfo;
+      
+      // Add leaves from this page
+      allLeaves.push(...pageLeaves.map((leaf: any) => ({
+        leafIndex: leaf.leafIndex,
+        leafValue: leaf.leafValue,
+      })));
+      
+      // Check if there are more pages
+      hasNext = !!pageInfo?.hasNextPage;
+      cursor = pageInfo?.endCursor;
+      
+      console.log(`📄 Fetched page: ${pageLeaves.length} leaves, total: ${allLeaves.length}`);
+    }
     
-    console.log(`✅ State tree leaves fetched: ${stateTreeLeaves.length} leaves`);
+    console.log(`✅ All state tree leaves fetched: ${allLeaves.length} leaves`);
     
-    return stateTreeLeaves.map((leaf: any) => ({
-      leafIndex: leaf.leafIndex,
-      leafValue: leaf.leafValue,
-    }));
+    return allLeaves;
 
   } catch (error) {
     console.error('Failed to fetch state tree leaves:', error);

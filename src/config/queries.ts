@@ -7,13 +7,14 @@ import { gql } from '@apollo/client';
 // ============ STATE TREE QUERIES ============
 
 /**
- * Get state tree commitments ordered by leafIndex
+ * Get state tree commitments ordered by leafIndex with pagination
  */
 export const GET_STATE_TREE_COMMITMENTS = gql`
-  query GetStateTreeCommitments($poolId: String!) {
+  query GetStateTreeCommitments($poolId: String!, $limit: Int = 1000, $after: String) {
     merkleTreeLeafs(
       where: { poolId: $poolId }
-      limit: 1000
+      limit: $limit
+      after: $after
       orderBy: "leafIndex"
       orderDirection: "asc"
     ) {
@@ -22,6 +23,12 @@ export const GET_STATE_TREE_COMMITMENTS = gql`
         leafValue
         treeRoot
         treeSize
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
       }
     }
   }
