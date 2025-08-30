@@ -84,7 +84,7 @@ function hashToBigInt(data: string): bigint {
 /**
  * Step 1: Fetch all required data in parallel
  */
-export async function fetchWithdrawalData(): Promise<{
+export async function fetchWithdrawalData(poolAddress: string): Promise<{
   stateTreeLeaves: StateTreeLeaf[];
   aspData: ASPData;
   poolScope: string;
@@ -93,7 +93,7 @@ export async function fetchWithdrawalData(): Promise<{
   
   // Fetch all required data in parallel for optimal performance
   const [stateTreeLeaves, aspData, poolScope] = await Promise.all([
-    fetchStateTreeLeaves(),
+    fetchStateTreeLeaves(poolAddress),
     fetchASPData(),
     fetchPoolScope()
   ]);
@@ -286,7 +286,7 @@ export async function processWithdrawal(request: WithdrawalRequest): Promise<Pre
     console.log('🚀 Starting complete withdrawal process...');
     
     // Step 1: Fetch all required data
-    const withdrawalData = await fetchWithdrawalData();
+    const withdrawalData = await fetchWithdrawalData(request.note.poolAddress.toLowerCase());
     
     // Step 2: Calculate context and generate nullifiers
     const context = await calculateWithdrawalContext(request, withdrawalData);

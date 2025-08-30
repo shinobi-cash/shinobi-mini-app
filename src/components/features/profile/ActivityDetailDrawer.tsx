@@ -1,4 +1,4 @@
-import type { Activity } from '@/services/data'
+import type { Activity } from '@/services/data/queryService'
 import { 
   Drawer, 
   DrawerContent, 

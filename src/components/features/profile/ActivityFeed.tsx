@@ -1,4 +1,4 @@
-import type { Activity } from '@/services/data'
+import type { Activity } from '@/services/data/queryService'
 import { ActivityRow } from './ActivityRow'
 import { ActivityDetailDrawer } from './ActivityDetailDrawer'
 import { useState, useRef, useEffect, useCallback } from 'react'

@@ -123,11 +123,10 @@ export async function fetchPoolStats(poolAddress?: string): Promise<{
 /**
  * Fetch all state tree commitments ordered by leafIndex (with pagination)
  */
-export async function fetchStateTreeLeaves(poolAddress?: string, limit: number = DEFAULT_LIMIT): Promise<StateTreeLeaf[]> {
+export async function fetchStateTreeLeaves(poolId: string, limit: number = DEFAULT_LIMIT): Promise<StateTreeLeaf[]> {
   try {
     console.log('📊 Fetching state tree commitments...');
     
-    const poolId = (poolAddress || CONTRACTS.ETH_PRIVACY_POOL).toLowerCase();
     let allLeaves: StateTreeLeaf[] = [];
     let cursor: string | undefined;
     let hasNext = true;

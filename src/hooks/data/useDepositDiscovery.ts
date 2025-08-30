@@ -8,7 +8,7 @@ import {
   deriveChangeNullifier,
 } from "@/utils/noteDerivation";
 import { fetchActivities } from "@/services/data/queryService";
-import type { Activity } from '@/services/data'
+import type { Activity } from '@/services/data/queryService'
 
 /* ---------- Configuration ---------- */
 const ACTIVITIES_PER_PAGE = 100;

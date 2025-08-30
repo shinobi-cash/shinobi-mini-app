@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { fetchActivities } from '@/services/data/queryService'
-import type { Activity } from '@/services/data'
+import type { Activity } from '@/services/data/queryService'
 import { CONTRACTS } from '@/config/constants'
 
 interface PageInfo {
