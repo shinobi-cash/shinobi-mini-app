@@ -75,10 +75,12 @@ export interface Activity {
 /**
  * Get all activities with pagination support
  */
-export async function fetchActivities(limit: number = 15, after?: string) {
+export async function fetchActivities(poolAddress?: string, limit: number = 15, after?: string) {
+  const poolId = (poolAddress || CONTRACTS.ETH_PRIVACY_POOL).toLowerCase();
+  
   const result = await apolloClient.query({
     query: GET_ACTIVITIES,
-    variables: { limit, after },
+    variables: { poolId, limit, after },
     fetchPolicy: INDEXER_FETCH_POLICY,
   });
   

@@ -2,6 +2,7 @@ import { useQuery } from '@apollo/client'
 import { useCallback } from 'react'
 import { GET_ACTIVITIES } from '../../config/queries'
 import type { Activity } from '@/services/data'
+import { CONTRACTS } from '@/config/constants'
 
 interface PageInfo {
   hasNextPage: boolean
@@ -33,7 +34,11 @@ export function useIndexerActivities(options: UseIndexerActivitiesOptions = {}) 
     refetch,
     networkStatus,
   } = useQuery<ActivitiesResponse>(GET_ACTIVITIES, {
-    variables: { limit, after },
+    variables: { 
+      poolId: CONTRACTS.ETH_PRIVACY_POOL.toLowerCase(),
+      limit, 
+      after 
+    },
     errorPolicy: 'all',
     notifyOnNetworkStatusChange: true,
   })
@@ -68,6 +73,7 @@ export function useIndexerActivities(options: UseIndexerActivitiesOptions = {}) 
   /** Pull-to-refresh: reset to first page */
   const refresh = useCallback(() => {
     return refetch({
+      poolId: CONTRACTS.ETH_PRIVACY_POOL.toLowerCase(),
       limit,
       after: undefined, // start from beginning
     })

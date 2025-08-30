@@ -10,7 +10,7 @@ import {
 import { queuedRequest } from "@/lib/apiQueue";
 import { apolloClient } from "@/lib/clients";
 import { INDEXER_FETCH_POLICY } from "@/config/constants";
-import { GET_ALL_ACTIVITIES_PAGINATED } from "@/config/queries";
+import { GET_ACTIVITIES } from "@/config/queries";
 import type { Activity } from '@/services/data'
 
 /* ---------- Configuration ---------- */
@@ -56,8 +56,8 @@ async function fetchActivitiesPage(
 
     const poolId = poolAddress.toLowerCase();
     const result = await apolloClient.query({
-      query: GET_ALL_ACTIVITIES_PAGINATED,
-      variables: { poolId, limit: pageSize, after: cursor || null },
+      query: GET_ACTIVITIES,
+      variables: { poolId, limit: pageSize, after: cursor || null, orderDirection: "asc" },
       fetchPolicy: INDEXER_FETCH_POLICY,
     });
 

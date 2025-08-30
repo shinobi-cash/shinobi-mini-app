@@ -76,8 +76,14 @@ export const GET_APPROVED_LABELS = gql`
  * Get all activities with pagination support
  */
 export const GET_ACTIVITIES = gql`
-  query GetActivities($limit: Int = 10, $after: String) {
-    activitys(limit: $limit, after: $after, orderBy: "timestamp", orderDirection: "desc") {
+  query GetActivities($poolId: String!, $limit: Int = 10, $after: String, $orderDirection: String = "desc") {
+    activitys(
+      where: { poolId: $poolId }
+      limit: $limit
+      after: $after
+      orderBy: "timestamp"
+      orderDirection: $orderDirection
+    ) {
       items {
         id
         type
@@ -277,67 +283,7 @@ export const GET_ACTIVITY_BY_TX_HASH = gql`
   }
 `;
 
-/**
- * Get all activities with pagination support (for V2 privacy-first discovery)
- */
-export const GET_ALL_ACTIVITIES_PAGINATED = gql`
-  query GetAllActivitiesPaginated($poolId: String!, $limit: Int!, $after: String) {
-    activitys(
-      where: { poolId: $poolId }
-      limit: $limit
-      after: $after
-      orderBy: "timestamp"
-      orderDirection: "asc"
-    ) {
-      items {
-        id
-        type
-        poolId
-        amount
-        label
-        precommitmentHash
-        spentNullifier
-        newCommitment
-        blockNumber
-        timestamp
-        transactionHash
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
-      }
-    }
-  }
-`;
 
-/**
- * Get recent activities for a pool
- */
-export const GET_RECENT_ACTIVITIES = gql`
-  query GetRecentActivities($poolId: String!, $limit: Int = 50) {
-    activitys(
-      where: { poolId: $poolId }
-      orderBy: "timestamp"
-      orderDirection: "desc"
-      limit: $limit
-    ) {
-      items {
-        id
-        type
-        commitment
-        nullifierHash
-        label
-        amount
-        timestamp
-        transactionHash
-        blockNumber
-        aspStatus
-      }
-    }
-  }
-`;
 
 /**
  * Get activities within a date range
