@@ -7,16 +7,16 @@
 
 import { API_QUEUE } from "@/config/constants";
 
-interface QueuedRequest<T> {
+interface QueuedRequest {
   id: string;
-  executor: () => Promise<T>;
-  resolve: (value: T) => void;
+  executor: () => Promise<unknown>;
+  resolve: (value: unknown) => void;
   reject: (error: Error) => void;
   timestamp: number;
 }
 
 export class ApiExecutionQueue {
-  private queue: QueuedRequest<any>[] = [];
+  private queue: QueuedRequest[] = [];
   private processing = false;
   private lastExecutionTime = 0;
   private requestCounter = 0;
@@ -30,10 +30,10 @@ export class ApiExecutionQueue {
    */
   async submit<T>(executor: () => Promise<T>): Promise<T> {
     return new Promise<T>((resolve, reject) => {
-      const request: QueuedRequest<T> = {
+      const request: QueuedRequest = {
         id: `req_${++this.requestCounter}_${Date.now()}`,
-        executor,
-        resolve,
+        executor: executor as () => Promise<unknown>,
+        resolve: resolve as (value: unknown) => void,
         reject,
         timestamp: Date.now(),
       };

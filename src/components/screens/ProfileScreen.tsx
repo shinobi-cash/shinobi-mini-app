@@ -27,6 +27,24 @@ export const ProfileScreen = () => {
 
 const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
   const { publicKey, accountKey } = useAuth();
+
+  // Only render the actual profile when auth values exist
+  if (!publicKey || !accountKey) {
+    return null;
+  }
+
+  return <ProfileContent publicKey={publicKey} accountKey={accountKey} onSignOut={onSignOut} />;
+};
+
+const ProfileContent = ({
+  publicKey,
+  accountKey,
+  onSignOut,
+}: {
+  publicKey: string;
+  accountKey: bigint;
+  onSignOut: () => void;
+}) => {
   const noteChainModal = useModalWithSelection<NoteChain>(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { onTransactionIndexed } = useTransactionTracking();

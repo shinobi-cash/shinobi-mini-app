@@ -21,6 +21,8 @@ import {
   deriveDepositSecret,
   derivedNoteCommitment,
 } from "@/utils/noteDerivation";
+import type { SmartAccountClient } from "permissionless";
+import type { UserOperation } from "viem/account-abstraction";
 import {
   type WithdrawalData,
   createWithdrawalData,
@@ -66,8 +68,8 @@ export interface WithdrawalProofData {
 export interface PreparedWithdrawal {
   context: WithdrawalContext;
   proofData: WithdrawalProofData;
-  userOperation: any;
-  smartAccountClient: any;
+  userOperation: UserOperation<"0.7">;
+  smartAccountClient: SmartAccountClient;
 }
 
 // ============ UTILITY FUNCTIONS ============
@@ -218,7 +220,7 @@ export async function generateWithdrawalProof(
 export async function prepareWithdrawalTransaction(
   context: WithdrawalContext,
   proofData: WithdrawalProofData,
-): Promise<{ userOperation: any; smartAccountClient: any }> {
+): Promise<{ userOperation: UserOperation<"0.7">; smartAccountClient: SmartAccountClient }> {
   console.log("📤 Step 4: Preparing withdrawal transaction...");
 
   const { poolScope, withdrawalData } = context;
@@ -250,7 +252,10 @@ export async function prepareWithdrawalTransaction(
 /**
  * Step 5: Execute withdrawal transaction
  */
-export async function executeWithdrawal(smartAccountClient: any, userOperation: any): Promise<string> {
+export async function executeWithdrawal(
+  smartAccountClient: SmartAccountClient,
+  userOperation: UserOperation,
+): Promise<string> {
   console.log("🚀 Step 5: Executing withdrawal...");
 
   const transactionHash = await executeWithdrawalUserOperation(smartAccountClient, userOperation);

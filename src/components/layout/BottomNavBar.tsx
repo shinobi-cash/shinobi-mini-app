@@ -20,7 +20,7 @@ export const BottomNavBar = () => {
   return (
     <nav className="bg-app-surface border-t border-app-border pb-safe-area-bottom">
       <div className="flex items-center justify-around">
-        {navItems.map((item, index) => {
+        {navItems.map((item) => {
           const isActive = currentScreen === item.screen;
           return (
             <button

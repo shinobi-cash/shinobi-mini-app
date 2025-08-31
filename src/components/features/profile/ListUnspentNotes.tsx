@@ -14,7 +14,7 @@ export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
   const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
 
   // Use cached notes for immediate display
-  const { data: noteDiscovery, loading: isLoading } = useCachedNotes(publicKey, poolAddress, accountKey);
+  const { data: noteDiscovery, loading: isLoading } = useCachedNotes(publicKey || "", poolAddress);
 
   // TypeScript assertion: AuthenticationGate ensures these values exist
   if (!publicKey || !accountKey) {

@@ -6,20 +6,20 @@ export interface ValidationRule<T = unknown> {
   message: string;
 }
 
-export interface FormFieldConfig<T = unknown> {
+export interface FormFieldConfig<T = any> {
   rules: ValidationRule<T>[];
   initialValue: T;
 }
 
 export interface FormConfig {
-  [key: string]: FormFieldConfig;
+  [key: string]: FormFieldConfig<any>;
 }
 
-export function useFormValidation<T extends Record<string, unknown>>(config: FormConfig) {
+export function useFormValidation<T extends Record<string, any>>(config: FormConfig) {
   const [values, setValues] = useState<T>(() => {
     const initialValues = {} as T;
     for (const key of Object.keys(config)) {
-      initialValues[key as keyof T] = config[key].initialValue;
+      initialValues[key as keyof T] = config[key].initialValue as T[keyof T];
     }
     return initialValues;
   });
@@ -28,7 +28,7 @@ export function useFormValidation<T extends Record<string, unknown>>(config: For
   const [touched, setTouched] = useState<Partial<Record<keyof T, boolean>>>({});
 
   const validateField = useCallback(
-    (name: keyof T, value: unknown): string | null => {
+    (name: keyof T, value: any): string | null => {
       const fieldConfig = config[name as string];
       if (!fieldConfig) return null;
 
@@ -43,7 +43,7 @@ export function useFormValidation<T extends Record<string, unknown>>(config: For
   );
 
   const setValue = useCallback(
-    (name: keyof T, value: unknown) => {
+    (name: keyof T, value: any) => {
       setValues((prev) => ({ ...prev, [name]: value }));
 
       // Validate immediately if field has been touched
@@ -91,7 +91,7 @@ export function useFormValidation<T extends Record<string, unknown>>(config: For
   const reset = useCallback(() => {
     const initialValues = {} as T;
     for (const key of Object.keys(config)) {
-      initialValues[key as keyof T] = config[key].initialValue;
+      initialValues[key as keyof T] = config[key].initialValue as T[keyof T];
     }
     setValues(initialValues);
     setErrors({});

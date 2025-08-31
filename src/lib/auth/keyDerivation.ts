@@ -102,7 +102,7 @@ async function getPasskeyDerivedBytes(accountName: string, credentialId: string)
       extensions: {
         // WebAuthn Level 3 PRF (aka hmac-secret). Some platforms gate behind "prf".
         prf: { eval: { first: prfInput } },
-      } as any,
+      },
     },
   })) as PublicKeyCredential | null;
 
@@ -110,9 +110,9 @@ async function getPasskeyDerivedBytes(accountName: string, credentialId: string)
     throw new Error("Passkey authentication failed - no assertion received");
   }
 
-  const extResults = (cred as any).getClientExtensionResults?.() ?? {};
+  const extResults = cred.getClientExtensionResults?.() ?? {};
   const prf = extResults?.prf;
-  const first: ArrayBuffer | undefined = prf?.results?.first;
+  const first: ArrayBuffer | undefined = prf?.results?.first as ArrayBuffer | undefined;
 
   if (!first || !(first instanceof ArrayBuffer)) {
     // Deterministic derivation cannot be guaranteed without PRF.
@@ -184,7 +184,7 @@ export async function createPasskeyCredential(
       extensions: {
         // Advertise PRF support at registration if available; some authenticators use it to bind derivation
         prf: { eval: { first: new TextEncoder().encode("shinobi-prf:probe") } },
-      } as any,
+      },
     },
   })) as PublicKeyCredential | null;
 

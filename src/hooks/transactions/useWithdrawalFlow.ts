@@ -39,7 +39,7 @@ export function useWithdrawalFlow({ note }: UseWithdrawalFlowProps) {
           note,
           withdrawAmount,
           recipientAddress,
-          accountKey,
+          accountKey: accountKey!,
         };
 
         // Validate the request first

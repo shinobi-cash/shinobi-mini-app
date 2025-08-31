@@ -340,6 +340,10 @@ class NoteCacheService {
 
     return new Promise((resolve, reject) => {
       const transaction = this.db?.transaction([STORE_NAME], "readwrite");
+      if (!transaction) {
+        reject(new Error("Database transaction could not be created"));
+        return;
+      }
       const store = transaction.objectStore(STORE_NAME);
       const request = store.put(storageData);
 
@@ -351,37 +355,39 @@ class NoteCacheService {
   private async getCachedData(publicKey: string, poolAddress: string): Promise<CachedNoteData | null> {
     if (!this.db) await this.init();
 
-    return new Promise(async (resolve, reject) => {
-      try {
-        const key = await this.getKey(publicKey, poolAddress);
-        const transaction = this.db?.transaction([STORE_NAME], "readonly");
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.get(key);
+    return new Promise((resolve, reject) => {
+      this.getKey(publicKey, poolAddress)
+        .then((key) => {
+          const transaction = this.db?.transaction([STORE_NAME], "readonly");
+          if (!transaction) {
+            reject(new Error("Database transaction could not be created"));
+            return;
+          }
+          const store = transaction.objectStore(STORE_NAME);
+          const request = store.get(key);
 
-        request.onerror = () => reject(request.error);
-        request.onsuccess = async () => {
-          const result: StoredEncryptedData = request.result;
-          if (result) {
-            try {
+          request.onerror = () => reject(request.error);
+          request.onsuccess = () => {
+            const result: StoredEncryptedData = request.result;
+            if (result) {
               const encryptedData: EncryptedData = {
                 iv: this.base64ToArrayBuffer(result.encryptedPayload.iv),
                 data: this.base64ToArrayBuffer(result.encryptedPayload.data),
                 salt: this.base64ToArrayBuffer(result.encryptedPayload.salt),
               };
 
-              const decryptedData = await this.decrypt(encryptedData);
-              resolve(decryptedData);
-            } catch (decryptionError) {
-              console.error("Failed to decrypt cached data:", decryptionError);
-              resolve(null); // Return null if decryption fails (wrong password)
+              this.decrypt(encryptedData)
+                .then((decryptedData) => resolve(decryptedData))
+                .catch((decryptionError) => {
+                  console.error("Failed to decrypt cached data:", decryptionError);
+                  resolve(null); // Return null if decryption fails (wrong password)
+                });
+            } else {
+              resolve(null);
             }
-          } else {
-            resolve(null);
-          }
-        };
-      } catch (error) {
-        reject(error);
-      }
+          };
+        })
+        .catch((error) => reject(error));
     });
   }
 
@@ -408,6 +414,10 @@ class NoteCacheService {
 
     return new Promise((resolve, reject) => {
       const transaction = this.db?.transaction([STORE_NAME, ACCOUNT_STORE_NAME, PASSKEY_STORE_NAME], "readwrite");
+      if (!transaction) {
+        reject(new Error("Failed to create transaction"));
+        return;
+      }
       const notesStore = transaction.objectStore(STORE_NAME);
       const accountStore = transaction.objectStore(ACCOUNT_STORE_NAME);
       const passkeyStore = transaction.objectStore(PASSKEY_STORE_NAME);
@@ -428,7 +438,9 @@ class NoteCacheService {
                 keysToRemove.push(key);
               }
             }
-            keysToRemove.forEach((key) => localStorage.removeItem(key));
+            for (const key of keysToRemove) {
+              localStorage.removeItem(key);
+            }
           } catch (error) {
             console.warn("Failed to clear session markers:", error);
           }
@@ -481,7 +493,7 @@ class NoteCacheService {
         if (!this.db?.objectStoreNames.contains(ACCOUNT_STORE_NAME)) {
           console.error(
             `${ACCOUNT_STORE_NAME} object store not found. Available stores:`,
-            Array.from(this.db?.objectStoreNames),
+            Array.from(this.db?.objectStoreNames || []),
           );
           reject(
             new Error(`Database corruption: ${ACCOUNT_STORE_NAME} object store missing. Try clearing browser data.`),
@@ -519,6 +531,10 @@ class NoteCacheService {
 
     return new Promise((resolve, reject) => {
       const transaction = this.db?.transaction([ACCOUNT_STORE_NAME], "readonly");
+      if (!transaction) {
+        reject(new Error("Failed to create transaction"));
+        return;
+      }
       const store = transaction.objectStore(ACCOUNT_STORE_NAME);
       const request = store.get(accountName);
 
@@ -551,8 +567,17 @@ class NoteCacheService {
 
     return new Promise((resolve, reject) => {
       const transaction = this.db?.transaction([ACCOUNT_STORE_NAME], "readonly");
+      if (!this.currentAccountName) {
+        reject(new Error("No current account name set"));
+        return;
+      }
+      if (!transaction) {
+        reject(new Error("Database transaction could not be created"));
+        return;
+      }
       const store = transaction.objectStore(ACCOUNT_STORE_NAME);
-      const request = store.get(this.currentAccountName!);
+
+      const request = store.get(this.currentAccountName);
 
       request.onerror = () => reject(request.error);
       request.onsuccess = async () => {
@@ -623,6 +648,10 @@ class NoteCacheService {
 
     return new Promise((resolve, reject) => {
       const transaction = this.db?.transaction([PASSKEY_STORE_NAME], "readwrite");
+      if (!transaction) {
+        reject(new Error("Failed to create transaction"));
+        return;
+      }
       const store = transaction.objectStore(PASSKEY_STORE_NAME);
       const request = store.put(passkeyData);
 
@@ -639,6 +668,10 @@ class NoteCacheService {
 
     return new Promise((resolve, reject) => {
       const transaction = this.db?.transaction([PASSKEY_STORE_NAME], "readonly");
+      if (!transaction) {
+        reject(new Error("Failed to create transaction"));
+        return;
+      }
       const store = transaction.objectStore(PASSKEY_STORE_NAME);
       const request = store.get(accountName);
 
@@ -657,6 +690,10 @@ class NoteCacheService {
 
     return new Promise((resolve, reject) => {
       const transaction = this.db?.transaction([ACCOUNT_STORE_NAME], "readonly");
+      if (!transaction) {
+        reject(new Error("Failed to create transaction"));
+        return;
+      }
       const store = transaction.objectStore(ACCOUNT_STORE_NAME);
       const request = store.getAllKeys();
 

@@ -156,12 +156,14 @@ export function formatProofForContract(
 export async function prepareWithdrawalUserOperation(
   smartAccountClient: SmartAccountClient,
   relayCallData: `0x${string}`,
-): Promise<any> {
+) {
   try {
     console.log("📤 Preparing UserOperation for withdrawal...");
-
+    if (!smartAccountClient.account) {
+      throw new Error("Smart account not initialized");
+    }
     const preparedUserOperation = await smartAccountClient.prepareUserOperation({
-      account: smartAccountClient.account!,
+      account: smartAccountClient.account,
       calls: [
         {
           to: CONTRACTS.PRIVACY_POOL_ENTRYPOINT as `0x${string}`,

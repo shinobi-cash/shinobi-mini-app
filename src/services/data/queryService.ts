@@ -18,6 +18,14 @@ import {
 import { apiQueue } from "@/lib/apiQueue";
 import { apolloClient } from "@/lib/clients";
 
+// Types based on indexer schema
+interface MerkleTreeLeafData {
+  leafIndex: string;
+  leafValue: string;
+  treeRoot: string;
+  treeSize: string;
+}
+
 // ============ CONSTANTS ============
 
 const DEFAULT_LIMIT = 100;
@@ -146,7 +154,7 @@ export async function fetchStateTreeLeaves(poolId: string, limit: number = DEFAU
 
       // Add leaves from this page
       allLeaves.push(
-        ...pageLeaves.map((leaf: any) => ({
+        ...pageLeaves.map((leaf: MerkleTreeLeafData) => ({
           leafIndex: leaf.leafIndex,
           leafValue: leaf.leafValue,
         })),
@@ -242,7 +250,7 @@ export async function fetchApprovedLabelsFromIndexer(): Promise<string[]> {
     });
 
     const activities = result.data?.activitys?.items || [];
-    return activities.map((activity: any) => activity.label);
+    return activities.map((activity: Activity) => activity.label);
   } catch (error) {
     console.error("Failed to fetch approved labels from indexer:", error);
     return [];
