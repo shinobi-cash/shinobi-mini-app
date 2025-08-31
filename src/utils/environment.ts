@@ -9,9 +9,7 @@ export function isFarcasterEnvironment(): boolean {
 
   // Check for Farcaster SDK presence
   const hasFarcasterSDK =
-    (typeof window !== "undefined" &&
-      (window as any).parent?.postMessage &&
-      window.location.hostname.includes("farcaster")) ||
+    (typeof window !== "undefined" && window.location.hostname.includes("farcaster")) ||
     window.location.hostname.includes("warpcast");
 
   // Check user agent for Farcaster-specific indicators

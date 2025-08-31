@@ -53,7 +53,7 @@ const DepositForm = () => {
     if (error) {
       banner.error("Transaction failed");
     }
-  }, [error]);
+  }, [error, banner]);
 
   // Handle note generation errors silently - auto-retry without user notification
   useEffect(() => {
@@ -81,7 +81,7 @@ const DepositForm = () => {
         form.reset();
       }, 1000);
     }
-  }, [isSuccess, transactionHash, reset, form]);
+  }, [isSuccess, transactionHash, reset, form, trackTransaction]);
 
   // Extract form handlers
   const { handleAmountChange, handleQuickAmount } = form;

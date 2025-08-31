@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { formatEther } from "viem";
+import type { CashNoteData } from "../transactions/useDepositCommitment";
 import { useFormValidation, validationRules } from "./useFormValidation";
 
 interface DepositFormData {
@@ -62,10 +63,10 @@ export function useDepositForm({ balance }: UseDepositFormProps) {
   // Validation checks for UI feedback
   const isValidAmount = amountNum > 0 && amountNum <= availableBalance;
   const hasBalance = balance?.value ? Number.parseFloat(formatEther(balance.value)) > 0 : false;
-  const hasNoteData = (noteData: any) => noteData !== null;
+  const hasNoteData = (noteData: CashNoteData | null) => noteData !== null;
 
   // Check if deposit can be executed
-  const canDeposit = (isOnCorrectNetwork: boolean, noteData: any, isTransacting: boolean) => {
+  const canDeposit = (isOnCorrectNetwork: boolean, noteData: CashNoteData | null, isTransacting: boolean) => {
     return (
       isValidAmount &&
       hasBalance &&

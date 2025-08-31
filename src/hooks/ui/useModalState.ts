@@ -48,7 +48,7 @@ export function useModalState(initialState = false): ModalState & ModalStateActi
  * Hook for managing modal state with selected item pattern
  * Common pattern where opening a modal also sets a selected item
  */
-export function useModalWithSelection<T = any>(initialState = false) {
+export function useModalWithSelection<T = unknown>(initialState = false) {
   const modal = useModalState(initialState);
   const [selectedItem, setSelectedItem] = useState<T | null>(null);
 

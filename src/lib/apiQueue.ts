@@ -109,9 +109,9 @@ export class ApiExecutionQueue {
    */
   clear() {
     // Reject all pending requests
-    this.queue.forEach((request) => {
+    for (const request of this.queue) {
       request.reject(new Error("Queue cleared"));
-    });
+    }
     this.queue = [];
     this.processing = false;
   }

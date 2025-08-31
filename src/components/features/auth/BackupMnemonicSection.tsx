@@ -87,7 +87,7 @@ Shinobi Privacy App`;
             <div className="mb-3">
               <div className="grid grid-cols-3 gap-1">
                 {displayMnemonic.map((word, index) => (
-                  <div key={`mnemonic-${index}`} className="bg-app-background rounded-lg text-center border border-app">
+                  <div key={word} className="bg-app-background rounded-lg text-center border border-app">
                     <span className="text-xs text-app-tertiary block mb-0.5">{index + 1}</span>
                     <span className="font-mono text-xs text-app-primary font-medium">{word}</span>
                   </div>

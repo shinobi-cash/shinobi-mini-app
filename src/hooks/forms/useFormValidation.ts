@@ -1,12 +1,12 @@
 import { useCallback, useState } from "react";
 import { isAddress } from "viem";
 
-export interface ValidationRule<T = any> {
+export interface ValidationRule<T = unknown> {
   validate: (value: T) => boolean;
   message: string;
 }
 
-export interface FormFieldConfig<T = any> {
+export interface FormFieldConfig<T = unknown> {
   rules: ValidationRule<T>[];
   initialValue: T;
 }
@@ -15,12 +15,12 @@ export interface FormConfig {
   [key: string]: FormFieldConfig;
 }
 
-export function useFormValidation<T extends Record<string, any>>(config: FormConfig) {
+export function useFormValidation<T extends Record<string, unknown>>(config: FormConfig) {
   const [values, setValues] = useState<T>(() => {
     const initialValues = {} as T;
-    Object.keys(config).forEach((key) => {
+    for (const key of Object.keys(config)) {
       initialValues[key as keyof T] = config[key].initialValue;
-    });
+    }
     return initialValues;
   });
 
@@ -28,7 +28,7 @@ export function useFormValidation<T extends Record<string, any>>(config: FormCon
   const [touched, setTouched] = useState<Partial<Record<keyof T, boolean>>>({});
 
   const validateField = useCallback(
-    (name: keyof T, value: any): string | null => {
+    (name: keyof T, value: unknown): string | null => {
       const fieldConfig = config[name as string];
       if (!fieldConfig) return null;
 
@@ -43,7 +43,7 @@ export function useFormValidation<T extends Record<string, any>>(config: FormCon
   );
 
   const setValue = useCallback(
-    (name: keyof T, value: any) => {
+    (name: keyof T, value: unknown) => {
       setValues((prev) => ({ ...prev, [name]: value }));
 
       // Validate immediately if field has been touched
@@ -70,25 +70,29 @@ export function useFormValidation<T extends Record<string, any>>(config: FormCon
     const newErrors: Partial<Record<keyof T, string>> = {};
     let isValid = true;
 
-    Object.keys(config).forEach((key) => {
+    for (const key of Object.keys(config)) {
       const error = validateField(key as keyof T, values[key as keyof T]);
       if (error) {
         newErrors[key as keyof T] = error;
         isValid = false;
       }
-    });
+    }
 
     setErrors(newErrors);
-    setTouched(Object.keys(config).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
+    const touchedFields: Partial<Record<keyof T, boolean>> = {};
+    for (const key of Object.keys(config)) {
+      touchedFields[key as keyof T] = true;
+    }
+    setTouched(touchedFields);
 
     return isValid;
   }, [config, validateField, values]);
 
   const reset = useCallback(() => {
     const initialValues = {} as T;
-    Object.keys(config).forEach((key) => {
+    for (const key of Object.keys(config)) {
       initialValues[key as keyof T] = config[key].initialValue;
-    });
+    }
     setValues(initialValues);
     setErrors({});
     setTouched({});

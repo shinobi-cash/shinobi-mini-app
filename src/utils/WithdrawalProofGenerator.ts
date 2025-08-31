@@ -10,25 +10,21 @@
  * - Proof verification using verification keys
  */
 
-import { LeanIMT } from "@zk-kit/lean-imt";
+import { LeanIMT, type LeanIMTMerkleProof } from "@zk-kit/lean-imt";
 import { poseidon2 } from "poseidon-lite";
 import * as snarkjs from "snarkjs";
 
 // ============ TYPES ============
 
 export interface WithdrawalProofData {
-  proof: {
-    pi_a: string[];
-    pi_b: string[][];
-    pi_c: string[];
-  };
+  proof: snarkjs.Groth16Proof;
   publicSignals: string[];
 }
 
 interface CircuitFiles {
   wasmFile: Uint8Array;
   zkeyFile: Uint8Array;
-  vkeyData: any;
+  vkeyData: object;
 }
 
 interface WithdrawalProofArgs {
@@ -197,11 +193,7 @@ export class WithdrawalProofGenerator {
 
     try {
       const circuitFiles = await this.ensureCircuitFiles();
-      const isValid = await snarkjs.groth16.verify(
-        circuitFiles.vkeyData,
-        proofData.publicSignals,
-        proofData.proof as any,
-      );
+      const isValid = await snarkjs.groth16.verify(circuitFiles.vkeyData, proofData.publicSignals, proofData.proof);
 
       console.log(`   ${isValid ? "✅ Valid" : "❌ Invalid"} proof`);
       return isValid;
@@ -216,11 +208,15 @@ export class WithdrawalProofGenerator {
   private buildMerkleTrees(stateTreeCommitments: bigint[], aspTreeLabels: bigint[]) {
     // Build state tree
     const stateTree = new LeanIMT(this.hash);
-    stateTreeCommitments.forEach((commitment) => stateTree.insert(commitment));
+    for (const commitment of stateTreeCommitments) {
+      stateTree.insert(commitment);
+    }
 
     // Build ASP tree
     const aspTree = new LeanIMT(this.hash);
-    aspTreeLabels.forEach((label) => aspTree.insert(label));
+    for (const label of aspTreeLabels) {
+      aspTree.insert(label);
+    }
 
     return { stateTree, aspTree };
   }
@@ -234,8 +230,8 @@ export class WithdrawalProofGenerator {
     label: bigint;
     newNullifier: bigint;
     newSecret: bigint;
-    stateProof: any;
-    aspProof: any;
+    stateProof: LeanIMTMerkleProof<bigint>;
+    aspProof: LeanIMTMerkleProof<bigint>;
     stateTreeDepth: number;
     ASPTreeDepth: number;
     stateIndex: number;

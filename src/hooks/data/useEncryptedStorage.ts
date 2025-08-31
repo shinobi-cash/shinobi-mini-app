@@ -77,14 +77,14 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
       };
 
       const events = ["mousedown", "mousemove", "keypress", "scroll", "touchstart"];
-      events.forEach((event) => {
+      for (const event of events) {
         document.addEventListener(event, handleUserActivity, true);
-      });
+      }
 
       return () => {
-        events.forEach((event) => {
+        for (const event of events) {
           document.removeEventListener(event, handleUserActivity, true);
-        });
+        }
       };
     }
   }, [state.isSessionActive, resetSessionTimeout]);

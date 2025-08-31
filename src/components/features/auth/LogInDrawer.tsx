@@ -88,8 +88,10 @@ function LoginWithBackupPhrase({ onRecoverAccountKey }: { onRecoverAccountKey: (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-3 gap-2">
               {words.map((word, idx) => (
-                <div key={`word-${idx}`} className="flex flex-col">
-                  <label htmlFor={`word-${idx}`} className="text-xs font-medium text-app-secondary text-center mb-1">{idx + 1}</label>
+                <div key={`word-field-${idx}-${word}`} className="flex flex-col">
+                  <label htmlFor={`word-${idx}`} className="text-xs font-medium text-app-secondary text-center mb-1">
+                    {idx + 1}
+                  </label>
                   <input
                     id={`word-${idx}`}
                     ref={idx === 0 ? firstInputRef : undefined}

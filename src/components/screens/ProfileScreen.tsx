@@ -41,7 +41,10 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
     error,
     progress,
     refresh,
-  } = useNotes(publicKey!, poolAddress, accountKey!, { autoScan: true });
+  } = useNotes(publicKey, poolAddress, accountKey, { autoScan: true });
+
+  // Track shown banners to prevent infinite loops
+  const shownBannersRef = useRef({ scanning: false, error: false, lastProgressId: "", lastErrorId: "" });
 
   // Memoize note chains, showing last note of each chain sorted by timestamp
   const noteChains = useMemo(() => {
@@ -61,9 +64,6 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
     });
     return cleanup;
   }, [onTransactionIndexed, refresh]);
-
-  // Track shown banners to prevent infinite loops
-  const shownBannersRef = useRef({ scanning: false, error: false, lastProgressId: "", lastErrorId: "" });
 
   // Banner feedback for note discovery
   useEffect(() => {
@@ -85,7 +85,7 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
     }
 
     shownBannersRef.current.lastProgressId = progressId;
-  }, [progress, noteDiscovery?.newNotesFound]);
+  }, [progress, noteDiscovery, banner]);
 
   // Banner feedback for discovery errors
   useEffect(() => {
@@ -102,7 +102,12 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
     }
 
     shownBannersRef.current.lastErrorId = errorId;
-  }, [error]);
+  }, [error, banner]);
+
+  // TypeScript assertion: AuthenticationGate ensures these values exist
+  if (!publicKey || !accountKey) {
+    throw new Error("ProfileScreen: Missing auth values despite AuthenticationGate");
+  }
 
   const unspentNotes = noteChains.filter((noteChain) => {
     const lastNote = noteChain[noteChain.length - 1];
@@ -139,17 +144,6 @@ const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
         open={noteChainModal.isOpen}
         onOpenChange={noteChainModal.setOpen}
       />
-
-      {/* Empty State for no account keys */}
-      {(!accountKey || !publicKey) && (
-        <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-          <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-            <span className="text-2xl">💰</span>
-          </div>
-          <h3 className="text-lg font-medium text-app-primary mb-2">No Account Keys</h3>
-          <p className="text-sm text-app-secondary">Create or import an account to generate cash notes</p>
-        </div>
-      )}
     </div>
   );
 };

@@ -125,7 +125,9 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
 
         {/* Recipient Address */}
         <div className="mb-4">
-          <label htmlFor="recipient-address" className="text-sm font-medium text-app-primary mb-2 block">Recipient Address</label>
+          <label htmlFor="recipient-address" className="text-sm font-medium text-app-primary mb-2 block">
+            Recipient Address
+          </label>
           <Input
             id="recipient-address"
             type="text"

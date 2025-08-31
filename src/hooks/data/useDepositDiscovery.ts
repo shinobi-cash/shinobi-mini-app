@@ -4,7 +4,7 @@ import type { Activity } from "@/services/data/queryService";
 import { deriveChangeNullifier, deriveDepositNullifier, deriveDepositSecret } from "@/utils/noteDerivation";
 import { poseidon1, poseidon2 } from "poseidon-lite";
 // discoverNotesV2.ts
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /* ---------- Configuration ---------- */
 const ACTIVITIES_PER_PAGE = 100;
@@ -330,9 +330,6 @@ export function useNotes(publicKey: string, poolAddress: string, accountKey: big
   const [error, setError] = useState<Error | null>(null);
   const [progress, setProgress] = useState<DiscoveryProgress | null>(null);
 
-  // Stable string key
-  const accountKeyString = useMemo(() => accountKey.toString(), [accountKey]);
-
   // Track latest refresh
   const refreshIdRef = useRef(0);
 
@@ -385,7 +382,7 @@ export function useNotes(publicKey: string, poolAddress: string, accountKey: big
       });
 
     return () => controller.abort();
-  }, [accountKeyString, poolAddress, publicKey, runDiscovery, options?.autoScan]);
+  }, [poolAddress, publicKey, runDiscovery, options?.autoScan]);
 
   const refresh = useCallback(async () => {
     const runId = ++refreshIdRef.current;

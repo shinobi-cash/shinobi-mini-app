@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 type Theme = "dark" | "light" | "system";
 
@@ -33,12 +33,12 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem(storageKey) as Theme) || defaultTheme);
 
   // Calculate the effective theme (what's actually applied)
-  const getEffectiveTheme = (): "light" | "dark" => {
+  const getEffectiveTheme = useCallback((): "light" | "dark" => {
     if (theme === "system") {
       return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     }
     return theme;
-  };
+  }, [theme]);
 
   const [effectiveTheme, setEffectiveTheme] = useState<"light" | "dark">(getEffectiveTheme);
 
@@ -48,7 +48,7 @@ export function ThemeProvider({
 
     root.setAttribute("data-theme", newEffectiveTheme);
     setEffectiveTheme(newEffectiveTheme);
-  }, [theme]);
+  }, [getEffectiveTheme]);
 
   useEffect(() => {
     // Listen for system theme changes when theme is set to "system"

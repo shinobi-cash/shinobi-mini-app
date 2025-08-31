@@ -46,15 +46,15 @@ export async function getWithdrawalSmartAccountClient() {
   const account = privateKeyToAccount(WITHDRAWAL_ACCOUNT_PRIVATE_KEY);
 
   const simpleAccount = await toSimpleSmartAccount({
-    owner: account as any,
-    client: publicClient as any,
+    owner: account,
+    client: publicClient,
     entryPoint: { address: entryPoint07Address, version: "0.7" },
   });
 
   const smartAccountClient = createSmartAccountClient({
-    client: publicClient as any,
+    client: publicClient,
     account: simpleAccount,
-    bundlerTransport: http(BUNDLER_URL) as any,
+    bundlerTransport: http(BUNDLER_URL),
     paymaster: {
       // Provide stub data for gas estimation - just hardcode high gas values
       async getPaymasterStubData() {

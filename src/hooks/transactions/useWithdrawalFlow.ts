@@ -39,7 +39,7 @@ export function useWithdrawalFlow({ note }: UseWithdrawalFlowProps) {
           note,
           withdrawAmount,
           recipientAddress,
-          accountKey: accountKey!,
+          accountKey,
         };
 
         // Validate the request first
@@ -104,6 +104,11 @@ export function useWithdrawalFlow({ note }: UseWithdrawalFlowProps) {
     setPreparationError(null);
     setShowPreview(false);
   }, []);
+
+  // TypeScript assertion: This hook is used in auth-gated components
+  if (!accountKey) {
+    throw new Error("useWithdrawalFlow: Missing accountKey despite AuthenticationGate");
+  }
 
   return {
     // States

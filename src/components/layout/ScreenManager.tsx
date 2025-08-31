@@ -15,7 +15,7 @@ import { Screen } from "./ScreenLayout";
 export interface ScreenConfig {
   id: string;
   component: React.ComponentType;
-  props?: Record<string, any>;
+  props?: Record<string, unknown>;
   title?: string;
   scrollable?: boolean;
 }

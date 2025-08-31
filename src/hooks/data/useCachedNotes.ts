@@ -1,12 +1,9 @@
 import { type DiscoveryResult, noteCache } from "@/lib/storage/noteCache";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
-export function useCachedNotes(publicKey: string, poolAddress: string, accountKey: bigint) {
+export function useCachedNotes(publicKey: string, poolAddress: string) {
   const [data, setData] = useState<DiscoveryResult | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Stable string key
-  const accountKeyString = useMemo(() => accountKey.toString(), [accountKey]);
 
   useEffect(() => {
     const loadCache = async () => {
@@ -21,7 +18,7 @@ export function useCachedNotes(publicKey: string, poolAddress: string, accountKe
     };
 
     loadCache();
-  }, [publicKey, poolAddress, accountKeyString]);
+  }, [publicKey, poolAddress]);
 
   return { data, loading };
 }

@@ -5,14 +5,14 @@
 declare global {
   interface Window {
     Buffer?: {
-      from(data: any, encoding?: string): Uint8Array;
-      isBuffer(obj: any): boolean;
+      from(data: string | ArrayBuffer | Uint8Array, encoding?: string): Uint8Array;
+      isBuffer(obj: unknown): boolean;
     };
   }
 
   var Buffer: {
-    from(data: any, encoding?: string): Uint8Array;
-    isBuffer(obj: any): boolean;
+    from(data: string | ArrayBuffer | Uint8Array, encoding?: string): Uint8Array;
+    isBuffer(obj: unknown): boolean;
   };
 }
 

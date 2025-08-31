@@ -109,7 +109,11 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
     const checkTransactionIndexed = async () => {
       try {
         const indexedBlockInfo = await fetchLatestIndexedBlock();
-        if (indexedBlockInfo && Number.parseInt(indexedBlockInfo.blockNumber) >= trackedTransaction.blockNumber!) {
+        if (
+          indexedBlockInfo &&
+          trackedTransaction.blockNumber !== null &&
+          Number.parseInt(indexedBlockInfo.blockNumber) >= trackedTransaction.blockNumber
+        ) {
           setTrackingStatus("synced");
 
           // Emit the indexed event

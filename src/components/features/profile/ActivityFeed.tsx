@@ -13,8 +13,8 @@ export interface ActivityFeedProps {
   loading?: boolean;
   error?: string;
   hasNextPage?: boolean;
-  onFetchMore?: () => Promise<any>;
-  onRefresh?: () => Promise<any>;
+  onFetchMore?: () => Promise<void>;
+  onRefresh?: () => Promise<void>;
 }
 
 export const ActivityFeed = ({
@@ -154,15 +154,14 @@ export const ActivityFeed = ({
             ) : (
               <>
                 {activities.map((activity) => (
-                  <div 
-                    key={activity.id} 
+                  <button
+                    key={activity.id}
+                    type="button"
                     onClick={() => handleActivityClick(activity)}
-                    onKeyDown={(e) => e.key === "Enter" && handleActivityClick(activity)}
-                    role="button"
-                    tabIndex={0}
+                    className="w-full text-left"
                   >
                     <ActivityRow activity={activity} />
-                  </div>
+                  </button>
                 ))}
 
                 {isFetchingMore && (
