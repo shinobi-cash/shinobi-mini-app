@@ -1,6 +1,6 @@
+import type { Activity } from "@/lib/indexer/sdk";
 import { type DiscoveryResult, type Note, type NoteChain, noteCache } from "@/lib/storage/noteCache";
-import { fetchActivities } from "@/services/data/queryService";
-import type { Activity } from "@/services/data/queryService";
+import { fetchActivities} from "@/services/data/indexerService";
 import { deriveChangeNullifier, deriveDepositNullifier, deriveDepositSecret } from "@/utils/noteDerivation";
 import { poseidon1, poseidon2 } from "poseidon-lite";
 // discoverNotesV2.ts
@@ -182,17 +182,18 @@ export async function discoverNotes(
   while (hasNext) {
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
 
-    // Fetch one page of generic activities (rate-limited via apiQueue)
+    // Fetch one page of generic activities 
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
 
     const activitiesResult = await fetchActivities(poolAddress, ACTIVITIES_PER_PAGE, cursor, "asc");
     const activities: Activity[] = activitiesResult.items;
+    cursor = activitiesResult.pageInfo.endCursor;
     pagesProcessed++;
 
     // Update progress for page fetch
     progress.pagesProcessed = pagesProcessed;
     progress.currentPageActivityCount = activities.length;
-    progress.lastCursor = activitiesResult.pageInfo.endCursor;
+    progress.lastCursor = cursor;
     onProgress?.({ ...progress });
 
     // 1) Extend live deposits in-place using this page's activities
@@ -291,7 +292,6 @@ export async function discoverNotes(
     }
 
     // 3) Persist after processing this page so we can resume later
-    cursor = activitiesResult.pageInfo.endCursor || cursor;
     await noteCache.storeDiscoveredNotes(publicKey, poolAddress, notes, cursor);
 
     // Re-emit progress after persistence

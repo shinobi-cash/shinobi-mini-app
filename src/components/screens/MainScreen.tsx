@@ -1,5 +1,6 @@
 import { NavigationProvider } from "../../contexts/NavigationContext";
-import { useIndexerActivities } from "../../hooks/data/useIndexerActivities";
+import { useActivities } from "../../hooks/data/useActivities";
+import { CONTRACTS } from "../../config/constants";
 import { ActivityFeed } from "../features/profile/ActivityFeed";
 import { AppBanner } from "../layout/AppBanner";
 import { AppHeader } from "../layout/AppHeader";
@@ -7,6 +8,8 @@ import { BottomNavBar } from "../layout/BottomNavBar";
 import { AppLayout } from "../layout/ScreenLayout";
 import { type ScreenConfig, ScreenManager } from "../layout/ScreenManager";
 import { DepositScreen } from "./DepositScreen";
+import { useBanner } from "../../contexts/BannerContext";
+import { useEffect, useRef } from "react";
 import { ProfileScreen } from "./ProfileScreen";
 import { WithdrawalScreen } from "./WithdrawalScreen";
 
@@ -14,16 +17,43 @@ import { WithdrawalScreen } from "./WithdrawalScreen";
  * Home Screen View Controller
  */
 function HomeScreenController() {
-  const { activities, loading, error, loadMore, hasNextPage, refresh } = useIndexerActivities();
+  const { banner } = useBanner();
+  const lastErrorRef = useRef<string | null>(null);
+  
+  const { 
+    activities, 
+    loading, 
+    error, 
+    fetchMore, 
+    hasNextPage, 
+    refetch,
+    hasData 
+  } = useActivities({
+    poolId: CONTRACTS.ETH_PRIVACY_POOL,
+    limit: 10
+  });
+
+  // Show banner error when we have data but error on refresh
+  // Use error message string to prevent infinite loops
+  useEffect(() => {
+    const errorMessage = error?.message || null;
+    
+    if (errorMessage && hasData && errorMessage !== lastErrorRef.current) {
+      banner.error("Failed to refresh activities", { duration: 5000 });
+      lastErrorRef.current = errorMessage;
+    } else if (!errorMessage) {
+      lastErrorRef.current = null;
+    }
+  }, [error?.message, hasData, banner]);
 
   return (
     <ActivityFeed
-      activities={activities}
+      activities={activities || []}
       loading={loading}
-      error={error ? "Failed to load activities" : undefined}
+      error={error && !hasData ? "Failed to load activities" : undefined}
       hasNextPage={hasNextPage}
-      onFetchMore={() => loadMore?.() ?? Promise.resolve()}
-      onRefresh={() => refresh?.() ?? Promise.resolve()}
+      onFetchMore={async () => { await fetchMore?.(); }}
+      onRefresh={async () => { await refetch?.(); }}
     />
   );
 }

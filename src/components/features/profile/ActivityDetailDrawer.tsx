@@ -1,6 +1,6 @@
 import { NETWORK } from "@/config/constants";
 import { useBanner } from "@/contexts/BannerContext";
-import type { Activity } from "@/services/data/queryService";
+import type { Activity } from "@/lib/indexer/sdk";
 import { formatEthAmount, formatHash, formatTimestamp } from "@/utils/formatters";
 import { Copy, ExternalLink, X } from "lucide-react";
 import { useState } from "react";

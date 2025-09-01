@@ -1,4 +1,4 @@
-import { fetchLatestIndexedBlock } from "@/services/data/queryService";
+import { fetchLatestIndexedBlock } from "@/services/data/indexerService";
 import type React from "react";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 

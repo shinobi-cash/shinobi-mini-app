@@ -1,12 +1,13 @@
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
-import type { Activity } from "@/services/data/queryService";
-import { fetchPoolStats } from "@/services/data/queryService";
+import type { Activity } from "@/lib/indexer/sdk";
+import { fetchPoolStats } from "@/services/data/indexerService";
 import { formatEthAmount } from "@/utils/formatters";
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
 import { ActivityDetailDrawer } from "./ActivityDetailDrawer";
 import { ActivityRow } from "./ActivityRow";
+import { useBanner } from "@/contexts/BannerContext";
 
 export interface ActivityFeedProps {
   activities: Activity[];
@@ -25,6 +26,7 @@ export const ActivityFeed = ({
   hasNextPage,
   onRefresh,
 }: ActivityFeedProps) => {
+  const { banner } = useBanner();
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
@@ -36,33 +38,54 @@ export const ActivityFeed = ({
     createdAt: string;
   } | null>(null);
   const [poolStatsLoading, setPoolStatsLoading] = useState(true);
+  const [poolStatsError, setPoolStatsError] = useState<Error | null>(null);
+  const lastPoolStatsErrorRef = useRef<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const { onTransactionIndexed } = useTransactionTracking();
 
   // Fetch pool stats using the service
-  const loadPoolStats = useCallback(async () => {
-    setPoolStatsLoading(true);
+  const loadPoolStats = useCallback(async (isRefresh = false) => {
+    if (!isRefresh) setPoolStatsLoading(true);
+    setPoolStatsError(null);
+    
     try {
       const stats = await fetchPoolStats();
       setPoolStats(stats);
     } catch (error) {
-      console.error("Failed to load pool stats:", error);
+      setPoolStatsError(error as Error);
+      
+      // If this is initial load (not refresh), clear data
+      if (!isRefresh && !poolStats) {
+        setPoolStats(null);
+      }
     } finally {
       setPoolStatsLoading(false);
     }
-  }, []);
+  }, [poolStats]);
 
   // Load pool stats on mount
   useEffect(() => {
     loadPoolStats();
   }, [loadPoolStats]);
 
+  // Show banner error when pool stats refresh fails (prevent infinite loops)
+  useEffect(() => {
+    const errorMessage = poolStatsError?.message || null;
+    
+    if (errorMessage && poolStats && errorMessage !== lastPoolStatsErrorRef.current) {
+      banner.error("Failed to refresh pool stats", { duration: 5000 });
+      lastPoolStatsErrorRef.current = errorMessage;
+    } else if (!errorMessage) {
+      lastPoolStatsErrorRef.current = null;
+    }
+  }, [poolStatsError?.message, poolStats, banner]);
+
   // Auto-refresh when transaction gets indexed
   useEffect(() => {
     const cleanup = onTransactionIndexed(() => {
       onRefresh?.();
-      loadPoolStats();
+      loadPoolStats(true); // Pass true for refresh
     });
     return cleanup;
   }, [onTransactionIndexed, onRefresh, loadPoolStats]);
@@ -120,7 +143,7 @@ export const ActivityFeed = ({
                 size="sm"
                 onClick={() => {
                   setIsRefreshing(true);
-                  Promise.all([onRefresh(), loadPoolStats()]).finally(() => setIsRefreshing(false));
+                  Promise.all([onRefresh(), loadPoolStats(true)]).finally(() => setIsRefreshing(false));
                 }}
                 disabled={isRefreshing || loading}
                 className="h-8 w-8 p-0 text-app-secondary hover:text-app-primary"

@@ -4,37 +4,12 @@
 
 import { BUNDLER_URL, WITHDRAWAL_ACCOUNT_PRIVATE_KEY } from "@/config/constants";
 import { CONTRACTS } from "@/config/constants";
-import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { createSmartAccountClient } from "permissionless";
 import { toSimpleSmartAccount } from "permissionless/accounts";
 import { http, createPublicClient } from "viem";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseSepolia } from "viem/chains";
-
-// ============ APOLLO GRAPHQL CLIENT ============
-
-const INDEXER_URL = import.meta.env.DEV ? import.meta.env.VITE_INDEXER_URL_DEV : import.meta.env.VITE_INDEXER_URL_PROD;
-
-const INDEXER_API_TOKEN = import.meta.env.DEV
-  ? import.meta.env.VITE_INDEXER_TOKEN_DEV
-  : import.meta.env.VITE_INDEXER_TOKEN_PROD;
-export const apolloClient = new ApolloClient({
-  uri: INDEXER_URL,
-  cache: new InMemoryCache(),
-  headers: {
-    Authorization: `Bearer ${INDEXER_API_TOKEN}`,
-    "Content-Type": "application/json",
-  },
-  defaultOptions: {
-    watchQuery: {
-      errorPolicy: "all",
-    },
-    query: {
-      errorPolicy: "all",
-    },
-  },
-});
 
 // Create public client for contract calls
 export const publicClient = createPublicClient({

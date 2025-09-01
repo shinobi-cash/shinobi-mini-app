@@ -1,4 +1,4 @@
-import type { Activity } from "@/services/data/queryService";
+import type { Activity } from "@/lib/indexer/sdk";
 import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
 import { StatusDot } from "../../StatusDot";
 interface ActivityRowProps {

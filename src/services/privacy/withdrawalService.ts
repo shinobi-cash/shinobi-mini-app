@@ -33,7 +33,8 @@ import {
   prepareWithdrawalUserOperation,
 } from "../blockchain/contractService";
 // Import our new services
-import { type ASPData, type StateTreeLeaf, fetchASPData, fetchStateTreeLeaves } from "../data/queryService";
+import { fetchASPData, fetchStateTreeLeaves } from "../data/indexerService";
+import type { ASPData, StateTreeLeaf } from "@/lib/indexer/sdk";
 
 // ============ TYPES ============
 
@@ -206,7 +207,7 @@ export async function generateWithdrawalProof(
     newNullifier: BigInt(newNullifier),
     newSecret: BigInt(newSecret),
     stateTreeCommitments: stateTreeLeaves.map((leaf) => BigInt(leaf.leafValue)),
-    aspTreeLabels: aspData.approvedLabels.map((label) => BigInt(label)),
+    aspTreeLabels: aspData.approvalList.map((label: string) => BigInt(label)),
   });
 
   console.log("✅ ZK proof generated successfully");

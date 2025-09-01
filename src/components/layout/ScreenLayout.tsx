@@ -20,7 +20,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ header, banner, bottomNav, children }: AppLayoutProps) {
   return (
-    <div className="h-screen sm:h-[70vh] flex flex-col bg-app-background overflow-hidden">
+    <div className="h-screen sm:h-[80vh] flex flex-col bg-app-background overflow-hidden">
       {/* Header - Fixed at top */}
       {header && <div className="flex-shrink-0">{header}</div>}
 

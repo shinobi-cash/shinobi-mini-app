@@ -1,8 +1,8 @@
-import type { ActivityStatus, ActivityType } from "@/services/data/queryService";
+import type { ActivityStatus, ActivityType } from "@/services/data/indexerService";
 
 interface StatusDotProps {
-  type: ActivityType;
-  status: ActivityStatus;
+  type: ActivityType | string;
+  status: ActivityStatus | string;
 }
 
 export const StatusDot = ({ type, status }: StatusDotProps) => {

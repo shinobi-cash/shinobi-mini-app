@@ -28,13 +28,6 @@ export const GAS_LIMITS = {
   PAYMASTER_POST_OP_GAS_LIMIT: 35000n, // Above the 32,000 minimum
 } as const;
 
-/**
- * Configuration for API request queue rate limiting
- */
-export const API_QUEUE = {
-  REQUEST_DELAY_MS: 200, // Delay between API requests (200ms = 5 requests per second)
-} as const;
-
 // ============ ZK CIRCUIT CONSTANTS ============
 
 /**
@@ -48,6 +41,18 @@ export const SNARK_SCALAR_FIELD = "218882428718392752222464057452572750885483644
  * GraphQL and indexer configuration
  */
 export const INDEXER_FETCH_POLICY = "network-only";
+
+/**
+ * Indexer endpoint configuration based on environment
+ */
+export const INDEXER_CONFIG = {
+  ENDPOINT: import.meta.env.MODE === 'development' 
+    ? import.meta.env.VITE_INDEXER_URL_DEV || "http://localhost:42069/proxy/graphql"
+    : import.meta.env.VITE_INDEXER_URL_PROD || "https://api.thegraph.com/subgraphs/name/shinobi-cash/privacy-pools-v1",
+  TOKEN: import.meta.env.MODE === 'development'
+    ? import.meta.env.VITE_INDEXER_TOKEN_DEV
+    : import.meta.env.VITE_INDEXER_TOKEN_PROD,
+} as const;
 
 /**
  * IPFS configuration

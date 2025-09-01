@@ -1,4 +1,3 @@
-import { ApolloProvider } from "@apollo/client";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
@@ -6,7 +5,8 @@ import ReactDOM from "react-dom/client";
 import { WagmiProvider } from "wagmi";
 import "@rainbow-me/rainbowkit/styles.css";
 
-import { apolloClient } from "@/lib/clients";
+// Initialize Shinobi Indexer SDK
+import "@/lib/indexer/client";
 import App from "./App.tsx";
 import { isFarcasterEnvironment } from "./utils/environment.ts";
 import { config } from "./wagmi.ts";
@@ -34,9 +34,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <WalletProvider>
-        <ApolloProvider client={apolloClient}>
-          <App />
-        </ApolloProvider>
+        <App />
       </WalletProvider>
     </QueryClientProvider>
   </React.StrictMode>,

@@ -1,8 +1,8 @@
-import { fetchLatestIndexedBlock } from "@/services/data/queryService";
+import { fetchLatestIndexedBlock } from "@/services/data/indexerService";
 import { useEffect, useState } from "react";
 import { useTransactionTracking } from "../transactions/useTransactionTracking";
 
-export function useConditionalIndexerHealth() {
+export function useIndexerHealth() {
   const { trackingStatus } = useTransactionTracking();
   const [indexerHealth, setIndexerHealth] = useState<boolean | null>(null);
 
@@ -14,10 +14,11 @@ export function useConditionalIndexerHealth() {
       return;
     }
 
-    const checkIndexerHealth = async () => {
+    const checkIndexerHealthStatus = async () => {
       try {
         const latestBlock = await fetchLatestIndexedBlock();
-        setIndexerHealth(latestBlock !== null);
+        const isHealthy = latestBlock !== null;
+        setIndexerHealth(isHealthy);
       } catch (error) {
         console.error("Indexer health check failed:", error);
         setIndexerHealth(false);
@@ -25,8 +26,8 @@ export function useConditionalIndexerHealth() {
     };
 
     // Check immediately and then every 30 seconds
-    checkIndexerHealth();
-    const interval = setInterval(checkIndexerHealth, 30000);
+    checkIndexerHealthStatus();
+    const interval = setInterval(checkIndexerHealthStatus, 30000);
 
     return () => clearInterval(interval);
   }, [trackingStatus]);

@@ -1,5 +1,5 @@
 import { useBanner } from "@/contexts/BannerContext";
-import { useConditionalIndexerHealth } from "@/hooks/data/useConditionalIndexerHealth";
+import { useIndexerHealth } from "@/hooks/data/useIndexerHealth";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { Dot } from "lucide-react";
 
@@ -7,7 +7,7 @@ import { Dot } from "lucide-react";
 export const AppBanner = () => {
   const { trackingStatus, trackedTxHash } = useTransactionTracking();
   const { currentBanner, dismissBanner } = useBanner();
-  const { indexerHealth } = useConditionalIndexerHealth();
+  const { indexerHealth } = useIndexerHealth();
 
   // Show current banner if one exists
   if (currentBanner) {
@@ -15,31 +15,31 @@ export const AppBanner = () => {
       switch (type) {
         case "success":
           return {
-            bg: "bg-green-50 dark:bg-green-900/20",
+            bg: "bg-green-100 dark:bg-green-900/30",
             border: "border-green-200 dark:border-green-800",
             text: "text-green-700 dark:text-green-300",
           };
         case "error":
           return {
-            bg: "bg-red-50 dark:bg-red-900/20",
+            bg: "bg-red-100 dark:bg-red-900/30",
             border: "border-red-200 dark:border-red-800",
             text: "text-red-700 dark:text-red-300",
           };
         case "warning":
           return {
-            bg: "bg-yellow-50 dark:bg-yellow-900/20",
+            bg: "bg-yellow-100 dark:bg-yellow-900/30",
             border: "border-yellow-200 dark:border-yellow-800",
             text: "text-yellow-700 dark:text-yellow-300",
           };
         case "info":
           return {
-            bg: "bg-blue-50 dark:bg-blue-900/20",
+            bg: "bg-blue-100 dark:bg-blue-900/30",
             border: "border-blue-200 dark:border-blue-800",
             text: "text-blue-700 dark:text-blue-300",
           };
         default:
           return {
-            bg: "bg-gray-50 dark:bg-gray-800/20",
+            bg: "bg-gray-100 dark:bg-gray-800/30",
             border: "border-gray-200 dark:border-gray-700",
             text: "text-gray-600 dark:text-gray-400",
           };
@@ -66,7 +66,7 @@ export const AppBanner = () => {
   if (trackingStatus === "waiting") {
     const shortHash = trackedTxHash ? `${trackedTxHash.slice(0, 6)}...${trackedTxHash.slice(-4)}` : "";
     return (
-      <div className="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800">
+      <div className="bg-blue-100 dark:bg-blue-900/30 border-b border-blue-200 dark:border-blue-800">
         <div className="flex items-center justify-center gap-1 text-[10px] text-blue-700 dark:text-blue-300 font-mono">
           <Dot className="w-3 h-3 animate-pulse" />
           {shortHash} • Waiting for indexing...
@@ -78,7 +78,7 @@ export const AppBanner = () => {
   if (trackingStatus === "synced") {
     const shortHash = trackedTxHash ? `${trackedTxHash.slice(0, 6)}...${trackedTxHash.slice(-4)}` : "";
     return (
-      <div className="bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800">
+      <div className="bg-green-100 dark:bg-green-900/30 border-b border-green-200 dark:border-green-800">
         <div className="flex items-center justify-center gap-1 text-[10px] text-green-700 dark:text-green-300 font-mono">
           <Dot className="w-3 h-3" />
           {shortHash} • Indexed!
@@ -89,7 +89,7 @@ export const AppBanner = () => {
 
   if (indexerHealth === false) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">
+      <div className="bg-red-100 dark:bg-red-900/30 border-b border-red-200 dark:border-red-800">
         <div className="flex items-center justify-center gap-1 text-[10px] text-red-700 dark:text-red-300 font-mono">
           <Dot className="w-3 h-3" />
           Indexer offline
@@ -100,7 +100,7 @@ export const AppBanner = () => {
 
   // Default state
   return (
-    <div className="bg-gray-50 dark:bg-gray-800/20 border-b border-gray-200 dark:border-gray-700">
+    <div className="bg-gray-100 dark:bg-gray-800/30 border-b border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-center gap-1 text-[10px] text-gray-600 dark:text-gray-400 font-mono">
         <Dot className="w-3 h-3" />
         Base Sepolia
