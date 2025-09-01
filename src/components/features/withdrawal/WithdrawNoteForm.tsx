@@ -1,11 +1,11 @@
-import { useWithdrawalForm } from "@/hooks/forms/useWithdrawalForm";
 import { useWithdrawalFlow } from "@/hooks/transactions/useWithdrawalFlow";
 import type { Note } from "@/lib/storage/noteCache";
 import { cn } from "@/lib/utils";
 import { calculateWithdrawalAmounts } from "@/services/privacy/withdrawalService";
 import { formatEthAmount } from "@/utils/formatters";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { isAddress, parseEther } from "viem";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { TransactionPreviewDrawer } from "./TransactionPreviewDrawer";
@@ -16,30 +16,94 @@ interface WithdrawNoteFormProps {
 }
 
 export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
-  // Use form hook for validation and state management
-  const form = useWithdrawalForm({ note });
+  // Direct state
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawAmountError, setWithdrawAmountError] = useState<string>("");
+  const [recipientAddress, setRecipientAddress] = useState("");
+  const [recipientError, setRecipientError] = useState<string>("");
 
-  // Use withdrawal flow hook for transaction management
+  // Form utilities
+  const availableBalance = Number.parseFloat(formatEthAmount(note.amount));
+  const withdrawAmountNum = Number.parseFloat(withdrawAmount) || 0;
+
+  // ---- Validation ----
+  const validateAmount = useCallback(
+    (value: string): string => {
+      if(value.length === 0 ) return "";
+      if (!value.trim()) return "Please enter an amount";
+      try {
+        const parsed = parseEther(value);
+        if (parsed <= 0n) return "Amount must be positive";
+        const num = Number.parseFloat(value);
+        if (num > availableBalance) {
+          return `Amount cannot exceed ${formatEthAmount(note.amount)} ETH`;
+        }
+        return "";
+      } catch {
+        return "Please enter a valid amount";
+      }
+    },
+    [availableBalance, note.amount]
+  );
+
+  const validateAddress = useCallback((value: string): string => {
+    if(value.length === 0 ) return "";
+    if (!value.trim()) return "Please enter a recipient address";
+    if (!isAddress(value)) return "Please enter a valid Ethereum address";
+    return "";
+  }, []);
+
+  // ---- Handlers ----
+  const handleAmountChange = useCallback(
+    (value: string) => {
+      setWithdrawAmount(value);
+      setWithdrawAmountError(validateAmount(value));
+    },
+    [validateAmount]
+  );
+
+  const handleAddressChange = useCallback(
+    (value: string) => {
+      setRecipientAddress(value);
+      setRecipientError(validateAddress(value));
+    },
+    [validateAddress]
+  );
+
+  const handleMaxClick = useCallback(() => {
+    const maxValue = availableBalance.toString();
+    setWithdrawAmount(maxValue);
+    setWithdrawAmountError(validateAmount(maxValue));
+  }, [availableBalance, validateAmount]);
+
+  const handlePercentageClick = useCallback(
+    (percentage: number) => {
+      const amount = (availableBalance * percentage).toString();
+      setWithdrawAmount(amount);
+      setWithdrawAmountError(validateAmount(amount));
+    },
+    [availableBalance, validateAmount]
+  );
+
+  // Derived state
+  const isValidAmount = !withdrawAmountError && withdrawAmountNum > 0;
+  const isValidAddress = !recipientError;
+
+  // Withdrawal flow hook
   const withdrawalFlow = useWithdrawalFlow({ note });
 
-  // Extract form values for easier access
-  const { withdrawAmount, recipientAddress, withdrawAmountNum, availableBalance, isValidAmount, isValidRecipient } =
-    form;
-
-  // Memoize expensive calculations to prevent unnecessary recalculations
   const withdrawalAmounts = useMemo(() => {
-    return withdrawAmount ? calculateWithdrawalAmounts(withdrawAmount) : { executionFee: 0, youReceive: 0 };
+    return withdrawAmount
+      ? calculateWithdrawalAmounts(withdrawAmount)
+      : { executionFee: 0, youReceive: 0 };
   }, [withdrawAmount]);
 
   const { executionFee, youReceive } = withdrawalAmounts;
+  const remainingBalance = useMemo(
+    () => availableBalance - withdrawAmountNum,
+    [availableBalance, withdrawAmountNum]
+  );
 
-  // Remaining balance = original amount - withdrawal amount (execution fee comes from withdrawal)
-  const remainingBalance = useMemo(() => availableBalance - withdrawAmountNum, [availableBalance, withdrawAmountNum]);
-
-  // Extract form handlers
-  const { handleAmountChange, handleMaxClick, setRecipientAddress } = form;
-
-  // Extract withdrawal flow handlers and state
   const {
     showPreview,
     isPreparing,
@@ -50,10 +114,9 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
     resetStates,
   } = withdrawalFlow;
 
-  // Auto-reset all states when form values change
   useEffect(() => {
     resetStates();
-  }, [resetStates]);
+  }, [resetStates, withdrawAmount, recipientAddress]);
 
   return (
     <div className="h-full flex flex-col px-4 py-4">
@@ -68,9 +131,9 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
         </div>
       </div>
 
-      {/* Form Content */}
+      {/* Form */}
       <div className="flex-1 overflow-auto">
-        {/* Amount Input */}
+        {/* Amount */}
         <div className="mb-6">
           <div className="text-center mb-3">
             <input
@@ -83,7 +146,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
             <p className="text-base text-app-secondary mt-1">ETH</p>
           </div>
 
-          {/* Available Balance */}
+          {/* Balance */}
           <div className="text-center mb-3">
             <p className="text-xs text-app-secondary">
               Available:{" "}
@@ -93,7 +156,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
             </p>
           </div>
 
-          {/* Quick Amount Buttons */}
+          {/* Quick Buttons */}
           <div className="flex gap-2 justify-center">
             <Button variant="outline" size="sm" onClick={handleMaxClick} className="rounded-full px-3 py-1 text-xs">
               MAX
@@ -101,7 +164,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => form.handlePercentageClick(0.5)}
+              onClick={() => handlePercentageClick(0.5)}
               className="rounded-full px-3 py-1 text-xs"
             >
               50%
@@ -109,18 +172,12 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => form.handlePercentageClick(0.25)}
+              onClick={() => handlePercentageClick(0.25)}
               className="rounded-full px-3 py-1 text-xs"
             >
               25%
             </Button>
           </div>
-
-          {!isValidAmount && withdrawAmount && (
-            <p className="text-xs text-destructive mt-2 text-center">
-              Amount must be between 0 and {formatEthAmount(note.amount)} ETH
-            </p>
-          )}
         </div>
 
         {/* Recipient Address */}
@@ -133,23 +190,27 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
             type="text"
             placeholder="0x..."
             value={recipientAddress}
-            onChange={(e) => setRecipientAddress(e.target.value)}
+            onChange={(e) => handleAddressChange(e.target.value)}
             className={cn(
               "font-mono text-xs",
-              !isValidRecipient && recipientAddress && "border-destructive focus:border-destructive",
+              recipientError && "border-destructive focus:border-destructive"
             )}
           />
-          {!isValidRecipient && recipientAddress && (
-            <p className="text-xs text-destructive mt-2">Please enter a valid Ethereum address</p>
-          )}
         </div>
+        {/* Error */}
+        {withdrawAmountError && (
+          <p className="text-xs text-destructive mt-2 text-center">{withdrawAmountError}</p>
+        )}
+        {recipientError && <p className="text-xs text-destructive text-center mt-2">{recipientError}</p>}
+
       </div>
 
-      {/* Action Button */}
+
+      {/* Action */}
       <div className="mt-auto">
         <Button
           onClick={() => handlePreviewWithdrawal(withdrawAmount, recipientAddress)}
-          disabled={!isValidAmount || !isValidRecipient || isPreparing || isExecuting}
+          disabled={!isValidAmount || !isValidAddress || isPreparing || isExecuting}
           className="w-full h-11 rounded-xl text-sm font-medium"
           size="lg"
         >
@@ -169,7 +230,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
         </Button>
       </div>
 
-      {/* Transaction Preview Drawer */}
+      {/* Drawer */}
       {showPreview && (
         <TransactionPreviewDrawer
           isOpen={showPreview}
@@ -187,3 +248,4 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
     </div>
   );
 };
+

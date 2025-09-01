@@ -1,11 +1,10 @@
 import { useBanner } from "@/contexts/BannerContext";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { AlertTriangle, ChevronDown, Loader2 } from "lucide-react";
-import { useEffect, useRef } from "react";
-import { formatEther } from "viem";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { formatEther, parseEther } from "viem";
 import { useAccount, useBalance, useChainId } from "wagmi";
 import { NETWORK } from "../../config/constants";
-import { useDepositForm } from "../../hooks/forms/useDepositForm";
 import { useDepositCommitment } from "../../hooks/transactions/useDepositCommitment";
 import { useDepositTransaction } from "../../hooks/transactions/useDepositTransaction";
 import { AuthenticationGate } from "../shared/AuthenticationGate";
@@ -41,79 +40,113 @@ const DepositForm = () => {
   const { trackTransaction } = useTransactionTracking();
   const { banner } = useBanner();
 
-  // Use deposit form hook for form management
-  const form = useDepositForm({ balance });
+  const [amount, setAmount] = useState("");
+  const [amountError, setAmountError] = useState<string>("");
+
+  const availableBalance = balance?.value ?? 0n;
+  const selectedAsset = { symbol: "ETH", name: "Ethereum", icon: "⚫" };
+
+  // ---- Validation ----
+  const validateAmount = useCallback(
+    (value: string): string => {
+      if(value.length === 0 ) return "";
+      if (!value.trim()) return "Please enter an amount";
+      try {
+        const parsed = parseEther(value);
+        if (parsed <= 0n) return "Amount must be positive";
+        if (parsed > availableBalance)
+          return `Amount cannot exceed ${formatEther(availableBalance)} ETH`;
+        return "";
+      } catch {
+        return "Please enter a valid amount";
+      }
+    },
+    [availableBalance]
+  );
+
+  // Keep state + error synced
+  const handleAmountChange = useCallback(
+    (value: string) => {
+      setAmount(value);
+      setAmountError(validateAmount(value));
+    },
+    [validateAmount]
+  );
+
+  const handleQuickAmount = useCallback(
+    (quickAmount: string) => {
+      setAmount(quickAmount);
+      setAmountError(validateAmount(quickAmount));
+    },
+    [validateAmount]
+  );
 
   const isOnCorrectNetwork = chainId === NETWORK.CHAIN_ID;
-  const { noteData, isGeneratingNote, error: noteError, regenerateNote } = useDepositCommitment();
-  const { deposit, reset, clearError, isLoading, isSuccess, error, transactionHash } = useDepositTransaction();
+  const { noteData, isGeneratingNote, error: noteError, regenerateNote } =
+    useDepositCommitment();
+  const {
+    deposit,
+    reset,
+    clearError,
+    isLoading,
+    isSuccess,
+    error,
+    transactionHash,
+  } = useDepositTransaction();
 
-  // Handle transaction errors with banner
+  // Banner for tx error
   useEffect(() => {
-    if (error) {
-      banner.error("Transaction failed");
-    }
+    if (error) banner.error("Transaction failed");
   }, [error, banner]);
 
-  // Handle note generation errors silently - auto-retry without user notification
+  // Retry note silently
   useEffect(() => {
     if (noteError) {
       console.warn("Note generation failed, auto-retrying:", noteError);
-      // Silently retry after a short delay
-      setTimeout(() => {
-        regenerateNote();
-      }, 1000);
+      setTimeout(() => regenerateNote(), 1000);
     }
   }, [noteError, regenerateNote]);
 
-  // Handle transaction success with banner and auto-reset
+  // Success handler
   useEffect(() => {
     if (isSuccess && transactionHash && !shownBannersRef.current.has(transactionHash)) {
-      // Mark this transaction hash as shown
       shownBannersRef.current.add(transactionHash);
-
-      // Track transaction for indexing status (replaces banner)
       trackTransaction(transactionHash);
-
-      // Reset form for next deposit
       setTimeout(() => {
         reset();
-        form.reset();
+        setAmount("");
+        setAmountError("");
       }, 1000);
     }
-  }, [isSuccess, transactionHash, reset, form, trackTransaction]);
+  }, [isSuccess, transactionHash, reset, trackTransaction]);
 
-  // Extract form handlers
-  const { handleAmountChange, handleQuickAmount } = form;
-
+  // Deposit
   const handleDeposit = async () => {
-    if (!noteData || !form.amount) return;
-
-    // Clear any previous errors
+    if (!noteData || !amount || amountError) return;
     clearError();
-
     try {
-      await deposit(form.amount, noteData);
-    } catch (error) {
-      console.error("Deposit failed:", error);
+      await deposit(amount, noteData);
+    } catch (err) {
+      console.error("Deposit failed:", err);
     }
   };
 
-  // Extract form validation state
-  const { amount, selectedAsset, isValidAmount, hasBalance } = form;
+  // Derived flags
   const isTransacting = isLoading;
-  const hasNoteData = noteData !== null;
-  const canDepositAmount = form.canDeposit(isOnCorrectNetwork, noteData, isTransacting);
+  const hasNoteData = !!noteData;
+  const hasBalance = availableBalance > 0n;
+  const canMakeDeposit =
+    !amountError && amount.trim() && isOnCorrectNetwork && hasNoteData && hasBalance && !isTransacting;
 
   return (
     <div className="h-full flex flex-col px-4 py-4">
-      {/* Header with wallet info */}
+      {/* Header */}
       <div className="mb-6">
         <h1 className="text-xl font-bold text-app-primary">Deposit</h1>
         <p className="text-xs text-app-secondary mt-1 font-mono">{address}</p>
       </div>
 
-      {/* Asset Selection */}
+      {/* Asset */}
       <div className="mb-4">
         <div className="bg-app-card rounded-xl p-3">
           <div className="flex items-center justify-between">
@@ -131,7 +164,7 @@ const DepositForm = () => {
         </div>
       </div>
 
-      {/* Amount Input */}
+      {/* Amount */}
       <div className="mb-6">
         <div className="text-center mb-3">
           <input
@@ -144,7 +177,7 @@ const DepositForm = () => {
           <p className="text-base text-app-secondary mt-1">{selectedAsset.symbol}</p>
         </div>
 
-        {/* Quick Amount Buttons */}
+        {/* Quick Buttons */}
         <div className="flex gap-2 justify-center">
           {DEPOSIT_AMOUNTS.map((deposit) => (
             <Button
@@ -167,13 +200,15 @@ const DepositForm = () => {
             <AlertTriangle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
             <div>
               <p className="text-xs font-medium text-orange-800 dark:text-orange-200">Wrong Network</p>
-              <p className="text-xs text-orange-600 dark:text-orange-400">Please switch to {NETWORK.NAME}</p>
+              <p className="text-xs text-orange-600 dark:text-orange-400">
+                Please switch to {NETWORK.NAME}
+              </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Balance Info */}
+      {/* Balance */}
       <div className="bg-app-card rounded-xl p-3 mb-4">
         <div className="flex justify-between text-xs">
           <span className="text-app-secondary">Available</span>
@@ -185,10 +220,15 @@ const DepositForm = () => {
         </div>
       </div>
 
-      {/* Deposit Button */}
+       {/* Inline error */}
+        {amountError && (
+          <p className="text-xs text-red-500 text-center mt-2">{amountError}</p>
+        )}
+
+      {/* Button */}
       <div className="mt-auto">
         <Button
-          disabled={!canDepositAmount}
+          disabled={!canMakeDeposit}
           onClick={handleDeposit}
           className="w-full h-11 rounded-xl text-sm font-medium"
           size="lg"
@@ -204,7 +244,7 @@ const DepositForm = () => {
             `Switch to ${NETWORK.NAME}`
           ) : !hasBalance ? (
             "Insufficient Balance"
-          ) : !isValidAmount ? (
+          ) : amountError ? (
             "Enter Amount"
           ) : (
             "Deposit to Privacy Pool"
@@ -214,3 +254,4 @@ const DepositForm = () => {
     </div>
   );
 };
+
