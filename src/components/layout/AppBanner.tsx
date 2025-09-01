@@ -1,10 +1,8 @@
 import { useBanner } from "@/contexts/BannerContext";
 import { useConditionalIndexerHealth } from "@/hooks/data/useConditionalIndexerHealth";
-import { TransactionTrackingProvider, useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
+import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { Dot } from "lucide-react";
 
-// Re-export the provider for convenience
-export { TransactionTrackingProvider };
 
 export const AppBanner = () => {
   const { trackingStatus, trackedTxHash } = useTransactionTracking();

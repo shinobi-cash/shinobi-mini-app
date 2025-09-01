@@ -1,7 +1,7 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SplashScreen } from "@/components/SplashScreen";
 import { PasswordAuthDrawer } from "@/components/features/auth/PasswordAuthDrawer";
-import { TransactionTrackingProvider } from "@/components/layout/AppBanner";
+import { TransactionTrackingProvider } from "./hooks/transactions/useTransactionTracking";
 import { MainScreen } from "@/components/screens/MainScreen";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { BannerProvider } from "@/contexts/BannerContext";
