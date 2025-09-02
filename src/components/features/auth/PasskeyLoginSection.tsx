@@ -9,7 +9,7 @@ import { KDF } from "@/lib/auth/keyDerivation";
 import { storageManager } from "@/lib/storage";
 import { restoreFromMnemonic } from "@/utils/crypto";
 import { Fingerprint } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 
