@@ -89,9 +89,8 @@ function LoginWithBackupPhrase({ onRecoverAccountKey }: { onRecoverAccountKey: (
 
   return (
     <div className="space-y-4">
-      <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-4">
-        {/* Word Grid */}
-        <div className="bg-app-surface rounded-xl p-3 border border-app shadow-sm">
+      {/* Word Grid */}
+      <div className="bg-app-surface rounded-xl p-3 border border-app shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-3 gap-2">
               {words.map((word, idx) => (
@@ -126,7 +125,6 @@ function LoginWithBackupPhrase({ onRecoverAccountKey }: { onRecoverAccountKey: (
             )}
           </form>
         </div>
-      </div>
     </div>
   );
 }
@@ -236,28 +234,28 @@ export function LogInDrawer({ open, onOpenChange }: LogInDrawerProps) {
   const getTitle = () => {
     switch (currentStep) {
       case "ChooseLoginMethod":
-        return "Choose Login Method";
+        return "Login";
       case "LoginWithConvenientAuth":
         return shouldShowPasskey ? "Passkey" : "Password";
       case "LoginWithBackupPhrase":
-        return "Account Recovery";
+        return "Recovery";
       case "SetupConvenientAuth":
-        return "Setup Passkey";
+        return shouldShowPasskey ? "Setup Passkey" : "Setup Password";
       default:
-        return "Authentication";
+        return "Auth";
     }
   };
 
   const getDescription = () => {
     switch (currentStep) {
       case "ChooseLoginMethod":
-        return "Choose how you want to login to your account";
+        return "Choose login method";
       case "LoginWithConvenientAuth":
-        return shouldShowPasskey ? "Use biometric authentication" : "Enter your Account name and password to continue";
+        return shouldShowPasskey ? "Use biometric auth" : "Enter account and password";
       case "LoginWithBackupPhrase":
-        return "Enter your mnemonic phrase to recover";
+        return "Enter recovery phrase";
       case "SetupConvenientAuth":
-        return "Configure convenient access for future logins";
+        return shouldShowPasskey ? "Setup biometric access" : "Create secure password";
       default:
         return "";
     }
