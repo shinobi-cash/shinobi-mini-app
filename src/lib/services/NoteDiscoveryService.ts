@@ -182,10 +182,6 @@ export class NoteDiscoveryService {
     progress.complete = true;
     onProgress?.(progress);
 
-    console.log(
-      `[DiscoveryV2] ✅ Done: ${notes.length} chains, +${progress.depositsMatched} deposits matched, lastUsedIndex=${lastUsedIndex}, lastCursor=${cursor}`,
-    );
-
     return {
       notes,
       lastUsedIndex,
