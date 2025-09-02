@@ -1,6 +1,6 @@
 /**
- * Refactored Authentication Context
- * Separates React state management from authentication business logic and storage
+ * Authentication Context
+ * Manages user authentication state with secure key management
  */
 
 import type { KeyGenerationResult } from "@/utils/crypto";

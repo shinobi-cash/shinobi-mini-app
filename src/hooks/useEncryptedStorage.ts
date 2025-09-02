@@ -1,15 +1,10 @@
 /**
- * Refactored Encrypted Storage Hook
- * Separates React state/timer management from session business logic and storage
+ * Encrypted Storage Hook
+ * Manages session state and automatic timeout with user activity tracking
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { SessionService } from "@/lib/services/SessionService";
-import { SessionStorageProviderAdapter } from "@/lib/services/adapters/SessionStorageProviderAdapter";
-
-// Create service instances
-const storageProvider = new SessionStorageProviderAdapter();
-const sessionService = new SessionService(storageProvider);
+import { storageManager } from "@/lib/storage";
 
 interface EncryptedStorageState {
   isSessionActive: boolean;
@@ -38,7 +33,7 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
 
   // Clear session automatically after timeout - exact logic from original
   const clearSession = useCallback(() => {
-    sessionService.clearSession();
+    storageManager.clearSession();
     setState((prev) => ({
       ...prev,
       isSessionActive: false,
@@ -54,7 +49,7 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
   // Clear all data including passkeys - exact logic from original
   const clearAllData = useCallback(async () => {
     try {
-      await sessionService.clearAllData();
+      await storageManager.clearAllData();
       clearSession();
     } catch (error) {
       console.error("Failed to clear all data:", error);
@@ -105,7 +100,7 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
 
   // Check if there's any encrypted data in storage - exact logic from original
   const hasEncryptedData = useCallback((): boolean => {
-    return sessionService.hasEncryptedData();
+    return storageManager.hasEncryptedData();
   }, []);
 
   return {

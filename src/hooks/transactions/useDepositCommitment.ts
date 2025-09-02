@@ -1,6 +1,6 @@
 /**
- * Refactored Deposit Commitment Hook
- * Separates React state management from deposit business logic and storage
+ * Deposit Commitment Hook
+ * Manages deposit commitment generation with collision detection
  */
 
 import { useCallback, useEffect, useState } from "react";

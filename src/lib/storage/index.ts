@@ -1,8 +1,7 @@
 /**
- * Refactored Storage Library - Main Export
+ * Storage Library - Main Export
  * 
- * Provides exact same API as current noteCache for seamless replacement
- * while improving internal organization and maintainability
+ * Provides secure encrypted storage with improved organization and maintainability
  */
 
 // Main storage manager and backward compatibility alias
@@ -20,20 +19,15 @@ export type {
 } from "./interfaces/IDataTypes";
 
 // Key derivation service for external usage
-export { KDF_Refactored } from "./services/KeyDerivationService";
+export { KDF } from "./services/KeyDerivationService";
 
 /**
- * USAGE EXAMPLE - Drop-in replacement:
+ * USAGE EXAMPLE:
  * 
- * // OLD:
- * import { noteCache } from "@/lib/storage/noteCache";
- * await noteCache.initializeAccountSession(accountName, symmetricKey);
- * 
- * // NEW (exact same API):
- * import { noteCache } from "@/lib/storage";
- * await noteCache.initializeAccountSession(accountName, symmetricKey);
- * 
- * OR use the new name:
  * import { storageManager } from "@/lib/storage";
  * await storageManager.initializeAccountSession(accountName, symmetricKey);
+ * 
+ * // Legacy compatibility:
+ * import { noteCache } from "@/lib/storage";
+ * await noteCache.initializeAccountSession(accountName, symmetricKey);
  */

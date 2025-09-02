@@ -6,7 +6,7 @@
 import type { IAuthStorageProvider, DerivedKeyResult } from "../interfaces/IAuthStorageProvider";
 import type { CachedAccountData, SessionInfo } from "@/lib/storage/interfaces/IDataTypes";
 import { storageManager } from "@/lib/storage";
-import { KDF_Refactored } from "@/lib/storage";
+import { KDF } from "@/lib/storage";
 
 export class AuthStorageProviderAdapter implements IAuthStorageProvider {
   /**
@@ -73,13 +73,13 @@ export class AuthStorageProviderAdapter implements IAuthStorageProvider {
    * Derive key from password
    */
   async deriveKeyFromPassword(password: string, accountName: string): Promise<DerivedKeyResult> {
-    return KDF_Refactored.deriveKeyFromPassword(password, accountName);
+    return KDF.deriveKeyFromPassword(password, accountName);
   }
 
   /**
    * Derive key from passkey
    */
   async deriveKeyFromPasskey(accountName: string, credentialId: string): Promise<DerivedKeyResult> {
-    return KDF_Refactored.deriveKeyFromPasskey(accountName, credentialId);
+    return KDF.deriveKeyFromPasskey(accountName, credentialId);
   }
 }

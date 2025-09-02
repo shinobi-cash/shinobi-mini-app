@@ -1,10 +1,10 @@
 /**
- * Refactored Note Discovery Hook
- * Separates React state management from storage and business logic
+ * Note Discovery Hook
+ * Provides cache-first note discovery with background scanning
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { DiscoveryResult } from "@/lib/storage/interfaces/IDataTypes";
+import type { DiscoveryResult } from "@/lib/storage/types";
 import { NoteDiscoveryService, type DiscoveryProgress } from "@/lib/services/NoteDiscoveryService";
 import { StorageProviderAdapter } from "@/lib/services/adapters/StorageProviderAdapter";
 

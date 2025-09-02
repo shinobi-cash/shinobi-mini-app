@@ -1,6 +1,6 @@
 /**
- * Key Derivation Service - Integrated with refactored storage
- * Maintains exact same crypto logic as current keyDerivation.ts but uses new storage layer
+ * Key Derivation Service
+ * Provides cryptographic key derivation with secure storage integration
  */
 
 import type { SessionInfo } from "../interfaces/IDataTypes";
@@ -246,7 +246,7 @@ export class KeyDerivationService {
 export const keyDerivationService = new KeyDerivationService();
 
 // Export public API that matches current KDF export from keyDerivation.ts
-export const KDF_Refactored = {
+export const KDF = {
   deriveKeyFromPassword: keyDerivationService.deriveKeyFromPassword.bind(keyDerivationService),
   deriveKeyFromPasskey: keyDerivationService.deriveKeyFromPasskey.bind(keyDerivationService),
   createPasskeyCredential: keyDerivationService.createPasskeyCredential.bind(keyDerivationService),
