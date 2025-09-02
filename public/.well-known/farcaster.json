@@ -2,14 +2,14 @@
   "frame": {
     "name": "Shinobi Cash",
     "version": "1",
-    "iconUrl": "https://app.shinobi.cash/ninja-icon.png",
+    "iconUrl": "https://app.shinobi.cash/assets/shinobi.cash-white-text-wBG.png",
     "homeUrl": "https://app.shinobi.cash",
-    "imageUrl": "https://app.shinobi.cash/ninja-icon.png",
-    "splashImageUrl": "https://app.shinobi.cash/ninja-icon.png",
+    "imageUrl": "https://app.shinobi.cash/assets/preview.png",
+    "splashImageUrl": "https://app.shinobi.cash/assets/shinobi.cash-white-text.svg",
     "splashBackgroundColor": "#000000",
     "webhookUrl": "https://app.shinobi.cash/api/webhook",
     "subtitle": "Your Privacy Shield for Crypto",
-    "description": "Shinobi Cash- Private crypto transactions using zero-knowledge proofs",
+    "description": "Shinobi Cash- Private crypto transactions",
     "primaryCategory": "finance"
   },
   "accountAssociation": {
