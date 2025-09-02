@@ -36,7 +36,7 @@ export class NoteDiscoveryService {
     publicKey: string,
     poolAddress: string,
     accountKey: bigint,
-    options?: DiscoveryOptions
+    options?: DiscoveryOptions,
   ): Promise<DiscoveryResult> {
     const { signal, onProgress } = options || {};
 
@@ -106,14 +106,14 @@ export class NoteDiscoveryService {
             if (lastNote.status === "spent" || BigInt(lastNote.amount) <= 0n) {
               liveDeposits = liveDeposits.filter(
                 (deposit) =>
-                  !(deposit.depositIndex === liveDeposit.depositIndex && deposit.chainIndex === liveDeposit.chainIndex)
+                  !(deposit.depositIndex === liveDeposit.depositIndex && deposit.chainIndex === liveDeposit.chainIndex),
               );
             } else {
               const newRemaining = BigInt(lastNote.amount);
               liveDeposits = liveDeposits.map((deposit) =>
                 deposit.depositIndex === liveDeposit.depositIndex && deposit.chainIndex === liveDeposit.chainIndex
                   ? { ...deposit, remaining: newRemaining }
-                  : deposit
+                  : deposit,
               );
             }
           }
@@ -134,7 +134,7 @@ export class NoteDiscoveryService {
         onProgress?.(progress);
 
         const depositPosition = activities.findIndex(
-          (activity) => activity.type === "DEPOSIT" && activity.precommitmentHash === targetPrecommitment
+          (activity) => activity.type === "DEPOSIT" && activity.precommitmentHash === targetPrecommitment,
         );
 
         if (depositPosition === -1) break;
@@ -147,7 +147,7 @@ export class NoteDiscoveryService {
           candidateDepositIndex,
           activitiesAfter,
           accountKey,
-          poolAddress
+          poolAddress,
         );
 
         notes.push(newChain);
@@ -183,7 +183,7 @@ export class NoteDiscoveryService {
     onProgress?.(progress);
 
     console.log(
-      `[DiscoveryV2] ✅ Done: ${notes.length} chains, +${progress.depositsMatched} deposits matched, lastUsedIndex=${lastUsedIndex}, lastCursor=${cursor}`
+      `[DiscoveryV2] ✅ Done: ${notes.length} chains, +${progress.depositsMatched} deposits matched, lastUsedIndex=${lastUsedIndex}, lastCursor=${cursor}`,
     );
 
     return {
@@ -201,7 +201,7 @@ export class NoteDiscoveryService {
     chain: NoteChain,
     pageActivities: Activity[],
     accountKey: bigint,
-    poolAddress: string
+    poolAddress: string,
   ): number {
     let withdrawalsMatched = 0;
     const lastNote = chain[chain.length - 1];
@@ -219,7 +219,7 @@ export class NoteDiscoveryService {
       const nullifierHash = poseidon1([currentNullifier]).toString();
 
       const withdrawal = pageActivities.find(
-        (activity) => activity.type === "WITHDRAWAL" && activity.spentNullifier === nullifierHash
+        (activity) => activity.type === "WITHDRAWAL" && activity.spentNullifier === nullifierHash,
       );
 
       if (!withdrawal || !withdrawal.newCommitment) break;
@@ -259,7 +259,7 @@ export class NoteDiscoveryService {
     depositIndex: number,
     pageActivitiesAfter: Activity[],
     accountKey: bigint,
-    poolAddress: string
+    poolAddress: string,
   ): { chain: NoteChain } {
     const depositNote: Note = {
       poolAddress,

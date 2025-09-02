@@ -62,7 +62,7 @@ export async function fetchStateTreeLeaves(poolId: string): Promise<any[]> {
     // Use SDK's built-in method that handles pagination automatically
     const allLeaves = await indexerClient.getAllStateTreeLeaves(poolId);
 
-    return allLeaves.map(leaf => ({
+    return allLeaves.map((leaf) => ({
       leafIndex: leaf.leafIndex,
       leafValue: leaf.leafValue,
     }));

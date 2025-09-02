@@ -46,12 +46,15 @@ export const INDEXER_FETCH_POLICY = "network-only";
  * Indexer endpoint configuration based on environment
  */
 export const INDEXER_CONFIG = {
-  ENDPOINT: import.meta.env.MODE === 'development' 
-    ? import.meta.env.VITE_INDEXER_URL_DEV || "http://localhost:42069/proxy/graphql"
-    : import.meta.env.VITE_INDEXER_URL_PROD || "https://api.thegraph.com/subgraphs/name/shinobi-cash/privacy-pools-v1",
-  TOKEN: import.meta.env.MODE === 'development'
-    ? import.meta.env.VITE_INDEXER_TOKEN_DEV
-    : import.meta.env.VITE_INDEXER_TOKEN_PROD,
+  ENDPOINT:
+    import.meta.env.MODE === "development"
+      ? import.meta.env.VITE_INDEXER_URL_DEV || "http://localhost:42069/proxy/graphql"
+      : import.meta.env.VITE_INDEXER_URL_PROD ||
+        "https://api.thegraph.com/subgraphs/name/shinobi-cash/privacy-pools-v1",
+  TOKEN:
+    import.meta.env.MODE === "development"
+      ? import.meta.env.VITE_INDEXER_TOKEN_DEV
+      : import.meta.env.VITE_INDEXER_TOKEN_PROD,
 } as const;
 
 /**

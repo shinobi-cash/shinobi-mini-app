@@ -15,10 +15,10 @@ export interface INoteStorageProvider {
    * Store discovered notes with pagination cursor
    */
   storeDiscoveredNotes(
-    publicKey: string, 
-    poolAddress: string, 
-    notes: NoteChain[], 
-    lastProcessedCursor?: string
+    publicKey: string,
+    poolAddress: string,
+    notes: NoteChain[],
+    lastProcessedCursor?: string,
   ): Promise<void>;
 
   /**

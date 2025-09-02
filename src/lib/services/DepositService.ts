@@ -28,7 +28,7 @@ export class DepositService {
   async generateDepositCommitment(
     accountKey: bigint,
     publicKey: string,
-    poolAddress: string
+    poolAddress: string,
   ): Promise<DepositCommitmentResult> {
     try {
       // Use local cache to get next deposit index (privacy-first)

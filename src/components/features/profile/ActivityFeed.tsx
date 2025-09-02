@@ -45,24 +45,27 @@ export const ActivityFeed = ({
   const { onTransactionIndexed } = useTransactionTracking();
 
   // Fetch pool stats using the service
-  const loadPoolStats = useCallback(async (isRefresh = false) => {
-    if (!isRefresh) setPoolStatsLoading(true);
-    setPoolStatsError(null);
-    
-    try {
-      const stats = await fetchPoolStats();
-      setPoolStats(stats);
-    } catch (error) {
-      setPoolStatsError(error as Error);
-      
-      // If this is initial load (not refresh), clear data
-      if (!isRefresh && !poolStats) {
-        setPoolStats(null);
+  const loadPoolStats = useCallback(
+    async (isRefresh = false) => {
+      if (!isRefresh) setPoolStatsLoading(true);
+      setPoolStatsError(null);
+
+      try {
+        const stats = await fetchPoolStats();
+        setPoolStats(stats);
+      } catch (error) {
+        setPoolStatsError(error as Error);
+
+        // If this is initial load (not refresh), clear data
+        if (!isRefresh && !poolStats) {
+          setPoolStats(null);
+        }
+      } finally {
+        setPoolStatsLoading(false);
       }
-    } finally {
-      setPoolStatsLoading(false);
-    }
-  }, [poolStats]);
+    },
+    [poolStats],
+  );
 
   // Load pool stats on mount
   useEffect(() => {
@@ -72,7 +75,7 @@ export const ActivityFeed = ({
   // Show banner error when pool stats refresh fails (prevent infinite loops)
   useEffect(() => {
     const errorMessage = poolStatsError?.message || null;
-    
+
     if (errorMessage && poolStats && errorMessage !== lastPoolStatsErrorRef.current) {
       banner.error("Failed to refresh pool stats", { duration: 5000 });
       lastPoolStatsErrorRef.current = errorMessage;

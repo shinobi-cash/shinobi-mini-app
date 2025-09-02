@@ -70,7 +70,7 @@ export class KeyDerivationService {
       keyMaterial,
       { name: "AES-GCM", length: CONFIG.KEY_LENGTH },
       false,
-      ["encrypt", "decrypt"]
+      ["encrypt", "decrypt"],
     );
 
     return { symmetricKey, salt };
@@ -94,7 +94,7 @@ export class KeyDerivationService {
       keyMaterial,
       { name: "AES-GCM", length: CONFIG.KEY_LENGTH },
       false,
-      ["encrypt", "decrypt"]
+      ["encrypt", "decrypt"],
     );
 
     return { symmetricKey, salt: accountSalt };
@@ -129,7 +129,7 @@ export class KeyDerivationService {
 
     if (!first || !(first instanceof ArrayBuffer)) {
       throw new Error(
-        "Authenticator does not support PRF (hmac-secret) extension; deterministic passkey KDF unavailable."
+        "Authenticator does not support PRF (hmac-secret) extension; deterministic passkey KDF unavailable.",
       );
     }
 
@@ -139,10 +139,7 @@ export class KeyDerivationService {
   /**
    * Create passkey credential - exact implementation from keyDerivation.ts
    */
-  async createPasskeyCredential(
-    accountName: string,
-    userHandle: string
-  ): Promise<{ credentialId: string }> {
+  async createPasskeyCredential(accountName: string, userHandle: string): Promise<{ credentialId: string }> {
     const challenge = crypto.getRandomValues(new Uint8Array(32));
     const userId = new TextEncoder().encode(userHandle);
 
@@ -210,7 +207,7 @@ export class KeyDerivationService {
   async storeSessionInfo(
     accountName: string,
     authMethod: "passkey" | "password",
-    opts?: { credentialId?: string }
+    opts?: { credentialId?: string },
   ): Promise<void> {
     return this.sessionRepo.storeSessionInfo(accountName, authMethod, opts);
   }

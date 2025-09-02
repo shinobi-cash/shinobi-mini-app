@@ -1,6 +1,6 @@
 /**
  * Shinobi Indexer SDK Client
- * 
+ *
  * Main client for interacting with the Shinobi privacy pool indexer GraphQL API
  */
 
@@ -76,11 +76,11 @@ export class ShinobiIndexerClient {
   private async executeQuery<T>(queryFn: () => Promise<ApolloQueryResult<T>>): Promise<T> {
     try {
       const result = await queryFn();
-      
+
       if (result.errors) {
-        throw new Error(`GraphQL errors: ${result.errors.map(e => e.message).join(", ")}`);
+        throw new Error(`GraphQL errors: ${result.errors.map((e) => e.message).join(", ")}`);
       }
-      
+
       return result.data;
     } catch (error: any) {
       const indexerError: IndexerError = {
@@ -107,8 +107,8 @@ export class ShinobiIndexerClient {
           after: options.after,
           orderDirection: options.orderDirection || "desc",
         },
-        fetchPolicy: 'network-only', // Force network request, bypass cache
-      })
+        fetchPolicy: "network-only", // Force network request, bypass cache
+      }),
     );
 
     return data.activitys;
@@ -119,7 +119,11 @@ export class ShinobiIndexerClient {
   /**
    * Get state tree commitments with pagination
    */
-  async getStateTreeCommitments(poolId: string, limit = 1000, after?: string): Promise<PaginatedResponse<StateTreeLeaf>> {
+  async getStateTreeCommitments(
+    poolId: string,
+    limit = 1000,
+    after?: string,
+  ): Promise<PaginatedResponse<StateTreeLeaf>> {
     const data = await this.executeQuery(() =>
       this.apolloClient.query({
         query: GET_STATE_TREE_COMMITMENTS,
@@ -128,7 +132,7 @@ export class ShinobiIndexerClient {
           limit,
           after,
         },
-      })
+      }),
     );
 
     return data.merkleTreeLeafs;
@@ -162,13 +166,12 @@ export class ShinobiIndexerClient {
     const data = await this.executeQuery(() =>
       this.apolloClient.query({
         query: GET_LATEST_ASP_ROOT,
-      })
+      }),
     );
 
     const items = data.associationSetUpdates?.items;
     return items && items.length > 0 ? items[0] : null;
   }
-
 
   // ============ POOL METHODS ============
 
@@ -185,8 +188,8 @@ export class ShinobiIndexerClient {
       this.apolloClient.query({
         query: GET_POOL_STATS,
         variables: { poolId },
-        fetchPolicy: 'network-only',
-      })
+        fetchPolicy: "network-only",
+      }),
     );
 
     return data.pool;
@@ -206,8 +209,8 @@ export class ShinobiIndexerClient {
       this.apolloClient.query({
         query: GET_POOL_CONFIG,
         variables: { poolId },
-        fetchPolicy: 'network-only',
-      })
+        fetchPolicy: "network-only",
+      }),
     );
 
     return data.pool;
@@ -222,7 +225,7 @@ export class ShinobiIndexerClient {
     const data = await this.executeQuery(() =>
       this.apolloClient.query({
         query: HEALTH_CHECK,
-      })
+      }),
     );
 
     return data._meta;
@@ -235,8 +238,8 @@ export class ShinobiIndexerClient {
     const data = await this.executeQuery(() =>
       this.apolloClient.query({
         query: GET_LATEST_INDEXED_BLOCK,
-        fetchPolicy: 'network-only',
-      })
+        fetchPolicy: "network-only",
+      }),
     );
 
     const status = data._meta?.status;

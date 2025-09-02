@@ -19,7 +19,7 @@ export interface IKeyValueStorageAdapter<T = any> extends IStorageAdapter<T> {
 }
 
 /**
- * Document Storage Interface  
+ * Document Storage Interface
  * For storage that uses object properties as keys (IndexedDB)
  */
 export interface IDocumentStorageAdapter<T = any> extends IStorageAdapter<T> {

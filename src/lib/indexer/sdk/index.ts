@@ -1,6 +1,6 @@
 /**
  * Shinobi Indexer SDK
- * 
+ *
  * A TypeScript SDK for interacting with the Shinobi privacy pool indexer GraphQL API
  */
 
@@ -11,17 +11,13 @@ export { ShinobiIndexerClient, createShinobiClient, setShinobiClient, getShinobi
 export type {
   // Core types
   Activity,
-  
   // State tree types
   StateTreeLeaf,
-  
   // ASP types
   ASPApprovalList,
   ASPData,
-  
   // Health types
   LatestIndexedBlock,
-  
   // Configuration types
   ShinobiIndexerConfig,
 } from "./types";

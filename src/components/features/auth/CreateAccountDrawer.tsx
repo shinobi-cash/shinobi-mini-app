@@ -95,9 +95,7 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
       case "BackupMnemonic":
         return "Save your recovery phrase";
       case "SetupConvenientAuth":
-        return shouldShowPasskey 
-          ? "Setup biometric access"
-          : "Create secure password";
+        return shouldShowPasskey ? "Setup biometric access" : "Create secure password";
       default:
         return "Create new account";
     }

@@ -41,37 +41,40 @@ export class AuthenticationService {
 
       if (sessionInfo.authMethod === "passkey" && sessionInfo.credentialId) {
         // Auto-restore passkey session
-        const keyResult = await this.storageProvider.deriveKeyFromPasskey(sessionInfo.accountName, sessionInfo.credentialId);
+        const keyResult = await this.storageProvider.deriveKeyFromPasskey(
+          sessionInfo.accountName,
+          sessionInfo.credentialId,
+        );
         const authState = await this.restoreFromSessionKey(keyResult.symmetricKey, sessionInfo.accountName);
-        
-        return { 
-          status: "passkey-ready", 
-          authState 
+
+        return {
+          status: "passkey-ready",
+          authState,
         };
       }
 
       if (sessionInfo.authMethod === "password") {
         // Show password prompt for this specific account
-        return { 
+        return {
           status: "password-needed",
           quickAuthState: {
             show: true,
             accountName: sessionInfo.accountName,
-          }
+          },
         };
       }
 
       return { status: "none" };
     } catch (error) {
       console.error("Session restoration failed:", error);
-      
+
       // Only clear session if it's not a concurrent request error
       if (error instanceof Error && error.message.includes("A request is already pending")) {
         console.warn("WebAuthn request collision detected, skipping session clear");
       } else {
         await this.storageProvider.clearSessionInfo();
       }
-      
+
       return { status: "none" };
     }
   }
@@ -92,7 +95,7 @@ export class AuthenticationService {
 
       // Restore keys from mnemonic
       const restoredKeys = restoreFromMnemonic(accountData.mnemonic);
-      
+
       return {
         publicKey: restoredKeys.publicKey,
         privateKey: restoredKeys.privateKey,

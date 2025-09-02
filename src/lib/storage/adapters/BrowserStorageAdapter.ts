@@ -12,7 +12,7 @@ export class BrowserStorageAdapter<T = string> implements IBrowserStorageAdapter
     try {
       const value = this.storage.getItem(key);
       if (value === null) return null;
-      
+
       // Try to parse as JSON, fallback to raw string
       try {
         return JSON.parse(value) as T;
@@ -27,7 +27,7 @@ export class BrowserStorageAdapter<T = string> implements IBrowserStorageAdapter
 
   async set(key: string, value: T): Promise<void> {
     try {
-      const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+      const serialized = typeof value === "string" ? value : JSON.stringify(value);
       this.storage.setItem(key, serialized);
     } catch (error) {
       console.warn(`Failed to set ${key} in storage:`, error);

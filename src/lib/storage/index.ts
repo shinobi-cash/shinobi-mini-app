@@ -1,6 +1,6 @@
 /**
  * Storage Library - Main Export
- * 
+ *
  * Provides secure encrypted storage with improved organization and maintainability
  */
 
@@ -23,10 +23,10 @@ export { KDF } from "./services/KeyDerivationService";
 
 /**
  * USAGE EXAMPLE:
- * 
+ *
  * import { storageManager } from "@/lib/storage";
  * await storageManager.initializeAccountSession(accountName, symmetricKey);
- * 
+ *
  * // Legacy compatibility:
  * import { noteCache } from "@/lib/storage";
  * await noteCache.initializeAccountSession(accountName, symmetricKey);

@@ -301,7 +301,7 @@ export class IndexedDBAdapter<T = any> implements IEncryptedStorageAdapter<T> {
 // Create shared encryption service
 const sharedEncryptionService = new EncryptionService();
 
-// Create store-specific adapters  
+// Create store-specific adapters
 export const notesStorageAdapter = new IndexedDBAdapter(STORE_NAME, sharedEncryptionService);
 export const accountStorageAdapter = new IndexedDBAdapter(ACCOUNT_STORE_NAME, sharedEncryptionService);
 export const passkeyStorageAdapter = new IndexedDBAdapter(PASSKEY_STORE_NAME, sharedEncryptionService);

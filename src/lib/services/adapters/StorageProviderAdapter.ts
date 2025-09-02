@@ -16,7 +16,7 @@ export class StorageProviderAdapter implements INoteStorageProvider {
     publicKey: string,
     poolAddress: string,
     notes: NoteChain[],
-    lastProcessedCursor?: string
+    lastProcessedCursor?: string,
   ): Promise<void> {
     return storageManager.storeDiscoveredNotes(publicKey, poolAddress, notes, lastProcessedCursor);
   }

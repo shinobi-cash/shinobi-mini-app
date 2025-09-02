@@ -41,9 +41,9 @@ export class AuthStorageProviderAdapter implements IAuthStorageProvider {
    * Store session info
    */
   async storeSessionInfo(
-    accountName: string, 
-    authMethod: "passkey" | "password", 
-    opts?: { credentialId?: string }
+    accountName: string,
+    authMethod: "passkey" | "password",
+    opts?: { credentialId?: string },
   ): Promise<void> {
     return storageManager.storeSessionInfo(accountName, authMethod, opts);
   }

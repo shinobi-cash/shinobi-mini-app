@@ -26,7 +26,11 @@ export interface IAuthStorageProvider {
   /**
    * Session info operations
    */
-  storeSessionInfo(accountName: string, authMethod: "passkey" | "password", opts?: { credentialId?: string }): Promise<void>;
+  storeSessionInfo(
+    accountName: string,
+    authMethod: "passkey" | "password",
+    opts?: { credentialId?: string },
+  ): Promise<void>;
   getStoredSessionInfo(): Promise<SessionInfo | null>;
   clearSessionInfo(): Promise<void>;
   updateSessionLastAuth(): Promise<void>;

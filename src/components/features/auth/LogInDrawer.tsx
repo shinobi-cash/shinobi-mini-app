@@ -91,40 +91,40 @@ function LoginWithBackupPhrase({ onRecoverAccountKey }: { onRecoverAccountKey: (
     <div className="space-y-4">
       {/* Word Grid */}
       <div className="bg-app-surface rounded-xl p-3 border border-app shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-3 gap-2">
-              {words.map((word, idx) => (
-                <div key={`word-field-${idx}-${word}`} className="flex flex-col">
-                  <label htmlFor={`word-${idx}`} className="text-xs font-medium text-app-secondary text-center mb-1">
-                    {idx + 1}
-                  </label>
-                  <input
-                    id={`word-${idx}`}
-                    ref={idx === 0 ? firstInputRef : undefined}
-                    type="text"
-                    className="p-2 rounded-lg border border-app text-sm font-mono text-center focus:outline-none focus:ring-2 focus:ring-blue-500 bg-app-background"
-                    placeholder="word"
-                    value={word}
-                    onChange={(e) => handleChange(idx, e.target.value)}
-                    onPaste={(e) => handlePaste(e, idx)}
-                    disabled={isProcessing}
-                    autoComplete="off"
-                  />
-                </div>
-              ))}
-            </div>
-
-            <Button type="submit" className="w-full" disabled={isProcessing || !words.every((w) => w)}>
-              {isProcessing ? "Processing..." : "Load Account"}
-            </Button>
-
-            {error && (
-              <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-                <p className="text-sm text-red-600 text-center">{error}</p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-3 gap-2">
+            {words.map((word, idx) => (
+              <div key={`word-field-${idx}-${word}`} className="flex flex-col">
+                <label htmlFor={`word-${idx}`} className="text-xs font-medium text-app-secondary text-center mb-1">
+                  {idx + 1}
+                </label>
+                <input
+                  id={`word-${idx}`}
+                  ref={idx === 0 ? firstInputRef : undefined}
+                  type="text"
+                  className="p-2 rounded-lg border border-app text-sm font-mono text-center focus:outline-none focus:ring-2 focus:ring-blue-500 bg-app-background"
+                  placeholder="word"
+                  value={word}
+                  onChange={(e) => handleChange(idx, e.target.value)}
+                  onPaste={(e) => handlePaste(e, idx)}
+                  disabled={isProcessing}
+                  autoComplete="off"
+                />
               </div>
-            )}
-          </form>
-        </div>
+            ))}
+          </div>
+
+          <Button type="submit" className="w-full" disabled={isProcessing || !words.every((w) => w)}>
+            {isProcessing ? "Processing..." : "Load Account"}
+          </Button>
+
+          {error && (
+            <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+              <p className="text-sm text-red-600 text-center">{error}</p>
+            </div>
+          )}
+        </form>
+      </div>
     </div>
   );
 }

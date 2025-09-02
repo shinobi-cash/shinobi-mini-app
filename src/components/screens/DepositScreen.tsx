@@ -50,19 +50,18 @@ const DepositForm = () => {
   // ---- Validation ----
   const validateAmount = useCallback(
     (value: string): string => {
-      if(value.length === 0 ) return "";
+      if (value.length === 0) return "";
       if (!value.trim()) return "Please enter an amount";
       try {
         const parsed = parseEther(value);
         if (parsed <= 0n) return "Amount must be positive";
-        if (parsed > availableBalance)
-          return `Amount cannot exceed ${formatEther(availableBalance)} ETH`;
+        if (parsed > availableBalance) return `Amount cannot exceed ${formatEther(availableBalance)} ETH`;
         return "";
       } catch {
         return "Please enter a valid amount";
       }
     },
-    [availableBalance]
+    [availableBalance],
   );
 
   // Keep state + error synced
@@ -71,7 +70,7 @@ const DepositForm = () => {
       setAmount(value);
       setAmountError(validateAmount(value));
     },
-    [validateAmount]
+    [validateAmount],
   );
 
   const handleQuickAmount = useCallback(
@@ -79,22 +78,13 @@ const DepositForm = () => {
       setAmount(quickAmount);
       setAmountError(validateAmount(quickAmount));
     },
-    [validateAmount]
+    [validateAmount],
   );
 
   const { publicKey, accountKey } = useAuth();
   const isOnCorrectNetwork = chainId === NETWORK.CHAIN_ID;
-  const { noteData, isGeneratingNote, error: noteError, regenerateNote } =
-    useDepositCommitment(publicKey, accountKey);
-  const {
-    deposit,
-    reset,
-    clearError,
-    isLoading,
-    isSuccess,
-    error,
-    transactionHash,
-  } = useDepositTransaction();
+  const { noteData, isGeneratingNote, error: noteError, regenerateNote } = useDepositCommitment(publicKey, accountKey);
+  const { deposit, reset, clearError, isLoading, isSuccess, error, transactionHash } = useDepositTransaction();
 
   // Banner for tx error
   useEffect(() => {
@@ -202,9 +192,7 @@ const DepositForm = () => {
             <AlertTriangle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
             <div>
               <p className="text-xs font-medium text-orange-800 dark:text-orange-200">Wrong Network</p>
-              <p className="text-xs text-orange-600 dark:text-orange-400">
-                Please switch to {NETWORK.NAME}
-              </p>
+              <p className="text-xs text-orange-600 dark:text-orange-400">Please switch to {NETWORK.NAME}</p>
             </div>
           </div>
         </div>
@@ -222,10 +210,8 @@ const DepositForm = () => {
         </div>
       </div>
 
-       {/* Inline error */}
-        {amountError && (
-          <p className="text-xs text-red-500 text-center mt-2">{amountError}</p>
-        )}
+      {/* Inline error */}
+      {amountError && <p className="text-xs text-red-500 text-center mt-2">{amountError}</p>}
 
       {/* Button */}
       <div className="mt-auto">
@@ -256,4 +242,3 @@ const DepositForm = () => {
     </div>
   );
 };
-

@@ -3,18 +3,18 @@
  * Maintains exact same API as current noteCache for seamless replacement
  */
 
-import type { 
-  CachedAccountData, 
-  DiscoveryResult, 
-  NamedPasskeyData, 
-  NoteChain, 
-  SessionInfo 
+import type {
+  CachedAccountData,
+  DiscoveryResult,
+  NamedPasskeyData,
+  NoteChain,
+  SessionInfo,
 } from "./interfaces/IDataTypes";
-import { 
-  notesStorageAdapter, 
-  accountStorageAdapter, 
-  passkeyStorageAdapter, 
-  sharedEncryptionService 
+import {
+  notesStorageAdapter,
+  accountStorageAdapter,
+  passkeyStorageAdapter,
+  sharedEncryptionService,
 } from "./adapters/IndexedDBAdapter";
 import { localStorageAdapter, sessionStorageAdapter } from "./adapters/BrowserStorageAdapter";
 import { NotesRepository } from "./repositories/NotesRepository";
@@ -46,11 +46,11 @@ class StorageManager {
   async initializeAccountSession(accountName: string, symmetricKey: CryptoKey): Promise<void> {
     this.currentAccountName = accountName;
     sharedEncryptionService.setEncryptionKey(symmetricKey);
-    
+
     // Initialize all storage adapters
     await notesStorageAdapter.initializeSession(symmetricKey);
     await accountStorageAdapter.initializeSession(symmetricKey);
-    
+
     // Mark session as initialized
     await this.sessionRepo.markSessionInitialized(accountName);
   }
@@ -101,7 +101,7 @@ class StorageManager {
     publicKey: string,
     poolAddress: string,
     notes: NoteChain[],
-    lastProcessedCursor?: string
+    lastProcessedCursor?: string,
   ): Promise<void> {
     return this.notesRepo.storeDiscoveredNotes(publicKey, poolAddress, notes, lastProcessedCursor);
   }
@@ -161,7 +161,7 @@ class StorageManager {
   async storeSessionInfo(
     accountName: string,
     authMethod: "passkey" | "password",
-    opts?: { credentialId?: string }
+    opts?: { credentialId?: string },
   ): Promise<void> {
     return this.sessionRepo.storeSessionInfo(accountName, authMethod, opts);
   }

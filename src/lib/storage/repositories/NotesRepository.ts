@@ -3,12 +3,12 @@
  * Maintains exact logic and data compatibility with current noteCache implementation
  */
 
-import type { 
-  CachedNoteData, 
-  DiscoveryResult, 
-  NoteChain, 
+import type {
+  CachedNoteData,
+  DiscoveryResult,
+  NoteChain,
   StoredEncryptedData,
-  EncryptedData 
+  EncryptedData,
 } from "../interfaces/IDataTypes";
 import type { IndexedDBAdapter } from "../adapters/IndexedDBAdapter";
 import { EncryptionService } from "../services/EncryptionService";
@@ -16,7 +16,7 @@ import { EncryptionService } from "../services/EncryptionService";
 export class NotesRepository {
   constructor(
     private storageAdapter: IndexedDBAdapter,
-    private encryptionService: EncryptionService
+    private encryptionService: EncryptionService,
   ) {}
 
   /**
@@ -57,7 +57,7 @@ export class NotesRepository {
     publicKey: string,
     poolAddress: string,
     notes: NoteChain[],
-    lastProcessedCursor?: string
+    lastProcessedCursor?: string,
   ): Promise<void> {
     if (!this.encryptionService.isKeyAvailable()) {
       throw new Error("Session not initialized");
@@ -96,7 +96,7 @@ export class NotesRepository {
     poolAddress: string,
     notes: NoteChain[],
     lastUsedDepositIndex: number,
-    lastProcessedCursor?: string
+    lastProcessedCursor?: string,
   ): Promise<void> {
     const sensitiveData: CachedNoteData = {
       poolAddress,
@@ -129,7 +129,7 @@ export class NotesRepository {
    */
   private async getCachedData(publicKey: string, poolAddress: string): Promise<CachedNoteData | null> {
     const key = await this.getKey(publicKey, poolAddress);
-    const result = await this.storageAdapter.get(key) as StoredEncryptedData | null;
+    const result = (await this.storageAdapter.get(key)) as StoredEncryptedData | null;
 
     if (result) {
       const encryptedData: EncryptedData = {
@@ -149,5 +149,4 @@ export class NotesRepository {
 
     return null;
   }
-
 }

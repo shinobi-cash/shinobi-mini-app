@@ -14,7 +14,7 @@ const STORAGE_KEY = "shinobi.encrypted.session";
 export class SessionRepository {
   constructor(
     private localStorageAdapter: IBrowserStorageAdapter,
-    private sessionStorageAdapter: IBrowserStorageAdapter
+    private sessionStorageAdapter: IBrowserStorageAdapter,
   ) {}
 
   /**
@@ -23,7 +23,7 @@ export class SessionRepository {
   async storeSessionInfo(
     accountName: string,
     authMethod: "passkey" | "password",
-    opts?: { credentialId?: string }
+    opts?: { credentialId?: string },
   ): Promise<void> {
     const isIframe = window.self !== window.top;
     const sessionInfo: SessionInfo = {
@@ -46,7 +46,7 @@ export class SessionRepository {
    */
   async getStoredSessionInfo(): Promise<SessionInfo | null> {
     try {
-      const info = await this.sessionStorageAdapter.get(SESSION_KEY) as SessionInfo | null;
+      const info = (await this.sessionStorageAdapter.get(SESSION_KEY)) as SessionInfo | null;
       if (!info) return null;
 
       // Check timeout
@@ -105,7 +105,7 @@ export class SessionRepository {
    */
   async getUserSalt(accountName: string): Promise<Uint8Array | null> {
     const key = `shinobi_user_salt:${accountName.toLowerCase().trim()}`;
-    const existing = await this.localStorageAdapter.get(key) as string | null;
+    const existing = (await this.localStorageAdapter.get(key)) as string | null;
     if (existing) {
       const bin = atob(existing);
       const out = new Uint8Array(bin.length);
@@ -148,10 +148,10 @@ export class SessionRepository {
         const keys = this.localStorageAdapter.getAllKeys();
         return keys.includes(`${STORAGE_KEY}_${accountName}`);
       }
-      
+
       // Check for any account session
       const keys = this.localStorageAdapter.getAllKeys();
-      return keys.some(key => key.startsWith(STORAGE_KEY));
+      return keys.some((key) => key.startsWith(STORAGE_KEY));
     } catch (error) {
       console.warn("Failed to check encrypted data:", error);
       return false;

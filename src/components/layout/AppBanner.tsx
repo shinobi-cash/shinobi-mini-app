@@ -3,7 +3,6 @@ import { useIndexerHealth } from "@/hooks/data/useIndexerHealth";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { Dot } from "lucide-react";
 
-
 export const AppBanner = () => {
   const { trackingStatus, trackedTxHash } = useTransactionTracking();
   const { currentBanner, dismissBanner } = useBanner();

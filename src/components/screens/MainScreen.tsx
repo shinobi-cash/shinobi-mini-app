@@ -19,25 +19,17 @@ import { WithdrawalScreen } from "./WithdrawalScreen";
 function HomeScreenController() {
   const { banner } = useBanner();
   const lastErrorRef = useRef<string | null>(null);
-  
-  const { 
-    activities, 
-    loading, 
-    error, 
-    fetchMore, 
-    hasNextPage, 
-    refetch,
-    hasData 
-  } = useActivities({
+
+  const { activities, loading, error, fetchMore, hasNextPage, refetch, hasData } = useActivities({
     poolId: CONTRACTS.ETH_PRIVACY_POOL,
-    limit: 10
+    limit: 10,
   });
 
   // Show banner error when we have data but error on refresh
   // Use error message string to prevent infinite loops
   useEffect(() => {
     const errorMessage = error?.message || null;
-    
+
     if (errorMessage && hasData && errorMessage !== lastErrorRef.current) {
       banner.error("Failed to refresh activities", { duration: 5000 });
       lastErrorRef.current = errorMessage;
@@ -52,8 +44,12 @@ function HomeScreenController() {
       loading={loading}
       error={error && !hasData ? "Failed to load activities" : undefined}
       hasNextPage={hasNextPage}
-      onFetchMore={async () => { await fetchMore?.(); }}
-      onRefresh={async () => { await refetch?.(); }}
+      onFetchMore={async () => {
+        await fetchMore?.();
+      }}
+      onRefresh={async () => {
+        await refetch?.();
+      }}
     />
   );
 }

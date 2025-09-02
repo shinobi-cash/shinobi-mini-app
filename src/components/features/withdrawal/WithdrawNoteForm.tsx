@@ -29,7 +29,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
   // ---- Validation ----
   const validateAmount = useCallback(
     (value: string): string => {
-      if(value.length === 0 ) return "";
+      if (value.length === 0) return "";
       if (!value.trim()) return "Please enter an amount";
       try {
         const parsed = parseEther(value);
@@ -43,11 +43,11 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
         return "Please enter a valid amount";
       }
     },
-    [availableBalance, note.amount]
+    [availableBalance, note.amount],
   );
 
   const validateAddress = useCallback((value: string): string => {
-    if(value.length === 0 ) return "";
+    if (value.length === 0) return "";
     if (!value.trim()) return "Please enter a recipient address";
     if (!isAddress(value)) return "Please enter a valid Ethereum address";
     return "";
@@ -59,7 +59,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
       setWithdrawAmount(value);
       setWithdrawAmountError(validateAmount(value));
     },
-    [validateAmount]
+    [validateAmount],
   );
 
   const handleAddressChange = useCallback(
@@ -67,7 +67,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
       setRecipientAddress(value);
       setRecipientError(validateAddress(value));
     },
-    [validateAddress]
+    [validateAddress],
   );
 
   const handleMaxClick = useCallback(() => {
@@ -82,7 +82,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
       setWithdrawAmount(amount);
       setWithdrawAmountError(validateAmount(amount));
     },
-    [availableBalance, validateAmount]
+    [availableBalance, validateAmount],
   );
 
   // Derived state
@@ -93,16 +93,11 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
   const withdrawalFlow = useWithdrawalFlow({ note });
 
   const withdrawalAmounts = useMemo(() => {
-    return withdrawAmount
-      ? calculateWithdrawalAmounts(withdrawAmount)
-      : { executionFee: 0, youReceive: 0 };
+    return withdrawAmount ? calculateWithdrawalAmounts(withdrawAmount) : { executionFee: 0, youReceive: 0 };
   }, [withdrawAmount]);
 
   const { executionFee, youReceive } = withdrawalAmounts;
-  const remainingBalance = useMemo(
-    () => availableBalance - withdrawAmountNum,
-    [availableBalance, withdrawAmountNum]
-  );
+  const remainingBalance = useMemo(() => availableBalance - withdrawAmountNum, [availableBalance, withdrawAmountNum]);
 
   const {
     showPreview,
@@ -191,20 +186,13 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
             placeholder="0x..."
             value={recipientAddress}
             onChange={(e) => handleAddressChange(e.target.value)}
-            className={cn(
-              "font-mono text-xs",
-              recipientError && "border-destructive focus:border-destructive"
-            )}
+            className={cn("font-mono text-xs", recipientError && "border-destructive focus:border-destructive")}
           />
         </div>
         {/* Error */}
-        {withdrawAmountError && (
-          <p className="text-xs text-destructive mt-2 text-center">{withdrawAmountError}</p>
-        )}
+        {withdrawAmountError && <p className="text-xs text-destructive mt-2 text-center">{withdrawAmountError}</p>}
         {recipientError && <p className="text-xs text-destructive text-center mt-2">{recipientError}</p>}
-
       </div>
-
 
       {/* Action */}
       <div className="mt-auto">
@@ -248,4 +236,3 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
     </div>
   );
 };
-

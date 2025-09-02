@@ -11,7 +11,7 @@ const indexerClient = createShinobiClient({
   headers: {
     "Content-Type": "application/json",
     "User-Agent": "shinobi-mini-app/1.0.0",
-    ...(INDEXER_CONFIG.TOKEN && { "Authorization": `Bearer ${INDEXER_CONFIG.TOKEN}` }),
+    ...(INDEXER_CONFIG.TOKEN && { Authorization: `Bearer ${INDEXER_CONFIG.TOKEN}` }),
   },
   timeout: 30000,
   retryDelay: 100,

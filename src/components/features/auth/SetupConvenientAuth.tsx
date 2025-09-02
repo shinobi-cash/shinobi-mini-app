@@ -19,18 +19,8 @@ export default function SetupConvenientAuth({
   const shouldShowPasskey = isPasskeySupported();
 
   if (shouldShowPasskey) {
-    return (
-      <PasskeySetupForm
-        generatedKeys={generatedKeys}
-        onSuccess={onSetupConvenientAuthComplete}
-      />
-    );
+    return <PasskeySetupForm generatedKeys={generatedKeys} onSuccess={onSetupConvenientAuthComplete} />;
   }
 
-  return (
-    <PasswordSetupForm
-      generatedKeys={generatedKeys}
-      onSuccess={onSetupConvenientAuthComplete}
-    />
-  );
+  return <PasswordSetupForm generatedKeys={generatedKeys} onSuccess={onSetupConvenientAuthComplete} />;
 }

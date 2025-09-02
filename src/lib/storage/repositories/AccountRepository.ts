@@ -11,7 +11,7 @@ import { EncryptionService } from "../services/EncryptionService";
 export class AccountRepository {
   constructor(
     private storageAdapter: IndexedDBAdapter,
-    private encryptionService: EncryptionService
+    private encryptionService: EncryptionService,
   ) {}
 
   /**
