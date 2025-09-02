@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
 import { Eye, EyeOff, Lock, X } from "lucide-react";
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "../../ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "../../ui/drawer";
 
@@ -18,6 +18,14 @@ export function PasswordAuthDrawer() {
   const [showPassword, setShowPassword] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus on password input when drawer opens
+  useEffect(() => {
+    if (quickAuthState?.show && passwordInputRef.current) {
+      passwordInputRef.current.focus();
+    }
+  }, [quickAuthState?.show]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +74,7 @@ export function PasswordAuthDrawer() {
           <form onSubmit={handleSubmit} className="space-y-4 pt-4">
             <div className="relative">
               <input
+                ref={passwordInputRef}
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => {

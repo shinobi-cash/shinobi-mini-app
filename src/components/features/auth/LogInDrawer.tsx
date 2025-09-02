@@ -30,6 +30,13 @@ function LoginWithBackupPhrase({ onRecoverAccountKey }: { onRecoverAccountKey: (
   const firstInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string>();
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Auto-focus on first input when component mounts
+  useEffect(() => {
+    if (firstInputRef.current) {
+      firstInputRef.current.focus();
+    }
+  }, []);
   const handlePaste = (e: React.ClipboardEvent, idx: number) => {
     e.preventDefault();
     const pastedText = e.clipboardData.getData("text/plain");

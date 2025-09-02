@@ -10,7 +10,7 @@ import { storageManager } from "@/lib/storage";
 import type { KeyGenerationResult } from "@/utils/crypto";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "../../ui/button";
 
 interface PasswordSetupSectionProps {
@@ -33,6 +33,14 @@ export function PasswordSetupSection({
   const [passwordError, setPasswordError] = useState("");
   const { setKeys } = useAuth();
   const { banner } = useBanner();
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus on password input when component mounts
+  useEffect(() => {
+    if (passwordInputRef.current) {
+      passwordInputRef.current.focus();
+    }
+  }, []);
 
   const validatePassword = (pass: string) => {
     if (pass.length < 8) {
@@ -119,6 +127,7 @@ export function PasswordSetupSection({
       <div className="space-y-3">
         <div className="relative">
           <input
+            ref={passwordInputRef}
             id="setup-password"
             type={showPassword ? "text" : "password"}
             value={password}

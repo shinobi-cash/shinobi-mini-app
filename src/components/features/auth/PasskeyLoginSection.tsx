@@ -9,7 +9,7 @@ import { KDF } from "@/lib/auth/keyDerivation";
 import { storageManager } from "@/lib/storage";
 import { restoreFromMnemonic } from "@/utils/crypto";
 import { Fingerprint } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 
@@ -23,6 +23,14 @@ export function PasskeyLoginSection({ onSuccess }: PasskeyLoginSectionProps) {
   const [error, setError] = useState<string | null>(null);
   const { setKeys } = useAuth();
   const { banner } = useBanner();
+  const accountNameInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus on account name input when component mounts
+  useEffect(() => {
+    if (accountNameInputRef.current) {
+      accountNameInputRef.current.focus();
+    }
+  }, []);
 
   const handlePasskeyLogin = async () => {
     if (!accountName.trim()) {
@@ -91,12 +99,18 @@ export function PasskeyLoginSection({ onSuccess }: PasskeyLoginSectionProps) {
   return (
     <div className="space-y-4">
       <Input
+        ref={accountNameInputRef}
         id="username-login"
         type="text"
         value={accountName}
         onChange={(e) => {
           setAccountName(e.target.value);
           if (error) setError(null); // Clear error on input change
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && accountName.trim() && !isProcessing) {
+            handlePasskeyLogin();
+          }
         }}
         placeholder="Account Name"
         autoComplete="username webauthn"

@@ -10,7 +10,7 @@ import { storageManager } from "@/lib/storage";
 import { restoreFromMnemonic } from "@/utils/crypto";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 
@@ -26,6 +26,14 @@ export function PasswordLoginSection({ onSuccess }: PasswordLoginSectionProps) {
   const [error, setError] = useState<string | null>(null);
   const { setKeys } = useAuth();
   const { banner } = useBanner();
+  const accountNameInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus on account name input when component mounts
+  useEffect(() => {
+    if (accountNameInputRef.current) {
+      accountNameInputRef.current.focus();
+    }
+  }, []);
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +86,7 @@ export function PasswordLoginSection({ onSuccess }: PasswordLoginSectionProps) {
   return (
     <form onSubmit={handlePasswordLogin} className="space-y-4">
       <Input
+        ref={accountNameInputRef}
         id="username-password-login"
         type="text"
         value={accountName}

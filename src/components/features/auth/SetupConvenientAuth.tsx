@@ -15,6 +15,14 @@ export default function SetupConvenientAuth({
   const [accountName, setAccountName] = useState("");
   const [accountNameError, setAccountNameError] = useState("");
   const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const accountNameInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus on account name input when component mounts
+  useEffect(() => {
+    if (accountNameInputRef.current) {
+      accountNameInputRef.current.focus();
+    }
+  }, []);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -49,6 +57,7 @@ export default function SetupConvenientAuth({
   return (
     <div className="space-y-4">
       <Input
+        ref={accountNameInputRef}
         id="account-name"
         type="text"
         value={accountName}
