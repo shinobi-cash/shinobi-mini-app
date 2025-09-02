@@ -46,17 +46,13 @@ export function useWithdrawalFlow({ note }: UseWithdrawalFlowProps) {
         validateWithdrawalRequest(withdrawalRequest);
 
         // Prepare the withdrawal using our service
-        console.log("🚀 Preparing withdrawal...");
         const prepared = await processWithdrawal(withdrawalRequest);
 
         // Set both states together to avoid race condition
         setPreparedWithdrawal(prepared);
         setShowPreview(true);
         setIsPreparing(false);
-
-        console.log("📋 Setting showPreview to true, prepared data:", !!prepared);
       } catch (error) {
-        console.error("❌ Failed to prepare withdrawal:", error);
         setIsPreparing(false);
         setPreparationError(error instanceof Error ? error.message : "Failed to prepare withdrawal");
         banner.error("Failed to prepare withdrawal");
@@ -75,10 +71,7 @@ export function useWithdrawalFlow({ note }: UseWithdrawalFlowProps) {
     try {
       setIsExecuting(true);
 
-      console.log("🚀 Executing withdrawal transaction...");
       const transactionHash = await executePreparedWithdrawal(preparedWithdrawal);
-
-      console.log("✅ Withdrawal executed successfully:", transactionHash);
 
       // Track transaction for indexing status (replaces banner)
       trackTransaction(transactionHash);
@@ -86,7 +79,6 @@ export function useWithdrawalFlow({ note }: UseWithdrawalFlowProps) {
       setShowPreview(false);
       setIsExecuting(false);
     } catch (error) {
-      console.error("❌ Failed to execute withdrawal:", error);
       setIsExecuting(false);
       banner.error("Failed to execute withdrawal");
     }

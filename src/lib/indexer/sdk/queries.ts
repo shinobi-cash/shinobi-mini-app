@@ -102,26 +102,6 @@ export const GET_LATEST_ASP_ROOT = gql`
   }
 `;
 
-/**
- * Get approved labels from activities
- */
-export const GET_APPROVED_LABELS = gql`
-  query GetApprovedLabels {
-    activitys(
-      where: { aspStatus: "approved" }
-      limit: 1000
-      orderBy: "timestamp"
-      orderDirection: "desc"
-    ) {
-      items {
-        label
-        commitment
-        timestamp
-      }
-    }
-  }
-`;
-
 // ============ POOL QUERIES ============
 
 /**

@@ -87,21 +87,12 @@ export async function fetchWithdrawalData(poolAddress: string): Promise<{
   aspData: ASPData;
   poolScope: string;
 }> {
-  console.log("📊 Step 1: Fetching withdrawal data...");
-
   // Fetch all required data in parallel for optimal performance
   const [stateTreeLeaves, aspData, poolScope] = await Promise.all([
     fetchStateTreeLeaves(poolAddress),
     fetchASPData(),
     fetchPoolScope(),
   ]);
-
-  console.log("✅ All withdrawal data fetched:", {
-    stateTreeLeaves: stateTreeLeaves.length,
-    approvedLabels: aspData.approvedLabels.length,
-    aspRoot: aspData.aspRoot,
-    poolScope,
-  });
 
   return { stateTreeLeaves, aspData, poolScope };
 }
@@ -113,8 +104,6 @@ export async function calculateWithdrawalContext(
   request: WithdrawalRequest,
   withdrawalData: { stateTreeLeaves: StateTreeLeaf[]; aspData: ASPData; poolScope: string },
 ): Promise<WithdrawalContext> {
-  console.log("🔐 Step 2: Calculating withdrawal context...");
-
   const { note, recipientAddress, accountKey } = request;
   const { stateTreeLeaves, aspData, poolScope } = withdrawalData;
 
@@ -132,8 +121,6 @@ export async function calculateWithdrawalContext(
       [withdrawalDataStruct, BigInt(poolScope)],
     ),
   );
-
-  console.log(`  Context hash: ${context}`);
 
   // Get account key and generate nullifiers/secrets
   const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
@@ -175,8 +162,6 @@ export async function generateWithdrawalProof(
   request: WithdrawalRequest,
   context: WithdrawalContext,
 ): Promise<WithdrawalProofData> {
-  console.log("🔐 Step 3: Generating ZK proof...");
-
   const { note, withdrawAmount } = request;
   const noteCommitment = derivedNoteCommitment(request.accountKey, note);
   const {
@@ -204,8 +189,6 @@ export async function generateWithdrawalProof(
     aspTreeLabels: aspData.approvalList.map((label: string) => BigInt(label)),
   });
 
-  console.log("✅ ZK proof generated successfully");
-
   return withdrawalProof;
 }
 
@@ -216,8 +199,6 @@ export async function prepareWithdrawalTransaction(
   context: WithdrawalContext,
   proofData: WithdrawalProofData,
 ): Promise<{ userOperation: UserOperation<"0.7">; smartAccountClient: SmartAccountClient }> {
-  console.log("📤 Step 4: Preparing withdrawal transaction...");
-
   const { poolScope, withdrawalData } = context;
 
   // Format proof for contract compatibility
@@ -238,9 +219,6 @@ export async function prepareWithdrawalTransaction(
   // Prepare UserOperation
   const userOperation = await prepareWithdrawalUserOperation(smartAccountClient, relayCallData);
 
-  console.log("✅ Withdrawal transaction prepared");
-  console.log(`  UserOperation prepared for account: ${smartAccountClient.account.address}`);
-
   return { userOperation, smartAccountClient };
 }
 
@@ -251,13 +229,7 @@ export async function executeWithdrawal(
   smartAccountClient: SmartAccountClient,
   userOperation: UserOperation,
 ): Promise<string> {
-  console.log("🚀 Step 5: Executing withdrawal...");
-
   const transactionHash = await executeWithdrawalUserOperation(smartAccountClient, userOperation);
-
-  console.log("🎉 Withdrawal executed successfully!");
-  console.log(`  Transaction hash: ${transactionHash}`);
-
   return transactionHash;
 }
 
@@ -268,8 +240,6 @@ export async function executeWithdrawal(
  */
 export async function processWithdrawal(request: WithdrawalRequest): Promise<PreparedWithdrawal> {
   try {
-    console.log("🚀 Starting complete withdrawal process...");
-
     // Step 1: Fetch all required data
     const withdrawalData = await fetchWithdrawalData(request.note.poolAddress.toLowerCase());
 
@@ -282,8 +252,6 @@ export async function processWithdrawal(request: WithdrawalRequest): Promise<Pre
     // Step 4: Prepare UserOperation
     const { userOperation, smartAccountClient } = await prepareWithdrawalTransaction(context, proofData);
 
-    console.log("✅ Withdrawal preparation completed successfully");
-
     return {
       context,
       proofData,
@@ -291,7 +259,7 @@ export async function processWithdrawal(request: WithdrawalRequest): Promise<Pre
       smartAccountClient,
     };
   } catch (error) {
-    console.error("❌ Withdrawal process failed:", error);
+    console.error("Withdrawal process failed:", error);
     throw error;
   }
 }

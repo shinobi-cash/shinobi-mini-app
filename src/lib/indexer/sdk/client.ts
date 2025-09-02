@@ -10,7 +10,6 @@ import {
   Activity,
   ActivitiesQueryOptions,
   ASPApprovalList,
-  ASPData,
   HealthStatus,
   IndexerError,
   LatestIndexedBlock,
@@ -20,7 +19,6 @@ import {
 } from "./types";
 import {
   GET_ACTIVITIES,
-  GET_APPROVED_LABELS,
   GET_LATEST_ASP_ROOT,
   GET_LATEST_INDEXED_BLOCK,
   GET_POOL_CONFIG,
@@ -171,39 +169,6 @@ export class ShinobiIndexerClient {
     return items && items.length > 0 ? items[0] : null;
   }
 
-  /**
-   * Get approved labels from activities
-   */
-  async getApprovedLabels(): Promise<any[]> {
-    const data = await this.executeQuery(() =>
-      this.apolloClient.query({
-        query: GET_APPROVED_LABELS,
-      })
-    );
-
-    return data.activitys?.items || [];
-  }
-
-  /**
-   * Get ASP data (combines root and approval list)
-   */
-  async getASPData(): Promise<ASPData | null> {
-    const [aspRoot, approvedLabels] = await Promise.all([
-      this.getLatestASPRoot(),
-      this.getApprovedLabels(),
-    ]);
-
-    if (!aspRoot) {
-      return null;
-    }
-
-    return {
-      root: aspRoot.root,
-      ipfsCID: aspRoot.ipfsCID,
-      timestamp: aspRoot.timestamp,
-      approvalList: approvedLabels.map(label => label.label || label.commitment),
-    };
-  }
 
   // ============ POOL METHODS ============
 

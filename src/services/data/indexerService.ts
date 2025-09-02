@@ -59,12 +59,8 @@ export async function fetchActivities(
  */
 export async function fetchStateTreeLeaves(poolId: string): Promise<any[]> {
   try {
-    console.log("📊 Fetching state tree commitments...");
-
     // Use SDK's built-in method that handles pagination automatically
     const allLeaves = await indexerClient.getAllStateTreeLeaves(poolId);
-
-    console.log(`✅ All state tree leaves fetched: ${allLeaves.length} leaves`);
 
     return allLeaves.map(leaf => ({
       leafIndex: leaf.leafIndex,
@@ -84,16 +80,11 @@ export async function fetchStateTreeLeaves(poolId: string): Promise<any[]> {
  */
 export async function fetchLatestASPRoot(): Promise<{ root: string; ipfsCID: string; timestamp: string }> {
   try {
-    console.log("🌳 Fetching latest ASP root...");
-
     const latestUpdate = await indexerClient.getLatestASPRoot();
 
     if (!latestUpdate?.root || !latestUpdate?.ipfsCID) {
       throw new Error("No ASP root found or missing IPFS CID");
     }
-
-    console.log(`✅ Latest ASP root found: ${latestUpdate.root}`);
-    console.log(`📎 IPFS CID: ${latestUpdate.ipfsCID}`);
 
     return {
       root: latestUpdate.root,
@@ -112,7 +103,6 @@ export async function fetchLatestASPRoot(): Promise<{ root: string; ipfsCID: str
  */
 export async function fetchApprovedLabelsFromIPFS(ipfsCID: string): Promise<string[]> {
   try {
-    console.log("🏷️ Fetching approved labels from IPFS...");
     const ipfsResponse = await fetch(`${IPFS_GATEWAY_URL}${ipfsCID}`);
 
     if (!ipfsResponse.ok) {
@@ -126,10 +116,7 @@ export async function fetchApprovedLabelsFromIPFS(ipfsCID: string): Promise<stri
       throw new Error("Invalid approval list format: missing cumulativeApprovedLabels array");
     }
 
-    const approvedLabels = approvalList.cumulativeApprovedLabels;
-    console.log(`✅ Approved labels fetched from IPFS: ${approvedLabels.length} labels`);
-
-    return approvedLabels;
+    return approvalList.cumulativeApprovedLabels;
   } catch (error) {
     console.error("Failed to fetch approved labels from IPFS:", error);
     throw new Error("Failed to fetch approved labels from IPFS");
@@ -138,28 +125,21 @@ export async function fetchApprovedLabelsFromIPFS(ipfsCID: string): Promise<stri
 
 /**
  * Orchestrates fetching ASP root from indexer and approval list from IPFS
- * Uses SDK client which handles the orchestration internally
+ * Fetches approved labels directly from IPFS for most up-to-date data
  */
 export async function fetchASPData(): Promise<any> {
   try {
-    console.log("🔄 Orchestrating ASP data fetch (indexer + IPFS)...");
+    // Step 1: Get latest ASP root and IPFS CID from indexer
+    const { root, ipfsCID, timestamp } = await fetchLatestASPRoot();
 
-    // Use SDK's built-in method that combines ASP root and approval list
-    const aspData = await indexerClient.getASPData();
-
-    if (!aspData) {
-      throw new Error("No ASP data available");
-    }
-
-    console.log(`✅ ASP data orchestration complete`);
-    console.log(`🌳 ASP Root: ${aspData.root}`);
-    console.log(`📦 IPFS CID: ${aspData.ipfsCID}`);
-    console.log(`📋 Approval list: ${aspData.approvalList.length} items`);
+    // Step 2: Fetch approval list directly from IPFS using the CID
+    const approvalList = await fetchApprovedLabelsFromIPFS(ipfsCID);
 
     return {
-      aspRoot: aspData.root,
-      ipfsCID: aspData.ipfsCID,
-      approvedLabels: aspData.approvalList,
+      aspRoot: root,
+      ipfsCID,
+      timestamp,
+      approvalList,
     };
   } catch (error) {
     console.error("Failed ASP data orchestration:", error);
