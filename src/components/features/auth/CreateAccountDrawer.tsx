@@ -1,4 +1,5 @@
 import type { KeyGenerationResult } from "@/utils/crypto";
+import { isPasskeySupported } from "@/utils/environment";
 import { ChevronLeft, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../../ui/button";
@@ -17,6 +18,7 @@ interface CreateAccountDrawerProps {
 export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerProps) => {
   const [currentStep, setCurrentStep] = useState<CreateAccountStep>("KeyGeneration");
   const [generatedKeys, setGeneratedKeys] = useState<KeyGenerationResult | null>(null);
+  const shouldShowPasskey = isPasskeySupported();
 
   const onKeyGenerationComplete = (keys: KeyGenerationResult) => {
     setGeneratedKeys(keys);
@@ -76,11 +78,11 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
   const getTitle = () => {
     switch (currentStep) {
       case "KeyGeneration":
-        return "Generate Account Keys";
+        return "Generate Keys";
       case "BackupMnemonic":
-        return "Backup Recovery Phrase";
+        return "Backup Phrase";
       case "SetupConvenientAuth":
-        return "Setup Passkey";
+        return shouldShowPasskey ? "Setup Passkey" : "Setup Password";
       default:
         return "Create Account";
     }
@@ -89,13 +91,15 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
   const getDescription = () => {
     switch (currentStep) {
       case "KeyGeneration":
-        return "Generate cryptographic keys locally";
+        return "Generate keys locally";
       case "BackupMnemonic":
-        return "Save your mnemonic phrase to recover account";
+        return "Save your recovery phrase";
       case "SetupConvenientAuth":
-        return "Choose your preferred authentication method for account access";
+        return shouldShowPasskey 
+          ? "Setup biometric access"
+          : "Create secure password";
       default:
-        return "Create a new secure account";
+        return "Create new account";
     }
   };
 
