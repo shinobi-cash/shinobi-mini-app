@@ -1,7 +1,7 @@
 import { CONTRACTS } from "@/config/constants";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCachedNotes } from "@/hooks/data/useCachedNotes";
-import type { Note } from "@/lib/storage/noteCache";
+import { useCachedNotes } from "@/hooks/useCachedNotes";
+import type { Note } from "@/lib/storage/types";
 import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
 import { ChevronRight, Loader2, Wallet } from "lucide-react";
 

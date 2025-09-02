@@ -1,21 +1,17 @@
-import { noteCache } from "@/lib/storage/noteCache";
-import { deriveDepositNullifier, deriveDepositSecret } from "@/utils/noteDerivation";
-import { poseidon2 } from "poseidon-lite";
+/**
+ * Refactored Deposit Commitment Hook
+ * Separates React state management from deposit business logic and storage
+ */
+
 import { useCallback, useEffect, useState } from "react";
 import { useAccount } from "wagmi";
-import { CONTRACTS } from "../../config/constants";
-import { useAuth } from "../../contexts/AuthContext";
+import { CONTRACTS } from "@/config/constants";
+import { DepositService, type CashNoteData } from "@/lib/services/DepositService";
+import { DepositStorageProviderAdapter } from "@/lib/services/adapters/DepositStorageProviderAdapter";
 
-// ---------------------------------------------------------------------------
-// Note interface - uses data from collision service
-// ---------------------------------------------------------------------------
-
-export interface CashNoteData {
-  poolAddress: string;
-  depositIndex: number;
-  changeIndex: number; // always 0 for deposits
-  precommitment: bigint;
-}
+// Create service instances
+const storageProvider = new DepositStorageProviderAdapter();
+const depositService = new DepositService(storageProvider);
 
 export interface DepositCashNoteResult {
   noteData: CashNoteData | null;
@@ -24,12 +20,13 @@ export interface DepositCashNoteResult {
   regenerateNote: () => Promise<void>;
 }
 
-// ---------------------------------------------------------------------------
-// Hook
-// ---------------------------------------------------------------------------
-
-export function useDepositCommitment(): DepositCashNoteResult {
-  const { publicKey, accountKey } = useAuth();
+/**
+ * Hook for deposit commitment generation with decoupled storage and business logic
+ */
+export function useDepositCommitment(
+  publicKey: string | null,
+  accountKey: bigint | null
+): DepositCashNoteResult {
   const { address } = useAccount();
 
   const [state, setState] = useState<{
@@ -53,38 +50,25 @@ export function useDepositCommitment(): DepositCashNoteResult {
     try {
       const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
 
-      // Use local cache to get next deposit index (privacy-first)
-      const depositIndex = await noteCache.getNextDepositIndex(publicKey, poolAddress);
+      // Use deposit service instead of direct storage call
+      const result = await depositService.generateDepositCommitment(accountKey, publicKey, poolAddress);
 
-      // Generate precommitment using local derivation
-      const depositNullifier = deriveDepositNullifier(accountKey, poolAddress, depositIndex);
-      const depositSecret = deriveDepositSecret(accountKey, poolAddress, depositIndex);
-      const precommitment = poseidon2([depositNullifier, depositSecret]);
-
-      const noteData: CashNoteData = {
-        poolAddress,
-        depositIndex,
-        changeIndex: 0,
-        precommitment,
-      };
-
-      setState((prev) => ({
-        ...prev,
-        noteData,
+      setState({
+        noteData: result.noteData,
         isGeneratingNote: false,
-        error: null,
-      }));
+        error: result.error,
+      });
     } catch (error) {
-      console.error("Error generating deposit commitment:", error);
-      setState((prev) => ({
-        ...prev,
+      console.error("Failed to generate deposit commitment:", error);
+      setState({
         noteData: null,
         isGeneratingNote: false,
         error: error instanceof Error ? error.message : "Failed to generate deposit commitment",
-      }));
+      });
     }
   }, [address, accountKey, publicKey]);
 
+  // Auto-generate on mount and when dependencies change - exact logic from original
   useEffect(() => {
     generateNewDepositCommitment();
   }, [generateNewDepositCommitment]);

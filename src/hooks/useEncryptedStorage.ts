@@ -1,10 +1,15 @@
 /**
- * React Hook for managing encrypted local storage session
- * Handles password-based encryption/decryption of sensitive note data
+ * Refactored Encrypted Storage Hook
+ * Separates React state/timer management from session business logic and storage
  */
 
-import { noteCache } from "@/lib/storage/noteCache";
 import { useCallback, useEffect, useState } from "react";
+import { SessionService } from "@/lib/services/SessionService";
+import { SessionStorageProviderAdapter } from "@/lib/services/adapters/SessionStorageProviderAdapter";
+
+// Create service instances
+const storageProvider = new SessionStorageProviderAdapter();
+const sessionService = new SessionService(storageProvider);
 
 interface EncryptedStorageState {
   isSessionActive: boolean;
@@ -31,9 +36,9 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
 
   const [sessionTimeout, setSessionTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  // Clear session automatically after timeout
+  // Clear session automatically after timeout - exact logic from original
   const clearSession = useCallback(() => {
-    noteCache.clearSession();
+    sessionService.clearSession();
     setState((prev) => ({
       ...prev,
       isSessionActive: false,
@@ -46,17 +51,17 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
     }
   }, [sessionTimeout]);
 
-  // Clear all data including passkeys (for reset/logout)
+  // Clear all data including passkeys - exact logic from original
   const clearAllData = useCallback(async () => {
     try {
-      await noteCache.clearAllData();
+      await sessionService.clearAllData();
       clearSession();
     } catch (error) {
       console.error("Failed to clear all data:", error);
     }
   }, [clearSession]);
 
-  // Reset session timeout
+  // Reset session timeout - exact logic from original
   const resetSessionTimeout = useCallback(() => {
     if (sessionTimeout) {
       clearTimeout(sessionTimeout);
@@ -69,7 +74,7 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
     setSessionTimeout(timeout);
   }, [sessionTimeout, clearSession]);
 
-  // Reset session timeout on user activity
+  // Reset session timeout on user activity - exact logic from original
   useEffect(() => {
     if (state.isSessionActive) {
       const handleUserActivity = () => {
@@ -89,7 +94,7 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
     }
   }, [state.isSessionActive, resetSessionTimeout]);
 
-  // Cleanup timeout on unmount
+  // Cleanup timeout on unmount - exact logic from original
   useEffect(() => {
     return () => {
       if (sessionTimeout) {
@@ -98,14 +103,9 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
     };
   }, [sessionTimeout]);
 
-  // Check if there's any encrypted data in storage
+  // Check if there's any encrypted data in storage - exact logic from original
   const hasEncryptedData = useCallback((): boolean => {
-    try {
-      return noteCache.hasEncryptedData();
-    } catch (error) {
-      console.warn("Failed to check encrypted data:", error);
-      return false;
-    }
+    return sessionService.hasEncryptedData();
   }, []);
 
   return {
@@ -116,13 +116,12 @@ export function useEncryptedStorage(): EncryptedStorageState & EncryptedStorageA
   };
 }
 
-// Helper hook for components that need encrypted storage
+// Helper hook for components that need encrypted session - exact logic from original
 export function useRequireEncryptedSession() {
   const storage = useEncryptedStorage();
 
   useEffect(() => {
     if (storage.isInitialized && !storage.isSessionActive && !storage.isLoading) {
-      // Redirect to password prompt or show modal
       console.warn("Encrypted session required but not active");
     }
   }, [storage.isInitialized, storage.isSessionActive, storage.isLoading]);

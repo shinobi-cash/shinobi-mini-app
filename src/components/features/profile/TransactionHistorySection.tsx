@@ -1,4 +1,4 @@
-import type { NoteChain } from "@/lib/storage/noteCache";
+import type { NoteChain } from "@/lib/storage/types";
 import { RefreshCw } from "lucide-react";
 import { Button } from "../../ui/button";
 import { CashNoteCard } from "./CashNoteCard";
@@ -41,14 +41,21 @@ export function TransactionHistorySection({
       {/* Scrollable History Table */}
       <div className="flex-1 flex flex-col bg-app-surface border-b border-app shadow-md overflow-hidden">
         <div className="flex-1 overflow-y-auto">
-          {loading ? (
+          {error ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <p className="text-app-secondary mb-1">Failed to load history</p>
+                <p className="text-sm text-app-tertiary">Check your connection and try again</p>
+              </div>
+            </div>
+          ) : loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
                 <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-app-secondary" />
                 <p className="text-app-secondary">Loading your transaction history...</p>
               </div>
             </div>
-          ) : error ? (
+          ) : noteChains.length === 0 ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
                 <p className="text-app-secondary mb-1">Failed to load history</p>

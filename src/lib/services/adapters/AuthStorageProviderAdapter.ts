@@ -4,9 +4,9 @@
  */
 
 import type { IAuthStorageProvider, DerivedKeyResult } from "../interfaces/IAuthStorageProvider";
-import type { CachedAccountData, SessionInfo } from "@/lib/storage-refactored/interfaces/IDataTypes";
-import { storageManager } from "@/lib/storage-refactored";
-import { KDF_Refactored } from "@/lib/storage-refactored";
+import type { CachedAccountData, SessionInfo } from "@/lib/storage/interfaces/IDataTypes";
+import { storageManager } from "@/lib/storage";
+import { KDF_Refactored } from "@/lib/storage";
 
 export class AuthStorageProviderAdapter implements IAuthStorageProvider {
   /**

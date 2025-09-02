@@ -1,5 +1,5 @@
 import { NETWORK } from "@/config/constants";
-import type { NoteChain } from "@/lib/storage/noteCache";
+import type { NoteChain } from "@/lib/storage/types";
 import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
 import { ExternalLink, X } from "lucide-react";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "../../ui/drawer";

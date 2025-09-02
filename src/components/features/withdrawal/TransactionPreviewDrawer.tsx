@@ -1,5 +1,5 @@
 import { useBanner } from "@/contexts/BannerContext";
-import type { Note } from "@/lib/storage/noteCache";
+import type { Note } from "@/lib/storage/types";
 import { formatEthAmount, formatHash } from "@/utils/formatters";
 import { Copy, Info, Loader2, X } from "lucide-react";
 import { Button } from "../../ui/button";

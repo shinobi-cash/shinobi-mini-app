@@ -6,7 +6,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
 import { KDF } from "@/lib/auth/keyDerivation";
-import { noteCache } from "@/lib/storage/noteCache";
+import { storageManager } from "@/lib/storage";
 import type { KeyGenerationResult } from "@/utils/crypto";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import type React from "react";
@@ -70,7 +70,7 @@ export function PasswordSetupSection({
 
     try {
       // Check for existing account (this also initializes the database)
-      const existingAccount = await noteCache.getAccountDataByName(accountName.trim());
+      const existingAccount = await storageManager.getAccountDataByName(accountName.trim());
       if (existingAccount) {
         banner.error("Account already exists");
         return;
@@ -88,7 +88,7 @@ export function PasswordSetupSection({
       const { symmetricKey } = await KDF.deriveKeyFromPassword(password, accountName.trim());
 
       // Initialize session with the derived key
-      await noteCache.initializeAccountSession(accountName.trim(), symmetricKey);
+      await storageManager.initializeAccountSession(accountName.trim(), symmetricKey);
 
       // Store account data using the session
       const accountData = {
@@ -96,7 +96,7 @@ export function PasswordSetupSection({
         mnemonic: generatedKeys.mnemonic,
         createdAt: Date.now(),
       };
-      await noteCache.storeAccountData(accountData);
+      await storageManager.storeAccountData(accountData);
 
       // Store session info for future restoration
       KDF.storeSessionInfo(accountName.trim(), "password");

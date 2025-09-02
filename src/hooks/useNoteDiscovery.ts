@@ -4,9 +4,9 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { DiscoveryResult } from "@/lib/storage-refactored/interfaces/IDataTypes";
-import { NoteDiscoveryService, type DiscoveryProgress } from "@/lib/services-refactored/NoteDiscoveryService";
-import { StorageProviderAdapter } from "@/lib/services-refactored/adapters/StorageProviderAdapter";
+import type { DiscoveryResult } from "@/lib/storage/interfaces/IDataTypes";
+import { NoteDiscoveryService, type DiscoveryProgress } from "@/lib/services/NoteDiscoveryService";
+import { StorageProviderAdapter } from "@/lib/services/adapters/StorageProviderAdapter";
 
 // Create service instances
 const storageProvider = new StorageProviderAdapter();
@@ -25,7 +25,7 @@ export interface UseNoteDiscoveryOptions {
 }
 
 /**
- * Hook for note discovery with decoupled storage and business logic
+ * Hook for note discovery with proper cache-first loading and error handling
  */
 export function useNoteDiscovery(
   publicKey: string,
@@ -48,15 +48,24 @@ export function useNoteDiscovery(
   );
 
   useEffect(() => {
+    // Don't run if we don't have valid auth parameters
+    if (!publicKey || !accountKey) {
+      setLoading(false);
+      return;
+    }
+
     const autoScan = options?.autoScan ?? true;
+    const runId = ++refreshIdRef.current;
+    let hasCachedData = false;
 
     // Load cache first
     const loadCache = async () => {
       try {
         const cached = await storageProvider.getCachedNotes(publicKey, poolAddress);
-        if (cached) {
+        if (cached && runId === refreshIdRef.current) {
           setData(cached);
-          setLoading(false);
+          setLoading(false); // Stop loading immediately when cache is available
+          hasCachedData = true;
         }
       } catch (error) {
         console.error("Failed to load cached notes:", error);
@@ -69,33 +78,47 @@ export function useNoteDiscovery(
 
     const controller = new AbortController();
     const signal = controller.signal;
-    const runId = ++refreshIdRef.current;
 
     const onProgress = (p: DiscoveryProgress) => {
       if (runId === refreshIdRef.current) setProgress(p);
     };
 
+    // Start background discovery
     runDiscovery(signal, onProgress)
       .then((result) => {
-        if (runId === refreshIdRef.current) setData(result);
+        if (runId === refreshIdRef.current) {
+          setData(result);
+          setError(null);
+        }
       })
       .catch((err) => {
         if (err instanceof DOMException && err.name === "AbortError") return;
-        if (runId === refreshIdRef.current) setError(err as Error);
+        if (runId === refreshIdRef.current) {
+          // Only set error if we don't have cached data
+          if (!hasCachedData) {
+            setError(err as Error);
+          }
+          console.warn("Note discovery failed:", err);
+        }
       })
       .finally(() => {
-        if (runId === refreshIdRef.current) setLoading(false);
+        if (runId === refreshIdRef.current) {
+          setLoading(false);
+        }
       });
 
     return () => controller.abort();
-  }, [poolAddress, publicKey, runDiscovery, options?.autoScan]);
+  }, [poolAddress, publicKey, accountKey, options?.autoScan]);
 
   const refresh = useCallback(async () => {
     const runId = ++refreshIdRef.current;
     const controller = new AbortController();
     const signal = controller.signal;
 
-    setLoading(true);
+    // Only show loading during refresh if we have no data
+    if (!data) {
+      setLoading(true);
+    }
     setError(null);
 
     const onProgress = (p: DiscoveryProgress) => {
@@ -104,14 +127,25 @@ export function useNoteDiscovery(
 
     try {
       const result = await runDiscovery(signal, onProgress);
-      if (runId === refreshIdRef.current) setData(result);
+      if (runId === refreshIdRef.current) {
+        setData(result);
+        setError(null);
+      }
       return result;
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") throw err;
-      if (runId === refreshIdRef.current) setError(err as Error);
+      if (runId === refreshIdRef.current) {
+        // Only show error if we don't have cached data to fall back to
+        if (!data) {
+          setError(err as Error);
+        }
+        console.warn("Note refresh failed:", err);
+      }
       throw err;
     } finally {
-      if (runId === refreshIdRef.current) setLoading(false);
+      if (runId === refreshIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [runDiscovery]);
 

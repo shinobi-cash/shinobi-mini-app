@@ -3,7 +3,7 @@
  * Abstracts storage operations for authentication service
  */
 
-import type { CachedAccountData, SessionInfo } from "@/lib/storage-refactored/interfaces/IDataTypes";
+import type { CachedAccountData, SessionInfo } from "@/lib/storage/interfaces/IDataTypes";
 
 export interface DerivedKeyResult {
   symmetricKey: CryptoKey;

@@ -1,11 +1,11 @@
 import { CONTRACTS } from "@/config/constants";
 import { useBanner } from "@/contexts/BannerContext";
-import { useNotes } from "@/hooks/data/useDepositDiscovery";
+import { useNotes } from "@/hooks/useNoteDiscovery";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { useModalWithSelection } from "@/hooks/ui/useModalState";
-import type { NoteChain } from "@/lib/storage/noteCache";
+import type { NoteChain } from "@/lib/storage/types";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { NoteChainDetailDrawer } from "../features/profile/NoteChainDetailDrawer";
 import { ProfileSummaryCard } from "../features/profile/ProfileSummaryCard";
 import { TransactionHistorySection } from "../features/profile/TransactionHistorySection";

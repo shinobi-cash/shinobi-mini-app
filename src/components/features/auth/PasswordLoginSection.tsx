@@ -6,7 +6,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
 import { KDF } from "@/lib/auth/keyDerivation";
-import { noteCache } from "@/lib/storage/noteCache";
+import { storageManager } from "@/lib/storage";
 import { restoreFromMnemonic } from "@/utils/crypto";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import type React from "react";
@@ -43,10 +43,10 @@ export function PasswordLoginSection({ onSuccess }: PasswordLoginSectionProps) {
       const { symmetricKey } = await KDF.deriveKeyFromPassword(password, accountName.trim());
 
       // Initialize account-scoped session with derived key
-      await noteCache.initializeAccountSession(accountName.trim(), symmetricKey);
+      await storageManager.initializeAccountSession(accountName.trim(), symmetricKey);
 
       // Retrieve and restore account keys
-      const accountData = await noteCache.getAccountData();
+      const accountData = await storageManager.getAccountData();
       if (!accountData) {
         throw new Error("Account not found or incorrect password");
       }

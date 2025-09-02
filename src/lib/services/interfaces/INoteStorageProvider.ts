@@ -3,7 +3,7 @@
  * Abstracts storage operations for note discovery service
  */
 
-import type { DiscoveryResult, NoteChain } from "@/lib/storage-refactored/interfaces/IDataTypes";
+import type { DiscoveryResult, NoteChain } from "@/lib/storage/interfaces/IDataTypes";
 
 export interface INoteStorageProvider {
   /**

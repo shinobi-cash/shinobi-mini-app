@@ -5,6 +5,7 @@
 
 import type { KeyGenerationResult } from "@/utils/crypto";
 import { restoreFromMnemonic } from "@/utils/crypto";
+import { getAccountKey } from "@/utils/accountKey";
 import type { IAuthStorageProvider } from "./interfaces/IAuthStorageProvider";
 
 export interface AuthState {
@@ -153,8 +154,6 @@ export class AuthenticationService {
    */
   private getAccountKey(keys: { privateKey?: string; mnemonic?: string[] }): bigint | null {
     try {
-      // Import getAccountKey to avoid circular dependency
-      const { getAccountKey } = require("@/utils/accountKey");
       return getAccountKey({
         privateKey: keys.privateKey || undefined,
         mnemonic: keys.mnemonic || undefined,

@@ -6,7 +6,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
 import { KDF } from "@/lib/auth/keyDerivation";
-import { noteCache } from "@/lib/storage/noteCache";
+import { storageManager } from "@/lib/storage";
 import { restoreFromMnemonic } from "@/utils/crypto";
 import { Fingerprint } from "lucide-react";
 import { useState } from "react";
@@ -35,7 +35,7 @@ export function PasskeyLoginSection({ onSuccess }: PasskeyLoginSectionProps) {
 
     try {
       // Get passkey data for this account
-      const passkeyData = await noteCache.getPasskeyData(accountName.trim());
+      const passkeyData = await storageManager.getPasskeyData(accountName.trim());
       if (!passkeyData) {
         throw new Error(`No passkey found for account '${accountName.trim()}'. Please create one first.`);
       }
@@ -44,10 +44,10 @@ export function PasskeyLoginSection({ onSuccess }: PasskeyLoginSectionProps) {
       const { symmetricKey } = await KDF.deriveKeyFromPasskey(accountName.trim(), passkeyData.credentialId);
 
       // Initialize account-scoped session
-      await noteCache.initializeAccountSession(accountName.trim(), symmetricKey);
+      await storageManager.initializeAccountSession(accountName.trim(), symmetricKey);
 
       // Retrieve and restore account keys
-      const accountData = await noteCache.getAccountData();
+      const accountData = await storageManager.getAccountData();
       if (!accountData) {
         throw new Error("Account data not found");
       }

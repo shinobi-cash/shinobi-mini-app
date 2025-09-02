@@ -4,7 +4,7 @@
  */
 
 import type { ISessionStorageProvider } from "../interfaces/ISessionStorageProvider";
-import { storageManager } from "@/lib/storage-refactored";
+import { storageManager } from "@/lib/storage";
 
 export class SessionStorageProviderAdapter implements ISessionStorageProvider {
   clearSession(): void {

@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
-import type { Note } from "@/lib/storage/noteCache";
+import type { Note } from "@/lib/storage/types";
 import {
   type PreparedWithdrawal,
   type WithdrawalRequest,
@@ -54,7 +54,6 @@ export function useWithdrawalFlow({ note }: UseWithdrawalFlowProps) {
         setShowPreview(true);
         setIsPreparing(false);
 
-        console.log("✅ Withdrawal prepared successfully");
         console.log("📋 Setting showPreview to true, prepared data:", !!prepared);
       } catch (error) {
         console.error("❌ Failed to prepare withdrawal:", error);

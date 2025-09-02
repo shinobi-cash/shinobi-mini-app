@@ -1,15 +1,9 @@
 /**
  * Privacy Withdrawal Service
- *
- * Orchestrates secure privacy pool withdrawals:
- * - Withdrawal context calculation and validation
- * - Zero-knowledge proof generation
- * - Transaction preparation and execution
- * - Privacy-preserving nullifier management
  */
 
 import { CONTRACTS, SNARK_SCALAR_FIELD, WITHDRAWAL_FEES } from "@/config/constants";
-import type { Note } from "@/lib/storage/noteCache";
+import type { Note } from "@/lib/storage/types";
 import { WithdrawalProofGenerator } from "@/utils/WithdrawalProofGenerator";
 import { encodeAbiParameters, isAddress, keccak256, parseEther } from "viem";
 

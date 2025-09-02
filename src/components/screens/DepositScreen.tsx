@@ -1,11 +1,12 @@
 import { useBanner } from "@/contexts/BannerContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { AlertTriangle, ChevronDown, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatEther, parseEther } from "viem";
 import { useAccount, useBalance, useChainId } from "wagmi";
 import { NETWORK } from "../../config/constants";
-import { useDepositCommitment } from "../../hooks/transactions/useDepositCommitment";
+import { useDepositCommitment } from "@/hooks/transactions/useDepositCommitment";
 import { useDepositTransaction } from "../../hooks/transactions/useDepositTransaction";
 import { AuthenticationGate } from "../shared/AuthenticationGate";
 import { WalletGate } from "../shared/WalletGate";
@@ -81,9 +82,10 @@ const DepositForm = () => {
     [validateAmount]
   );
 
+  const { publicKey, accountKey } = useAuth();
   const isOnCorrectNetwork = chainId === NETWORK.CHAIN_ID;
   const { noteData, isGeneratingNote, error: noteError, regenerateNote } =
-    useDepositCommitment();
+    useDepositCommitment(publicKey, accountKey);
   const {
     deposit,
     reset,

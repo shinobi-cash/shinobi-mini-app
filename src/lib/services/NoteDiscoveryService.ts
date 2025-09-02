@@ -4,7 +4,7 @@
  */
 
 import type { Activity } from "@/lib/indexer/sdk";
-import type { Note, NoteChain, DiscoveryResult } from "@/lib/storage-refactored/interfaces/IDataTypes";
+import type { Note, NoteChain, DiscoveryResult } from "@/lib/storage/interfaces/IDataTypes";
 import type { INoteStorageProvider } from "./interfaces/INoteStorageProvider";
 import { fetchActivities } from "@/services/data/indexerService";
 import { deriveChangeNullifier, deriveDepositNullifier, deriveDepositSecret } from "@/utils/noteDerivation";

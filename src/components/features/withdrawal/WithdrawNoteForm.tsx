@@ -1,5 +1,5 @@
 import { useWithdrawalFlow } from "@/hooks/transactions/useWithdrawalFlow";
-import type { Note } from "@/lib/storage/noteCache";
+import type { Note } from "@/lib/storage/types";
 import { cn } from "@/lib/utils";
 import { calculateWithdrawalAmounts } from "@/services/privacy/withdrawalService";
 import { formatEthAmount } from "@/utils/formatters";

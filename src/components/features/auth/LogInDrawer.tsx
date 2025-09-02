@@ -5,7 +5,6 @@
  * Follows mobile-first drawer design patterns
  */
 
-import { noteCache } from "@/lib/storage/noteCache";
 import { type KeyGenerationResult, restoreFromMnemonic, validateMnemonic } from "@/utils/crypto";
 import { isPasskeySupported } from "@/utils/environment";
 import { ChevronLeft, Fingerprint, Lock, X } from "lucide-react";
@@ -15,6 +14,7 @@ import { Button } from "../../ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "../../ui/drawer";
 import { AuthSection } from "./AuthSection";
 import SetupConvenientAuth from "./SetupConvenientAuth";
+import { storageManager } from "@/lib/storage";
 
 interface LogInDrawerProps {
   open: boolean;
@@ -137,7 +137,7 @@ export function LogInDrawer({ open, onOpenChange }: LogInDrawerProps) {
     if (open) {
       const loadAccounts = async () => {
         try {
-          const accounts = await noteCache.listAccountNames();
+          const accounts = await storageManager.listAccountNames();
           setAvailableAccounts(accounts);
         } catch (error) {
           console.error("Failed to load accounts:", error);

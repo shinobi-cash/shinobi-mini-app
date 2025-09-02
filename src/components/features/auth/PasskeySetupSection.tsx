@@ -6,7 +6,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
 import { KDF } from "@/lib/auth/keyDerivation";
-import { noteCache } from "@/lib/storage/noteCache";
+import { storageManager } from "@/lib/storage";
 import { type KeyGenerationResult, createHash } from "@/utils/crypto";
 import { Fingerprint } from "lucide-react";
 import { useState } from "react";
@@ -35,7 +35,7 @@ export function PasskeySetupSection({
     }
 
     // Check for existing passkey
-    const hasPasskey = await noteCache.passkeyExists(accountName.trim());
+    const hasPasskey = await storageManager.passkeyExists(accountName.trim());
     if (hasPasskey) {
       banner.error("Passkey already exists");
       return;
@@ -55,7 +55,7 @@ export function PasskeySetupSection({
       const { symmetricKey } = await KDF.deriveKeyFromPasskey(accountName.trim(), credentialId);
 
       // Initialize session with the derived key
-      await noteCache.initializeAccountSession(accountName.trim(), symmetricKey);
+      await storageManager.initializeAccountSession(accountName.trim(), symmetricKey);
 
       // Store account data using the session
       const accountData = {
@@ -63,7 +63,7 @@ export function PasskeySetupSection({
         mnemonic: generatedKeys.mnemonic,
         createdAt: Date.now(),
       };
-      await noteCache.storeAccountData(accountData);
+      await storageManager.storeAccountData(accountData);
 
       // Store passkey metadata
       const passkeyData = {
@@ -73,7 +73,7 @@ export function PasskeySetupSection({
         publicKeyHash: userHandle,
         created: Date.now(),
       };
-      await noteCache.storePasskeyData(passkeyData);
+      await storageManager.storePasskeyData(passkeyData);
 
       // Store session info for restoration
       KDF.storeSessionInfo(accountName.trim(), "passkey", { credentialId });

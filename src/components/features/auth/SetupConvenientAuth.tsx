@@ -1,8 +1,8 @@
-import { noteCache } from "@/lib/storage/noteCache";
 import type { KeyGenerationResult } from "@/utils/crypto";
 import { useEffect, useRef, useState } from "react";
 import { Input } from "../../ui/input";
 import { AuthSection } from "./AuthSection";
+import { storageManager } from "@/lib/storage";
 
 export default function SetupConvenientAuth({
   generatedKeys,
@@ -40,7 +40,7 @@ export default function SetupConvenientAuth({
       return "Account name can only contain letters, numbers, spaces, hyphens, and underscores";
     }
     // Check if account already exists
-    const exists = await noteCache.accountExists(name.trim());
+    const exists = await storageManager.accountExists(name.trim());
     if (exists) {
       return "An account with this name already exists";
     }

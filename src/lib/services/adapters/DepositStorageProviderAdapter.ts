@@ -4,7 +4,7 @@
  */
 
 import type { IDepositStorageProvider } from "../interfaces/IDepositStorageProvider";
-import { storageManager } from "@/lib/storage-refactored";
+import { storageManager } from "@/lib/storage";
 
 export class DepositStorageProviderAdapter implements IDepositStorageProvider {
   async getNextDepositIndex(publicKey: string, poolAddress: string): Promise<number> {
