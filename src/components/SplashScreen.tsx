@@ -5,8 +5,7 @@ interface SplashScreenProps {
 export const SplashScreen = ({ subtitle }: SplashScreenProps) => (
   <div className="min-h-screen bg-app-background flex flex-col items-center justify-center px-2 py-2 sm:px-4 sm:py-4">
     <div className="text-center">
-      <div className="text-8xl mb-8 animate-bounce">🥷</div>
-      <h1 className="text-4xl sm:text-5xl font-bold text-app-primary mb-3 font-sans">shinobi.cash</h1>
+      <h1 className="text-4xl sm:text-5xl font-bold text-app-primary mb-3 font-sans animate-bounce">shinobi.cash</h1>
       {subtitle && <p className="text-app-secondary text-lg animate-pulse">{subtitle}</p>}
     </div>
   </div>
