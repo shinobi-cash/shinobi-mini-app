@@ -1,4 +1,5 @@
 import { fetchLatestIndexedBlock } from "@/services/data/indexerService";
+import { publicClient } from "@/lib/clients";
 import type React from "react";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
@@ -71,21 +72,12 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
 
     const fetchTransactionReceipt = async () => {
       try {
-        const response = await fetch("https://sepolia.base.org", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            jsonrpc: "2.0",
-            method: "eth_getTransactionReceipt",
-            params: [trackedTransaction.hash],
-            id: 1,
-          }),
+        const receipt = await publicClient.getTransactionReceipt({
+          hash: trackedTransaction.hash as `0x${string}`,
         });
 
-        const rpcResult = await response.json();
-        if (rpcResult.result) {
-          const blockNumber = Number.parseInt(rpcResult.result.blockNumber, 16);
-          setTrackedTransaction((prev) => (prev ? { ...prev, blockNumber } : null));
+        if (receipt) {
+          setTrackedTransaction((prev) => (prev ? { ...prev, blockNumber: Number(receipt.blockNumber) } : null));
         } else {
           // Receipt not available yet, retry in 3 seconds
           timeoutRef.current = setTimeout(fetchTransactionReceipt, 3000);
