@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { NoteChainDetailDrawer } from "../features/profile/NoteChainDetailDrawer";
 import { ProfileSummaryCard } from "../features/profile/ProfileSummaryCard";
-import { TransactionHistorySection } from "../features/profile/TransactionHistorySection";
+import { NotesHistorySection } from "../features/profile/NotesHistorySection";
 import { AuthenticationGate } from "../shared/AuthenticationGate";
 
 export const ProfileScreen = () => {
@@ -146,8 +146,8 @@ const ProfileContent = ({
       {/* Summary Card */}
       <ProfileSummaryCard unspentNotes={unspentNotes} totalNotes={noteChains.length} onSignOut={onSignOut} />
 
-      {/* Transaction History */}
-      <TransactionHistorySection
+      {/* Notes History */}
+      <NotesHistorySection
         noteChains={noteChains}
         loading={loading}
         error={!!error}

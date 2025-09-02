@@ -3,7 +3,7 @@ import { RefreshCw } from "lucide-react";
 import { Button } from "../../ui/button";
 import { CashNoteCard } from "./CashNoteCard";
 
-interface TransactionHistorySectionProps {
+interface NotesHistorySectionProps {
   noteChains: NoteChain[];
   loading: boolean;
   error: boolean;
@@ -12,19 +12,19 @@ interface TransactionHistorySectionProps {
   onNoteChainClick: (noteChain: NoteChain) => void;
 }
 
-export function TransactionHistorySection({
+export function NotesHistorySection({
   noteChains,
   loading,
   error,
   isRefreshing,
   onRefresh,
   onNoteChainClick,
-}: TransactionHistorySectionProps) {
+}: NotesHistorySectionProps) {
   return (
     <div className="flex-1 flex flex-col min-h-0 gap-2">
       <div className="flex-shrink-0 bg-app-surface border-b border-app shadow-md">
         <div className="flex items-center justify-between py-3 px-4">
-          <h2 className="text-lg font-semibold text-app-secondary tracking-tight flex-1">Transaction History</h2>
+          <h2 className="text-lg font-semibold text-app-secondary tracking-tight flex-1">Notes History</h2>
           <Button
             variant="ghost"
             size="sm"
