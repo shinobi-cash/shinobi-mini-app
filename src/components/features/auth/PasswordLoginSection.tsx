@@ -26,12 +26,11 @@ export function PasswordLoginSection({ onSuccess }: PasswordLoginSectionProps) {
   const [error, setError] = useState<string | null>(null);
   const { setKeys } = useAuth();
   const { banner } = useBanner();
-  const accountNameInputRef = useRef<HTMLInputElement>(null);
-
   // Auto-focus on account name input when component mounts
   useEffect(() => {
-    if (accountNameInputRef.current) {
-      accountNameInputRef.current.focus();
+    const input = document.getElementById("username-password-login") as HTMLInputElement;
+    if (input) {
+      input.focus();
     }
   }, []);
 
@@ -86,7 +85,6 @@ export function PasswordLoginSection({ onSuccess }: PasswordLoginSectionProps) {
   return (
     <form onSubmit={handlePasswordLogin} className="space-y-4">
       <Input
-        ref={accountNameInputRef}
         id="username-password-login"
         type="text"
         value={accountName}
@@ -101,7 +99,7 @@ export function PasswordLoginSection({ onSuccess }: PasswordLoginSectionProps) {
       />
 
       <div className="relative">
-        <input
+        <Input
           id="login-password"
           type={showPassword ? "text" : "password"}
           value={password}
@@ -109,7 +107,7 @@ export function PasswordLoginSection({ onSuccess }: PasswordLoginSectionProps) {
             setPassword(e.target.value);
             if (error) setError(null); // Clear error on input change
           }}
-          className="w-full px-3 py-2 pr-10 border border-app rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-app-background text-app-primary"
+          className="pr-10"
           placeholder="Enter your password"
           required
           disabled={isProcessing}

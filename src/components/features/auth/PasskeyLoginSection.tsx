@@ -23,12 +23,11 @@ export function PasskeyLoginSection({ onSuccess }: PasskeyLoginSectionProps) {
   const [error, setError] = useState<string | null>(null);
   const { setKeys } = useAuth();
   const { banner } = useBanner();
-  const accountNameInputRef = useRef<HTMLInputElement>(null);
-
   // Auto-focus on account name input when component mounts
   useEffect(() => {
-    if (accountNameInputRef.current) {
-      accountNameInputRef.current.focus();
+    const input = document.getElementById("username-login") as HTMLInputElement;
+    if (input) {
+      input.focus();
     }
   }, []);
 
@@ -99,7 +98,6 @@ export function PasskeyLoginSection({ onSuccess }: PasskeyLoginSectionProps) {
   return (
     <div className="space-y-4">
       <Input
-        ref={accountNameInputRef}
         id="username-login"
         type="text"
         value={accountName}

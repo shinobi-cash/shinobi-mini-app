@@ -1,6 +1,7 @@
 /**
- * Password Setup Section - For Account Creation Flow
- * Takes provided keys and creates password-based encryption for the account
+ * Password Setup Form
+ * Complete form with account name input and password authentication setup
+ * Handles account validation, password creation, and encrypted key storage
  */
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,19 +15,14 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 
-interface PasswordSetupSectionProps {
-  accountName: string;
-  accountNameError?: string;
+interface PasswordSetupFormProps {
   generatedKeys: KeyGenerationResult | null;
   onSuccess: () => void;
 }
 
-export function PasswordSetupSection({
-  accountName,
-  accountNameError,
-  generatedKeys,
-  onSuccess,
-}: PasswordSetupSectionProps) {
+export function PasswordSetupForm({ generatedKeys, onSuccess }: PasswordSetupFormProps) {
+  const [accountName, setAccountName] = useState("");
+  const [accountNameError, setAccountNameError] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -34,14 +30,46 @@ export function PasswordSetupSection({
   const [passwordError, setPasswordError] = useState("");
   const { setKeys } = useAuth();
   const { banner } = useBanner();
-  const passwordInputRef = useRef<HTMLInputElement>(null);
+  const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Auto-focus on password input when component mounts
+  // Auto-focus on account name input when component mounts
   useEffect(() => {
-    if (passwordInputRef.current) {
-      passwordInputRef.current.focus();
+    const input = document.getElementById("account-name") as HTMLInputElement;
+    if (input) {
+      input.focus();
     }
   }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (validationTimeoutRef.current) {
+        clearTimeout(validationTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Account name validation - exact same logic as SetupConvenientAuth
+  const validateAccountName = async (name: string): Promise<string | null> => {
+    if (!name.trim()) {
+      return "Account name is required";
+    }
+    if (name.length < 2) {
+      return "Account name must be at least 2 characters";
+    }
+    if (name.length > 30) {
+      return "Account name must be less than 30 characters";
+    }
+    if (!/^[a-zA-Z0-9\s\-_]+$/.test(name)) {
+      return "Account name can only contain letters, numbers, spaces, hyphens, and underscores";
+    }
+    // Check if account already exists
+    const exists = await storageManager.accountExists(name.trim());
+    if (exists) {
+      return "An account with this name already exists";
+    }
+    return null;
+  };
 
   const validatePassword = (pass: string) => {
     if (pass.length < 8) {
@@ -125,10 +153,41 @@ export function PasswordSetupSection({
 
   return (
     <form onSubmit={handlePasswordSetup} className="space-y-4">
+      <Input
+        id="account-name"
+        type="text"
+        value={accountName}
+        onChange={(e) => {
+          setAccountName(e.target.value);
+          if (accountNameError) setAccountNameError("");
+
+          // Debounce the validation to avoid excessive database calls
+          if (validationTimeoutRef.current) {
+            clearTimeout(validationTimeoutRef.current);
+          }
+
+          if (e.target.value.trim()) {
+            validationTimeoutRef.current = setTimeout(async () => {
+              try {
+                const error = await validateAccountName(e.target.value);
+                setAccountNameError(error || "");
+              } catch (err) {
+                console.warn("Account validation failed:", err);
+                // Don't set an error - just skip validation if DB is not ready
+              }
+            }, 500); // Wait 500ms after user stops typing
+          }
+        }}
+        placeholder="Account Name"
+        maxLength={30}
+        autoComplete="off"
+        aria-invalid={!!accountNameError}
+      />
+      {accountNameError && <p className="text-red-600 text-xs">{accountNameError}</p>}
+
       <div className="space-y-3">
         <div className="relative">
           <Input
-            ref={passwordInputRef}
             id="setup-password"
             type={showPassword ? "text" : "password"}
             value={password}
