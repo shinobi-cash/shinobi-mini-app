@@ -59,23 +59,25 @@ export function PoolActions({ disabled = false }: PoolActionsProps) {
     <div className="flex gap-3">
       {poolActions.map((action) => {
         const isActive = currentScreen === action.screen;
-        
+
         // Different requirements for each action
-        const isDisabled = disabled || (() => {
-          switch (action.id) {
-            case "deposit":
-              // Deposit requires both account auth AND wallet connection
-              return !isAuthenticated || !isConnected;
-            case "withdraw":
-              // Withdrawal only requires account auth (uses Account Abstraction)
-              return !isAuthenticated;
-            default:
-              return false;
-          }
-        })();
+        const isDisabled =
+          disabled ||
+          (() => {
+            switch (action.id) {
+              case "deposit":
+                // Deposit requires both account auth AND wallet connection
+                return !isAuthenticated || !isConnected;
+              case "withdraw":
+                // Withdrawal only requires account auth (uses Account Abstraction)
+                return !isAuthenticated;
+              default:
+                return false;
+            }
+          })();
 
         const tooltipMessage = getTooltipMessage(action.id);
-        
+
         const buttonElement = (
           <Button
             key={action.id}
@@ -98,13 +100,9 @@ export function PoolActions({ disabled = false }: PoolActionsProps) {
             <div key={action.id} className="flex-1">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div>
-                    {buttonElement}
-                  </div>
+                  <div>{buttonElement}</div>
                 </TooltipTrigger>
-                <TooltipContent>
-                  {tooltipMessage}
-                </TooltipContent>
+                <TooltipContent>{tooltipMessage}</TooltipContent>
               </Tooltip>
             </div>
           );

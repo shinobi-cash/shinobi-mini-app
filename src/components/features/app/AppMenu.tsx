@@ -18,15 +18,15 @@ export function AppMenu() {
   const [openLogin, setOpenLogin] = useState(false);
   const [openCreateAccount, setOpenCreateAccount] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   // Wallet state
   const { isConnected, address } = useAccount();
   const { disconnect } = useDisconnect();
   const { openConnectModal } = useConnectModal();
-  
+
   // Authentication state
   const { isAuthenticated, signOut } = useAuth();
-  
+
   // Navigation
   const { setCurrentScreen } = useNavigation();
 
@@ -93,7 +93,7 @@ export function AppMenu() {
           {/* Account Section */}
           <div className="px-3 py-2 border-b border-app">
             <p className="text-xs text-app-tertiary mb-2">Account</p>
-            
+
             {isAuthenticated ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
@@ -166,7 +166,7 @@ export function AppMenu() {
           {/* Wallet Section */}
           <div className="px-3 py-2 border-b border-app">
             <p className="text-xs text-app-tertiary mb-2">Wallet Connection</p>
-            
+
             {isConnected ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
@@ -241,16 +241,9 @@ export function AppMenu() {
       )}
 
       {/* Authentication Drawers */}
-      <LogInDrawer
-        open={openLogin}
-        onOpenChange={setOpenLogin}
-        onSessionInitialized={() => setOpenLogin(false)}
-      />
-      
-      <CreateAccountDrawer
-        open={openCreateAccount}
-        onOpenChange={setOpenCreateAccount}
-      />
+      <LogInDrawer open={openLogin} onOpenChange={setOpenLogin} onSessionInitialized={() => setOpenLogin(false)} />
+
+      <CreateAccountDrawer open={openCreateAccount} onOpenChange={setOpenCreateAccount} />
     </div>
   );
 }

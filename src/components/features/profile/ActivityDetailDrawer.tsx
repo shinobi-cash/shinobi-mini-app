@@ -123,8 +123,8 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                       rel="noopener noreferrer"
                       className="flex gap-1 p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
                     >
-                      <span className="text-xs font-mono text-app-primary">{'View'}</span> 
-                       <ExternalLink className="h-3.5 w-3.5 text-app-tertiary" />
+                      <span className="text-xs font-mono text-app-primary">{"View"}</span>
+                      <ExternalLink className="h-3.5 w-3.5 text-app-tertiary" />
                     </a>
                   </div>
                 </div>

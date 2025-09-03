@@ -22,9 +22,7 @@ export function PoolStatsCard({ totalDeposits, memberCount, loading = false }: P
           <p className="text-sm text-app-secondary">Total Pool Value</p>
         </div>
         <div className="flex flex-col text-right">
-          <p className="text-2xl font-bold text-app-primary tabular-nums">
-            {loading ? "..." : memberCount}
-          </p>
+          <p className="text-2xl font-bold text-app-primary tabular-nums">{loading ? "..." : memberCount}</p>
           <p className="text-sm text-app-secondary">Active Members</p>
         </div>
       </div>

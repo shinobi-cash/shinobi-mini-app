@@ -29,11 +29,7 @@ export function AssetSelector({ selectedAsset, onAssetChange, disabled = false }
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-white">
-            <img
-              src={selectedAsset.icon}
-              alt={`${selectedAsset.name} icon`}
-              className="w-full h-full object-cover"
-            />
+            <img src={selectedAsset.icon} alt={`${selectedAsset.name} icon`} className="w-full h-full object-cover" />
           </div>
           <div className="text-left">
             <p className="text-sm font-semibold text-app-primary">{selectedAsset.symbol}</p>

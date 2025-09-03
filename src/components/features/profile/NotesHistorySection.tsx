@@ -12,12 +12,7 @@ interface NotesHistorySectionProps {
 
 type NoteFilter = "unspent" | "spent";
 
-export function NotesHistorySection({
-  noteChains,
-  loading,
-  error,
-  onNoteChainClick,
-}: NotesHistorySectionProps) {
+export function NotesHistorySection({ noteChains, loading, error, onNoteChainClick }: NotesHistorySectionProps) {
   const [activeFilter, setActiveFilter] = useState<NoteFilter>("unspent");
 
   // Filter note chains based on selected tab
@@ -26,8 +21,8 @@ export function NotesHistorySection({
     return lastNote.status === activeFilter;
   });
 
-  const unspentCount = noteChains.filter(chain => chain[chain.length - 1].status === "unspent").length;
-  const spentCount = noteChains.filter(chain => chain[chain.length - 1].status === "spent").length;
+  const unspentCount = noteChains.filter((chain) => chain[chain.length - 1].status === "unspent").length;
+  const spentCount = noteChains.filter((chain) => chain[chain.length - 1].status === "spent").length;
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
@@ -105,7 +100,10 @@ export function NotesHistorySection({
               {filteredNoteChains.map((noteChain, index) => {
                 const lastNote = noteChain[noteChain.length - 1];
                 return (
-                  <div key={`chain-${index}-${lastNote.depositIndex}-${lastNote.changeIndex}`} className="border-b border-app-border last:border-b-0">
+                  <div
+                    key={`chain-${index}-${lastNote.depositIndex}-${lastNote.changeIndex}`}
+                    className="border-b border-app-border last:border-b-0"
+                  >
                     <CashNoteCard
                       note={lastNote}
                       chainLength={noteChain.length}

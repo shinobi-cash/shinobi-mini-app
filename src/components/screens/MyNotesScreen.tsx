@@ -160,8 +160,8 @@ const NotesContent = ({
 
       {/* Notes Overview */}
       <div className="space-y-4">
-        <NotesSummaryCard 
-          unspentNotes={unspentNotes} 
+        <NotesSummaryCard
+          unspentNotes={unspentNotes}
           totalNotes={noteChains.length}
           isRediscovering={isRefreshing}
           onRediscover={handleRefresh}
