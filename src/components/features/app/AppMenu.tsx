@@ -4,7 +4,7 @@
  * Includes wallet connection, settings, about, and other app features
  */
 
-import { BookOpen, HelpCircle, LogOut, Menu, Settings, UserPlus, LogIn, WalletIcon, FileText } from "lucide-react";
+import { BookOpen, HelpCircle, LogOut, Menu, Settings, UserPlus, LogIn, WalletIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAccount, useDisconnect } from "wagmi";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
@@ -67,10 +67,6 @@ export function AppMenu() {
     setIsOpen(false);
   };
 
-  const handleViewNotes = () => {
-    setCurrentScreen("my-notes");
-    setIsOpen(false);
-  };
 
   const shortenAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -114,22 +110,6 @@ export function AppMenu() {
           {/* Account Actions */}
           <div className="border-b border-app">
             <div className="py-1">
-              {/* My Notes - only enabled when authenticated */}
-              <button
-                type="button"
-                onClick={isAuthenticated ? handleViewNotes : undefined}
-                disabled={!isAuthenticated}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
-                  isAuthenticated
-                    ? "text-app-secondary hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/20 cursor-pointer"
-                    : "text-app-tertiary opacity-50 cursor-not-allowed"
-                }`}
-                title={!isAuthenticated ? "Sign in to access your notes" : "View your notes"}
-              >
-                <FileText className="w-4 h-4" />
-                My Notes
-              </button>
-
               {/* Authentication actions */}
               {isAuthenticated ? (
                 <button

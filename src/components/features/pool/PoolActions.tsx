@@ -7,20 +7,21 @@
 import { useNavigation, type Asset } from "@/contexts/NavigationContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAccount } from "wagmi";
-import { Minus, Plus } from "lucide-react";
+import { FileText, Minus, Plus } from "lucide-react";
 import { Button } from "../../ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "../../ui/tooltip";
 
 interface PoolAction {
-  id: "deposit" | "withdraw";
+  id: "deposit" | "withdraw" | "my-notes";
   icon: React.ReactNode;
   label: string;
-  screen: "deposit" | "withdraw";
+  screen: "deposit" | "withdraw" | "my-notes";
 }
 
 const poolActions: PoolAction[] = [
   { id: "deposit", icon: <Plus className="w-5 h-5" />, label: "Deposit", screen: "deposit" },
   { id: "withdraw", icon: <Minus className="w-5 h-5" />, label: "Withdraw", screen: "withdraw" },
+  { id: "my-notes", icon: <FileText className="w-5 h-5" />, label: "My Notes", screen: "my-notes" },
 ];
 
 interface PoolActionsProps {
@@ -33,7 +34,7 @@ export function PoolActions({ asset, disabled = false }: PoolActionsProps) {
   const { isAuthenticated } = useAuth();
   const { isConnected } = useAccount();
 
-  const getTooltipMessage = (actionId: "deposit" | "withdraw") => {
+  const getTooltipMessage = (actionId: "deposit" | "withdraw" | "my-notes") => {
     switch (actionId) {
       case "deposit":
         if (!isAuthenticated && !isConnected) {
@@ -51,14 +52,20 @@ export function PoolActions({ asset, disabled = false }: PoolActionsProps) {
           return "Sign in to withdraw";
         }
         return null;
+      case "my-notes":
+        if (!isAuthenticated) {
+          return "Sign in to view your notes";
+        }
+        return null;
       default:
         return null;
     }
   };
 
   return (
-    <div className="flex gap-3">
-      {poolActions.map((action) => {
+    <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div className="flex gap-3 min-w-max px-1">
+        {poolActions.map((action) => {
         const isActive = currentScreen === action.screen;
 
         // Different requirements for each action
@@ -70,7 +77,8 @@ export function PoolActions({ asset, disabled = false }: PoolActionsProps) {
                 // Deposit requires both account auth AND wallet connection
                 return !isAuthenticated || !isConnected;
               case "withdraw":
-                // Withdrawal only requires account auth (uses Account Abstraction)
+              case "my-notes":
+                // Withdrawal and My Notes only require account auth
                 return !isAuthenticated;
               default:
                 return false;
@@ -86,7 +94,7 @@ export function PoolActions({ asset, disabled = false }: PoolActionsProps) {
             disabled={isDisabled}
             variant={isActive ? "default" : "outline"}
             size="lg"
-            className={`w-full h-12 text-sm font-semibold transition-all duration-200 active:scale-95 ${
+            className={`whitespace-nowrap px-6 h-12 text-sm font-semibold transition-all duration-200 active:scale-95 ${
               isDisabled ? "cursor-not-allowed" : ""
             }`}
           >
@@ -98,23 +106,18 @@ export function PoolActions({ asset, disabled = false }: PoolActionsProps) {
         // Wrap with tooltip if disabled and has message
         if (isDisabled && tooltipMessage) {
           return (
-            <div key={action.id} className="flex-1">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div>{buttonElement}</div>
-                </TooltipTrigger>
-                <TooltipContent>{tooltipMessage}</TooltipContent>
-              </Tooltip>
-            </div>
+            <Tooltip key={action.id}>
+              <TooltipTrigger asChild>
+                <div>{buttonElement}</div>
+              </TooltipTrigger>
+              <TooltipContent>{tooltipMessage}</TooltipContent>
+            </Tooltip>
           );
         }
 
-        return (
-          <div key={action.id} className="flex-1">
-            {buttonElement}
-          </div>
-        );
+        return buttonElement;
       })}
+      </div>
     </div>
   );
 }
