@@ -116,7 +116,7 @@ export const ActivityFeed = ({
   }, [onFetchMore, hasNextPage, isFetchingMore]);
 
   return (
-    <div className="flex flex-col h-full gap-2">
+    <div className="flex flex-col h-full gap-1">
       {/* Total Deposits */}
       <div className="flex-shrink-0">
         <div className="flex justify-between bg-app-surface p-3 border-t border-b border-app shadow-md">
@@ -136,10 +136,10 @@ export const ActivityFeed = ({
       </div>
 
       {/* Activities */}
-      <div className="flex-1 flex flex-col min-h-0 gap-2">
+      <div className="flex-1 flex flex-col min-h-0">
         <div className="flex-shrink-0 bg-app-surface border-b border-app shadow-md">
-          <div className="flex items-center justify-between py-3 px-4">
-            <h2 className="text-lg font-semibold text-app-secondary tracking-tight flex-1">Activities</h2>
+          <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-2">
+            <h2 className="text-sm font-semibold text-app-secondary tracking-tight flex-1">Recent Pool Activities</h2>
             {onRefresh && (
               <Button
                 variant="ghost"
@@ -174,7 +174,7 @@ export const ActivityFeed = ({
               <div className="flex items-center justify-center py-8">
                 <div className="text-center">
                   <p className="text-app-secondary mb-1">No activities yet</p>
-                  <p className="text-sm text-app-tertiary">Start by making a deposit to see your activity history</p>
+                  <p className="text-sm text-app-tertiary">Start by making a deposit to see activity history</p>
                 </div>
               </div>
             ) : (
