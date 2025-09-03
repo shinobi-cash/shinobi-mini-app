@@ -107,32 +107,33 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
               <div className="divide-y divide-app-border">
                 {/* Transaction Hash */}
                 <div className="px-3 py-2 flex items-center justify-between">
-                  <span className="text-xs font-medium text-app-secondary">Hash</span>
+                  <span className="text-xs font-medium text-app-secondary">Explorer Link</span>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-mono text-app-primary">{formatHash(activity.transactionHash)}</span>
-                    <button
+                    {/* <span className="text-xs font-mono text-app-primary">{activity.transactionHash}</span> */}
+                    {/* <button
                       type="button"
                       onClick={() => copyToClipboard(activity.transactionHash, "Transaction Hash")}
                       className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
                     >
                       <Copy className="h-3.5 w-3.5 text-app-tertiary" />
-                    </button>
+                    </button> */}
                     <a
                       href={`${NETWORK.EXPLORER_URL}/tx/${activity.transactionHash}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
+                      className="flex gap-1 p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
                     >
-                      <ExternalLink className="h-3.5 w-3.5 text-app-tertiary" />
+                      <span className="text-xs font-mono text-app-primary">{'View'}</span> 
+                       <ExternalLink className="h-3.5 w-3.5 text-app-tertiary" />
                     </a>
                   </div>
                 </div>
 
                 {/* Block Number */}
-                <div className="px-3 py-2 flex items-center justify-between">
+                {/* <div className="px-3 py-2 flex items-center justify-between">
                   <span className="text-xs font-medium text-app-secondary">Block</span>
                   <span className="text-xs font-mono text-app-primary">#{activity.blockNumber}</span>
-                </div>
+                </div> */}
 
                 {/* Timestamp */}
                 <div className="px-3 py-2 flex items-center justify-between">
@@ -188,7 +189,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                   )}
 
                   {/* Sponsorship Status */}
-                  <div className="px-3 py-2 flex items-center justify-between">
+                  {/* <div className="px-3 py-2 flex items-center justify-between">
                     <span className="text-xs font-medium text-app-secondary">Gas Sponsored</span>
                     <div className="flex items-center gap-1.5">
                       <div
@@ -196,7 +197,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                       />
                       <span className="text-xs text-app-primary">{activity.isSponsored ? "Yes" : "No"}</span>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Fee Amount */}
                   {activity.feeAmount && (
