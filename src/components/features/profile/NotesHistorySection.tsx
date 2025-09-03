@@ -51,7 +51,7 @@ export function NotesHistorySection({
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
                 <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-app-secondary" />
-                <p className="text-app-secondary">Loading your transaction history...</p>
+                <p className="text-app-secondary">Loading your notes history...</p>
               </div>
             </div>
           ) : noteChains.length === 0 ? (

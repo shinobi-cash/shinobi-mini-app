@@ -7,7 +7,7 @@ import type { NoteChain } from "@/lib/storage/types";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { NoteChainDetailDrawer } from "../features/profile/NoteChainDetailDrawer";
-import { ProfileSummaryCard } from "../features/profile/ProfileSummaryCard";
+import { NotesSummaryCard } from "../features/profile/NotesSummaryCard";
 import { NotesHistorySection } from "../features/profile/NotesHistorySection";
 import { AuthenticationGate } from "../shared/AuthenticationGate";
 import { BackButton } from "../ui/back-button";
@@ -21,23 +21,23 @@ export const MyNotesScreen = () => {
       description="Create or load your account to access privacy features"
       context="my-notes"
     >
-      <AuthenticatedProfile onSignOut={signOut} />
+      <AuthenticatedNotes onSignOut={signOut} />
     </AuthenticationGate>
   );
 };
 
-const AuthenticatedProfile = ({ onSignOut }: { onSignOut: () => void }) => {
+const AuthenticatedNotes = ({ onSignOut }: { onSignOut: () => void }) => {
   const { publicKey, accountKey } = useAuth();
 
-  // Only render the actual profile when auth values exist
+  // Only render the actual notes when auth values exist
   if (!publicKey || !accountKey) {
     return null;
   }
 
-  return <ProfileContent publicKey={publicKey} accountKey={accountKey} onSignOut={onSignOut} />;
+  return <NotesContent publicKey={publicKey} accountKey={accountKey} onSignOut={onSignOut} />;
 };
 
-const ProfileContent = ({
+const NotesContent = ({
   publicKey,
   accountKey,
   onSignOut,
@@ -53,7 +53,7 @@ const ProfileContent = ({
 
   const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
 
-  // Use discovery with autoScan enabled for profile screen
+  // Use discovery with autoScan enabled for notes screen
   const {
     data: noteDiscovery,
     loading,
@@ -125,7 +125,7 @@ const ProfileContent = ({
 
   // TypeScript assertion: AuthenticationGate ensures these values exist
   if (!publicKey || !accountKey) {
-    throw new Error("ProfileScreen: Missing auth values despite AuthenticationGate");
+    throw new Error("MyNotesScreen: Missing auth values despite AuthenticationGate");
   }
 
   const unspentNotes = noteChains.filter((noteChain) => {
@@ -152,7 +152,7 @@ const ProfileContent = ({
 
       {/* Notes Overview */}
       <div className="space-y-4">
-        <ProfileSummaryCard unspentNotes={unspentNotes} totalNotes={noteChains.length} onSignOut={onSignOut} />
+        <NotesSummaryCard unspentNotes={unspentNotes} totalNotes={noteChains.length} onSignOut={onSignOut} />
       </div>
 
       {/* Notes History */}

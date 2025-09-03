@@ -1,13 +1,13 @@
 import { UserX } from "lucide-react";
 import { Button } from "../../ui/button";
 
-interface ProfileSummaryCardProps {
+interface NotesSummaryCardProps {
   unspentNotes: number;
   totalNotes: number;
   onSignOut: () => void;
 }
 
-export function ProfileSummaryCard({ unspentNotes, totalNotes, onSignOut }: ProfileSummaryCardProps) {
+export function NotesSummaryCard({ unspentNotes, totalNotes, onSignOut }: NotesSummaryCardProps) {
   const spentNotes = totalNotes - unspentNotes;
 
   return (
