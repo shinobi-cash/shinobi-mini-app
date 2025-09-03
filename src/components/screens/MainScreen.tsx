@@ -4,7 +4,6 @@ import { CONTRACTS } from "../../config/constants";
 import { PoolDashboard } from "../features/pool/PoolDashboard";
 import { AppBanner } from "../layout/AppBanner";
 import { AppHeader } from "../layout/AppHeader";
-import { BottomNavBar } from "../layout/BottomNavBar";
 import { AppLayout } from "../layout/ScreenLayout";
 import { type ScreenConfig, ScreenManager } from "../layout/ScreenManager";
 import { DepositScreen } from "./DepositScreen";
@@ -103,7 +102,7 @@ function FallbackScreen() {
  */
 function MainContent() {
   return (
-    <AppLayout header={<AppHeader />} banner={<AppBanner />} bottomNav={<BottomNavBar />}>
+    <AppLayout header={<AppHeader />} banner={<AppBanner />}>
       <ScreenManager screens={screenRegistry} fallbackScreen={FallbackScreen} />
     </AppLayout>
   );
