@@ -1,7 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { Moon, Sun } from "lucide-react";
-import { WalletDropdown } from "../WalletDropdown";
 import { Switch } from "../ui/switch";
+import { AppMenu } from "../features/app/AppMenu";
 
 export const AppHeader = () => {
   const { effectiveTheme, toggleTheme } = useTheme();
@@ -23,7 +23,7 @@ export const AppHeader = () => {
           shinobi.cash
         </h1>
         <div className="flex justify-end">
-          <WalletDropdown />
+          <AppMenu />
         </div>
       </div>
     </header>
