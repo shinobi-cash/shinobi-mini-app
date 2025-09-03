@@ -2,12 +2,13 @@ import { useTransactionTracking } from "@/hooks/transactions/useTransactionTrack
 import type { Activity } from "@/lib/indexer/sdk";
 import { fetchPoolStats } from "@/services/data/indexerService";
 import { formatEthAmount } from "@/utils/formatters";
-import { RefreshCw } from "lucide-react";
+import { ChevronDown, Minus, Plus, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
 import { ActivityDetailDrawer } from "./ActivityDetailDrawer";
 import { ActivityRow } from "./ActivityRow";
 import { useBanner } from "@/contexts/BannerContext";
+import { useNavigation } from "@/contexts/NavigationContext";
 
 export interface ActivityFeedProps {
   activities: Activity[];
@@ -16,6 +17,11 @@ export interface ActivityFeedProps {
   hasNextPage?: boolean;
   onFetchMore?: () => Promise<void>;
   onRefresh?: () => Promise<void>;
+}
+interface NavItem {
+  icon: React.ReactNode;
+  label: string;
+  screen: "home" | "deposit" | "withdraw" | "profile";
 }
 
 export const ActivityFeed = ({
@@ -43,6 +49,8 @@ export const ActivityFeed = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const { onTransactionIndexed } = useTransactionTracking();
+  const selectedAsset = { symbol: "ETH", name: "Ethereum", icon: "/ethereum.svg" };
+  const { currentScreen, setCurrentScreen } = useNavigation();
 
   // Fetch pool stats using the service
   const loadPoolStats = useCallback(
@@ -96,7 +104,10 @@ export const ActivityFeed = ({
   // Use accurate total from indexer pool stats
   const totalDeposits = poolStats?.totalDeposits ? BigInt(poolStats.totalDeposits) : 0n;
   const memberCount = poolStats?.memberCount || 0;
-
+  const navItems:NavItem[] = [
+    { icon: <Plus className="w-6 h-6" />, label: "Deposit", screen: "deposit" },
+    { icon: <Minus className="w-6 h-6" />, label: "Withdraw", screen: "withdraw" },
+  ];
   const handleActivityClick = (activity: Activity) => {
     setSelectedActivity(activity);
     setDrawerOpen(true);
@@ -119,18 +130,65 @@ export const ActivityFeed = ({
     <div className="flex flex-col h-full gap-1">
       {/* Total Deposits */}
       <div className="flex-shrink-0">
-        <div className="flex justify-between bg-app-surface p-3 border-t border-b border-app shadow-md">
-          <div className="flex flex-col">
-            <p className="text-sm font-semibold text-app-secondary mb-1">Deposits</p>
-            <p className="text-xl font-bold text-app-primary tabular-nums">
-              {poolStatsLoading ? "..." : `${formatEthAmount(totalDeposits, { decimals: 4 })} ETH`}
-            </p>
+        <div className="flex flex-col justify-between bg-app-surface p-3 border-t border-b border-app shadow-md gap-1">
+          <div className="flex justify-between">
+            <div className="flex flex-col">
+              <p className="text-xl font-bold text-app-primary tabular-nums">
+                {poolStatsLoading ? "..." : `${formatEthAmount(totalDeposits, { decimals: 4 })} ETH`}
+              </p>
+              <p className="text-sm font-semibold text-app-secondary mb-1">{'($ 0.0)'}</p>
+            </div>
+            <div className="flex flex-col text-right">
+              <p className="text-xl font-bold text-app-primary tabular-nums">
+                {poolStatsLoading ? "..." : `${memberCount}`}
+              </p>
+              <p className="text-sm font-semibold text-app-secondary mb-1">Unique Deposit</p>
+            </div>
           </div>
-          <div className="flex flex-col text-right">
-            <p className="text-sm font-semibold text-app-secondary mb-1">Count</p>
-            <p className="text-xl font-bold text-app-primary tabular-nums">
-              {poolStatsLoading ? "..." : `${memberCount}`}
-            </p>
+          <div className="bg-app-card rounded-xl">
+            <div className="flex items-center">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center">
+                  <img
+                  src={selectedAsset.icon}
+                  alt={`${selectedAsset.name} icon`}
+                  className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-app-primary">{selectedAsset.name}</p>
+                </div>
+              </div>
+              <ChevronDown className="w-4 h-4 text-app-secondary opacity-50" />
+            </div>
+          </div>
+          <div className="flex justify-between">
+            {navItems.map((item) => {
+              const isActive = currentScreen === item.screen;
+              return (
+                <button
+                  type="button"
+                  key={item.screen}
+                  onClick={() => setCurrentScreen(item.screen)}
+                      aria-label={item.label}
+                      className={`flex flex-col items-center space-y-1 py-2 px-3 min-w-0 flex-1 transition-colors duration-200 rounded-xl active:scale-95 ${
+                        isActive
+                          ? "text-indigo-600 dark:text-indigo-400 shadow-sm"
+                          : "text-app-secondary hover:text-app-primary active:text-app-primary dark:text-app-secondary dark:hover:text-app-primary dark:active:text-app-primary"
+                      }`}
+                      style={{ minWidth: 44, minHeight: 44 }}
+                    >
+                      <div className={`transition-all duration-200 ${isActive ? "scale-110" : ""}`}>{item.icon}</div>
+                      <span
+                        className={`text-xs font-semibold transition-colors duration-200 ${
+                          isActive ? "text-indigo-600 dark:text-indigo-400" : "text-app-secondary dark:text-app-secondary"
+                        }`}
+                      >
+                        {item.label}
+                      </span>
+                    </button>
+                  );
+                })}
           </div>
         </div>
       </div>

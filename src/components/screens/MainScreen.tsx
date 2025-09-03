@@ -1,7 +1,7 @@
 import { NavigationProvider } from "../../contexts/NavigationContext";
 import { useActivities } from "../../hooks/data/useActivities";
 import { CONTRACTS } from "../../config/constants";
-import { ActivityFeed } from "../features/profile/ActivityFeed";
+import { PoolDashboard } from "../features/pool/PoolDashboard";
 import { AppBanner } from "../layout/AppBanner";
 import { AppHeader } from "../layout/AppHeader";
 import { BottomNavBar } from "../layout/BottomNavBar";
@@ -14,7 +14,7 @@ import { ProfileScreen } from "./ProfileScreen";
 import { WithdrawalScreen } from "./WithdrawalScreen";
 
 /**
- * Home Screen View Controller
+ * Home Screen View Controller - Pool Dashboard
  */
 function HomeScreenController() {
   const { banner } = useBanner();
@@ -39,7 +39,7 @@ function HomeScreenController() {
   }, [error?.message, hasData, banner]);
 
   return (
-    <ActivityFeed
+    <PoolDashboard
       activities={activities || []}
       loading={loading}
       error={error && !hasData ? "Failed to load activities" : undefined}
@@ -61,7 +61,7 @@ const screenRegistry: ScreenConfig[] = [
   {
     id: "home",
     component: HomeScreenController,
-    title: "Activity",
+    title: "Pool",
     scrollable: true,
   },
   {
