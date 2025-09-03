@@ -1,40 +1,60 @@
 import type { NoteChain } from "@/lib/storage/types";
 import { RefreshCw } from "lucide-react";
-import { Button } from "../../ui/button";
+import { useState } from "react";
 import { CashNoteCard } from "./CashNoteCard";
 
 interface NotesHistorySectionProps {
   noteChains: NoteChain[];
   loading: boolean;
   error: boolean;
-  isRefreshing: boolean;
-  onRefresh: () => void;
   onNoteChainClick: (noteChain: NoteChain) => void;
 }
+
+type NoteFilter = "unspent" | "spent";
 
 export function NotesHistorySection({
   noteChains,
   loading,
   error,
-  isRefreshing,
-  onRefresh,
   onNoteChainClick,
 }: NotesHistorySectionProps) {
+  const [activeFilter, setActiveFilter] = useState<NoteFilter>("unspent");
+
+  // Filter note chains based on selected tab
+  const filteredNoteChains = noteChains.filter((noteChain) => {
+    const lastNote = noteChain[noteChain.length - 1];
+    return lastNote.status === activeFilter;
+  });
+
+  const unspentCount = noteChains.filter(chain => chain[chain.length - 1].status === "unspent").length;
+  const spentCount = noteChains.filter(chain => chain[chain.length - 1].status === "spent").length;
+
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <div className="flex-shrink-0 bg-app-surface border border-app rounded-t-xl">
-        <div className="flex items-center justify-between px-4 py-3">
-          <h3 className="text-sm font-semibold text-app-secondary">Notes History</h3>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onRefresh}
-            disabled={isRefreshing || loading}
-            className="h-8 w-8 p-0 text-app-secondary hover:text-app-primary"
-            title="Refresh notes history"
+        <div className="flex">
+          <button
+            type="button"
+            onClick={() => setActiveFilter("unspent")}
+            className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
+              activeFilter === "unspent"
+                ? "text-app-primary border-b-2 border-green-500"
+                : "text-app-secondary hover:text-app-primary"
+            }`}
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing || loading ? "animate-spin" : ""}`} />
-          </Button>
+            Unspent ({unspentCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveFilter("spent")}
+            className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
+              activeFilter === "spent"
+                ? "text-app-primary border-b-2 border-red-500"
+                : "text-app-secondary hover:text-app-primary"
+            }`}
+          >
+            Spent ({spentCount})
+          </button>
         </div>
       </div>
 
@@ -54,6 +74,24 @@ export function NotesHistorySection({
                 <p className="text-app-secondary">Loading your notes history...</p>
               </div>
             </div>
+          ) : filteredNoteChains.length === 0 && noteChains.length > 0 ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                {activeFilter === "unspent" ? (
+                  <>
+                    <span className="text-2xl mb-2 block">💸</span>
+                    <p className="text-app-secondary mb-1">No unspent notes</p>
+                    <p className="text-sm text-app-tertiary">All your notes have been spent</p>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-2xl mb-2 block">🔒</span>
+                    <p className="text-app-secondary mb-1">No spent notes</p>
+                    <p className="text-sm text-app-tertiary">Your notes are still available for withdrawal</p>
+                  </>
+                )}
+              </div>
+            </div>
           ) : noteChains.length === 0 ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
@@ -64,7 +102,7 @@ export function NotesHistorySection({
             </div>
           ) : (
             <>
-              {noteChains.map((noteChain, index) => {
+              {filteredNoteChains.map((noteChain, index) => {
                 const lastNote = noteChain[noteChain.length - 1];
                 return (
                   <div key={`chain-${index}-${lastNote.depositIndex}-${lastNote.changeIndex}`} className="border-b border-app-border last:border-b-0">
