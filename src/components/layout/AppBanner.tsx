@@ -1,10 +1,8 @@
 import { useBanner } from "@/contexts/BannerContext";
 import { useIndexerHealth } from "@/hooks/data/useIndexerHealth";
-import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { Dot } from "lucide-react";
 
 export const AppBanner = () => {
-  const { trackingStatus, trackedTxHash } = useTransactionTracking();
   const { currentBanner, dismissBanner } = useBanner();
   const { indexerHealth } = useIndexerHealth();
 
@@ -57,31 +55,6 @@ export const AppBanner = () => {
           <div className="w-1 h-1 bg-current rounded-full" />
           {currentBanner.message}
         </button>
-      </div>
-    );
-  }
-
-  // Fall back to transaction tracking or system status
-  if (trackingStatus === "waiting") {
-    const shortHash = trackedTxHash ? `${trackedTxHash.slice(0, 6)}...${trackedTxHash.slice(-4)}` : "";
-    return (
-      <div className="bg-blue-100 dark:bg-blue-900/30 border-b border-blue-200 dark:border-blue-800">
-        <div className="flex items-center justify-center gap-1 text-[10px] text-blue-700 dark:text-blue-300 font-mono">
-          <Dot className="w-3 h-3 animate-pulse" />
-          {shortHash} • Waiting for indexing...
-        </div>
-      </div>
-    );
-  }
-
-  if (trackingStatus === "synced") {
-    const shortHash = trackedTxHash ? `${trackedTxHash.slice(0, 6)}...${trackedTxHash.slice(-4)}` : "";
-    return (
-      <div className="bg-green-100 dark:bg-green-900/30 border-b border-green-200 dark:border-green-800">
-        <div className="flex items-center justify-center gap-1 text-[10px] text-green-700 dark:text-green-300 font-mono">
-          <Dot className="w-3 h-3" />
-          {shortHash} • Indexed!
-        </div>
       </div>
     );
   }

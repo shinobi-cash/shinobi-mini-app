@@ -106,7 +106,10 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
 
   // Banner for tx error
   useEffect(() => {
-    if (error) banner.error("Transaction failed");
+    if (error && !shownBannersRef.current.has(error)) {
+      shownBannersRef.current.add(error);
+      banner.error("Transaction failed");
+    }
   }, [error, banner]);
 
   // Retry note silently

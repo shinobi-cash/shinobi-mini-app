@@ -1,9 +1,10 @@
 import { fetchLatestIndexedBlock } from "@/services/data/indexerService";
 import { publicClient } from "@/lib/clients";
+import { useBanner } from "@/contexts/BannerContext";
 import type React from "react";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
-export type TrackingStatus = "idle" | "waiting" | "synced";
+export type TrackingStatus = "idle" | "pending" | "waiting" | "synced" | "failed";
 
 interface TransactionInfo {
   hash: string;
@@ -33,14 +34,22 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
   const eventTargetRef = useRef(new EventTarget());
   const timeoutRef = useRef<NodeJS.Timeout>();
   const intervalRef = useRef<NodeJS.Timeout>();
+  const { banner } = useBanner();
+  const bannerShownRef = useRef<{ [key: string]: boolean }>({});
 
   const trackTransaction = useCallback((txHash: string) => {
     // Clear any existing tracking
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     if (intervalRef.current) clearInterval(intervalRef.current);
 
+    // Reset banner tracking
+    bannerShownRef.current = {};
+    
+    const shortHash = `${txHash.slice(0, 6)}...${txHash.slice(-4)}`;
+    banner.info(`${shortHash} • Confirming transaction...`);
+    
     setTrackedTransaction({ hash: txHash, blockNumber: null });
-    setTrackingStatus("waiting");
+    setTrackingStatus("pending");
 
     // Auto-clear tracking after 5 minutes
     timeoutRef.current = setTimeout(
@@ -50,7 +59,7 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
       },
       5 * 60 * 1000,
     );
-  }, []);
+  }, [banner]);
 
   const onTransactionIndexed = useCallback((callback: () => void) => {
     const eventTarget = eventTargetRef.current;
@@ -64,9 +73,9 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
     };
   }, []);
 
-  // Fetch transaction receipt
+  // Fetch transaction receipt and check status
   useEffect(() => {
-    if (!trackedTransaction?.hash || trackingStatus !== "waiting" || trackedTransaction.blockNumber !== null) {
+    if (!trackedTransaction?.hash || trackingStatus !== "pending") {
       return;
     }
 
@@ -77,7 +86,23 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
         });
 
         if (receipt) {
-          setTrackedTransaction((prev) => (prev ? { ...prev, blockNumber: Number(receipt.blockNumber) } : null));
+          // Check if transaction was successful
+          if (receipt.status === "success") {
+            const shortHash = `${trackedTransaction.hash.slice(0, 6)}...${trackedTransaction.hash.slice(-4)}`;
+            banner.success(`${shortHash} • Transaction successful! indexing...`, { confetti: true });
+            setTrackedTransaction((prev) => (prev ? { ...prev, blockNumber: Number(receipt.blockNumber) } : null));
+            setTrackingStatus("waiting");
+          } else {
+            // Transaction failed
+            const shortHash = `${trackedTransaction.hash.slice(0, 6)}...${trackedTransaction.hash.slice(-4)}`;
+            banner.error(`${shortHash} • Transaction failed`);
+            setTrackingStatus("failed");
+            // Clear tracking on failure
+            setTimeout(() => {
+              setTrackedTransaction(null);
+              setTrackingStatus("idle");
+            }, 5000);
+          }
         } else {
           // Receipt not available yet, retry in 3 seconds
           timeoutRef.current = setTimeout(fetchTransactionReceipt, 3000);
@@ -89,8 +114,9 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
       }
     };
 
-    fetchTransactionReceipt();
-  }, [trackedTransaction?.hash, trackingStatus, trackedTransaction?.blockNumber]);
+    const timeoutId = setTimeout(fetchTransactionReceipt, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [trackedTransaction?.hash, trackingStatus]);
 
   // Check if transaction is indexed
   useEffect(() => {
@@ -106,6 +132,7 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
           trackedTransaction.blockNumber !== null &&
           Number.parseInt(indexedBlockInfo.blockNumber) >= trackedTransaction.blockNumber
         ) {
+          banner.success("Transaction indexed!");
           setTrackingStatus("synced");
 
           // Emit the indexed event
