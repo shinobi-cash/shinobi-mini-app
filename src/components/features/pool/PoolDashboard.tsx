@@ -125,14 +125,23 @@ export function PoolDashboard({
 
   // Infinite scroll setup
   useEffect(() => {
-    if (!onFetchMore || !hasNextPage) return;
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !isFetchingMore) {
-        setIsFetchingMore(true);
-        onFetchMore().finally(() => setIsFetchingMore(false));
+    if (!onFetchMore || !hasNextPage || !sentinelRef.current) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isFetchingMore && hasNextPage) {
+          setIsFetchingMore(true);
+          onFetchMore().finally(() => setIsFetchingMore(false));
+        }
+      },
+      {
+        root: scrollContainerRef.current,
+        rootMargin: "100px", // Trigger 100px before reaching the sentinel
+        threshold: 0.1,
       }
-    });
-    if (sentinelRef.current) observer.observe(sentinelRef.current);
+    );
+    
+    observer.observe(sentinelRef.current);
     return () => observer.disconnect();
   }, [onFetchMore, hasNextPage, isFetchingMore]);
 
@@ -178,7 +187,7 @@ export function PoolDashboard({
         </div>
 
         <div className="flex-1 bg-app-surface border-x border-b border-app rounded-b-xl overflow-hidden">
-          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto h-full">
+          <div ref={scrollContainerRef} className="h-full overflow-y-auto">
             {loading && activities.length === 0 ? (
               <div className="flex items-center justify-center py-12">
                 <p className="text-app-secondary">Loading activity...</p>
@@ -217,7 +226,9 @@ export function PoolDashboard({
                 )}
 
                 {/* Sentinel for infinite scroll */}
-                <div ref={sentinelRef} />
+                {hasNextPage && (
+                  <div ref={sentinelRef} className="h-4 w-full" />
+                )}
               </>
             )}
           </div>
