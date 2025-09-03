@@ -18,11 +18,6 @@ export interface ActivityFeedProps {
   onFetchMore?: () => Promise<void>;
   onRefresh?: () => Promise<void>;
 }
-interface NavItem {
-  icon: React.ReactNode;
-  label: string;
-  screen: "home" | "deposit" | "withdraw" | "profile";
-}
 
 export const ActivityFeed = ({
   activities,
@@ -104,7 +99,7 @@ export const ActivityFeed = ({
   // Use accurate total from indexer pool stats
   const totalDeposits = poolStats?.totalDeposits ? BigInt(poolStats.totalDeposits) : 0n;
   const memberCount = poolStats?.memberCount || 0;
-  const navItems:NavItem[] = [
+  const navItems = [
     { icon: <Plus className="w-6 h-6" />, label: "Deposit", screen: "deposit" },
     { icon: <Minus className="w-6 h-6" />, label: "Withdraw", screen: "withdraw" },
   ];

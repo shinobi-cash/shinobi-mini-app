@@ -10,25 +10,19 @@ import { NoteChainDetailDrawer } from "../features/profile/NoteChainDetailDrawer
 import { ProfileSummaryCard } from "../features/profile/ProfileSummaryCard";
 import { NotesHistorySection } from "../features/profile/NotesHistorySection";
 import { AuthenticationGate } from "../shared/AuthenticationGate";
-import { ScreenHeader } from "../layout/ScreenHeader";
-import { ScreenContent } from "../layout/ScreenLayout";
+import { BackButton } from "../ui/back-button";
 
 export const MyNotesScreen = () => {
   const { signOut } = useAuth();
 
   return (
-    <>
-      <ScreenHeader title="My Notes" backTo="home" />
-      <ScreenContent>
-        <AuthenticationGate
-          title="Account Required"
-          description="Create or load your account to access privacy features"
-          context="my-notes"
-        >
-          <AuthenticatedProfile onSignOut={signOut} />
-        </AuthenticationGate>
-      </ScreenContent>
-    </>
+    <AuthenticationGate
+      title="Account Required"
+      description="Create or load your account to access privacy features"
+      context="my-notes"
+    >
+      <AuthenticatedProfile onSignOut={signOut} />
+    </AuthenticationGate>
   );
 };
 
@@ -149,19 +143,29 @@ const ProfileContent = ({
   };
 
   return (
-    <div className="flex flex-col h-full gap-2">
-      {/* Summary Card */}
-      <ProfileSummaryCard unspentNotes={unspentNotes} totalNotes={noteChains.length} onSignOut={onSignOut} />
+    <div className="flex flex-col h-full gap-4 p-4">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <BackButton to="home" />
+        <h1 className="text-lg font-semibold text-app-primary tracking-tight">My Notes</h1>
+      </div>
+
+      {/* Notes Overview */}
+      <div className="space-y-4">
+        <ProfileSummaryCard unspentNotes={unspentNotes} totalNotes={noteChains.length} onSignOut={onSignOut} />
+      </div>
 
       {/* Notes History */}
-      <NotesHistorySection
-        noteChains={noteChains}
-        loading={loading}
-        error={!!error}
-        isRefreshing={isRefreshing}
-        onRefresh={handleRefresh}
-        onNoteChainClick={handleNoteChainClick}
-      />
+      <div className="flex-1 flex flex-col min-h-0">
+        <NotesHistorySection
+          noteChains={noteChains}
+          loading={loading}
+          error={!!error}
+          isRefreshing={isRefreshing}
+          onRefresh={handleRefresh}
+          onNoteChainClick={handleNoteChainClick}
+        />
+      </div>
 
       {/* Note Chain Detail Drawer */}
       <NoteChainDetailDrawer

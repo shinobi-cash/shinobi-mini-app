@@ -7,7 +7,7 @@ interface NavItem {
   screen: "home" | "my-notes";
 }
 
-const navItems: NavItem[] = [
+export const navItems: NavItem[] = [
   { icon: <Home className="w-6 h-6" />, label: "Pool", screen: "home" },
   { icon: <User className="w-6 h-6" />, label: "Notes", screen: "my-notes" },
 ];

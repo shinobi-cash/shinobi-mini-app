@@ -21,26 +21,25 @@ export function NotesHistorySection({
   onNoteChainClick,
 }: NotesHistorySectionProps) {
   return (
-    <div className="flex-1 flex flex-col min-h-0 gap-2">
-      <div className="flex-shrink-0 bg-app-surface border-b border-app shadow-md">
-        <div className="flex items-center justify-between py-3 px-4">
-          <h2 className="text-lg font-semibold text-app-secondary tracking-tight flex-1">Notes History</h2>
+    <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-shrink-0 bg-app-surface border border-app rounded-t-xl">
+        <div className="flex items-center justify-between px-4 py-3">
+          <h3 className="text-sm font-semibold text-app-secondary">Notes History</h3>
           <Button
             variant="ghost"
             size="sm"
             onClick={onRefresh}
             disabled={isRefreshing || loading}
             className="h-8 w-8 p-0 text-app-secondary hover:text-app-primary"
-            title="Refresh transaction history"
+            title="Refresh notes history"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing || loading ? "animate-spin" : ""}`} />
           </Button>
         </div>
       </div>
 
-      {/* Scrollable History Table */}
-      <div className="flex-1 flex flex-col bg-app-surface border-b border-app shadow-md overflow-hidden">
-        <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 bg-app-surface border-x border-b border-app rounded-b-xl overflow-hidden">
+        <div className="h-full overflow-y-auto">
           {error ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
@@ -56,18 +55,11 @@ export function NotesHistorySection({
               </div>
             </div>
           ) : noteChains.length === 0 ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="text-center">
-                <p className="text-app-secondary mb-1">Failed to load history</p>
-                <p className="text-sm text-app-tertiary">Check your connection and try again</p>
-              </div>
-            </div>
-          ) : noteChains.length === 0 ? (
-            <div className="flex items-center justify-center py-8">
+            <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <span className="text-2xl mb-2 block">💰</span>
-                <p className="text-app-secondary mb-1">No transaction history yet</p>
-                <p className="text-sm text-app-tertiary">Make a deposit to create your first cash note</p>
+                <p className="text-app-secondary mb-1">No notes yet</p>
+                <p className="text-sm text-app-tertiary">Make a deposit to create your first note</p>
               </div>
             </div>
           ) : (
@@ -75,12 +67,13 @@ export function NotesHistorySection({
               {noteChains.map((noteChain, index) => {
                 const lastNote = noteChain[noteChain.length - 1];
                 return (
-                  <CashNoteCard
-                    key={`chain-${index}-${lastNote.depositIndex}-${lastNote.changeIndex}`}
-                    note={lastNote}
-                    chainLength={noteChain.length}
-                    onClick={() => onNoteChainClick(noteChain)}
-                  />
+                  <div key={`chain-${index}-${lastNote.depositIndex}-${lastNote.changeIndex}`} className="border-b border-app-border last:border-b-0">
+                    <CashNoteCard
+                      note={lastNote}
+                      chainLength={noteChain.length}
+                      onClick={() => onNoteChainClick(noteChain)}
+                    />
+                  </div>
                 );
               })}
             </>
