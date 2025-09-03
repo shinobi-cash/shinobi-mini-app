@@ -167,35 +167,7 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
     }
   }, [selectedNote, withdrawAmount, validateAmount]);
 
-  // Loading state
-  if (isLoadingNotes) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <div className="relative">
-          <div className="w-16 h-16 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4">
-            <Loader2 className="w-6 h-6 animate-spin text-blue-600 dark:text-blue-400" />
-          </div>
-        </div>
-        <h3 className="text-base font-semibold text-app-primary mb-1">Loading Notes</h3>
-        <p className="text-sm text-app-secondary">Loading your available notes...</p>
-      </div>
-    );
-  }
 
-  // No notes state
-  if (availableNotes.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-          <Wallet className="w-6 h-6 text-gray-500 dark:text-gray-400" />
-        </div>
-        <h3 className="text-base font-semibold text-app-primary mb-1">No Available Notes</h3>
-        <p className="text-sm text-app-secondary text-center max-w-xs leading-relaxed">
-          Make a deposit first to create privacy notes that you can withdraw from.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="h-full flex flex-col px-4 py-4">
@@ -210,7 +182,14 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
             onClick={() => setIsNoteDropdownOpen(!isNoteDropdownOpen)}
             className="w-full h-16 p-4 justify-between text-left rounded-xl has-[>svg]:px-4"
           >
-            {selectedNote ? (
+            {isLoadingNotes ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-app-secondary" />
+                <span className="text-app-secondary">Loading notes...</span>
+              </div>
+            ) : availableNotes.length === 0 ? (
+              <span className="text-app-secondary">No notes available</span>
+            ) : selectedNote ? (
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-app-primary text-sm">
                   {getNoteLabel(selectedNote)}
@@ -222,10 +201,12 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
             ) : (
               <span className="text-app-secondary">Choose a note...</span>
             )}
-            {isNoteDropdownOpen ? (
-              <ChevronUp className="w-4 h-4 text-app-secondary ml-2" />
-            ) : (
-              <ChevronDown className="w-4 h-4 text-app-secondary ml-2" />
+            {!isLoadingNotes && availableNotes.length > 0 && (
+              isNoteDropdownOpen ? (
+                <ChevronUp className="w-4 h-4 text-app-secondary ml-2" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-app-secondary ml-2" />
+              )
             )}
           </Button>
 
