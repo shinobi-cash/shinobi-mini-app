@@ -152,8 +152,8 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
     <div className="h-full flex flex-col px-4 py-4">
       {/* Connected Address */}
       <div className="mb-6">
-        <p className="text-xs text-app-tertiary mb-1">Connected Address</p>
-        <p className="text-xs text-app-secondary font-mono">{address}</p>
+        <p className="text-xs text-app-secondary font-bold mb-1">Connected Address</p>
+        <p className="text-xs text-app-primary font-mono">{address}</p>
       </div>
 
       {/* Amount */}
@@ -161,12 +161,15 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
         <div className="text-center mb-3">
           <input
             type="text"
+            id="amount"
             placeholder="0.00"
             value={amount}
             onChange={(e) => handleAmountChange(e.target.value)}
-            className="text-3xl font-light text-center bg-transparent border-none outline-none text-app-primary placeholder-app-secondary w-full"
+            className={`text-3xl font-light text-center bg-transparent border-none outline-none placeholder-app-secondary w-full ${
+              amountError && amount.trim().length > 0 ? "text-red-500" : "text-app-primary"
+            }`}
           />
-          <p className="text-base text-app-secondary mt-1">{asset.symbol}</p>
+          <p className="text-base text-app-primary mt-1">{asset.symbol}</p>
         </div>
 
         {/* Quick Buttons */}
@@ -201,15 +204,13 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
       {/* Balance */}
       <div className="bg-app-card rounded-xl p-2 mb-4">
         <div className="flex justify-between text-xs">
-          <span className="text-app-secondary">Available</span>
+          <span className="text-app-secondary font-bold">Available</span>
           <span className="text-app-primary font-medium">
             {balance ? `${Number.parseFloat(formatEther(balance.value)).toFixed(4)} ${asset.symbol}` : `0.000 ${asset.symbol}`}
           </span>
         </div>
       </div>
 
-      {/* Inline error */}
-      {amountError && <p className="text-xs text-red-500 text-center mt-2">{amountError}</p>}
 
       {/* Button */}
       <div className="mt-auto">
@@ -233,7 +234,7 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
           ) : amountError ? (
             "Enter Amount"
           ) : (
-            "Deposit to Privacy Pool"
+            "Deposit to Pool"
           )}
         </Button>
       </div>
