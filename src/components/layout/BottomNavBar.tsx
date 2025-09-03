@@ -4,12 +4,12 @@ import { Home, User } from "lucide-react";
 interface NavItem {
   icon: React.ReactNode;
   label: string;
-  screen: "home" | "profile";
+  screen: "home" | "my-notes";
 }
 
 const navItems: NavItem[] = [
   { icon: <Home className="w-6 h-6" />, label: "Pool", screen: "home" },
-  { icon: <User className="w-6 h-6" />, label: "Profile", screen: "profile" },
+  { icon: <User className="w-6 h-6" />, label: "Notes", screen: "my-notes" },
 ];
 
 export const BottomNavBar = () => {

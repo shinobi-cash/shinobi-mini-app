@@ -2,7 +2,7 @@ import { BackButton } from "../ui/back-button";
 
 interface ScreenHeaderProps {
   title: string;
-  backTo?: "home" | "profile";
+  backTo?: "home" | "my-notes";
   showBackButton?: boolean;
 }
 

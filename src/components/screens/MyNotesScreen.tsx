@@ -13,17 +13,17 @@ import { AuthenticationGate } from "../shared/AuthenticationGate";
 import { ScreenHeader } from "../layout/ScreenHeader";
 import { ScreenContent } from "../layout/ScreenLayout";
 
-export const ProfileScreen = () => {
+export const MyNotesScreen = () => {
   const { signOut } = useAuth();
 
   return (
     <>
-      <ScreenHeader title="Profile" backTo="home" />
+      <ScreenHeader title="My Notes" backTo="home" />
       <ScreenContent>
         <AuthenticationGate
           title="Account Required"
           description="Create or load your account to access privacy features"
-          context="profile"
+          context="my-notes"
         >
           <AuthenticatedProfile onSignOut={signOut} />
         </AuthenticationGate>

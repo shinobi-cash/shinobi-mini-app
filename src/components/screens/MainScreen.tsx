@@ -10,7 +10,7 @@ import { type ScreenConfig, ScreenManager } from "../layout/ScreenManager";
 import { DepositScreen } from "./DepositScreen";
 import { useBanner } from "../../contexts/BannerContext";
 import { useEffect, useRef } from "react";
-import { ProfileScreen } from "./ProfileScreen";
+import { MyNotesScreen } from "./MyNotesScreen";
 import { WithdrawalScreen } from "./WithdrawalScreen";
 
 /**
@@ -77,9 +77,9 @@ const screenRegistry: ScreenConfig[] = [
     scrollable: true,
   },
   {
-    id: "profile",
-    component: ProfileScreen,
-    title: "Profile",
+    id: "my-notes",
+    component: MyNotesScreen,
+    title: "My Notes",
     scrollable: true,
   },
 ];

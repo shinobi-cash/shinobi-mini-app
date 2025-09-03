@@ -6,14 +6,14 @@ interface AuthenticationGateProps {
   children: React.ReactNode;
   title?: string;
   description?: string;
-  context?: "profile" | "deposit" | "withdraw";
+  context?: "my-notes" | "deposit" | "withdraw";
 }
 
 export const AuthenticationGate = ({
   children,
   title = "Welcome to Shinobi",
   description = "Choose how you want to get started:",
-  context = "profile",
+  context = "my-notes",
 }: AuthenticationGateProps) => {
   const { isAuthenticated } = useAuth();
 

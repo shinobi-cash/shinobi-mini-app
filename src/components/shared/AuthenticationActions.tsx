@@ -4,7 +4,7 @@ import { LogInDrawer } from "../features/auth/LogInDrawer";
 import { Button } from "../ui/button";
 
 interface AuthenticationActionsProps {
-  context?: "profile" | "deposit" | "withdraw";
+  context?: "my-notes" | "deposit" | "withdraw";
 }
 
 export const AuthenticationActions = ({ context: _ }: AuthenticationActionsProps) => {

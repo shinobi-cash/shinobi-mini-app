@@ -4,11 +4,12 @@
  * Includes wallet connection, settings, about, and other app features
  */
 
-import { BookOpen, HelpCircle, LogOut, Menu, Settings, UserPlus, LogIn, WalletIcon } from "lucide-react";
+import { BookOpen, HelpCircle, LogOut, Menu, Settings, UserPlus, LogIn, WalletIcon, FileText } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAccount, useDisconnect } from "wagmi";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigation } from "@/contexts/NavigationContext";
 import { LogInDrawer } from "../auth/LogInDrawer";
 import { CreateAccountDrawer } from "../auth/CreateAccountDrawer";
 
@@ -25,6 +26,9 @@ export function AppMenu() {
   
   // Authentication state
   const { isAuthenticated, signOut } = useAuth();
+  
+  // Navigation
+  const { setCurrentScreen } = useNavigation();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -60,6 +64,11 @@ export function AppMenu() {
 
   const handleSignOut = async () => {
     await signOut();
+    setIsOpen(false);
+  };
+
+  const handleViewNotes = () => {
+    setCurrentScreen("my-notes");
     setIsOpen(false);
   };
 
@@ -105,14 +114,24 @@ export function AppMenu() {
           {/* Account Actions */}
           <div className="border-b border-app">
             {isAuthenticated ? (
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-secondary hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                Sign Out
-              </button>
+              <div className="py-1">
+                <button
+                  type="button"
+                  onClick={handleViewNotes}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-secondary hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/20 transition-colors"
+                >
+                  <FileText className="w-4 h-4" />
+                  My Notes
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-secondary hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
+              </div>
             ) : (
               <div className="py-1">
                 <button

@@ -3,7 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { Button } from "./button";
 
 interface BackButtonProps {
-  to?: "home" | "profile";
+  to?: "home" | "my-notes";
   className?: string;
 }
 
