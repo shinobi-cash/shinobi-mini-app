@@ -61,11 +61,11 @@ export const ListUnspentNotes = ({ asset, onNoteSelected }: ListUnspentNotesProp
   }
 
   return (
-    <div className="flex flex-col h-full gap-4">
+    <div className="flex flex-col h-full gap-2">
       {/* Notes Table */}
       <div className="flex-1 flex flex-col min-h-0 gap-2">
         <div className="flex-shrink-0 bg-app-surface border-b border-app shadow-md">
-          <h2 className="text-lg font-semibold py-3 text-app-secondary tracking-tight text-center">
+          <h2 className="text-lg font-semibold py-2 text-app-secondary tracking-tight text-center">
             Withdraw Notes ({availableNotes.length})
           </h2>
         </div>
@@ -100,7 +100,7 @@ const NoteCard = ({ note, asset, onSelect }: NoteCardProps) => {
   return (
     <button
       type="button"
-      className="w-full bg-app-surface border-b border-app px-3 py-3 sm:px-4 sm:py-4 active:bg-app-surface-hover transition-all duration-150 hover:bg-app-surface-hover text-left group"
+      className="w-full bg-app-surface border-b border-app px-2 py-2 sm:px-3 sm:py-3 active:bg-app-surface-hover transition-all duration-150 hover:bg-app-surface-hover text-left group"
       onClick={onSelect}
     >
       {/* Note Details */}

@@ -39,7 +39,7 @@ export function AuthStepContent({
   switch (currentStep) {
     case "choose":
       return (
-        <div className="space-y-4">
+        <div className="space-y-2">
           <div className="flex gap-3">
             <Button
               variant="default"
@@ -64,7 +64,7 @@ export function AuthStepContent({
 
     case "login-method":
       return (
-        <div className="space-y-4">
+        <div className="space-y-2">
           <Button onClick={() => onLoginMethodChoice("convenient")} className="w-full" size="lg">
             {shouldShowPasskey ? (
               <>

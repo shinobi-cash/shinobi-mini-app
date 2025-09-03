@@ -12,7 +12,7 @@ export const AuthenticationActions = ({ context: _ }: AuthenticationActionsProps
   const [openAccountLogin, setOpenAccountLogin] = useState(false);
 
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-2">
       <Button
         variant="default"
         className="w-full h-12 text-base font-medium rounded-2xl"

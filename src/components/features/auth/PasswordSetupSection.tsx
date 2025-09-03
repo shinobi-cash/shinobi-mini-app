@@ -124,8 +124,8 @@ export function PasswordSetupSection({
   };
 
   return (
-    <form onSubmit={handlePasswordSetup} className="space-y-4">
-      <div className="space-y-3">
+    <form onSubmit={handlePasswordSetup} className="space-y-2">
+      <div className="space-y-2">
         <div className="relative">
           <Input
             ref={passwordInputRef}

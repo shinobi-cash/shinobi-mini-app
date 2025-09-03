@@ -83,7 +83,7 @@ export function PasswordLoginSection({ onSuccess }: PasswordLoginSectionProps) {
   };
 
   return (
-    <form onSubmit={handlePasswordLogin} className="space-y-4">
+    <form onSubmit={handlePasswordLogin} className="space-y-2">
       <Input
         id="username-password-login"
         type="text"

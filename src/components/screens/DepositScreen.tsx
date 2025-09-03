@@ -177,7 +177,7 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
               variant="outline"
               size="sm"
               onClick={() => handleQuickAmount(deposit.value)}
-              className="rounded-full px-3 py-1 text-xs"
+              className="rounded-full px-2 py-1 text-xs"
             >
               {deposit.label}
             </Button>
@@ -187,7 +187,7 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
 
       {/* Network Warning */}
       {!isOnCorrectNetwork && (
-        <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-3 mb-4">
+        <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-2 mb-4">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
             <div>
@@ -199,7 +199,7 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
       )}
 
       {/* Balance */}
-      <div className="bg-app-card rounded-xl p-3 mb-4">
+      <div className="bg-app-card rounded-xl p-2 mb-4">
         <div className="flex justify-between text-xs">
           <span className="text-app-secondary">Available</span>
           <span className="text-app-primary font-medium">

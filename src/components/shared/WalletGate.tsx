@@ -30,7 +30,7 @@ export const WalletGate = ({
 
           <h2 className="text-xl font-bold mb-2 text-center text-app-primary">Wallet Connected</h2>
 
-          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6 max-w-sm w-full">
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-2 mb-6 max-w-sm w-full">
             <p className="text-sm text-app-secondary mb-1">Connected Account</p>
             <p className="text-sm font-mono text-app-primary break-all">
               {address?.slice(0, 6)}...{address?.slice(-4)}

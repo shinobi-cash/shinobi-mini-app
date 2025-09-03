@@ -135,7 +135,7 @@ export function PasskeySetupForm({ generatedKeys, onSuccess }: PasskeySetupFormP
   };
 
   return (
-    <form onSubmit={handlePasskeySetup} className="space-y-4">
+    <form onSubmit={handlePasskeySetup} className="space-y-2">
       <Input
         id="account-name"
         type="text"

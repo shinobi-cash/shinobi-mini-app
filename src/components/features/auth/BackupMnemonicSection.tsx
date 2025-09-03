@@ -72,9 +72,9 @@ Shinobi Privacy App`;
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* Mnemonic Display */}
-      <div className="bg-app-surface rounded-xl p-3 border border-app shadow-sm">
+      <div className="bg-app-surface rounded-xl p-2 border border-app shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-medium text-app-primary">Your 12 Words</h3>
           <Button variant="ghost" size="sm" onClick={() => setIsRevealed(!isRevealed)} className="h-8 w-8 p-0">
@@ -123,7 +123,7 @@ Shinobi Privacy App`;
             className="w-full py-8 flex items-center justify-center cursor-pointer bg-orange-50 rounded-xl border-2 border-dashed border-orange-300 hover:border-orange-400 hover:bg-orange-100 transition-all"
             onClick={() => setIsRevealed(true)}
           >
-            <div className="text-center space-y-3">
+            <div className="text-center space-y-2">
               <div className="w-12 h-12 mx-auto flex items-center justify-center rounded-full bg-orange-100">
                 <FileText className="w-6 h-6 text-orange-600" />
               </div>
@@ -140,7 +140,7 @@ Shinobi Privacy App`;
       </div>
 
       {/* Confirmation */}
-      <div className="bg-app-surface rounded-xl p-3 border border-app shadow-sm">
+      <div className="bg-app-surface rounded-xl p-2 border border-app shadow-sm">
         <div className="flex items-center gap-2">
           <input
             type="checkbox"

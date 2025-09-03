@@ -149,7 +149,7 @@ const NotesContent = ({
   };
 
   return (
-    <div className="flex flex-col h-full gap-4 p-4">
+    <div className="flex flex-col h-full gap-2 p-2">
       {/* Header */}
       <div className="flex items-center gap-3">
         <BackButton to="home" />
@@ -157,7 +157,7 @@ const NotesContent = ({
       </div>
 
       {/* Notes Overview */}
-      <div className="space-y-4">
+      <div className="space-y-2">
         <NotesSummaryCard
           unspentNotes={unspentNotes}
           totalNotes={noteChains.length}

@@ -73,7 +73,7 @@ export function PasswordAuthDrawer() {
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-4 pb-6">
-          <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+          <form onSubmit={handleSubmit} className="space-y-2 pt-4">
             <div className="relative">
               <Input
                 type={showPassword ? "text" : "password"}

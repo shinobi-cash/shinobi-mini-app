@@ -49,9 +49,9 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
           <DrawerDescription className="text-sm items-start text-app-secondary" />
         </DrawerHeader>
 
-        <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-2">
           {/* Amount Section - iOS card style */}
-          <div className="bg-app-surface rounded-xl p-3 border border-app shadow-sm">
+          <div className="bg-app-surface rounded-xl p-2 border border-app shadow-sm">
             {activity.type === "DEPOSIT" && activity.originalAmount && activity.vettingFeeAmount ? (
               <div className="space-y-2">
                 <div className="px-0 py-1 border-b border-app bg-app-surface">
@@ -97,16 +97,16 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
           </div>
 
           {/* Details Grid - iOS grouped list style */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             {/* Transaction Details */}
             <div className="bg-app-surface rounded-xl border border-app shadow-sm overflow-hidden">
-              <div className="px-3 py-2 border-b border-app bg-app-surface">
+              <div className="px-2 py-2 border-b border-app bg-app-surface">
                 <h3 className="text-sm font-semibold text-app-primary">Transaction</h3>
               </div>
 
               <div className="divide-y divide-app-border">
                 {/* Transaction Hash */}
-                <div className="px-3 py-2 flex items-center justify-between">
+                <div className="px-2 py-2 flex items-center justify-between">
                   <span className="text-xs font-medium text-app-secondary">Explorer Link</span>
                   <div className="flex items-center gap-1.5">
                     {/* <span className="text-xs font-mono text-app-primary">{activity.transactionHash}</span> */}
@@ -130,20 +130,20 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                 </div>
 
                 {/* Block Number */}
-                {/* <div className="px-3 py-2 flex items-center justify-between">
+                {/* <div className="px-2 py-2 flex items-center justify-between">
                   <span className="text-xs font-medium text-app-secondary">Block</span>
                   <span className="text-xs font-mono text-app-primary">#{activity.blockNumber}</span>
                 </div> */}
 
                 {/* Timestamp */}
-                <div className="px-3 py-2 flex items-center justify-between">
+                <div className="px-2 py-2 flex items-center justify-between">
                   <span className="text-xs font-medium text-app-secondary">Time</span>
                   <span className="text-xs text-app-primary">{formatTimestamp(activity.timestamp)}</span>
                 </div>
 
                 {/* ASP Status - only for deposits */}
                 {activity.type === "DEPOSIT" && (
-                  <div className="px-3 py-2 flex items-center justify-between">
+                  <div className="px-2 py-2 flex items-center justify-between">
                     <span className="text-xs font-medium text-app-secondary">ASP Status</span>
                     <div className="flex items-center gap-1.5">
                       <div
@@ -166,14 +166,14 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
 
             {activity.type === "WITHDRAWAL" && (
               <div className="bg-app-surface rounded-xl border border-app shadow-sm overflow-hidden">
-                <div className="px-3 py-2 border-b border-app">
+                <div className="px-2 py-2 border-b border-app">
                   <h3 className="text-sm font-semibold text-app-primary">Withdrawal Details</h3>
                 </div>
 
                 <div className="divide-y divide-app-border">
                   {/* Recipient */}
                   {activity.recipient && (
-                    <div className="px-3 py-2 flex items-center justify-between">
+                    <div className="px-2 py-2 flex items-center justify-between">
                       <span className="text-xs font-medium text-app-secondary">Recipient</span>
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs font-mono text-app-primary">{formatHash(activity.recipient)}</span>
@@ -189,7 +189,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                   )}
 
                   {/* Sponsorship Status */}
-                  {/* <div className="px-3 py-2 flex items-center justify-between">
+                  {/* <div className="px-2 py-2 flex items-center justify-between">
                     <span className="text-xs font-medium text-app-secondary">Gas Sponsored</span>
                     <div className="flex items-center gap-1.5">
                       <div
@@ -201,7 +201,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
 
                   {/* Fee Amount */}
                   {activity.feeAmount && (
-                    <div className="px-3 py-2 flex items-center justify-between">
+                    <div className="px-2 py-2 flex items-center justify-between">
                       <span className="text-xs font-medium text-app-secondary">Relay Fee</span>
                       <span className="text-xs font-mono text-app-primary">
                         {formatEthAmount(BigInt(activity.feeAmount) - BigInt(activity.feeRefund || 0), {
@@ -229,11 +229,11 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
 
             {/* Pool Information */}
             <div className="bg-app-surface rounded-xl border border-app shadow-sm overflow-hidden">
-              <div className="px-3 py-2 border-b border-app">
+              <div className="px-2 py-2 border-b border-app">
                 <h3 className="text-sm font-semibold text-app-primary">Pool</h3>
               </div>
 
-              <div className="px-3 py-2 flex items-center justify-between">
+              <div className="px-2 py-2 flex items-center justify-between">
                 <span className="text-xs font-medium text-app-secondary">Address</span>
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-mono text-app-primary">{formatHash(activity.poolId || "")}</span>

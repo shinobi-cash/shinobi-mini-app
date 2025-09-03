@@ -142,9 +142,9 @@ export function PoolDashboard({ activities, loading, error, onFetchMore, hasNext
   const memberCount = poolStats?.memberCount || 0;
 
   return (
-    <div className="flex flex-col h-full gap-4 p-4">
+    <div className="flex flex-col h-full gap-2 p-2">
       {/* Pool Overview */}
-      <div className="space-y-4">
+      <div className="space-y-2">
         <PoolStatsCard totalDeposits={totalDeposits} memberCount={memberCount} loading={poolStatsLoading} />
 
         <AssetSelector
@@ -158,7 +158,7 @@ export function PoolDashboard({ activities, loading, error, onFetchMore, hasNext
       {/* Recent Activity */}
       <div className="flex-1 flex flex-col min-h-0">
         <div className="flex-shrink-0 bg-app-surface border border-app rounded-t-xl">
-          <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center justify-between px-4 py-2">
             <h3 className="text-sm font-semibold text-app-secondary">Recent Activity</h3>
             {onRefresh && (
               <Button

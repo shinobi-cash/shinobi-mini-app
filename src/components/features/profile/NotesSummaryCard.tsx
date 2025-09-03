@@ -13,7 +13,7 @@ export function NotesSummaryCard({ unspentNotes, totalNotes, isRediscovering, on
 
   return (
     <div className="flex-shrink-0">
-      <div className="bg-app-surface p-4 border border-app rounded-xl shadow-sm">
+      <div className="bg-app-surface p-2 border border-app rounded-xl shadow-sm">
         <div className="flex gap-6 mb-3">
           <div className="flex flex-col">
             <p className="text-sm font-semibold text-app-secondary mb-1">Unspent</p>

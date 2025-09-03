@@ -96,7 +96,7 @@ export function PasskeyLoginSection({ onSuccess }: PasskeyLoginSectionProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <Input
         id="username-login"
         type="text"

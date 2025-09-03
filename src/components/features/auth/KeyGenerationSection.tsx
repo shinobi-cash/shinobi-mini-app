@@ -68,8 +68,8 @@ export function KeyGenerationSection({ onKeyGenerationComplete }: KeyGenerationS
 
   if (isGenerating) {
     return (
-      <div className="space-y-4">
-        <div className="bg-app-surface rounded-xl p-4 border border-app shadow-sm">
+      <div className="space-y-2">
+        <div className="bg-app-surface rounded-xl p-2 border border-app shadow-sm">
           <div className="text-center">
             <div className="w-full h-2 bg-gray-200 rounded-full mb-4">
               <div className="h-2 bg-violet-500 rounded-full transition-all" style={{ width: `${progress}%` }} />
@@ -85,8 +85,8 @@ export function KeyGenerationSection({ onKeyGenerationComplete }: KeyGenerationS
   }
 
   return (
-    <div className="space-y-4">
-      <div className="text-center space-y-3">
+    <div className="space-y-2">
+      <div className="text-center space-y-2">
         <div className="w-16 h-16 bg-violet-100 dark:bg-violet-900/30 rounded-full flex items-center justify-center mx-auto">
           <Key className="w-8 h-8 text-violet-600 dark:text-violet-400" />
         </div>
@@ -98,7 +98,7 @@ export function KeyGenerationSection({ onKeyGenerationComplete }: KeyGenerationS
         </div>
       </div>
 
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-2">
         <div className="flex items-start gap-3">
           <div className="w-5 h-5 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
             <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full" />

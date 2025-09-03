@@ -7,7 +7,7 @@ export const AppHeader = () => {
   const { effectiveTheme, toggleTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-app-border py-3 px-2 sm:py-4 sm:px-4 bg-app-surface">
+    <header className="sticky top-0 z-50 border-b border-app-border py-2 px-2 sm:py-3 sm:px-3 bg-app-surface">
       <div className="grid grid-cols-3 items-center">
         <div className="flex justify-start">
           <Switch

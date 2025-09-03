@@ -31,7 +31,7 @@ export function NotesHistorySection({ noteChains, loading, error, onNoteChainCli
           <button
             type="button"
             onClick={() => setActiveFilter("unspent")}
-            className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
+            className={`flex-1 px-4 py-2 text-sm font-semibold transition-colors ${
               activeFilter === "unspent"
                 ? "text-app-primary border-b-2 border-green-500"
                 : "text-app-secondary hover:text-app-primary"
@@ -42,7 +42,7 @@ export function NotesHistorySection({ noteChains, loading, error, onNoteChainCli
           <button
             type="button"
             onClick={() => setActiveFilter("spent")}
-            className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
+            className={`flex-1 px-4 py-2 text-sm font-semibold transition-colors ${
               activeFilter === "spent"
                 ? "text-app-primary border-b-2 border-red-500"
                 : "text-app-secondary hover:text-app-primary"

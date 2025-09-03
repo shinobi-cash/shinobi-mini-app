@@ -154,14 +154,14 @@ export const WithdrawNoteForm = ({ note, asset, onBack }: WithdrawNoteFormProps)
 
           {/* Quick Buttons */}
           <div className="flex gap-2 justify-center">
-            <Button variant="outline" size="sm" onClick={handleMaxClick} className="rounded-full px-3 py-1 text-xs">
+            <Button variant="outline" size="sm" onClick={handleMaxClick} className="rounded-full px-2 py-1 text-xs">
               MAX
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => handlePercentageClick(0.5)}
-              className="rounded-full px-3 py-1 text-xs"
+              className="rounded-full px-2 py-1 text-xs"
             >
               50%
             </Button>
@@ -169,7 +169,7 @@ export const WithdrawNoteForm = ({ note, asset, onBack }: WithdrawNoteFormProps)
               variant="outline"
               size="sm"
               onClick={() => handlePercentageClick(0.25)}
-              className="rounded-full px-3 py-1 text-xs"
+              className="rounded-full px-2 py-1 text-xs"
             >
               25%
             </Button>

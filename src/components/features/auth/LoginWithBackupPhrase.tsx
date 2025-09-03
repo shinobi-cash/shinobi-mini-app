@@ -65,9 +65,9 @@ export function LoginWithBackupPhrase({ onRecoverAccountKey }: LoginWithBackupPh
   };
 
   return (
-    <div className="space-y-4">
-      <div className="bg-app-surface rounded-xl p-3 border border-app shadow-sm">
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-2">
+      <div className="bg-app-surface rounded-xl p-2 border border-app shadow-sm">
+        <form onSubmit={handleSubmit} className="space-y-2">
           <div className="grid grid-cols-3 gap-2">
             {words.map((word, idx) => (
               <div key={`word-field-${idx}-${word}`} className="flex flex-col">
@@ -95,7 +95,7 @@ export function LoginWithBackupPhrase({ onRecoverAccountKey }: LoginWithBackupPh
           </Button>
 
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+            <div className="p-2 rounded-lg bg-red-50 border border-red-200">
               <p className="text-sm text-red-600 text-center">{error}</p>
             </div>
           )}

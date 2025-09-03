@@ -33,7 +33,7 @@ export function NoteChainDetailDrawer({ noteChain, open, onOpenChange }: NoteCha
 
         <div className="flex-1 overflow-y-auto px-4 pb-6">
           {/* Balance Summary */}
-          <div className="bg-app-surface rounded-xl p-4 border border-app shadow mb-6 text-center">
+          <div className="bg-app-surface rounded-xl p-2 border border-app shadow mb-6 text-center">
             <p className="text-sm font-medium text-app-secondary mb-1">Current Balance</p>
             <p className="text-2xl font-bold text-app-primary tabular-nums mb-2">
               {formatEthAmount(lastNote.amount)} ETH

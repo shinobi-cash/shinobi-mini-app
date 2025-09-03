@@ -13,7 +13,7 @@ interface PoolStatsCardProps {
 
 export function PoolStatsCard({ totalDeposits, memberCount, loading = false }: PoolStatsCardProps) {
   return (
-    <div className="bg-app-surface p-4 border border-app rounded-xl shadow-sm">
+    <div className="bg-app-surface p-2 border border-app rounded-xl shadow-sm">
       <div className="flex justify-between items-start">
         <div className="flex flex-col">
           <p className="text-2xl font-bold text-app-primary tabular-nums">

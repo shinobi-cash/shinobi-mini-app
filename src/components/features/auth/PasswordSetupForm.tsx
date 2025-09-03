@@ -152,7 +152,7 @@ export function PasswordSetupForm({ generatedKeys, onSuccess }: PasswordSetupFor
   };
 
   return (
-    <form onSubmit={handlePasswordSetup} className="space-y-4">
+    <form onSubmit={handlePasswordSetup} className="space-y-2">
       <Input
         id="account-name"
         type="text"
@@ -185,7 +185,7 @@ export function PasswordSetupForm({ generatedKeys, onSuccess }: PasswordSetupFor
       />
       {accountNameError && <p className="text-red-600 text-xs">{accountNameError}</p>}
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div className="relative">
           <Input
             id="setup-password"

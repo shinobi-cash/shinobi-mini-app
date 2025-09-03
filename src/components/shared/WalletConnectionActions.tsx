@@ -11,7 +11,7 @@ export const WalletConnectionActions = () => {
   // In browser environment, use RainbowKit's ConnectButton
   if (!isFarcasterEnvironment()) {
     return (
-      <div className="w-full max-w-sm space-y-3">
+      <div className="w-full max-w-sm space-y-2">
         <ConnectButton.Custom>
           {({ account, chain, openAccountModal, openChainModal, openConnectModal, authenticationStatus, mounted }) => {
             const ready = mounted && authenticationStatus !== "loading";
@@ -107,7 +107,7 @@ export const WalletConnectionActions = () => {
   const isLoading = isPending || isConnecting;
 
   return (
-    <div className="w-full max-w-sm space-y-3">
+    <div className="w-full max-w-sm space-y-2">
       <Button
         variant="default"
         className="w-full h-12 text-base font-medium rounded-2xl"

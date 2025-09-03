@@ -24,7 +24,7 @@ export function AssetSelector({ selectedAsset, onAssetChange, disabled = false }
       type="button"
       onClick={() => onAssetChange?.(selectedAsset)}
       disabled={disabled}
-      className="bg-app-card rounded-lg p-3 border border-app hover:bg-app-surface-hover transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed w-full"
+      className="bg-app-card rounded-lg p-2 border border-app hover:bg-app-surface-hover transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed w-full"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

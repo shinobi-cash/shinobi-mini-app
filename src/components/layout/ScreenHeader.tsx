@@ -15,7 +15,7 @@ interface ScreenHeaderProps {
 
 export function ScreenHeader({ title, backTo = "home", showBackButton = true, breadcrumbs }: ScreenHeaderProps) {
   return (
-    <div className="flex items-center gap-3 px-4 py-3 bg-app-background border-b border-app-border">
+    <div className="flex items-center gap-3 px-4 py-2 bg-app-background border-b border-app-border">
       {showBackButton && <BackButton to={backTo} />}
 
       {breadcrumbs ? (

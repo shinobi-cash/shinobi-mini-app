@@ -180,7 +180,7 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
 
     if (currentActionStep === "wallet") {
       return (
-        <div className="space-y-4">
+        <div className="space-y-2">
           <Button
             variant="default"
             className="w-full h-12 text-base font-medium rounded-2xl"

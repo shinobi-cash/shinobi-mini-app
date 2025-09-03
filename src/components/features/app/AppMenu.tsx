@@ -92,7 +92,7 @@ export function AppMenu() {
       {isOpen && (
         <div className="absolute right-0 top-12 w-56 bg-app-surface border border-app rounded-xl shadow-lg z-50 overflow-hidden">
           {/* Account Section */}
-          <div className="px-3 py-2 border-b border-app">
+          <div className="px-2 py-2 border-b border-app">
             <div className="flex items-center justify-between mb-1">
               {/* Left: Label */}
               <p className="text-xs text-app-tertiary">Account</p>
@@ -120,7 +120,7 @@ export function AppMenu() {
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-secondary hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20 transition-colors"
+                  className="w-full flex items-center gap-2 px-2 py-2 text-sm text-app-secondary hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   Sign Out
@@ -130,7 +130,7 @@ export function AppMenu() {
                   <button
                     type="button"
                     onClick={handleLogin}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-secondary hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/20 transition-colors"
+                    className="w-full flex items-center gap-2 px-2 py-2 text-sm text-app-secondary hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/20 transition-colors"
                   >
                     <LogIn className="w-4 h-4" />
                     Log In
@@ -138,7 +138,7 @@ export function AppMenu() {
                   <button
                     type="button"
                     onClick={handleCreateAccount}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-secondary hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-950/20 transition-colors"
+                    className="w-full flex items-center gap-2 px-2 py-2 text-sm text-app-secondary hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-950/20 transition-colors"
                   >
                     <UserPlus className="w-4 h-4" />
                     Create Account
@@ -149,7 +149,7 @@ export function AppMenu() {
           </div>
 
           {/* Wallet Section */}
-          <div className="px-3 py-2 border-b border-app">
+          <div className="px-2 py-2 border-b border-app">
             <div className="flex items-center justify-between mb-1">
               {/* Left: Label */}
               <p className="text-xs text-app-tertiary">Wallet</p>
@@ -182,7 +182,7 @@ export function AppMenu() {
               <button
                 type="button"
                 onClick={handleDisconnect}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-secondary hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20 transition-colors"
+                className="w-full flex items-center gap-2 px-2 py-2 text-sm text-app-secondary hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 Disconnect Wallet
@@ -191,7 +191,7 @@ export function AppMenu() {
               <button
                 type="button"
                 onClick={handleConnect}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-secondary hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/20 transition-colors"
+                className="w-full flex items-center gap-2 px-2 py-2 text-sm text-app-secondary hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/20 transition-colors"
               >
                 <WalletIcon className="w-4 h-4" />
                 Connect Wallet
@@ -204,7 +204,7 @@ export function AppMenu() {
             <button
               type="button"
               disabled
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-tertiary opacity-50 cursor-not-allowed"
+              className="w-full flex items-center gap-2 px-2 py-2 text-sm text-app-tertiary opacity-50 cursor-not-allowed"
             >
               <Settings className="w-4 h-4" />
               Settings
@@ -212,7 +212,7 @@ export function AppMenu() {
             <button
               type="button"
               disabled
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-tertiary opacity-50 cursor-not-allowed"
+              className="w-full flex items-center gap-2 px-2 py-2 text-sm text-app-tertiary opacity-50 cursor-not-allowed"
             >
               <HelpCircle className="w-4 h-4" />
               About
@@ -220,7 +220,7 @@ export function AppMenu() {
             <button
               type="button"
               disabled
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-tertiary opacity-50 cursor-not-allowed"
+              className="w-full flex items-center gap-2 px-2 py-2 text-sm text-app-tertiary opacity-50 cursor-not-allowed"
             >
               <BookOpen className="w-4 h-4" />
               Documentation
