@@ -152,7 +152,7 @@ const NotesContent = ({
 
       {/* Notes Overview */}
       <div className="space-y-4">
-        <NotesSummaryCard unspentNotes={unspentNotes} totalNotes={noteChains.length} onSignOut={onSignOut} />
+        <NotesSummaryCard unspentNotes={unspentNotes} totalNotes={noteChains.length} />
       </div>
 
       {/* Notes History */}
