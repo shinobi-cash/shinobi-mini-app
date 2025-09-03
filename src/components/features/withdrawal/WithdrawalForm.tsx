@@ -6,7 +6,7 @@ import type { Note } from "@/lib/storage/types";
 import { cn } from "@/lib/utils";
 import { calculateWithdrawalAmounts } from "@/services/privacy/withdrawalService";
 import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
-import { Loader2, Wallet } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isAddress, parseEther } from "viem";
 import { Button } from "../../ui/button";
