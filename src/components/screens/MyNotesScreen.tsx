@@ -9,21 +9,29 @@ import { useAuth } from "@/contexts/AuthContext";
 import { NoteChainDetailDrawer } from "../features/profile/NoteChainDetailDrawer";
 import { NotesSummaryCard } from "../features/profile/NotesSummaryCard";
 import { NotesHistorySection } from "../features/profile/NotesHistorySection";
-import { AuthenticationGate } from "../shared/AuthenticationGate";
 import { BackButton } from "../ui/back-button";
+import { PoolDashboard } from "../features/pool/PoolDashboard";
+import { useActivities } from "@/hooks/data/useActivities";
+import { useNavigation } from "@/contexts/NavigationContext";
 
 export const MyNotesScreen = () => {
-  const { signOut } = useAuth();
+  const { isAuthenticated, signOut } = useAuth();
+  const { setCurrentScreen } = useNavigation();
 
-  return (
-    <AuthenticationGate
-      title="Account Required"
-      description="Create or load your account to access privacy features"
-      context="my-notes"
-    >
-      <AuthenticatedNotes onSignOut={signOut} />
-    </AuthenticationGate>
-  );
+  // Redirect to home when user signs out (this handles the redirect automatically)
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setCurrentScreen("home");
+    }
+  }, [isAuthenticated, setCurrentScreen]);
+
+  // Show Pool Dashboard for non-authenticated users (fallback while redirecting)
+  if (!isAuthenticated) {
+    return <PoolDashboardForNonAuthenticated />;
+  }
+
+  // Show authenticated notes for authenticated users
+  return <AuthenticatedNotes onSignOut={signOut} />;
 };
 
 const AuthenticatedNotes = ({ onSignOut }: { onSignOut: () => void }) => {
@@ -177,5 +185,46 @@ const NotesContent = ({
         onOpenChange={noteChainModal.setOpen}
       />
     </div>
+  );
+};
+
+/**
+ * Pool Dashboard for non-authenticated users
+ * Shows the same Pool Dashboard as home screen
+ */
+const PoolDashboardForNonAuthenticated = () => {
+  const { banner } = useBanner();
+  const lastErrorRef = useRef<string | null>(null);
+
+  const { activities, loading, error, fetchMore, hasNextPage, refetch, hasData } = useActivities({
+    poolId: CONTRACTS.ETH_PRIVACY_POOL,
+    limit: 10,
+  });
+
+  // Show banner error when we have data but error on refresh
+  useEffect(() => {
+    const errorMessage = error?.message || null;
+
+    if (errorMessage && hasData && errorMessage !== lastErrorRef.current) {
+      banner.error("Failed to refresh activities", { duration: 5000 });
+      lastErrorRef.current = errorMessage;
+    } else if (!errorMessage) {
+      lastErrorRef.current = null;
+    }
+  }, [error?.message, hasData, banner]);
+
+  return (
+    <PoolDashboard
+      activities={activities || []}
+      loading={loading}
+      error={error && !hasData ? "Failed to load activities" : undefined}
+      hasNextPage={hasNextPage}
+      onFetchMore={async () => {
+        await fetchMore?.();
+      }}
+      onRefresh={async () => {
+        await refetch?.();
+      }}
+    />
   );
 };

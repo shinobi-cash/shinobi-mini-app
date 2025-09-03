@@ -113,16 +113,25 @@ export function AppMenu() {
 
           {/* Account Actions */}
           <div className="border-b border-app">
-            {isAuthenticated ? (
-              <div className="py-1">
-                <button
-                  type="button"
-                  onClick={handleViewNotes}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-secondary hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/20 transition-colors"
-                >
-                  <FileText className="w-4 h-4" />
-                  My Notes
-                </button>
+            <div className="py-1">
+              {/* My Notes - only enabled when authenticated */}
+              <button
+                type="button"
+                onClick={isAuthenticated ? handleViewNotes : undefined}
+                disabled={!isAuthenticated}
+                className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+                  isAuthenticated
+                    ? "text-app-secondary hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/20 cursor-pointer"
+                    : "text-app-tertiary opacity-50 cursor-not-allowed"
+                }`}
+                title={!isAuthenticated ? "Sign in to access your notes" : "View your notes"}
+              >
+                <FileText className="w-4 h-4" />
+                My Notes
+              </button>
+
+              {/* Authentication actions */}
+              {isAuthenticated ? (
                 <button
                   type="button"
                   onClick={handleSignOut}
@@ -131,27 +140,27 @@ export function AppMenu() {
                   <LogOut className="w-4 h-4" />
                   Sign Out
                 </button>
-              </div>
-            ) : (
-              <div className="py-1">
-                <button
-                  type="button"
-                  onClick={handleLogin}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-secondary hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/20 transition-colors"
-                >
-                  <LogIn className="w-4 h-4" />
-                  Log In
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCreateAccount}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-secondary hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-950/20 transition-colors"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  Create Account
-                </button>
-              </div>
-            )}
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleLogin}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-secondary hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/20 transition-colors"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Log In
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCreateAccount}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-app-secondary hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-950/20 transition-colors"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Create Account
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Wallet Section */}
