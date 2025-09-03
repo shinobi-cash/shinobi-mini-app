@@ -92,23 +92,23 @@ export function AppMenu() {
         <div className="absolute right-0 top-12 w-56 bg-app-surface border border-app rounded-xl shadow-lg z-50 overflow-hidden">
           {/* Account Section */}
           <div className="px-3 py-2 border-b border-app">
-            <p className="text-xs text-app-tertiary mb-2">Account</p>
+            <div className="flex items-center justify-between mb-1">
+              {/* Left: Label */}
+              <p className="text-xs text-app-tertiary">Account</p>
 
-            {isAuthenticated ? (
-              <div className="space-y-2">
+              {/* Right: Status */}
+              {isAuthenticated ? (
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <p className="text-xs text-green-600 dark:text-green-400">Signed In</p>
                 </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
+              ) : (
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                   <p className="text-xs text-app-secondary">Not Signed In</p>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Account Actions */}
@@ -165,25 +165,29 @@ export function AppMenu() {
 
           {/* Wallet Section */}
           <div className="px-3 py-2 border-b border-app">
-            <p className="text-xs text-app-tertiary mb-2">Wallet Connection</p>
+            <div className="flex items-center justify-between mb-1">
+              {/* Left: Label */}
+              <p className="text-xs text-app-tertiary">Wallet</p>
 
-            {isConnected ? (
-              <div className="space-y-2">
+              {/* Right: Status */}
+              {isConnected ? (
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <p className="text-xs text-green-600 dark:text-green-400">Connected</p>
                 </div>
-                <p className="text-sm font-mono text-app-primary truncate bg-app-card px-2 py-1 rounded">
-                  {address && shortenAddress(address)}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2">
+              ) : (
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                   <p className="text-xs text-app-secondary">Not Connected</p>
                 </div>
-              </div>
+              )}
+            </div>
+
+            {/* Address only when connected */}
+            {isConnected && (
+              <p className="text-xs font-mono text-app-primary truncate bg-app-card py-1 rounded">
+                {address && shortenAddress(address)}
+              </p>
             )}
           </div>
 

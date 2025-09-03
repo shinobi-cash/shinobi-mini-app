@@ -4,7 +4,7 @@
  * Handles deposit and withdrawal navigation
  */
 
-import { useNavigation } from "@/contexts/NavigationContext";
+import { useNavigation, type Asset } from "@/contexts/NavigationContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAccount } from "wagmi";
 import { Minus, Plus } from "lucide-react";
@@ -24,11 +24,12 @@ const poolActions: PoolAction[] = [
 ];
 
 interface PoolActionsProps {
+  asset: Asset;
   disabled?: boolean;
 }
 
-export function PoolActions({ disabled = false }: PoolActionsProps) {
-  const { currentScreen, setCurrentScreen } = useNavigation();
+export function PoolActions({ asset, disabled = false }: PoolActionsProps) {
+  const { currentScreen, navigateToScreen } = useNavigation();
   const { isAuthenticated } = useAuth();
   const { isConnected } = useAccount();
 
@@ -81,7 +82,7 @@ export function PoolActions({ disabled = false }: PoolActionsProps) {
         const buttonElement = (
           <Button
             key={action.id}
-            onClick={() => setCurrentScreen(action.screen)}
+            onClick={() => navigateToScreen(action.screen, asset)}
             disabled={isDisabled}
             variant={isActive ? "default" : "outline"}
             size="lg"

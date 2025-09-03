@@ -6,10 +6,11 @@ import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
 import { ChevronRight, Loader2, Wallet } from "lucide-react";
 
 interface ListUnspentNotesProps {
+  asset: { symbol: string; name: string; icon: string };
   onNoteSelected: (note: Note) => void;
 }
 
-export const ListUnspentNotes = ({ onNoteSelected }: ListUnspentNotesProps) => {
+export const ListUnspentNotes = ({ asset, onNoteSelected }: ListUnspentNotesProps) => {
   const { publicKey, accountKey } = useAuth();
   const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
 
@@ -108,7 +109,7 @@ const NoteCard = ({ note, onSelect }: NoteCardProps) => {
             {noteLabel}
           </div>
           <div className="text-sm sm:text-base text-app-secondary font-medium tabular-nums">
-            {`${formatEthAmount(note.amount, { maxDecimals: 6 })} ETH`}
+            {`${formatEthAmount(note.amount, { maxDecimals: 6 })} ${asset.symbol}`}
           </div>
         </div>
 

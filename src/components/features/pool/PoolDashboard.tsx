@@ -152,7 +152,7 @@ export function PoolDashboard({ activities, loading, error, onFetchMore, hasNext
           disabled={true} // Future: enable when multi-asset support is added
         />
 
-        <PoolActions />
+        <PoolActions asset={selectedAsset} />
       </div>
 
       {/* Recent Activity */}

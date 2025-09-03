@@ -12,10 +12,11 @@ import { TransactionPreviewDrawer } from "./TransactionPreviewDrawer";
 
 interface WithdrawNoteFormProps {
   note: Note;
+  asset: { symbol: string; name: string; icon: string };
   onBack: () => void;
 }
 
-export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
+export const WithdrawNoteForm = ({ note, asset, onBack }: WithdrawNoteFormProps) => {
   // Direct state
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawAmountError, setWithdrawAmountError] = useState<string>("");
@@ -36,7 +37,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
         if (parsed <= 0n) return "Amount must be positive";
         const num = Number.parseFloat(value);
         if (num > availableBalance) {
-          return `Amount cannot exceed ${formatEthAmount(note.amount)} ETH`;
+          return `Amount cannot exceed ${formatEthAmount(note.amount)} ${asset.symbol}`;
         }
         return "";
       } catch {
@@ -138,7 +139,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
               onChange={(e) => handleAmountChange(e.target.value)}
               className="text-3xl font-light text-center bg-transparent border-none outline-none text-app-primary placeholder-app-secondary w-full"
             />
-            <p className="text-base text-app-secondary mt-1">ETH</p>
+            <p className="text-base text-app-secondary mt-1">{asset.symbol}</p>
           </div>
 
           {/* Balance */}
@@ -146,7 +147,7 @@ export const WithdrawNoteForm = ({ note, onBack }: WithdrawNoteFormProps) => {
             <p className="text-xs text-app-secondary">
               Available:{" "}
               <span className="text-app-primary font-medium">
-                {formatEthAmount(note.amount, { maxDecimals: 6 })} ETH
+                {formatEthAmount(note.amount, { maxDecimals: 6 })} {asset.symbol}
               </span>
             </p>
           </div>

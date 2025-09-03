@@ -1,7 +1,8 @@
 import { useBanner } from "@/contexts/BannerContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigation } from "@/contexts/NavigationContext";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
-import { AlertTriangle, ChevronDown, Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatEther, parseEther } from "viem";
 import { useAccount, useBalance, useChainId } from "wagmi";
@@ -22,9 +23,20 @@ const DEPOSIT_AMOUNTS = [
 ];
 
 export const DepositScreen = () => {
+  const { currentAsset } = useNavigation();
+  
+  // Default to ETH if no asset context (fallback)
+  const asset = currentAsset || { symbol: "ETH", name: "Ethereum", icon: "⚫" };
+  
+  const breadcrumbs = [
+    { label: "Pool", screen: "home" as const }, 
+    { label: asset.symbol }, 
+    { label: "Deposit" }
+  ];
+
   return (
     <>
-      <ScreenHeader title="Deposit" backTo="home" />
+      <ScreenHeader breadcrumbs={breadcrumbs} backTo="home" />
       <ScreenContent>
         <AuthenticationGate
           title="Account Required"
@@ -32,7 +44,7 @@ export const DepositScreen = () => {
           context="deposit"
         >
           <WalletGate title="Connect Wallet" description="Connect your wallet to fund privacy pool deposits">
-            <DepositForm />
+            <DepositForm asset={asset} />
           </WalletGate>
         </AuthenticationGate>
       </ScreenContent>
@@ -40,7 +52,7 @@ export const DepositScreen = () => {
   );
 };
 
-const DepositForm = () => {
+const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: string } }) => {
   const { address } = useAccount();
   const { data: balance } = useBalance({ address });
   const chainId = useChainId();
@@ -52,7 +64,6 @@ const DepositForm = () => {
   const [amountError, setAmountError] = useState<string>("");
 
   const availableBalance = balance?.value ?? 0n;
-  const selectedAsset = { symbol: "ETH", name: "Ethereum", icon: "⚫" };
 
   // ---- Validation ----
   const validateAmount = useCallback(
@@ -139,28 +150,10 @@ const DepositForm = () => {
 
   return (
     <div className="h-full flex flex-col px-4 py-4">
-      {/* Header */}
+      {/* Connected Address */}
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-app-primary">Deposit</h1>
-        <p className="text-xs text-app-secondary mt-1 font-mono">{address}</p>
-      </div>
-
-      {/* Asset */}
-      <div className="mb-4">
-        <div className="bg-app-card rounded-xl p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-gray-800 flex items-center justify-center text-white text-xs">
-                {selectedAsset.icon}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-app-primary">{selectedAsset.name}</p>
-                <p className="text-xs text-app-secondary">{selectedAsset.symbol}</p>
-              </div>
-            </div>
-            <ChevronDown className="w-4 h-4 text-app-secondary opacity-50" />
-          </div>
-        </div>
+        <p className="text-xs text-app-tertiary mb-1">Connected Address</p>
+        <p className="text-xs text-app-secondary font-mono">{address}</p>
       </div>
 
       {/* Amount */}
@@ -173,7 +166,7 @@ const DepositForm = () => {
             onChange={(e) => handleAmountChange(e.target.value)}
             className="text-3xl font-light text-center bg-transparent border-none outline-none text-app-primary placeholder-app-secondary w-full"
           />
-          <p className="text-base text-app-secondary mt-1">{selectedAsset.symbol}</p>
+          <p className="text-base text-app-secondary mt-1">{asset.symbol}</p>
         </div>
 
         {/* Quick Buttons */}
@@ -210,9 +203,7 @@ const DepositForm = () => {
         <div className="flex justify-between text-xs">
           <span className="text-app-secondary">Available</span>
           <span className="text-app-primary font-medium">
-            {balance
-              ? `${Number.parseFloat(formatEther(balance.value)).toFixed(4)} ${selectedAsset.symbol}`
-              : `0.000 ${selectedAsset.symbol}`}
+            {balance ? `${Number.parseFloat(formatEther(balance.value)).toFixed(4)} ${asset.symbol}` : `0.000 ${asset.symbol}`}
           </span>
         </div>
       </div>
