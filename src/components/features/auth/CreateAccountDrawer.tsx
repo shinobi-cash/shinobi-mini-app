@@ -1,14 +1,9 @@
-import type { KeyGenerationResult } from "@/utils/crypto";
 import { isPasskeySupported } from "@/utils/environment";
 import { ChevronLeft, X } from "lucide-react";
-import { useState } from "react";
 import { Button } from "../../ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "../../ui/drawer";
-import { BackupMnemonicSection } from "./BackupMnemonicSection";
-import { KeyGenerationSection } from "./KeyGenerationSection";
-import SetupConvenientAuth from "./SetupConvenientAuth";
-
-type CreateAccountStep = "KeyGeneration" | "BackupMnemonic" | "SetupConvenientAuth";
+import { AuthStepContent } from "./AuthStepContent";
+import { useAuthSteps } from "@/hooks/auth/useAuthSteps";
 
 interface CreateAccountDrawerProps {
   open: boolean;
@@ -16,88 +11,48 @@ interface CreateAccountDrawerProps {
 }
 
 export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerProps) => {
-  const [currentStep, setCurrentStep] = useState<CreateAccountStep>("KeyGeneration");
-  const [generatedKeys, setGeneratedKeys] = useState<KeyGenerationResult | null>(null);
   const shouldShowPasskey = isPasskeySupported();
+  
+  // Use shared auth steps logic, start with create-keys
+  const authSteps = useAuthSteps({
+    onAuthComplete: () => {
+      onOpenChange(false);
+    }
+  });
 
-  const onKeyGenerationComplete = (keys: KeyGenerationResult) => {
-    setGeneratedKeys(keys);
-    setCurrentStep("BackupMnemonic");
-  };
+  // Override to start with create flow
+  const currentStep = authSteps.currentStep === "choose" ? "create-keys" : authSteps.currentStep;
 
-  const onBackupMnemonicComplete = () => {
-    setCurrentStep("SetupConvenientAuth");
-  };
-
-  const onSetupConvenientAuthComplete = () => {
-    resetState();
-    onOpenChange(false);
-  };
-
-  const resetState = () => {
-    setCurrentStep("KeyGeneration");
-    setGeneratedKeys(null);
+  const canGoBack = () => {
+    return ["create-backup", "setup-convenient"].includes(currentStep);
   };
 
   const handleBack = () => {
     switch (currentStep) {
-      case "BackupMnemonic":
-        setCurrentStep("KeyGeneration");
+      case "create-backup":
+        authSteps.handleBack(); // This will go to create-keys
         break;
-      case "SetupConvenientAuth":
-        setCurrentStep("BackupMnemonic");
+      case "setup-convenient":
+        authSteps.handleBack(); // This will go to create-backup
         break;
-      default:
-        setCurrentStep("KeyGeneration");
-    }
-  };
-
-  const canGoBack = currentStep !== "KeyGeneration";
-
-  const renderContent = () => {
-    switch (currentStep) {
-      case "KeyGeneration":
-        return <KeyGenerationSection onKeyGenerationComplete={onKeyGenerationComplete} />;
-      case "BackupMnemonic":
-        return (
-          <BackupMnemonicSection generatedKeys={generatedKeys} onBackupMnemonicComplete={onBackupMnemonicComplete} />
-        );
-      case "SetupConvenientAuth":
-        return (
-          <SetupConvenientAuth
-            generatedKeys={generatedKeys}
-            onSetupConvenientAuthComplete={onSetupConvenientAuthComplete}
-          />
-        );
-
-      default:
-        return null;
     }
   };
 
   const getTitle = () => {
     switch (currentStep) {
-      case "KeyGeneration":
-        return "Generate Keys";
-      case "BackupMnemonic":
-        return "Backup Phrase";
-      case "SetupConvenientAuth":
-        return shouldShowPasskey ? "Setup Passkey" : "Setup Password";
-      default:
-        return "Create Account";
+      case "create-keys": return "Generate Keys";
+      case "create-backup": return "Backup Phrase";
+      case "setup-convenient": return shouldShowPasskey ? "Setup Passkey" : "Setup Password";
+      default: return "Create Account";
     }
   };
 
   const getDescription = () => {
     switch (currentStep) {
-      case "KeyGeneration":
-        return "Generate keys locally";
-      case "BackupMnemonic":
-        return "Save your recovery phrase";
-      case "SetupConvenientAuth":
-        return shouldShowPasskey ? "Setup biometric access" : "Create secure password";
-      default:
-        return "Create new account";
+      case "create-keys": return "Generate keys locally";
+      case "create-backup": return "Save your recovery phrase";
+      case "setup-convenient": return shouldShowPasskey ? "Setup biometric access" : "Create secure password";
+      default: return "Create new account";
     }
   };
 
@@ -106,7 +61,7 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
       open={open}
       onOpenChange={(newOpen) => {
         if (!newOpen) {
-          resetState();
+          authSteps.resetState();
         }
         onOpenChange(newOpen);
       }}
@@ -118,7 +73,7 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
         <DrawerHeader className="pb-0 px-4 pt-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {canGoBack && (
+              {canGoBack() && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -144,7 +99,20 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-4 pb-6">
-          <div className="p-2">{renderContent()}</div>
+          <div className="p-2">
+            <AuthStepContent
+              currentStep={currentStep}
+              generatedKeys={authSteps.generatedKeys}
+              loginKey={authSteps.loginKey}
+              onLoginChoice={authSteps.handleLoginChoice}
+              onCreateChoice={authSteps.handleCreateChoice}
+              onLoginMethodChoice={authSteps.handleLoginMethodChoice}
+              onKeyGenerationComplete={authSteps.handleKeyGenerationComplete}
+              onBackupComplete={authSteps.handleBackupComplete}
+              onRecoveryComplete={authSteps.handleRecoveryComplete}
+              onConvenientAuthComplete={authSteps.handleConvenientAuthComplete}
+            />
+          </div>
         </div>
       </DrawerContent>
     </Drawer>
