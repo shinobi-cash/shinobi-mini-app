@@ -3,16 +3,23 @@ import type { Note } from "@/lib/storage/types";
 import { ListUnspentNotes } from "../features/profile/ListUnspentNotes";
 import { WithdrawNoteForm } from "../features/withdrawal/WithdrawNoteForm";
 import { AuthenticationGate } from "../shared/AuthenticationGate";
+import { ScreenHeader } from "../layout/ScreenHeader";
+import { ScreenContent } from "../layout/ScreenLayout";
 
 export const WithdrawalScreen = () => {
   return (
-    <AuthenticationGate
-      title="Account Required"
-      description="Create or load your account to access privacy features"
-      context="withdraw"
-    >
-      <WithdrawalContent />
-    </AuthenticationGate>
+    <>
+      <ScreenHeader title="Withdraw" backTo="home" />
+      <ScreenContent>
+        <AuthenticationGate
+          title="Account Required"
+          description="Create or load your account to access privacy features"
+          context="withdraw"
+        >
+          <WithdrawalContent />
+        </AuthenticationGate>
+      </ScreenContent>
+    </>
   );
 };
 

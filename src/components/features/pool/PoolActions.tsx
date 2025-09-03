@@ -95,20 +95,26 @@ export function PoolActions({ disabled = false }: PoolActionsProps) {
         // Wrap with tooltip if disabled and has message
         if (isDisabled && tooltipMessage) {
           return (
-            <Tooltip key={action.id}>
-              <TooltipTrigger asChild>
-                <div className="flex-1">
-                  {buttonElement}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                {tooltipMessage}
-              </TooltipContent>
-            </Tooltip>
+            <div key={action.id} className="flex-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    {buttonElement}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {tooltipMessage}
+                </TooltipContent>
+              </Tooltip>
+            </div>
           );
         }
 
-        return buttonElement;
+        return (
+          <div key={action.id} className="flex-1">
+            {buttonElement}
+          </div>
+        );
       })}
     </div>
   );

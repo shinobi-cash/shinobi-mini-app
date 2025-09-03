@@ -10,18 +10,25 @@ import { NoteChainDetailDrawer } from "../features/profile/NoteChainDetailDrawer
 import { ProfileSummaryCard } from "../features/profile/ProfileSummaryCard";
 import { NotesHistorySection } from "../features/profile/NotesHistorySection";
 import { AuthenticationGate } from "../shared/AuthenticationGate";
+import { ScreenHeader } from "../layout/ScreenHeader";
+import { ScreenContent } from "../layout/ScreenLayout";
 
 export const ProfileScreen = () => {
   const { signOut } = useAuth();
 
   return (
-    <AuthenticationGate
-      title="Account Required"
-      description="Create or load your account to access privacy features"
-      context="profile"
-    >
-      <AuthenticatedProfile onSignOut={signOut} />
-    </AuthenticationGate>
+    <>
+      <ScreenHeader title="Profile" backTo="home" />
+      <ScreenContent>
+        <AuthenticationGate
+          title="Account Required"
+          description="Create or load your account to access privacy features"
+          context="profile"
+        >
+          <AuthenticatedProfile onSignOut={signOut} />
+        </AuthenticationGate>
+      </ScreenContent>
+    </>
   );
 };
 

@@ -11,6 +11,8 @@ import { useDepositTransaction } from "../../hooks/transactions/useDepositTransa
 import { AuthenticationGate } from "../shared/AuthenticationGate";
 import { WalletGate } from "../shared/WalletGate";
 import { Button } from "../ui/button";
+import { ScreenHeader } from "../layout/ScreenHeader";
+import { ScreenContent } from "../layout/ScreenLayout";
 
 const DEPOSIT_AMOUNTS = [
   { value: "0.01", label: "0.01 ETH" },
@@ -21,15 +23,20 @@ const DEPOSIT_AMOUNTS = [
 
 export const DepositScreen = () => {
   return (
-    <AuthenticationGate
-      title="Account Required"
-      description="Create or load your account to access privacy features"
-      context="deposit"
-    >
-      <WalletGate title="Connect Wallet" description="Connect your wallet to fund privacy pool deposits">
-        <DepositForm />
-      </WalletGate>
-    </AuthenticationGate>
+    <>
+      <ScreenHeader title="Deposit" backTo="home" />
+      <ScreenContent>
+        <AuthenticationGate
+          title="Account Required"
+          description="Create or load your account to access privacy features"
+          context="deposit"
+        >
+          <WalletGate title="Connect Wallet" description="Connect your wallet to fund privacy pool deposits">
+            <DepositForm />
+          </WalletGate>
+        </AuthenticationGate>
+      </ScreenContent>
+    </>
   );
 };
 
