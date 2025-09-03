@@ -134,14 +134,12 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
   }, [isSuccess, transactionHash, reset, trackTransaction]);
 
   // Deposit
-  const handleDeposit = async () => {
+  const handleDeposit = () => {
     if (!noteData || !amount || amountError) return;
     clearError();
-    try {
-      await deposit(amount, noteData);
-    } catch (err) {
-      console.error("Deposit failed:", err);
-    }
+    // Clear previous error banners
+    shownBannersRef.current.clear();
+    deposit(amount, noteData);
   };
 
   // Derived flags

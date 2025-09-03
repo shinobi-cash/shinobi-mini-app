@@ -73,49 +73,49 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
     };
   }, []);
 
-  // Fetch transaction receipt and check status
+  // Wait for transaction receipt and check status
   useEffect(() => {
     if (!trackedTransaction?.hash || trackingStatus !== "pending") {
       return;
     }
 
-    const fetchTransactionReceipt = async () => {
+    const waitForReceipt = async () => {
       try {
-        const receipt = await publicClient.getTransactionReceipt({
+        const receipt = await publicClient.waitForTransactionReceipt({
           hash: trackedTransaction.hash as `0x${string}`,
+          timeout: 60000, // 1 minute timeout
         });
 
-        if (receipt) {
-          // Check if transaction was successful
-          if (receipt.status === "success") {
-            const shortHash = `${trackedTransaction.hash.slice(0, 6)}...${trackedTransaction.hash.slice(-4)}`;
-            banner.success(`${shortHash} • Transaction successful! indexing...`, { confetti: true });
-            setTrackedTransaction((prev) => (prev ? { ...prev, blockNumber: Number(receipt.blockNumber) } : null));
-            setTrackingStatus("waiting");
-          } else {
-            // Transaction failed
-            const shortHash = `${trackedTransaction.hash.slice(0, 6)}...${trackedTransaction.hash.slice(-4)}`;
-            banner.error(`${shortHash} • Transaction failed`);
-            setTrackingStatus("failed");
-            // Clear tracking on failure
-            setTimeout(() => {
-              setTrackedTransaction(null);
-              setTrackingStatus("idle");
-            }, 5000);
-          }
+        // Check if transaction was successful
+        if (receipt.status === "success") {
+          const shortHash = `${trackedTransaction.hash.slice(0, 6)}...${trackedTransaction.hash.slice(-4)}`;
+          banner.success(`${shortHash} • Transaction successful! indexing...`, { confetti: true });
+          setTrackedTransaction((prev) => (prev ? { ...prev, blockNumber: Number(receipt.blockNumber) } : null));
+          setTrackingStatus("waiting");
         } else {
-          // Receipt not available yet, retry in 3 seconds
-          timeoutRef.current = setTimeout(fetchTransactionReceipt, 3000);
+          // Transaction failed
+          const shortHash = `${trackedTransaction.hash.slice(0, 6)}...${trackedTransaction.hash.slice(-4)}`;
+          banner.error(`${shortHash} • Transaction failed`);
+          setTrackingStatus("failed");
+          // Clear tracking on failure
+          setTimeout(() => {
+            setTrackedTransaction(null);
+            setTrackingStatus("idle");
+          }, 5000);
         }
       } catch (error) {
-        console.error("Failed to fetch transaction receipt:", error);
-        // Retry after error in 5 seconds
-        timeoutRef.current = setTimeout(fetchTransactionReceipt, 5000);
+        console.error("Failed to wait for transaction receipt:", error);
+        const shortHash = `${trackedTransaction.hash.slice(0, 6)}...${trackedTransaction.hash.slice(-4)}`;
+        banner.error(`${shortHash} • Transaction timeout`);
+        setTrackingStatus("failed");
+        setTimeout(() => {
+          setTrackedTransaction(null);
+          setTrackingStatus("idle");
+        }, 5000);
       }
     };
 
-    const timeoutId = setTimeout(fetchTransactionReceipt, 1000);
-    return () => clearTimeout(timeoutId);
+    waitForReceipt();
   }, [trackedTransaction?.hash, trackingStatus]);
 
   // Check if transaction is indexed

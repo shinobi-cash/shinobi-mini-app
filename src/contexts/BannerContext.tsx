@@ -40,6 +40,7 @@ export const BannerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [currentBanner, setCurrentBanner] = useState<BannerMessage | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const confettiTimeoutRef = useRef<NodeJS.Timeout>();
 
   const showBanner = useCallback((banner: Omit<BannerMessage, "id">, duration = 4000) => {
     const id = generateId();
@@ -65,10 +66,14 @@ export const BannerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const dismissBanner = useCallback(() => {
     setCurrentBanner(null);
 
-    // Clear timeout
+    // Clear timeouts
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = undefined;
+    }
+    if (confettiTimeoutRef.current) {
+      clearTimeout(confettiTimeoutRef.current);
+      confettiTimeoutRef.current = undefined;
     }
   }, []);
 
@@ -89,8 +94,13 @@ export const BannerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         
         // Show confetti for success messages if explicitly requested
         if (options?.confetti === true) {
+          // Clear existing confetti timeout
+          if (confettiTimeoutRef.current) {
+            clearTimeout(confettiTimeoutRef.current);
+          }
+          
           setShowConfetti(true);
-          setTimeout(() => setShowConfetti(false), 4000);
+          confettiTimeoutRef.current = setTimeout(() => setShowConfetti(false), 3000);
         }
       },
       [showBanner],
