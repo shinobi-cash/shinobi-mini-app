@@ -15,7 +15,7 @@ import { useActivities } from "@/hooks/data/useActivities";
 import { useNavigation } from "@/contexts/NavigationContext";
 
 export const MyNotesScreen = () => {
-  const { isAuthenticated, signOut } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { setCurrentScreen } = useNavigation();
 
   // Redirect to home when user signs out (this handles the redirect automatically)
@@ -31,10 +31,10 @@ export const MyNotesScreen = () => {
   }
 
   // Show authenticated notes for authenticated users
-  return <AuthenticatedNotes onSignOut={signOut} />;
+  return <AuthenticatedNotes />;
 };
 
-const AuthenticatedNotes = ({ onSignOut }: { onSignOut: () => void }) => {
+const AuthenticatedNotes = () => {
   const { publicKey, accountKey } = useAuth();
 
   // Only render the actual notes when auth values exist
@@ -42,17 +42,15 @@ const AuthenticatedNotes = ({ onSignOut }: { onSignOut: () => void }) => {
     return null;
   }
 
-  return <NotesContent publicKey={publicKey} accountKey={accountKey} onSignOut={onSignOut} />;
+  return <NotesContent publicKey={publicKey} accountKey={accountKey} />;
 };
 
 const NotesContent = ({
   publicKey,
   accountKey,
-  onSignOut,
 }: {
   publicKey: string;
   accountKey: bigint;
-  onSignOut: () => void;
 }) => {
   const noteChainModal = useModalWithSelection<NoteChain>(false);
   const [isRefreshing, setIsRefreshing] = useState(false);

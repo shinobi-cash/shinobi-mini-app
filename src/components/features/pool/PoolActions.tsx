@@ -5,11 +5,10 @@
  */
 
 import { useNavigation, type Asset } from "@/contexts/NavigationContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { useAccount } from "wagmi";
 import { FileText, Minus, Plus } from "lucide-react";
+import { useState } from "react";
 import { Button } from "../../ui/button";
-import { Tooltip, TooltipTrigger, TooltipContent } from "../../ui/tooltip";
+import { ActionAuthDrawer } from "./ActionAuthDrawer";
 
 interface PoolAction {
   id: "deposit" | "withdraw" | "my-notes";
@@ -30,36 +29,14 @@ interface PoolActionsProps {
 }
 
 export function PoolActions({ asset, disabled = false }: PoolActionsProps) {
-  const { currentScreen, navigateToScreen } = useNavigation();
-  const { isAuthenticated } = useAuth();
-  const { isConnected } = useAccount();
+  const { currentScreen } = useNavigation();
+  const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
+  const [selectedAction, setSelectedAction] = useState<"deposit" | "withdraw" | "my-notes">("deposit");
 
-  const getTooltipMessage = (actionId: "deposit" | "withdraw" | "my-notes") => {
-    switch (actionId) {
-      case "deposit":
-        if (!isAuthenticated && !isConnected) {
-          return "Sign in and connect wallet to deposit";
-        }
-        if (!isAuthenticated) {
-          return "Sign in to deposit";
-        }
-        if (!isConnected) {
-          return "Connect wallet to deposit";
-        }
-        return null;
-      case "withdraw":
-        if (!isAuthenticated) {
-          return "Sign in to withdraw";
-        }
-        return null;
-      case "my-notes":
-        if (!isAuthenticated) {
-          return "Sign in to view your notes";
-        }
-        return null;
-      default:
-        return null;
-    }
+  const handleActionClick = (action: PoolAction) => {
+    // Always show unified auth drawer - it will handle requirements and navigation
+    setSelectedAction(action.id);
+    setAuthDrawerOpen(true);
   };
 
   return (
@@ -68,56 +45,29 @@ export function PoolActions({ asset, disabled = false }: PoolActionsProps) {
         {poolActions.map((action) => {
         const isActive = currentScreen === action.screen;
 
-        // Different requirements for each action
-        const isDisabled =
-          disabled ||
-          (() => {
-            switch (action.id) {
-              case "deposit":
-                // Deposit requires both account auth AND wallet connection
-                return !isAuthenticated || !isConnected;
-              case "withdraw":
-              case "my-notes":
-                // Withdrawal and My Notes only require account auth
-                return !isAuthenticated;
-              default:
-                return false;
-            }
-          })();
-
-        const tooltipMessage = getTooltipMessage(action.id);
-
-        const buttonElement = (
+        return (
           <Button
             key={action.id}
-            onClick={() => navigateToScreen(action.screen, asset)}
-            disabled={isDisabled}
+            onClick={() => handleActionClick(action)}
+            disabled={disabled}
             variant={isActive ? "default" : "outline"}
             size="lg"
-            className={`whitespace-nowrap px-6 h-12 text-sm font-semibold transition-all duration-200 active:scale-95 ${
-              isDisabled ? "cursor-not-allowed" : ""
-            }`}
+            className="whitespace-nowrap px-6 h-12 text-sm font-semibold transition-all duration-200 active:scale-95"
           >
             {action.icon}
             <span className="ml-2">{action.label}</span>
           </Button>
         );
-
-        // Wrap with tooltip if disabled and has message
-        if (isDisabled && tooltipMessage) {
-          return (
-            <Tooltip key={action.id}>
-              <TooltipTrigger asChild>
-                <div>{buttonElement}</div>
-              </TooltipTrigger>
-              <TooltipContent>{tooltipMessage}</TooltipContent>
-            </Tooltip>
-          );
-        }
-
-        return buttonElement;
       })}
       </div>
+
+      {/* Action Auth Drawer */}
+      <ActionAuthDrawer
+        open={authDrawerOpen}
+        onOpenChange={setAuthDrawerOpen}
+        action={selectedAction}
+        asset={asset}
+      />
     </div>
   );
 }

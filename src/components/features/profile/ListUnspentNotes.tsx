@@ -76,6 +76,7 @@ export const ListUnspentNotes = ({ asset, onNoteSelected }: ListUnspentNotesProp
               <NoteCard
                 key={`${note.depositIndex}-${note.changeIndex}`}
                 note={note}
+                asset={asset}
                 onSelect={() => onNoteSelected(note)}
               />
             ))}
@@ -88,10 +89,11 @@ export const ListUnspentNotes = ({ asset, onNoteSelected }: ListUnspentNotesProp
 
 interface NoteCardProps {
   note: Note;
+  asset: { symbol: string; name: string; icon: string };
   onSelect: () => void;
 }
 
-const NoteCard = ({ note, onSelect }: NoteCardProps) => {
+const NoteCard = ({ note, asset, onSelect }: NoteCardProps) => {
   const noteLabel =
     note.changeIndex === 0 ? `Deposit #${note.depositIndex}` : `Change #${note.depositIndex}.${note.changeIndex}`;
 

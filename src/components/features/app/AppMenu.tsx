@@ -4,12 +4,11 @@
  * Includes wallet connection, settings, about, and other app features
  */
 
-import { BookOpen, HelpCircle, LogOut, Menu, Settings, UserPlus, LogIn, WalletIcon } from "lucide-react";
+import { BookOpen, HelpCircle, LogOut, Menu, Settings, LogIn, WalletIcon, UserPlus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAccount, useDisconnect } from "wagmi";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigation } from "@/contexts/NavigationContext";
 import { LogInDrawer } from "../auth/LogInDrawer";
 import { CreateAccountDrawer } from "../auth/CreateAccountDrawer";
 
@@ -27,8 +26,6 @@ export function AppMenu() {
   // Authentication state
   const { isAuthenticated, signOut } = useAuth();
 
-  // Navigation
-  const { setCurrentScreen } = useNavigation();
 
   // Close dropdown when clicking outside
   useEffect(() => {
