@@ -152,82 +152,82 @@ export function PasswordSetupForm({ generatedKeys, onSuccess }: PasswordSetupFor
   };
 
   return (
-    <form onSubmit={handlePasswordSetup} className="space-y-2">
-      <Input
-        id="account-name"
-        type="text"
-        value={accountName}
-        onChange={(e) => {
-          setAccountName(e.target.value);
-          if (accountNameError) setAccountNameError("");
+    <form onSubmit={handlePasswordSetup} className="space-y-3">
+      <div>
+        <Input
+          id="account-name"
+          type="text"
+          value={accountName}
+          onChange={(e) => {
+            setAccountName(e.target.value);
+            if (accountNameError) setAccountNameError("");
 
-          // Debounce the validation to avoid excessive database calls
-          if (validationTimeoutRef.current) {
-            clearTimeout(validationTimeoutRef.current);
-          }
+            // Debounce the validation to avoid excessive database calls
+            if (validationTimeoutRef.current) {
+              clearTimeout(validationTimeoutRef.current);
+            }
 
-          if (e.target.value.trim()) {
-            validationTimeoutRef.current = setTimeout(async () => {
-              try {
-                const error = await validateAccountName(e.target.value);
-                setAccountNameError(error || "");
-              } catch (err) {
-                console.warn("Account validation failed:", err);
-                // Don't set an error - just skip validation if DB is not ready
-              }
-            }, 500); // Wait 500ms after user stops typing
-          }
-        }}
-        placeholder="Account Name"
-        maxLength={30}
-        autoComplete="off"
-        aria-invalid={!!accountNameError}
-      />
-      {accountNameError && <p className="text-red-600 text-xs">{accountNameError}</p>}
+            if (e.target.value.trim()) {
+              validationTimeoutRef.current = setTimeout(async () => {
+                try {
+                  const error = await validateAccountName(e.target.value);
+                  setAccountNameError(error || "");
+                } catch (err) {
+                  console.warn("Account validation failed:", err);
+                  // Don't set an error - just skip validation if DB is not ready
+                }
+              }, 500); // Wait 500ms after user stops typing
+            }
+          }}
+          placeholder="Account Name"
+          maxLength={30}
+          autoComplete="off"
+          aria-invalid={!!accountNameError}
+        />
+        {accountNameError && <p className="text-red-600 text-xs mt-1">{accountNameError}</p>}
+      </div>
 
-      <div className="space-y-2">
-        <div className="relative">
-          <Input
-            id="setup-password"
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              if (passwordError) setPasswordError("");
-            }}
-            className="pr-10"
-            placeholder="Create a secure password"
-            required
-            disabled={isProcessing}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center"
-            disabled={isProcessing}
-          >
-            {showPassword ? (
-              <EyeOff className="h-4 w-4 text-app-tertiary" />
-            ) : (
-              <Eye className="h-4 w-4 text-app-tertiary" />
-            )}
-          </button>
-        </div>
+      <div className="relative">
+        <Input
+          id="setup-password"
+          type={showPassword ? "text" : "password"}
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            if (passwordError) setPasswordError("");
+          }}
+          className="pr-10"
+          placeholder="Enter password"
+          required
+          disabled={isProcessing}
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute inset-y-0 right-0 pr-3 flex items-center"
+          disabled={isProcessing}
+        >
+          {showPassword ? (
+            <EyeOff className="h-4 w-4 text-app-tertiary" />
+          ) : (
+            <Eye className="h-4 w-4 text-app-tertiary" />
+          )}
+        </button>
+      </div>
 
-        <div className="relative">
-          <Input
-            id="confirm-password"
-            type={showPassword ? "text" : "password"}
-            value={confirmPassword}
-            onChange={(e) => {
-              setConfirmPassword(e.target.value);
-              if (passwordError) setPasswordError("");
-            }}
-            placeholder="Confirm your password"
-            required
-            disabled={isProcessing}
-          />
-        </div>
+      <div className="relative">
+        <Input
+          id="confirm-password"
+          type={showPassword ? "text" : "password"}
+          value={confirmPassword}
+          onChange={(e) => {
+            setConfirmPassword(e.target.value);
+            if (passwordError) setPasswordError("");
+          }}
+          placeholder="Confirm your password"
+          required
+          disabled={isProcessing}
+        />
       </div>
 
       {passwordError && <p className="text-red-600 text-xs">{passwordError}</p>}
