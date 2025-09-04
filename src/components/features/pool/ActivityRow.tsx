@@ -1,6 +1,6 @@
 import type { Activity } from "@/lib/indexer/sdk";
 import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
-import { StatusDot } from "../../StatusDot";
+import { ActivityStatusIndicator } from "./ActivityStatusIndicator";
 interface ActivityRowProps {
   activity: Activity;
 }
@@ -30,7 +30,7 @@ export const ActivityRow = ({ activity }: ActivityRowProps) => (
             {formatTimestamp(activity.timestamp)}
           </div>
         </div>
-        <StatusDot type={activity.type} status={activity.aspStatus} />
+        <ActivityStatusIndicator type={activity.type} status={activity.aspStatus} />
       </div>
     </div>
   </div>

@@ -12,13 +12,13 @@ interface Asset {
   icon: string;
 }
 
-interface AssetSelectorProps {
+interface PoolAssetSelectorProps {
   selectedAsset: Asset;
   onAssetChange?: (asset: Asset) => void;
   disabled?: boolean;
 }
 
-export function AssetSelector({ selectedAsset, onAssetChange, disabled = false }: AssetSelectorProps) {
+export function PoolAssetSelector({ selectedAsset, onAssetChange, disabled = false }: PoolAssetSelectorProps) {
   return (
     <button
       type="button"

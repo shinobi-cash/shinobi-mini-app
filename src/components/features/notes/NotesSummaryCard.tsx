@@ -6,7 +6,6 @@ interface NotesSummaryCardProps {
   totalNotes: number;
   isRediscovering?: boolean;
   onRediscover?: () => void;
-  // Sync status props
   isScanning?: boolean;
   scanProgress?: { pagesProcessed: number; complete: boolean };
   syncError?: boolean;

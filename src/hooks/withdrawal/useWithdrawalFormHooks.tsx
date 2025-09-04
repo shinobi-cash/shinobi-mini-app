@@ -1,4 +1,4 @@
-import { useCachedNotes } from "@/hooks/useCachedNotes";
+import { useCachedNotes } from "@/hooks/notes/useCachedNotes";
 import type { Note } from "@/lib/storage/types";
 import { formatEthAmount } from "@/utils/formatters";
 import { useCallback, useEffect, useMemo, useState } from "react";

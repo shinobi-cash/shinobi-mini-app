@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigation } from "@/contexts/NavigationContext";
-import { useDepositCommitment } from "@/hooks/transactions/useDepositCommitment";
+import { useDepositCommitment } from "@/hooks/deposit/useDepositCommitment";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { showToast } from "@/lib/toast";
 import { AlertTriangle, Loader2 } from "lucide-react";
@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { formatEther, parseEther } from "viem";
 import { useAccount, useBalance, useChainId } from "wagmi";
 import { NETWORK } from "../../config/constants";
-import { useDepositTransaction } from "../../hooks/transactions/useDepositTransaction";
+import { useDepositTransaction } from "../../hooks/deposit/useDepositTransaction";
 import { ScreenHeader } from "../layout/ScreenHeader";
 import { ScreenContent } from "../layout/ScreenLayout";
 import { Button } from "../ui/button";

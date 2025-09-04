@@ -2,12 +2,12 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useModalWithSelection } from "@/hooks/ui/useModalState";
-import { useNotesData } from "@/hooks/useNotesData";
+import { useNotesData } from "@/hooks/notes/useNotesData";
 import type { Note, NoteChain } from "@/lib/storage/types";
 import { useState } from "react";
-import { NoteChainDetailDrawer } from "../features/profile/NoteChainDetailDrawer";
-import { NotesHistorySection } from "../features/profile/NotesHistorySection";
-import { NotesSummaryCard } from "../features/profile/NotesSummaryCard";
+import { NoteChainDetailDrawer } from "../features/notes/NoteChainDetailDrawer";
+import { NotesHistorySection } from "../features/notes/NotesHistorySection";
+import { NotesSummaryCard } from "../features/notes/NotesSummaryCard";
 import { WithdrawalForm } from "../features/withdrawal/WithdrawalForm";
 import { BackButton } from "../ui/back-button";
 

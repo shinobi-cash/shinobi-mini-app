@@ -5,9 +5,9 @@ import { fetchPoolStats } from "@/services/data/indexerService";
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
-import { ActivityDetailDrawer } from "../profile/ActivityDetailDrawer";
-import { ActivityRow } from "../profile/ActivityRow";
-import { AssetSelector } from "./AssetSelector";
+import { ActivityDetailDrawer } from "./ActivityDetailDrawer";
+import { ActivityRow } from "./ActivityRow";
+import { PoolAssetSelector } from "./PoolAssetSelector";
 import { PoolActions } from "./PoolActions";
 import { PoolStatsCard } from "./PoolStatsCard";
 
@@ -136,7 +136,7 @@ export function PoolDashboard({
       {/* Pool Overview */}
       <div className="space-y-2">
         <PoolStatsCard totalDeposits={totalDeposits} memberCount={memberCount} loading={poolStatsLoading} />
-        <AssetSelector selectedAsset={selectedAsset} disabled={true} />
+        <PoolAssetSelector selectedAsset={selectedAsset} disabled={true} />
         <PoolActions asset={selectedAsset} />
       </div>
 
