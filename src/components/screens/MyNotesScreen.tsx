@@ -1,14 +1,11 @@
 import { CONTRACTS } from "@/config/constants";
 import { useAuth } from "@/contexts/AuthContext";
-import { useBanner } from "@/contexts/BannerContext";
 import { useNavigation } from "@/contexts/NavigationContext";
-import { useActivities } from "@/hooks/data/useActivities";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { useModalWithSelection } from "@/hooks/ui/useModalState";
 import { useNotes } from "@/hooks/useNoteDiscovery";
 import type { NoteChain, Note } from "@/lib/storage/types";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { PoolDashboard } from "../features/pool/PoolDashboard";
+import { useEffect, useMemo, useState } from "react";
 import { NoteChainDetailDrawer } from "../features/profile/NoteChainDetailDrawer";
 import { NotesHistorySection } from "../features/profile/NotesHistorySection";
 import { NotesSummaryCard } from "../features/profile/NotesSummaryCard";
@@ -19,19 +16,18 @@ export const MyNotesScreen = () => {
   const { isAuthenticated } = useAuth();
   const { setCurrentScreen } = useNavigation();
 
-  // Redirect to home when user signs out (this handles the redirect automatically)
+  // Redirect to home when user signs out
   useEffect(() => {
     if (!isAuthenticated) {
       setCurrentScreen("home");
     }
   }, [isAuthenticated, setCurrentScreen]);
 
-  // Show Pool Dashboard for non-authenticated users (fallback while redirecting)
+  // Only render for authenticated users (redirect handles non-authenticated)
   if (!isAuthenticated) {
-    return <PoolDashboardForNonAuthenticated />;
+    return null;
   }
 
-  // Show authenticated notes for authenticated users
   return <AuthenticatedNotes />;
 };
 
@@ -58,7 +54,6 @@ const NotesContent = ({
   const [withdrawalNote, setWithdrawalNote] = useState<Note | null>(null);
   const [showingWithdrawalForm, setShowingWithdrawalForm] = useState(false);
   const { onTransactionIndexed } = useTransactionTracking();
-  const { banner } = useBanner();
 
   const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
 
@@ -70,9 +65,6 @@ const NotesContent = ({
     progress,
     refresh,
   } = useNotes(publicKey, poolAddress, accountKey, { autoScan: true });
-
-  // Track shown banners to prevent infinite loops
-  const shownBannersRef = useRef({ scanning: false, error: false, lastProgressId: "", lastErrorId: "" });
 
   // Memoize note chains, showing last note of each chain sorted by timestamp
   const noteChains = useMemo(() => {
@@ -92,50 +84,6 @@ const NotesContent = ({
     });
     return cleanup;
   }, [onTransactionIndexed, refresh]);
-
-  // Banner feedback for note discovery
-  useEffect(() => {
-    if (!progress) return;
-
-    const progressId = `${progress.pagesProcessed}-${progress.complete}`;
-    if (progressId === shownBannersRef.current.lastProgressId) return;
-
-    if (progress.pagesProcessed === 1 && !shownBannersRef.current.scanning) {
-      banner.info("Scanning blockchain for notes...");
-      shownBannersRef.current.scanning = true;
-    }
-
-    if (progress.complete) {
-      shownBannersRef.current.scanning = false;
-      if (noteDiscovery && noteDiscovery.newNotesFound > 0) {
-        banner.success(`Found ${noteDiscovery.newNotesFound} new notes`);
-      }
-    }
-
-    shownBannersRef.current.lastProgressId = progressId;
-  }, [progress, noteDiscovery, banner]);
-
-  // Banner feedback for discovery errors
-  useEffect(() => {
-    const errorId = error ? error.message : "no-error";
-    if (errorId === shownBannersRef.current.lastErrorId) return;
-
-    if (error && !shownBannersRef.current.error) {
-      banner.error("Note discovery failed");
-      shownBannersRef.current.error = true;
-    }
-
-    if (!error) {
-      shownBannersRef.current.error = false;
-    }
-
-    shownBannersRef.current.lastErrorId = errorId;
-  }, [error, banner]);
-
-  // TypeScript assertion: AuthenticationGate ensures these values exist
-  if (!publicKey || !accountKey) {
-    throw new Error("MyNotesScreen: Missing auth values despite AuthenticationGate");
-  }
 
   const unspentNotes = noteChains.filter((noteChain) => {
     const lastNote = noteChain[noteChain.length - 1];
@@ -194,6 +142,10 @@ const NotesContent = ({
           totalNotes={noteChains.length}
           isRediscovering={isRefreshing}
           onRediscover={handleRefresh}
+          isScanning={!!progress && !progress.complete}
+          scanProgress={progress || undefined}
+          syncError={!!error}
+          newNotesFound={noteDiscovery?.newNotesFound}
         />
       </div>
 
@@ -216,37 +168,3 @@ const NotesContent = ({
   );
 };
 
-const PoolDashboardForNonAuthenticated = () => {
-  const { banner } = useBanner();
-  const lastErrorRef = useRef<string | null>(null);
-
-  const { activities, loading, error, fetchMore, hasNextPage, refetch, hasData } = useActivities({
-    poolId: CONTRACTS.ETH_PRIVACY_POOL,
-    limit: 10,
-  });
-
-  useEffect(() => {
-    const errorMessage = error?.message || null;
-    if (errorMessage && hasData && errorMessage !== lastErrorRef.current) {
-      banner.error("Failed to refresh activities", { duration: 5000 });
-      lastErrorRef.current = errorMessage;
-    } else if (!errorMessage) {
-      lastErrorRef.current = null;
-    }
-  }, [error?.message, hasData, banner]);
-
-  return (
-    <PoolDashboard
-      activities={activities || []}
-      loading={loading}
-      error={error && !hasData ? "Failed to load activities" : undefined}
-      hasNextPage={hasNextPage}
-      onFetchMore={async () => {
-        await fetchMore?.();
-      }}
-      onRefresh={async () => {
-        await refetch?.();
-      }}
-    />
-  );
-};

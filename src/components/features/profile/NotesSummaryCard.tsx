@@ -1,4 +1,4 @@
-import { RotateCcw } from "lucide-react";
+import { AlertCircle, CheckCircle, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "../../ui/button";
 
 interface NotesSummaryCardProps {
@@ -6,38 +6,97 @@ interface NotesSummaryCardProps {
   totalNotes: number;
   isRediscovering?: boolean;
   onRediscover?: () => void;
+  // Sync status props
+  isScanning?: boolean;
+  scanProgress?: { pagesProcessed: number; complete: boolean };
+  syncError?: boolean;
+  newNotesFound?: number;
 }
 
-export function NotesSummaryCard({ unspentNotes, totalNotes, isRediscovering, onRediscover }: NotesSummaryCardProps) {
+export function NotesSummaryCard({ 
+  unspentNotes, 
+  totalNotes, 
+  isRediscovering, 
+  onRediscover,
+  isScanning,
+  scanProgress,
+  syncError,
+  newNotesFound
+}: NotesSummaryCardProps) {
   const spentNotes = totalNotes - unspentNotes;
+
+  // Determine sync status display
+  const getSyncStatus = () => {
+    if (isScanning || (scanProgress && !scanProgress.complete)) {
+      return {
+        icon: <Loader2 className="w-3 h-3 animate-spin text-blue-500" />,
+        text: "Scanning",
+        className: "text-blue-600"
+      };
+    }
+    
+    if (syncError) {
+      return {
+        icon: <AlertCircle className="w-3 h-3 text-red-500" />,
+        text: "Failed",
+        className: "text-red-600"
+      };
+    }
+    
+    if (newNotesFound && newNotesFound > 0) {
+      return {
+        icon: <CheckCircle className="w-3 h-3 text-green-500" />,
+        text: `+${newNotesFound} new`,
+        className: "text-green-600"
+      };
+    }
+    
+    return null;
+  };
+
+  const syncStatus = getSyncStatus();
 
   return (
     <div className="flex-shrink-0">
       <div className="bg-app-surface p-2 border border-app rounded-xl shadow-sm">
-        <div className="flex gap-6 mb-3">
-          <div className="flex flex-col">
-            <p className="text-sm font-semibold text-app-secondary mb-1">Unspent</p>
-            <p className="text-xl font-bold text-app-primary tabular-nums">{unspentNotes}</p>
+        <div className="flex justify-between items-end mb-3">
+          <div className="flex gap-6">
+            <div className="flex flex-col">
+              <p className="text-sm font-semibold text-app-secondary mb-1">Unspent</p>
+              <p className="text-xl font-bold text-app-primary tabular-nums">{unspentNotes}</p>
+            </div>
+            <div className="flex flex-col">
+              <p className="text-sm font-semibold text-app-secondary mb-1">Spent</p>
+              <p className="text-xl font-bold text-app-primary tabular-nums">{spentNotes}</p>
+            </div>
           </div>
+          
           <div className="flex flex-col">
-            <p className="text-sm font-semibold text-app-secondary mb-1">Spent</p>
-            <p className="text-xl font-bold text-app-primary tabular-nums">{spentNotes}</p>
+            <p className="text-sm font-semibold text-app-secondary mb-1">Status</p>
+            <div className="flex items-center gap-1.5 justify-end">
+              {syncStatus ? (
+                <div className={`flex items-center gap-1.5 ${syncStatus.className}`}>
+                  {syncStatus.icon}
+                  <span className="text-sm font-medium">{syncStatus.text}</span>
+                </div>
+              ) : (
+                <span className="text-sm font-medium text-green-600">Synced</span>
+              )}
+              {onRediscover && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onRediscover}
+                  disabled={isRediscovering}
+                  className="h-6 w-6 p-0 text-app-tertiary hover:text-app-primary"
+                  title="Re-discover notes from blockchain"
+                >
+                  <RotateCcw className={`w-3 h-3 ${isRediscovering ? "animate-spin" : ""}`} />
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-
-        {onRediscover && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onRediscover}
-            disabled={isRediscovering}
-            className="w-full text-app-secondary hover:text-app-primary"
-            title="Re-discover notes from blockchain"
-          >
-            <RotateCcw className={`w-4 h-4 mr-1 ${isRediscovering ? "animate-spin" : ""}`} />
-            {isRediscovering ? "Syncing..." : "Sync"}
-          </Button>
-        )}
       </div>
     </div>
   );
