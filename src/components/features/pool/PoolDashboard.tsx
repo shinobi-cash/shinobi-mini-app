@@ -4,9 +4,9 @@
  * Serves as the primary interface for pool interactions
  */
 
-import { useBanner } from "@/contexts/BannerContext";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import type { Activity } from "@/lib/indexer/sdk";
+import { showToast } from "@/lib/toast";
 import { fetchPoolStats } from "@/services/data/indexerService";
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -34,7 +34,6 @@ const ETH_ASSET = {
 };
 
 export function PoolDashboard({ activities, loading, error, onFetchMore, hasNextPage, onRefresh }: PoolDashboardProps) {
-  const { banner } = useBanner();
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
@@ -83,17 +82,17 @@ export function PoolDashboard({ activities, loading, error, onFetchMore, hasNext
     loadPoolStats();
   }, [loadPoolStats]);
 
-  // Show banner error when pool stats refresh fails
+  // Show toast error when pool stats refresh fails
   useEffect(() => {
     const errorMessage = poolStatsError?.message || null;
 
     if (errorMessage && poolStats && errorMessage !== lastPoolStatsErrorRef.current) {
-      banner.error("Failed to refresh pool stats", { duration: 5000 });
+      showToast.error("Failed to refresh pool stats");
       lastPoolStatsErrorRef.current = errorMessage;
     } else if (!errorMessage) {
       lastPoolStatsErrorRef.current = null;
     }
-  }, [poolStatsError?.message, poolStats, banner]);
+  }, [poolStatsError?.message, poolStats]);
 
   // Auto-refresh when transaction gets indexed
   useEffect(() => {

@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import { CONTRACTS } from "../../config/constants";
-import { useBanner } from "../../contexts/BannerContext";
 import { NavigationProvider } from "../../contexts/NavigationContext";
 import { useActivities } from "../../hooks/data/useActivities";
+import { showToast } from "../../lib/toast";
 import { PoolDashboard } from "../features/pool/PoolDashboard";
 import { AppBanner } from "../layout/AppBanner";
 import { AppHeader } from "../layout/AppHeader";
@@ -15,7 +15,6 @@ import { MyNotesScreen } from "./MyNotesScreen";
  * Home Screen View Controller - Pool Dashboard
  */
 function HomeScreenController() {
-  const { banner } = useBanner();
   const lastErrorRef = useRef<string | null>(null);
 
   const { activities, loading, error, fetchMore, hasNextPage, refetch, hasData } = useActivities({
@@ -23,18 +22,17 @@ function HomeScreenController() {
     limit: 10,
   });
 
-  // Show banner error when we have data but error on refresh
-  // Use error message string to prevent infinite loops
+  // Show toast error when we have data but error on refresh
   useEffect(() => {
     const errorMessage = error?.message || null;
 
     if (errorMessage && hasData && errorMessage !== lastErrorRef.current) {
-      banner.error("Failed to refresh activities", { duration: 5000 });
+      showToast.error("Failed to refresh activities");
       lastErrorRef.current = errorMessage;
     } else if (!errorMessage) {
       lastErrorRef.current = null;
     }
-  }, [error?.message, hasData, banner]);
+  }, [error?.message, hasData]);
 
   return (
     <PoolDashboard
