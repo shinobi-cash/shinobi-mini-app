@@ -3,7 +3,6 @@ import { CONTRACTS } from "../../config/constants";
 import { useActivities } from "../../hooks/data/useActivities";
 import { showToast } from "../../lib/toast";
 import { PoolDashboard } from "../features/pool/PoolDashboard";
-import { AppBanner } from "../layout/AppBanner";
 import { AppHeader } from "../layout/AppHeader";
 import { AppLayout } from "../layout/ScreenLayout";
 import { type ScreenConfig, ScreenManager } from "../layout/ScreenManager";
@@ -81,7 +80,7 @@ function FallbackScreen() {
 
 function MainContent() {
   return (
-    <AppLayout header={<AppHeader />} banner={<AppBanner />}>
+    <AppLayout header={<AppHeader />}>
       <ScreenManager screens={screenRegistry} fallbackScreen={FallbackScreen} />
     </AppLayout>
   );

@@ -4,7 +4,6 @@ import { PasswordAuthDrawer } from "@/components/features/auth/PasswordAuthDrawe
 import { MainScreen } from "@/components/screens/MainScreen";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { BannerProvider } from "@/contexts/BannerContext";
 import { NavigationProvider } from "@/contexts/NavigationContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { sdk } from "@farcaster/miniapp-sdk";
@@ -42,16 +41,14 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        <BannerProvider>
-          <NavigationProvider>
-            <AuthProvider>
-              <TransactionTrackingProvider>
-                <AppContent />
-                <Toaster />
-              </TransactionTrackingProvider>
-            </AuthProvider>
-          </NavigationProvider>
-        </BannerProvider>
+        <NavigationProvider>
+          <AuthProvider>
+            <TransactionTrackingProvider>
+              <AppContent />
+              <Toaster />
+            </TransactionTrackingProvider>
+          </AuthProvider>
+        </NavigationProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

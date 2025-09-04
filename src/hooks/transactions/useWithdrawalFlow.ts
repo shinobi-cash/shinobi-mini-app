@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useBanner } from "@/contexts/BannerContext";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
+import { showToast } from "@/lib/toast";
 import type { Note } from "@/lib/storage/types";
 import {
   type PreparedWithdrawal,
@@ -9,7 +9,7 @@ import {
   processWithdrawal,
   validateWithdrawalRequest,
 } from "@/services/privacy/withdrawalService";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface UseWithdrawalFlowProps {
   note: Note;
@@ -17,9 +17,22 @@ export interface UseWithdrawalFlowProps {
 }
 
 export function useWithdrawalFlow({ note, onTransactionSuccess }: UseWithdrawalFlowProps) {
-  const { banner } = useBanner();
   const { accountKey } = useAuth();
   const { trackTransaction } = useTransactionTracking();
+
+  // Safety: ensure hook used only when accountKey available
+  if (!accountKey) {
+    throw new Error("useWithdrawalFlow: Missing accountKey despite AuthenticationGate");
+  }
+
+  // Mounted guard to avoid state updates after unmount
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   // States for withdrawal flow
   const [showPreview, setShowPreview] = useState(false);
@@ -28,82 +41,88 @@ export function useWithdrawalFlow({ note, onTransactionSuccess }: UseWithdrawalF
   const [preparedWithdrawal, setPreparedWithdrawal] = useState<PreparedWithdrawal | null>(null);
   const [isExecuting, setIsExecuting] = useState(false);
 
-  // Handle withdrawal preparation
+  // Prepare withdrawal (preview)
   const handlePreviewWithdrawal = useCallback(
     async (withdrawAmount: string, recipientAddress: string) => {
-      try {
-        setIsPreparing(true);
-        setPreparationError(null);
+      setIsPreparing(true);
+      setPreparationError(null);
 
-        // Create withdrawal request
+      try {
         const withdrawalRequest: WithdrawalRequest = {
           note,
           withdrawAmount,
           recipientAddress,
-          accountKey: accountKey!,
+          accountKey,
         };
 
-        // Validate the request first
+        // Validate request (may throw)
         validateWithdrawalRequest(withdrawalRequest);
 
-        // Prepare the withdrawal using our service
+        // Prepare via service
         const prepared = await processWithdrawal(withdrawalRequest);
 
-        // Set both states together to avoid race condition
+        // Only update state if still mounted
+        if (!mountedRef.current) return;
         setPreparedWithdrawal(prepared);
         setShowPreview(true);
-        setIsPreparing(false);
-      } catch (error) {
-        setIsPreparing(false);
-        setPreparationError(error instanceof Error ? error.message : "Failed to prepare withdrawal");
-        banner.error("Failed to prepare withdrawal");
+      } catch (err) {
+        if (mountedRef.current) {
+          setPreparationError(err instanceof Error ? err.message : "Failed to prepare withdrawal");
+          showToast.error("Failed to prepare withdrawal", { duration: 5000 });
+        }
+      } finally {
+        if (mountedRef.current) setIsPreparing(false);
       }
     },
-    [note, accountKey, banner],
+    [note, accountKey],
   );
 
-  // Execute the withdrawal transaction
+  // Execute the prepared withdrawal
   const handleExecuteTransaction = useCallback(async () => {
     if (!preparedWithdrawal) {
-      banner.error("No prepared withdrawal found");
+      showToast.error("No prepared withdrawal found", { duration: 4000 });
       return;
     }
 
-    try {
-      setIsExecuting(true);
+    if (!mountedRef.current) return;
+    setIsExecuting(true);
 
+    try {
       const transactionHash = await executePreparedWithdrawal(preparedWithdrawal);
 
-      // Track transaction for indexing status (replaces banner)
+      if (!mountedRef.current) return;
+
+      // Track for indexing
       trackTransaction(transactionHash);
 
+      // Close preview and call callback if still mounted
       setShowPreview(false);
-      setIsExecuting(false);
-
-      // Call success callback if provided
       onTransactionSuccess?.();
-    } catch (error) {
-      setIsExecuting(false);
-      banner.error("Failed to execute withdrawal");
+    } catch (err) {
+      if (mountedRef.current) {
+        showToast.error("Failed to execute withdrawal", { duration: 5000 });
+      }
+    } finally {
+      if (mountedRef.current) setIsExecuting(false);
     }
-  }, [preparedWithdrawal, banner, trackTransaction, onTransactionSuccess]);
+  }, [preparedWithdrawal, trackTransaction, onTransactionSuccess]);
 
-  // Close preview drawer
   const closePreview = useCallback(() => {
+    if (!mountedRef.current) return;
     setShowPreview(false);
   }, []);
 
-  // Reset withdrawal states when form values change
   const resetStates = useCallback(() => {
+    if (!mountedRef.current) return;
     setPreparedWithdrawal(null);
     setPreparationError(null);
     setShowPreview(false);
   }, []);
 
-  // TypeScript assertion: This hook is used in auth-gated components
-  if (!accountKey) {
-    throw new Error("useWithdrawalFlow: Missing accountKey despite AuthenticationGate");
-  }
+  // Reset internal states if the note changes
+  useEffect(() => {
+    resetStates();
+  }, [note, resetStates]);
 
   return {
     // States

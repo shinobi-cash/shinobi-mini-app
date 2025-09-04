@@ -1,8 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useBanner } from "@/contexts/BannerContext";
 import { useNavigation } from "@/contexts/NavigationContext";
 import { useDepositCommitment } from "@/hooks/transactions/useDepositCommitment";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
+import { showToast } from "@/lib/toast";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatEther, parseEther } from "viem";
@@ -26,7 +26,11 @@ export const DepositScreen = () => {
   // Default to ETH if no asset context (fallback)
   const asset = currentAsset || { symbol: "ETH", name: "Ethereum", icon: "⚫" };
 
-  const breadcrumbs = [{ label: "Pool", screen: "home" as const }, { label: asset.symbol }, { label: "Deposit" }];
+  const breadcrumbs = [
+    { label: "Pool", screen: "home" as const },
+    { label: asset.symbol },
+    { label: "Deposit" },
+  ];
 
   return (
     <>
@@ -42,24 +46,22 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
   const { address } = useAccount();
   const { data: balance } = useBalance({ address });
   const chainId = useChainId();
-  const shownBannersRef = useRef(new Set<string>());
   const { trackTransaction } = useTransactionTracking();
-  const { banner } = useBanner();
+  const { publicKey, accountKey } = useAuth();
 
   const [amount, setAmount] = useState("");
-  const [amountError, setAmountError] = useState<string>("");
 
   const availableBalance = balance?.value ?? 0n;
 
   // ---- Validation ----
   const validateAmount = useCallback(
     (value: string): string => {
-      if (value.length === 0) return "";
       if (!value.trim()) return "Please enter an amount";
       try {
         const parsed = parseEther(value);
         if (parsed <= 0n) return "Amount must be positive";
-        if (parsed > availableBalance) return `Amount cannot exceed ${formatEther(availableBalance)} ETH`;
+        if (parsed > availableBalance)
+          return `Amount cannot exceed ${formatEther(availableBalance)} ETH`;
         return "";
       } catch {
         return "Please enter a valid amount";
@@ -68,72 +70,102 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
     [availableBalance],
   );
 
-  // Keep state + error synced
-  const handleAmountChange = useCallback(
-    (value: string) => {
-      setAmount(value);
-      setAmountError(validateAmount(value));
-    },
-    [validateAmount],
-  );
+  const amountError = amount ? validateAmount(amount) : "";
 
-  const handleQuickAmount = useCallback(
-    (quickAmount: string) => {
-      setAmount(quickAmount);
-      setAmountError(validateAmount(quickAmount));
-    },
-    [validateAmount],
-  );
+  // ---- Quick Inputs ----
+  const handleAmountChange = useCallback((value: string) => {
+    setAmount(value);
+  }, []);
 
-  const { publicKey, accountKey } = useAuth();
+  const handleQuickAmount = useCallback((quickAmount: string) => {
+    setAmount(quickAmount);
+  }, []);
+
+  // ---- Transaction Hooks ----
   const isOnCorrectNetwork = chainId === NETWORK.CHAIN_ID;
-  const { noteData, isGeneratingNote, error: noteError, regenerateNote } = useDepositCommitment(publicKey, accountKey);
-  const { deposit, reset, clearError, isLoading, isSuccess, error, transactionHash } = useDepositTransaction();
+  const { noteData, isGeneratingNote, error: noteError, regenerateNote } = useDepositCommitment(
+    publicKey,
+    accountKey,
+  );
+  const {
+    deposit,
+    reset,
+    clearError,
+    isLoading,
+    isSuccess,
+    error,
+    transactionHash,
+  } = useDepositTransaction();
 
-  // Banner for tx error
-  useEffect(() => {
-    if (error && !shownBannersRef.current.has(error)) {
-      shownBannersRef.current.add(error);
-      banner.error("Transaction failed");
-    }
-  }, [error, banner]);
+  // ---- Error + Success Tracking ----
+  const shownErrorsRef = useRef(new Set<string>());
+  const shownTxsRef = useRef(new Set<string>());
 
-  // Retry note silently
+  // Transaction error toast
   useEffect(() => {
-    if (noteError) {
-      console.warn("Note generation failed, auto-retrying:", noteError);
-      setTimeout(() => regenerateNote(), 1000);
+    if (error && !shownErrorsRef.current.has(error)) {
+      shownErrorsRef.current.add(error);
+      showToast.error("Transaction failed", { duration: 5000 });
     }
+  }, [error]);
+
+  // Retry note silently (with cleanup)
+  useEffect(() => {
+    if (!noteError) return;
+    console.warn("Note generation failed, auto-retrying:", noteError);
+    const timer = setTimeout(() => regenerateNote(), 1000);
+    return () => clearTimeout(timer);
   }, [noteError, regenerateNote]);
 
   // Success handler
   useEffect(() => {
-    if (isSuccess && transactionHash && !shownBannersRef.current.has(transactionHash)) {
-      shownBannersRef.current.add(transactionHash);
+    if (isSuccess && transactionHash && !shownTxsRef.current.has(transactionHash)) {
+      shownTxsRef.current.add(transactionHash);
       trackTransaction(transactionHash);
+
       setTimeout(() => {
         reset();
         setAmount("");
-        setAmountError("");
       }, 1000);
     }
   }, [isSuccess, transactionHash, reset, trackTransaction]);
 
-  // Deposit
+  // ---- Deposit Action ----
   const handleDeposit = () => {
     if (!noteData || !amount || amountError) return;
     clearError();
-    // Clear previous error banners
-    shownBannersRef.current.clear();
+    shownErrorsRef.current.clear();
     deposit(amount, noteData);
   };
 
-  // Derived flags
+  // ---- Derived Flags ----
   const isTransacting = isLoading;
   const hasNoteData = !!noteData;
   const hasBalance = availableBalance > 0n;
   const canMakeDeposit =
-    !amountError && amount.trim() && isOnCorrectNetwork && hasNoteData && hasBalance && !isTransacting;
+    !amountError &&
+    amount.trim() &&
+    isOnCorrectNetwork &&
+    hasNoteData &&
+    hasBalance &&
+    !isTransacting;
+
+  // ---- Button Label ----
+  const getButtonLabel = () => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Preparing Transaction...
+        </div>
+      );
+    }
+    if (isGeneratingNote || !hasNoteData) return "Preparing...";
+    if (!isOnCorrectNetwork) return `Switch to ${NETWORK.NAME}`;
+    if (!hasBalance) return "Insufficient Balance";
+    if (amountError) return "Enter Amount";
+    return "Deposit to Pool";
+  };
 
   return (
     <div className="h-full flex flex-col px-4 py-4">
@@ -153,7 +185,7 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
             value={amount}
             onChange={(e) => handleAmountChange(e.target.value)}
             className={`text-3xl font-light text-center bg-transparent border-none outline-none placeholder-app-secondary w-full ${
-              amountError && amount.trim().length > 0 ? "text-red-500" : "text-app-primary"
+              amountError ? "text-red-500" : "text-app-primary"
             }`}
           />
           <p className="text-base text-app-primary mt-1">{asset.symbol}</p>
@@ -182,7 +214,9 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
             <AlertTriangle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
             <div>
               <p className="text-xs font-medium text-orange-800 dark:text-orange-200">Wrong Network</p>
-              <p className="text-xs text-orange-600 dark:text-orange-400">Please switch to {NETWORK.NAME}</p>
+              <p className="text-xs text-orange-600 dark:text-orange-400">
+                Please switch to {NETWORK.NAME}
+              </p>
             </div>
           </div>
         </div>
@@ -208,22 +242,7 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
           className="w-full h-11 rounded-xl text-sm font-medium"
           size="lg"
         >
-          {isLoading ? (
-            <div className="flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Preparing Transaction...
-            </div>
-          ) : isGeneratingNote || !hasNoteData ? (
-            "Preparing..."
-          ) : !isOnCorrectNetwork ? (
-            `Switch to ${NETWORK.NAME}`
-          ) : !hasBalance ? (
-            "Insufficient Balance"
-          ) : amountError ? (
-            "Enter Amount"
-          ) : (
-            "Deposit to Pool"
-          )}
+          {getButtonLabel()}
         </Button>
       </div>
     </div>
