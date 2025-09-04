@@ -13,9 +13,10 @@ import { useCallback, useState } from "react";
 
 export interface UseWithdrawalFlowProps {
   note: Note;
+  onTransactionSuccess?: () => void;
 }
 
-export function useWithdrawalFlow({ note }: UseWithdrawalFlowProps) {
+export function useWithdrawalFlow({ note, onTransactionSuccess }: UseWithdrawalFlowProps) {
   const { banner } = useBanner();
   const { accountKey } = useAuth();
   const { trackTransaction } = useTransactionTracking();
@@ -78,11 +79,14 @@ export function useWithdrawalFlow({ note }: UseWithdrawalFlowProps) {
 
       setShowPreview(false);
       setIsExecuting(false);
+      
+      // Call success callback if provided
+      onTransactionSuccess?.();
     } catch (error) {
       setIsExecuting(false);
       banner.error("Failed to execute withdrawal");
     }
-  }, [preparedWithdrawal, banner, trackTransaction]);
+  }, [preparedWithdrawal, banner, trackTransaction, onTransactionSuccess]);
 
   // Close preview drawer
   const closePreview = useCallback(() => {

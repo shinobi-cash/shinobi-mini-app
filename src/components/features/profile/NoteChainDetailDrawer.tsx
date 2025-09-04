@@ -1,16 +1,23 @@
 import { NETWORK } from "@/config/constants";
 import type { NoteChain } from "@/lib/storage/types";
 import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Minus } from "lucide-react";
+import { Button } from "../../ui/button";
 import { ResponsiveModal } from "../../ui/responsive-modal";
 
 interface NoteChainDetailDrawerProps {
   noteChain: NoteChain | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onWithdrawClick?: (noteChain: NoteChain) => void;
 }
 
-export function NoteChainDetailDrawer({ noteChain, open, onOpenChange }: NoteChainDetailDrawerProps) {
+export function NoteChainDetailDrawer({ 
+  noteChain, 
+  open, 
+  onOpenChange, 
+  onWithdrawClick
+}: NoteChainDetailDrawerProps) {
   if (!noteChain) return null;
   const lastNote = noteChain[noteChain.length - 1];
 
@@ -42,6 +49,20 @@ export function NoteChainDetailDrawer({ noteChain, open, onOpenChange }: NoteCha
             {lastNote.status === "spent" ? "Fully Spent" : "Available"}
           </div>
         </div>
+
+        {/* Withdraw Action - Only show for unspent notes */}
+        {lastNote.status === "unspent" && BigInt(lastNote.amount) > 0n && onWithdrawClick && (
+          <div className="mb-6">
+            <Button
+              onClick={() => onWithdrawClick(noteChain)}
+              className="w-full h-12 text-base font-medium rounded-xl"
+              size="lg"
+            >
+              <Minus className="w-5 h-5 mr-2" />
+              Withdraw ETH
+            </Button>
+          </div>
+        )}
 
         {/* Feed */}
         <ul className="-mb-8">

@@ -16,9 +16,11 @@ import { TransactionPreviewDrawer } from "./TransactionPreviewDrawer";
 
 interface WithdrawalFormProps {
   asset: { symbol: string; name: string; icon: string };
+  preSelectedNote?: Note | null;
+  onTransactionSuccess?: () => void;
 }
 
-export function WithdrawalForm({ asset }: WithdrawalFormProps) {
+export function WithdrawalForm({ asset, preSelectedNote, onTransactionSuccess }: WithdrawalFormProps) {
   const { publicKey, accountKey } = useAuth();
   const poolAddress = CONTRACTS.ETH_PRIVACY_POOL;
 
@@ -48,12 +50,14 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
       .filter(Boolean) as Note[];
   }, [noteDiscovery]);
 
-  // Auto-select first note when available
+  // Auto-select note - prioritize preSelectedNote, then first available note
   useEffect(() => {
-    if (availableNotes.length > 0 && !selectedNote) {
+    if (preSelectedNote && preSelectedNote.status === "unspent") {
+      setSelectedNote(preSelectedNote);
+    } else if (availableNotes.length > 0 && !selectedNote) {
       setSelectedNote(availableNotes[0]);
     }
-  }, [availableNotes, selectedNote]);
+  }, [availableNotes, selectedNote, preSelectedNote]);
 
   // Helper function for note labels
   const getNoteLabel = (note: Note) => {
@@ -136,7 +140,10 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
     label: "dummy",
   };
 
-  const withdrawalFlow = useWithdrawalFlow({ note: selectedNote || dummyNote });
+  const withdrawalFlow = useWithdrawalFlow({ 
+    note: selectedNote || dummyNote,
+    onTransactionSuccess
+  });
 
   const withdrawalAmounts = useMemo(() => {
     return withdrawAmount ? calculateWithdrawalAmounts(withdrawAmount) : { executionFee: 0, youReceive: 0 };
@@ -168,7 +175,7 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
 
   return (
     <div className="h-full flex flex-col px-4 py-4">
-      {/* Note Selection */}
+      {/* Note Selection - Hide dropdown if preSelectedNote provided */}
       <div className="mb-6">
         <div className="relative">
           <label htmlFor="from-note" id="from-label" className="text-sm font-medium text-app-secondary mb-2 block">
@@ -187,15 +194,15 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
             className="sr-only"
           />
 
-          {/* Dropdown Trigger */}
+          {/* Note Display - Show as dropdown only if no preSelectedNote */}
           <Button
             variant="outline"
-            onClick={() => setIsNoteDropdownOpen(!isNoteDropdownOpen)}
-            className="w-full h-16 p-4 justify-between text-left rounded-xl has-[>svg]:px-4"
+            onClick={() => !preSelectedNote && setIsNoteDropdownOpen(!isNoteDropdownOpen)}
+            className={`w-full h-16 p-4 justify-between text-left rounded-xl has-[>svg]:px-4 ${preSelectedNote ? 'cursor-default' : ''}`}
             aria-labelledby="from-label"
-            aria-haspopup="listbox"
-            aria-expanded={isNoteDropdownOpen}
-            aria-controls={isNoteDropdownOpen ? "note-dropdown" : undefined}
+            aria-haspopup={preSelectedNote ? undefined : "listbox"}
+            aria-expanded={preSelectedNote ? undefined : isNoteDropdownOpen}
+            aria-controls={!preSelectedNote && isNoteDropdownOpen ? "note-dropdown" : undefined}
           >
             {isLoadingNotes ? (
               <div className="flex items-center gap-2">
@@ -216,6 +223,7 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
             )}
             {!isLoadingNotes &&
               availableNotes.length > 0 &&
+              !preSelectedNote &&
               (isNoteDropdownOpen ? (
                 <ChevronUp className="w-4 h-4 text-app-secondary ml-2" />
               ) : (
@@ -223,8 +231,8 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
               ))}
           </Button>
 
-          {/* Dropdown Content */}
-          {isNoteDropdownOpen && availableNotes.length > 1 && (
+          {/* Dropdown Content - Only show if no preSelectedNote */}
+          {!preSelectedNote && isNoteDropdownOpen && availableNotes.length > 1 && (
             <div
               id="note-dropdown"
               role="listbox"

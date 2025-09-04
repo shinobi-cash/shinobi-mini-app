@@ -6,12 +6,13 @@ import { useActivities } from "@/hooks/data/useActivities";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { useModalWithSelection } from "@/hooks/ui/useModalState";
 import { useNotes } from "@/hooks/useNoteDiscovery";
-import type { NoteChain } from "@/lib/storage/types";
+import type { NoteChain, Note } from "@/lib/storage/types";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PoolDashboard } from "../features/pool/PoolDashboard";
 import { NoteChainDetailDrawer } from "../features/profile/NoteChainDetailDrawer";
 import { NotesHistorySection } from "../features/profile/NotesHistorySection";
 import { NotesSummaryCard } from "../features/profile/NotesSummaryCard";
+import { WithdrawalForm } from "../features/withdrawal/WithdrawalForm";
 import { BackButton } from "../ui/back-button";
 
 export const MyNotesScreen = () => {
@@ -54,6 +55,8 @@ const NotesContent = ({
 }) => {
   const noteChainModal = useModalWithSelection<NoteChain>(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [withdrawalNote, setWithdrawalNote] = useState<Note | null>(null);
+  const [showingWithdrawalForm, setShowingWithdrawalForm] = useState(false);
   const { onTransactionIndexed } = useTransactionTracking();
   const { banner } = useBanner();
 
@@ -148,6 +151,49 @@ const NotesContent = ({
     refresh().finally(() => setIsRefreshing(false));
   };
 
+  const handleWithdrawClick = (noteChain: NoteChain) => {
+    const lastNote = noteChain[noteChain.length - 1];
+    if (lastNote.status === "unspent") {
+      setWithdrawalNote(lastNote);
+      setShowingWithdrawalForm(true);
+      noteChainModal.setOpen(false); // Close the note detail drawer
+    }
+  };
+
+  const handleBackToNotes = () => {
+    setShowingWithdrawalForm(false);
+    setWithdrawalNote(null);
+  };
+
+  const handleTransactionSuccess = () => {
+    // Return to notes screen and refresh data
+    handleBackToNotes();
+    refresh();
+  };
+
+  // Render withdrawal form in full screen when active
+  if (showingWithdrawalForm && withdrawalNote) {
+    return (
+      <div className="flex flex-col h-full gap-2 p-2">
+        {/* Withdrawal Header */}
+        <div className="flex items-center gap-3">
+          <BackButton onClick={handleBackToNotes} />
+          <h1 className="text-lg font-semibold text-app-primary tracking-tight">Withdraw ETH</h1>
+        </div>
+        
+        {/* Withdrawal Form - Full Screen */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <WithdrawalForm
+            asset={{ symbol: "ETH", name: "Ethereum", icon: "⚫" }}
+            preSelectedNote={withdrawalNote}
+            onTransactionSuccess={handleTransactionSuccess}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Render normal notes screen
   return (
     <div className="flex flex-col h-full gap-2 p-2">
       {/* Header */}
@@ -176,11 +222,12 @@ const NotesContent = ({
         />
       </div>
 
-      {/* Note Chain Detail Drawer */}
+      {/* Note Chain Detail Drawer - Only for viewing note details */}
       <NoteChainDetailDrawer
         noteChain={noteChainModal.selectedItem}
         open={noteChainModal.isOpen}
         onOpenChange={noteChainModal.setOpen}
+        onWithdrawClick={handleWithdrawClick}
       />
     </div>
   );

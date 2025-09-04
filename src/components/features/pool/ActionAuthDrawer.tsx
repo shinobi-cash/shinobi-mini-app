@@ -18,7 +18,7 @@ import { AuthStepContent } from "../auth/AuthStepContent";
 
 type ActionStep = "auth" | "wallet" | "complete";
 
-type ActionType = "deposit" | "withdraw" | "my-notes";
+type ActionType = "deposit" | "my-notes";
 
 interface ActionAuthDrawerProps {
   open: boolean;
@@ -80,7 +80,7 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
     }
   }, [open, isAuthenticated, isConnected, currentActionStep, action, asset, navigateToScreen, onOpenChange]);
 
-  const getTargetScreen = (actionType: ActionType): "deposit" | "withdraw" | "my-notes" => {
+  const getTargetScreen = (actionType: ActionType): "deposit" | "my-notes" => {
     return actionType;
   };
 
@@ -113,8 +113,6 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
     switch (action) {
       case "deposit":
         return `Deposit ${asset.symbol}`;
-      case "withdraw":
-        return `Withdraw ${asset.symbol}`;
       case "my-notes":
         return "My Notes";
       default:
@@ -161,8 +159,6 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
         switch (action) {
           case "deposit":
             return "Sign in to access deposit functionality";
-          case "withdraw":
-            return "Sign in to access your privacy notes";
           case "my-notes":
             return "Sign in to view your transaction history";
           default:

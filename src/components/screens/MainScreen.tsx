@@ -10,7 +10,6 @@ import { AppLayout } from "../layout/ScreenLayout";
 import { type ScreenConfig, ScreenManager } from "../layout/ScreenManager";
 import { DepositScreen } from "./DepositScreen";
 import { MyNotesScreen } from "./MyNotesScreen";
-import { WithdrawalScreen } from "./WithdrawalScreen";
 
 /**
  * Home Screen View Controller - Pool Dashboard
@@ -67,12 +66,6 @@ const screenRegistry: ScreenConfig[] = [
     id: "deposit",
     component: DepositScreen,
     title: "Deposit",
-    scrollable: true,
-  },
-  {
-    id: "withdraw",
-    component: WithdrawalScreen,
-    title: "Withdraw",
     scrollable: true,
   },
   {

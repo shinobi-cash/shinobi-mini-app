@@ -1,6 +1,6 @@
 import { type ReactNode, createContext, useContext, useState } from "react";
 
-export type Screen = "home" | "deposit" | "withdraw" | "my-notes";
+export type Screen = "home" | "deposit" | "my-notes";
 
 export interface Asset {
   symbol: string;
