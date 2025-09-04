@@ -1,6 +1,5 @@
 import { CONTRACTS } from "@/config/constants";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigation } from "@/contexts/NavigationContext";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { useModalWithSelection } from "@/hooks/ui/useModalState";
 import { useNotes } from "@/hooks/useNoteDiscovery";
@@ -14,16 +13,8 @@ import { BackButton } from "../ui/back-button";
 
 export const MyNotesScreen = () => {
   const { isAuthenticated } = useAuth();
-  const { setCurrentScreen } = useNavigation();
 
-  // Redirect to home when user signs out
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setCurrentScreen("home");
-    }
-  }, [isAuthenticated, setCurrentScreen]);
-
-  // Only render for authenticated users (redirect handles non-authenticated)
+  // Only render for authenticated users (AuthContext handles redirect)
   if (!isAuthenticated) {
     return null;
   }

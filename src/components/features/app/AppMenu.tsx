@@ -6,16 +6,12 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { BookOpen, HelpCircle, LogIn, LogOut, Menu, Settings, UserPlus, WalletIcon } from "lucide-react";
+import { BookOpen, HelpCircle, LogOut, Menu, Settings, WalletIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAccount, useDisconnect } from "wagmi";
-import { CreateAccountDrawer } from "../auth/CreateAccountDrawer";
-import { LogInDrawer } from "../auth/LogInDrawer";
 
 export function AppMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const [openLogin, setOpenLogin] = useState(false);
-  const [openCreateAccount, setOpenCreateAccount] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Wallet state
@@ -53,16 +49,6 @@ export function AppMenu() {
 
   const handleConnect = () => {
     openConnectModal?.();
-    setIsOpen(false);
-  };
-
-  const handleLogin = () => {
-    setOpenLogin(true);
-    setIsOpen(false);
-  };
-
-  const handleCreateAccount = () => {
-    setOpenCreateAccount(true);
     setIsOpen(false);
   };
 
@@ -125,22 +111,7 @@ export function AppMenu() {
                 </button>
               ) : (
                 <>
-                  <button
-                    type="button"
-                    onClick={handleLogin}
-                    className="w-full flex items-center gap-2 px-2 py-2 text-sm text-app-secondary hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/20 transition-colors"
-                  >
-                    <LogIn className="w-4 h-4" />
-                    Log In
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCreateAccount}
-                    className="w-full flex items-center gap-2 px-2 py-2 text-sm text-app-secondary hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-950/20 transition-colors"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    Create Account
-                  </button>
+                  
                 </>
               )}
             </div>
@@ -226,11 +197,6 @@ export function AppMenu() {
           </div>
         </div>
       )}
-
-      {/* Authentication Drawers */}
-      <LogInDrawer open={openLogin} onOpenChange={setOpenLogin} onSessionInitialized={() => setOpenLogin(false)} />
-
-      <CreateAccountDrawer open={openCreateAccount} onOpenChange={setOpenCreateAccount} />
     </div>
   );
 }

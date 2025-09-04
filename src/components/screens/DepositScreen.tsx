@@ -11,8 +11,6 @@ import { NETWORK } from "../../config/constants";
 import { useDepositTransaction } from "../../hooks/transactions/useDepositTransaction";
 import { ScreenHeader } from "../layout/ScreenHeader";
 import { ScreenContent } from "../layout/ScreenLayout";
-import { AuthenticationGate } from "../shared/AuthenticationGate";
-import { WalletGate } from "../shared/WalletGate";
 import { Button } from "../ui/button";
 
 const DEPOSIT_AMOUNTS = [
@@ -34,15 +32,7 @@ export const DepositScreen = () => {
     <>
       <ScreenHeader breadcrumbs={breadcrumbs} backTo="home" />
       <ScreenContent>
-        <AuthenticationGate
-          title="Account Required"
-          description="Create or load your account to access privacy features"
-          context="deposit"
-        >
-          <WalletGate title="Connect Wallet" description="Connect your wallet to fund privacy pool deposits">
-            <DepositForm asset={asset} />
-          </WalletGate>
-        </AuthenticationGate>
+        <DepositForm asset={asset} />
       </ScreenContent>
     </>
   );

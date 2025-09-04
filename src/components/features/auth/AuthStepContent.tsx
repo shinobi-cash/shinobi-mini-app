@@ -22,10 +22,6 @@ interface AuthStepContentProps {
   onRecoveryComplete: (keys: KeyGenerationResult) => void;
   onConvenientAuthComplete: () => void;
   onSyncingComplete: () => void;
-  actionContext?: {
-    type: "deposit" | "my-notes" | "general";
-    onNavigateToAction?: () => void;
-  };
 }
 
 export function AuthStepContent({
@@ -40,7 +36,6 @@ export function AuthStepContent({
   onRecoveryComplete,
   onConvenientAuthComplete,
   onSyncingComplete,
-  actionContext,
 }: AuthStepContentProps) {
   const shouldShowPasskey = isPasskeySupported();
 
@@ -114,7 +109,7 @@ export function AuthStepContent({
       );
 
     case "syncing-notes":
-      return <SyncingNotesSection onSyncComplete={onSyncingComplete} actionContext={actionContext} />;
+      return <SyncingNotesSection onSyncComplete={onSyncingComplete} />;
 
     default:
       return null;

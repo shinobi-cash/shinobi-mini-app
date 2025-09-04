@@ -5,6 +5,7 @@ import { MainScreen } from "@/components/screens/MainScreen";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { BannerProvider } from "@/contexts/BannerContext";
+import { NavigationProvider } from "@/contexts/NavigationContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { sdk } from "@farcaster/miniapp-sdk";
 import { useEffect } from "react";
@@ -42,12 +43,14 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider>
         <BannerProvider>
-          <AuthProvider>
-            <TransactionTrackingProvider>
-              <AppContent />
-              <Toaster />
-            </TransactionTrackingProvider>
-          </AuthProvider>
+          <NavigationProvider>
+            <AuthProvider>
+              <TransactionTrackingProvider>
+                <AppContent />
+                <Toaster />
+              </TransactionTrackingProvider>
+            </AuthProvider>
+          </NavigationProvider>
         </BannerProvider>
       </ThemeProvider>
     </ErrorBoundary>

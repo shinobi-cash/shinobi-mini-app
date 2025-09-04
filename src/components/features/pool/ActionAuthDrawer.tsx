@@ -223,7 +223,6 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
           onRecoveryComplete={authSteps.handleRecoveryComplete}
           onConvenientAuthComplete={authSteps.handleConvenientAuthComplete}
           onSyncingComplete={authSteps.handleSyncingComplete}
-          actionContext={authSteps.actionContext}
         />
       );
     }

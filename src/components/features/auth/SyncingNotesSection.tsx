@@ -5,8 +5,6 @@ import { StorageProviderAdapter } from "@/lib/services/adapters/StorageProviderA
 import {
   ArrowRight,
   CheckCircle,
-  Coins,
-  FileText,
   Loader2,
   RefreshCw,
 } from "lucide-react";
@@ -15,15 +13,10 @@ import { Button } from "../../ui/button";
 
 interface SyncingNotesSectionProps {
   onSyncComplete: () => void;
-  actionContext?: {
-    type: "deposit" | "my-notes" | "general";
-    onNavigateToAction?: () => void;
-  };
 }
 
 export function SyncingNotesSection({
   onSyncComplete,
-  actionContext,
 }: SyncingNotesSectionProps) {
   const { publicKey, accountKey } = useAuth();
 
@@ -111,58 +104,6 @@ export function SyncingNotesSection({
         </div>
       </>
     );
-
-    if (actionContext?.type === "deposit") {
-      return (
-        <div className="text-center space-y-4">
-          {baseContent}
-          <div className="space-y-2">
-            <Button
-              onClick={actionContext.onNavigateToAction || onSyncComplete}
-              className="w-full"
-              size="lg"
-            >
-              <Coins className="w-4 h-4 mr-2" />
-              Go to Deposit
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-            <Button
-              variant="outline"
-              onClick={onSyncComplete}
-              className="w-full"
-            >
-              Get Started
-            </Button>
-          </div>
-        </div>
-      );
-    }
-
-    if (actionContext?.type === "my-notes") {
-      return (
-        <div className="text-center space-y-4">
-          {baseContent}
-          <div className="space-y-2">
-            <Button
-              onClick={actionContext.onNavigateToAction || onSyncComplete}
-              className="w-full"
-              size="lg"
-            >
-              <FileText className="w-4 h-4 mr-2" />
-              View My Notes
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-            <Button
-              variant="outline"
-              onClick={onSyncComplete}
-              className="w-full"
-            >
-              Get Started
-            </Button>
-          </div>
-        </div>
-      );
-    }
 
     return (
       <div className="text-center space-y-4">

@@ -2,7 +2,6 @@ import { useNavigation } from "@/contexts/NavigationContext";
 import { WithdrawalForm } from "../features/withdrawal/WithdrawalForm";
 import { ScreenHeader } from "../layout/ScreenHeader";
 import { ScreenContent } from "../layout/ScreenLayout";
-import { AuthenticationGate } from "../shared/AuthenticationGate";
 
 export const WithdrawalScreen = () => {
   const { currentAsset } = useNavigation();
@@ -16,13 +15,7 @@ export const WithdrawalScreen = () => {
     <>
       <ScreenHeader breadcrumbs={breadcrumbs} backTo="home" />
       <ScreenContent>
-        <AuthenticationGate
-          title="Account Required"
-          description="Create or load your account to access privacy features"
-          context="withdraw"
-        >
-          <WithdrawalForm asset={asset} />
-        </AuthenticationGate>
+        <WithdrawalForm asset={asset} />
       </ScreenContent>
     </>
   );

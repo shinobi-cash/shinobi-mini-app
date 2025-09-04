@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { CONTRACTS } from "../../config/constants";
-import { NavigationProvider } from "../../contexts/NavigationContext";
 import { useActivities } from "../../hooks/data/useActivities";
 import { showToast } from "../../lib/toast";
 import { PoolDashboard } from "../features/pool/PoolDashboard";
@@ -88,8 +87,4 @@ function MainContent() {
   );
 }
 
-export const MainScreen = () => (
-  <NavigationProvider>
-    <MainContent />
-  </NavigationProvider>
-);
+export const MainScreen = () => <MainContent />;

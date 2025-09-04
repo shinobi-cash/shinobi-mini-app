@@ -9,6 +9,7 @@ import { getAccountKey } from "@/utils/accountKey";
 import type { KeyGenerationResult } from "@/utils/crypto";
 import { restoreFromMnemonic } from "@/utils/crypto";
 import { type ReactNode, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigation } from "@/contexts/NavigationContext";
 
 interface AuthState {
   publicKey: string | null;
@@ -46,6 +47,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { setCurrentScreen } = useNavigation();
+  
   const [authState, setAuthState] = useState<AuthState>({
     publicKey: null,
     privateKey: null,
@@ -63,6 +66,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAuthenticated = useMemo(() => {
     return !!(authState.privateKey && authState.mnemonic && authState.accountKey);
   }, [authState]);
+
+  // Redirect to home when authentication is lost
+  useEffect(() => {
+    if (!isRestoringSession && !isAuthenticated) {
+      setCurrentScreen("home");
+    }
+  }, [isAuthenticated, isRestoringSession, setCurrentScreen]);
 
   // Session restoration effect (now using KDF + storageManager directly)
   useEffect(() => {
