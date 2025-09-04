@@ -4,9 +4,9 @@
  */
 
 import { useAuth } from "@/contexts/AuthContext";
-import { useBanner } from "@/contexts/BannerContext";
 import { KDF } from "@/lib/auth/keyDerivation";
 import { storageManager } from "@/lib/storage";
+import { showToast } from "@/lib/toast";
 import { restoreFromMnemonic } from "@/utils/crypto";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import type React from "react";
@@ -25,7 +25,6 @@ export function PasswordLoginSection({ onSuccess }: PasswordLoginSectionProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setKeys } = useAuth();
-  const { banner } = useBanner();
   // Auto-focus on account name input when component mounts
   useEffect(() => {
     const input = document.getElementById("username-password-login") as HTMLInputElement;
@@ -70,13 +69,13 @@ export function PasswordLoginSection({ onSuccess }: PasswordLoginSectionProps) {
       // Store session info for future restoration
       KDF.storeSessionInfo(accountName.trim(), "password");
 
-      banner.success("Login successful");
+      showToast.auth.success("Login");
       onSuccess();
     } catch (error) {
       console.error("Password login failed:", error);
       const errorMessage = error instanceof Error ? error.message : "Authentication failed";
       setError(errorMessage);
-      banner.error("Login failed");
+      showToast.auth.error("Login");
     } finally {
       setIsProcessing(false);
     }

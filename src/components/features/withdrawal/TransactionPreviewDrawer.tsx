@@ -1,7 +1,7 @@
-import { useBanner } from "@/contexts/BannerContext";
 import type { Note } from "@/lib/storage/types";
 import { formatEthAmount, formatHash } from "@/utils/formatters";
-import { Copy, Info, Loader2 } from "lucide-react";
+import { Check, Copy, Info, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "../../ui/button";
 import { ResponsiveModal } from "../../ui/responsive-modal";
 
@@ -30,12 +30,17 @@ export const TransactionPreviewDrawer = ({
   remainingBalance,
   isProcessing,
 }: TransactionPreviewDrawerProps) => {
-  const { banner } = useBanner();
   const withdrawAmountNum = Number.parseFloat(withdrawAmount) || 0;
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  const copyToClipboard = (text: string, fieldName: string) => {
-    navigator.clipboard.writeText(text);
-    banner.success(`${fieldName} copied!`);
+  const copyToClipboard = async (text: string, fieldName: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedField(fieldName);
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch (error) {
+      console.warn("Copy failed:", error);
+    }
   };
 
   // Use consistent ETH formatting with 7 decimal places for precise comparison
@@ -122,8 +127,13 @@ export const TransactionPreviewDrawer = ({
                   type="button"
                   onClick={() => copyToClipboard(recipientAddress, "Recipient Address")}
                   className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
+                  title={copiedField === "Recipient Address" ? "Copied!" : "Copy recipient address"}
                 >
-                  <Copy className="h-3.5 w-3.5 text-app-tertiary" />
+                  {copiedField === "Recipient Address" ? (
+                    <Check className="h-3.5 w-3.5 text-green-500" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5 text-app-tertiary" />
+                  )}
                 </button>
               </div>
             </div>

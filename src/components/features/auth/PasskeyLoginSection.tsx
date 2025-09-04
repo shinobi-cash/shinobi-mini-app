@@ -4,7 +4,7 @@
  */
 
 import { useAuth } from "@/contexts/AuthContext";
-import { useBanner } from "@/contexts/BannerContext";
+import { showToast } from "@/lib/toast";
 import { KDF } from "@/lib/auth/keyDerivation";
 import { storageManager } from "@/lib/storage";
 import { restoreFromMnemonic } from "@/utils/crypto";
@@ -22,7 +22,6 @@ export function PasskeyLoginSection({ onSuccess }: PasskeyLoginSectionProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setKeys } = useAuth();
-  const { banner } = useBanner();
   // Auto-focus on account name input when component mounts
   useEffect(() => {
     const input = document.getElementById("username-login") as HTMLInputElement;
@@ -71,7 +70,7 @@ export function PasskeyLoginSection({ onSuccess }: PasskeyLoginSectionProps) {
       // Store session info for future restoration
       KDF.storeSessionInfo(accountName.trim(), "passkey", { credentialId: passkeyData.credentialId });
 
-      banner.success("Passkey login successful");
+      showToast.auth.success("Passkey login");
       onSuccess();
     } catch (error) {
       console.error("Passkey login failed:", error);
@@ -89,7 +88,7 @@ export function PasskeyLoginSection({ onSuccess }: PasskeyLoginSectionProps) {
       }
 
       setError(errorMessage);
-      banner.error("Passkey login failed");
+      showToast.auth.error("Passkey login");
     } finally {
       setIsProcessing(false);
     }

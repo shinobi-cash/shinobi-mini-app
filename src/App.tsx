@@ -2,6 +2,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SplashScreen } from "@/components/SplashScreen";
 import { PasswordAuthDrawer } from "@/components/features/auth/PasswordAuthDrawer";
 import { MainScreen } from "@/components/screens/MainScreen";
+import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { BannerProvider } from "@/contexts/BannerContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -44,6 +45,7 @@ function App() {
           <AuthProvider>
             <TransactionTrackingProvider>
               <AppContent />
+              <Toaster />
             </TransactionTrackingProvider>
           </AuthProvider>
         </BannerProvider>

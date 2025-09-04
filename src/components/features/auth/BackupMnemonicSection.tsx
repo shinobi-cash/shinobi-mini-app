@@ -1,7 +1,5 @@
-import { useBanner } from "@/contexts/BannerContext";
 import type { KeyGenerationResult } from "@/utils/crypto";
-import { getEnvironmentType } from "@/utils/environment";
-import { Check, Copy, Download, Eye, EyeOff, FileText } from "lucide-react";
+import { Check, Copy, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../../ui/button";
 
@@ -14,8 +12,6 @@ export function BackupMnemonicSection({ generatedKeys, onBackupMnemonicComplete 
   const [isRevealed, setIsRevealed] = useState(false);
   const [hasConfirmed, setHasConfirmed] = useState(false);
   const [hasCopied, setHasCopied] = useState(false);
-  const [canDownload] = useState(getEnvironmentType() === "web" || getEnvironmentType() === "standalone");
-  const { banner } = useBanner();
   const displayMnemonic = generatedKeys?.mnemonic;
 
   const handleCopyMnemonic = async () => {
@@ -24,52 +20,13 @@ export function BackupMnemonicSection({ generatedKeys, onBackupMnemonicComplete 
     try {
       await navigator.clipboard.writeText(displayMnemonic.join(" "));
       setHasCopied(true);
-      banner.success("Copied to clipboard");
       setTimeout(() => setHasCopied(false), 3000);
     } catch (error) {
-      banner.error("Copy failed");
+      console.warn("Copy failed:", error);
+      // Visual feedback will remain showing copy icon, indicating failure
     }
   };
 
-  const handleDownloadMnemonic = () => {
-    if (!displayMnemonic || !canDownload) {
-      banner.error("Download unavailable");
-      return;
-    }
-
-    try {
-      const content = `Shinobi Recovery Phrase
-
-IMPORTANT: Keep this phrase secure and private. Anyone with access to this phrase can control your account.
-
-Recovery Phrase:
-${displayMnemonic.join(" ")}
-
-Generated: ${new Date().toISOString()}
-
-Instructions:
-1. Store this phrase in a secure location
-2. Never share it with anyone  
-3. You'll need all 12 words in the correct order to recover your account
-4. If you lose this phrase, your account cannot be recovered
-
-Shinobi Privacy App`;
-
-      const blob = new Blob([content], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `shinobi-recovery-${Date.now()}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      banner.success("Download complete");
-    } catch (error) {
-      banner.error("Download failed");
-    }
-  };
 
   return (
     <div className="space-y-2">
@@ -96,7 +53,7 @@ Shinobi Privacy App`;
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={handleCopyMnemonic} className="flex-1 h-10 rounded-xl text-sm">
+              <Button variant="outline" onClick={handleCopyMnemonic} className="w-full h-10 rounded-xl text-sm">
                 {hasCopied ? (
                   <>
                     <Check className="w-4 h-4 mr-1" />
@@ -109,12 +66,6 @@ Shinobi Privacy App`;
                   </>
                 )}
               </Button>
-              {canDownload && (
-                <Button variant="outline" onClick={handleDownloadMnemonic} className="flex-1 h-10 rounded-xl text-sm">
-                  <Download className="w-4 h-4 mr-1" />
-                  Save
-                </Button>
-              )}
             </div>
           </div>
         ) : (
@@ -125,7 +76,7 @@ Shinobi Privacy App`;
           >
             <div className="text-center space-y-2">
               <div className="w-12 h-12 mx-auto flex items-center justify-center rounded-full bg-orange-100">
-                <FileText className="w-6 h-6 text-orange-600" />
+                <Eye className="w-6 h-6 text-orange-600" />
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2 justify-center">

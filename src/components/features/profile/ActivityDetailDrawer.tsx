@@ -1,8 +1,7 @@
 import { NETWORK } from "@/config/constants";
-import { useBanner } from "@/contexts/BannerContext";
 import type { Activity } from "@/lib/indexer/sdk";
 import { formatEthAmount, formatHash, formatTimestamp } from "@/utils/formatters";
-import { Copy, ExternalLink } from "lucide-react";
+import { Check, Copy, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { ResponsiveModal } from "../../ui/responsive-modal";
 
@@ -13,17 +12,16 @@ interface ActivityDetailDrawerProps {
 }
 
 export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityDetailDrawerProps) => {
-  const [, setCopiedField] = useState<string | null>(null);
-  const { banner } = useBanner();
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const copyToClipboard = async (text: string, fieldName: string) => {
     try {
       await navigator.clipboard.writeText(text);
       setCopiedField(fieldName);
-      banner.success(`${fieldName} copied!`);
       setTimeout(() => setCopiedField(null), 2000);
     } catch (error) {
-      banner.error("Failed to copy");
+      // Silently fail - user will see copy icon didn't change to checkmark
+      console.warn("Copy failed:", error);
     }
   };
 
@@ -170,8 +168,13 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                         type="button"
                         onClick={() => copyToClipboard(activity.recipient || "", "Recipient")}
                         className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
+                        title={copiedField === "Recipient" ? "Copied!" : "Copy recipient address"}
                       >
-                        <Copy className="h-3.5 w-3.5 text-app-tertiary" />
+                        {copiedField === "Recipient" ? (
+                          <Check className="h-3.5 w-3.5 text-green-500" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5 text-app-tertiary" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -230,8 +233,13 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                   type="button"
                   onClick={() => copyToClipboard(activity.poolId || "", "Pool Address")}
                   className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
+                  title={copiedField === "Pool Address" ? "Copied!" : "Copy pool address"}
                 >
-                  <Copy className="h-3.5 w-3.5 text-app-tertiary" />
+                  {copiedField === "Pool Address" ? (
+                    <Check className="h-3.5 w-3.5 text-green-500" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5 text-app-tertiary" />
+                  )}
                 </button>
                 <a
                   href={`${NETWORK.EXPLORER_URL}/address/${activity.poolId}`}
