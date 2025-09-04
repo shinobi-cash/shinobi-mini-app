@@ -72,40 +72,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const restoreSession = async () => {
       try {
-        const sessionInfo = await KDF.getStoredSessionInfo();
-        if (!sessionInfo) {
+        const resume = await KDF.resumeAuth();
+        if (resume.status === "none") {
           setIsRestoringSession(false);
           return;
         }
 
-        if (sessionInfo.authMethod === "passkey" && sessionInfo.credentialId) {
-          // Auto-restore via passkey PRF
-          const { symmetricKey } = await KDF.deriveKeyFromPasskey(sessionInfo.accountName, sessionInfo.credentialId);
-          await storageManager.initializeAccountSession(sessionInfo.accountName, symmetricKey);
-          const accountData = await storageManager.getAccountData();
-          if (!accountData) throw new Error("Account data not found");
-
-          const restored = restoreFromMnemonic(accountData.mnemonic);
-          setAuthState({
-            publicKey: restored.publicKey,
-            privateKey: restored.privateKey,
-            mnemonic: accountData.mnemonic,
-            accountKey: getAccountKey({ privateKey: restored.privateKey, mnemonic: accountData.mnemonic }),
-          });
-          setIsRestoringSession(false);
-          await storageManager.updateSessionLastAuth?.();
+        if (resume.status === "password-needed") {
+          setQuickAuthState({ show: true, accountName: resume.accountName });
           return;
         }
 
-        if (sessionInfo.authMethod === "password") {
-          setQuickAuthState({ show: true, accountName: sessionInfo.accountName });
-          return; // keep splash until user confirms password
-        }
+        // passkey-ready
+        const { result, accountName } = resume;
+        await storageManager.initializeAccountSession(accountName, result.symmetricKey);
+        const accountData = await storageManager.getAccountData();
+        if (!accountData) throw new Error("Account data not found");
 
+        const restored = restoreFromMnemonic(accountData.mnemonic);
+        setAuthState({
+          publicKey: restored.publicKey,
+          privateKey: restored.privateKey,
+          mnemonic: accountData.mnemonic,
+          accountKey: getAccountKey({ privateKey: restored.privateKey, mnemonic: accountData.mnemonic }),
+        });
         setIsRestoringSession(false);
       } catch (error) {
         console.error("Session restoration failed:", error);
-        // Handle concurrent request errors vs actual session errors
         if (error instanceof Error && error.message.includes("A request is already pending")) {
           console.warn("WebAuthn request collision detected, skipping session clear");
         } else {

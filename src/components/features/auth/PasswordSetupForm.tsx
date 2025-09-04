@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { KDF } from "@/lib/storage/services/KeyDerivationService";
 import { storageManager } from "@/lib/storage";
 import { showToast } from "@/lib/toast";
+import { validateAccountName } from "@/utils/validation";
 import type { KeyGenerationResult } from "@/utils/crypto";
 import { AlertCircle, Eye, EyeOff, Lock } from "lucide-react";
 import type React from "react";
@@ -49,27 +50,7 @@ export function PasswordSetupForm({ generatedKeys, onSuccess }: PasswordSetupFor
     };
   }, []);
 
-  // Account name validation - exact same logic as SetupConvenientAuth
-  const validateAccountName = async (name: string): Promise<string | null> => {
-    if (!name.trim()) {
-      return "Account name is required";
-    }
-    if (name.length < 2) {
-      return "Account name must be at least 2 characters";
-    }
-    if (name.length > 30) {
-      return "Account name must be less than 30 characters";
-    }
-    if (!/^[a-zA-Z0-9\s\-_]+$/.test(name)) {
-      return "Account name can only contain letters, numbers, spaces, hyphens, and underscores";
-    }
-    // Check if account already exists
-    const exists = await storageManager.accountExists(name.trim());
-    if (exists) {
-      return "An account with this name already exists";
-    }
-    return null;
-  };
+  // Account name validation moved to shared util
 
   const validatePassword = (pass: string) => {
     if (pass.length < 8) {

@@ -72,7 +72,6 @@ export function PasskeySetupSection({
       const passkeyData = {
         accountName: accountName.trim(),
         credentialId: credentialId,
-        challenge: "", // Not needed with PRF
         publicKeyHash: userHandle,
         created: Date.now(),
       };

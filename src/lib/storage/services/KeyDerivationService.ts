@@ -142,13 +142,14 @@ export class KeyDerivationService {
   async createPasskeyCredential(accountName: string, userHandle: string): Promise<{ credentialId: string }> {
     const challenge = crypto.getRandomValues(new Uint8Array(32));
     const userId = new TextEncoder().encode(userHandle);
+    const rpId = (import.meta as any)?.env?.VITE_RP_ID ?? window.location.hostname;
 
     const credential = (await navigator.credentials.create({
       publicKey: {
         challenge,
         rp: {
           name: "Shinobi Privacy Pool",
-          id: window.location.hostname,
+          id: rpId,
         },
         user: {
           id: userId,

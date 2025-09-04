@@ -12,13 +12,7 @@ import {
   passkeyStorageAdapter,
   sharedEncryptionService,
 } from "./adapters/IndexedDBAdapter";
-import type {
-  CachedAccountData,
-  DiscoveryResult,
-  NamedPasskeyData,
-  NoteChain,
-  SessionInfo,
-} from "./interfaces/IDataTypes";
+import type { CachedAccountData, DiscoveryResult, NamedPasskeyData, NoteChain } from "./interfaces/IDataTypes";
 import { AccountRepository } from "./repositories/AccountRepository";
 import { NotesRepository } from "./repositories/NotesRepository";
 import { PasskeyRepository } from "./repositories/PasskeyRepository";
@@ -155,29 +149,6 @@ class StorageManager {
 
   async passkeyExists(accountName: string): Promise<boolean> {
     return this.passkeyRepo.passkeyExists(accountName);
-  }
-
-  // ============ SESSION INFO OPERATIONS ============
-  // Exact API match to keyDerivation.ts
-
-  async storeSessionInfo(
-    accountName: string,
-    authMethod: "passkey" | "password",
-    opts?: { credentialId?: string },
-  ): Promise<void> {
-    return this.sessionRepo.storeSessionInfo(accountName, authMethod, opts);
-  }
-
-  async getStoredSessionInfo(): Promise<SessionInfo | null> {
-    return this.sessionRepo.getStoredSessionInfo();
-  }
-
-  async clearSessionInfo(): Promise<void> {
-    return this.sessionRepo.clearSessionInfo();
-  }
-
-  async updateSessionLastAuth(): Promise<void> {
-    return this.sessionRepo.updateSessionLastAuth();
   }
 
   // ============ USER SALT OPERATIONS ============

@@ -36,7 +36,6 @@ export interface CachedAccountData {
 export interface NamedPasskeyData {
   accountName: string;
   credentialId: string;
-  challenge: string;
   publicKeyHash: string;
   created: number;
 }
