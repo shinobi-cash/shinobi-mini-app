@@ -1,12 +1,26 @@
 /**
  * Authentication Context
- * Manages user authentication state with secure key management
+ * Manages user authentication state with secure key management (no service indirection)
  */
 
-import { type AuthState, AuthenticationService, type QuickAuthState } from "@/lib/services/AuthenticationService";
-import { AuthStorageProviderAdapter } from "@/lib/services/adapters/AuthStorageProviderAdapter";
+import { storageManager } from "@/lib/storage";
+import { KDF } from "@/lib/storage/services/KeyDerivationService";
 import type { KeyGenerationResult } from "@/utils/crypto";
+import { restoreFromMnemonic } from "@/utils/crypto";
+import { getAccountKey } from "@/utils/accountKey";
 import { type ReactNode, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+
+interface AuthState {
+  publicKey: string | null;
+  privateKey: string | null;
+  mnemonic: string[] | null;
+  accountKey: bigint | null;
+}
+
+interface QuickAuthState {
+  show: boolean;
+  accountName: string;
+}
 
 interface AuthContextType {
   // Authentication state
@@ -31,10 +45,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Create service instances
-const storageProvider = new AuthStorageProviderAdapter();
-const authService = new AuthenticationService(storageProvider);
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
     publicKey: null,
@@ -51,10 +61,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Derived state: authenticated if we have the necessary keys
   const isAuthenticated = useMemo(() => {
-    return authService.isAuthenticated(authState);
+    return !!(authState.privateKey && authState.mnemonic && authState.accountKey);
   }, [authState]);
 
-  // Session restoration effect - exact logic from AuthContext.tsx
+  // Session restoration effect (now using KDF + storageManager directly)
   useEffect(() => {
     // Prevent multiple concurrent restoration attempts
     if (restorationAttempted.current) return;
@@ -62,25 +72,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const restoreSession = async () => {
       try {
-        const result = await authService.restoreSession();
-
-        if (result.status === "passkey-ready" && result.authState) {
-          setAuthState(result.authState);
+        const sessionInfo = await KDF.getStoredSessionInfo();
+        if (!sessionInfo) {
           setIsRestoringSession(false);
-        } else if (result.status === "password-needed" && result.quickAuthState) {
-          setQuickAuthState(result.quickAuthState);
-          // Don't set isRestoringSession to false here - keep splash screen visible
-        } else {
-          // status === 'none', show normal login flow
-          setIsRestoringSession(false);
+          return;
         }
+
+        if (sessionInfo.authMethod === "passkey" && sessionInfo.credentialId) {
+          // Auto-restore via passkey PRF
+          const { symmetricKey } = await KDF.deriveKeyFromPasskey(sessionInfo.accountName, sessionInfo.credentialId);
+          await storageManager.initializeAccountSession(sessionInfo.accountName, symmetricKey);
+          const accountData = await storageManager.getAccountData();
+          if (!accountData) throw new Error("Account data not found");
+
+          const restored = restoreFromMnemonic(accountData.mnemonic);
+          setAuthState({
+            publicKey: restored.publicKey,
+            privateKey: restored.privateKey,
+            mnemonic: accountData.mnemonic,
+            accountKey: getAccountKey({ privateKey: restored.privateKey, mnemonic: accountData.mnemonic }),
+          });
+          setIsRestoringSession(false);
+          await storageManager.updateSessionLastAuth?.();
+          return;
+        }
+
+        if (sessionInfo.authMethod === "password") {
+          setQuickAuthState({ show: true, accountName: sessionInfo.accountName });
+          return; // keep splash until user confirms password
+        }
+
+        setIsRestoringSession(false);
       } catch (error) {
         console.error("Session restoration failed:", error);
         // Handle concurrent request errors vs actual session errors
         if (error instanceof Error && error.message.includes("A request is already pending")) {
           console.warn("WebAuthn request collision detected, skipping session clear");
         } else {
-          await authService.signOut();
+          storageManager.clearSession();
+          await KDF.clearSessionInfo();
         }
         setIsRestoringSession(false);
       }
@@ -90,16 +120,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setKeys = (newKeys: KeyGenerationResult) => {
-    const newAuthState = authService.createAuthStateFromKeys(newKeys);
-    setAuthState(newAuthState);
+    setAuthState({
+      publicKey: newKeys.publicKey,
+      privateKey: newKeys.privateKey,
+      mnemonic: newKeys.mnemonic,
+      accountKey: (() => {
+        try {
+          return getAccountKey({ privateKey: newKeys.privateKey, mnemonic: newKeys.mnemonic });
+        } catch {
+          return null;
+        }
+      })(),
+    });
   };
 
   const handleQuickPasswordAuth = async (password: string) => {
     if (!quickAuthState) return;
 
     try {
-      const newAuthState = await authService.handleQuickPasswordAuth(password, quickAuthState.accountName);
-      setAuthState(newAuthState);
+      const { symmetricKey } = await KDF.deriveKeyFromPassword(password, quickAuthState.accountName);
+      await storageManager.initializeAccountSession(quickAuthState.accountName, symmetricKey);
+      const accountData = await storageManager.getAccountData();
+      if (!accountData) throw new Error("Account data not found");
+      const restored = restoreFromMnemonic(accountData.mnemonic);
+      setAuthState({
+        publicKey: restored.publicKey,
+        privateKey: restored.privateKey,
+        mnemonic: accountData.mnemonic,
+        accountKey: getAccountKey({ privateKey: restored.privateKey, mnemonic: accountData.mnemonic }),
+      });
+      await KDF.storeSessionInfo(quickAuthState.accountName, "password");
       setQuickAuthState(null);
       setIsRestoringSession(false);
     } catch (error) {
@@ -111,7 +161,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const dismissQuickAuth = async () => {
     setQuickAuthState(null);
     setIsRestoringSession(false);
-    await authService.signOut();
+    storageManager.clearSession();
+    await KDF.clearSessionInfo();
   };
 
   const signOut = async () => {
@@ -121,7 +172,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       mnemonic: null,
       accountKey: null,
     });
-    await authService.signOut();
+    storageManager.clearSession();
+    await KDF.clearSessionInfo();
     setQuickAuthState(null);
   };
 
