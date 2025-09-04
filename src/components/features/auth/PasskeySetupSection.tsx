@@ -4,7 +4,7 @@
  */
 
 import { useAuth } from "@/contexts/AuthContext";
-import { KDF } from "@/lib/auth/keyDerivation";
+import { KDF } from "@/lib/storage/services/KeyDerivationService";
 import { storageManager } from "@/lib/storage";
 import { showToast } from "@/lib/toast";
 import { type KeyGenerationResult, createHash } from "@/utils/crypto";
