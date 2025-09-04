@@ -18,6 +18,8 @@ import type {
   SessionInfo,
 } from "./interfaces/IDataTypes";
 import { AccountRepository } from "./repositories/AccountRepository";
+import { fetchActivities } from "@/services/data/indexerService";
+import { CONTRACTS } from "@/config/constants";
 import { NotesRepository } from "./repositories/NotesRepository";
 import { PasskeyRepository } from "./repositories/PasskeyRepository";
 import { SessionRepository } from "./repositories/SessionRepository";
@@ -194,6 +196,44 @@ class StorageManager {
 
   async getTheme(storageKey?: string): Promise<string | null> {
     return this.sessionRepo.getTheme(storageKey);
+  }
+
+  // ============ NEW ACCOUNT SYNC BASELINE ============
+  
+  /**
+   * Initialize sync baseline for new accounts to avoid scanning historical data
+   * Sets the current blockchain cursor as the starting point for future syncs
+   */
+  async initializeSyncBaseline(publicKey: string, poolAddress: string = CONTRACTS.ETH_PRIVACY_POOL): Promise<void> {
+    try {
+      // Get the most recent cursor from the indexer (latest activity)
+      const result = await fetchActivities(poolAddress, 1, undefined, "desc");
+      const currentCursor = result.pageInfo.endCursor;
+      
+      // Store empty notes with current cursor as baseline
+      const baselineData = {
+        poolAddress,
+        publicKey,
+        notes: [], // No historical notes for new account
+        lastUsedDepositIndex: -1, // Start from deposit index 0
+        lastSyncTime: Date.now(),
+        lastProcessedCursor: currentCursor, // Start from current blockchain position
+      };
+
+      // Store the baseline data
+      await this.notesRepo.storeData(
+        publicKey,
+        poolAddress,
+        baselineData.notes,
+        baselineData.lastUsedDepositIndex,
+        baselineData.lastProcessedCursor
+      );
+
+      console.log(`Initialized sync baseline for new account with cursor: ${currentCursor}`);
+    } catch (error) {
+      console.warn("Failed to initialize sync baseline, will fall back to full scan:", error);
+      // Don't throw - if this fails, the sync will just do a full scan
+    }
   }
 }
 

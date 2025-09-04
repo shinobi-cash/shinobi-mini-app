@@ -141,6 +141,16 @@ export function PasswordSetupForm({ generatedKeys, onSuccess }: PasswordSetupFor
       // Set keys in auth context
       setKeys(generatedKeys);
 
+      // Initialize sync baseline for new account to avoid scanning historical blockchain data
+      if (generatedKeys.publicKey) {
+        try {
+          await storageManager.initializeSyncBaseline(generatedKeys.publicKey);
+        } catch (error) {
+          console.warn("Failed to initialize sync baseline:", error);
+          // Don't block account creation if this fails
+        }
+      }
+
       banner.success("Account created");
       onSuccess();
     } catch (error) {

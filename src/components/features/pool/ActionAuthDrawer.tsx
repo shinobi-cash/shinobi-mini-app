@@ -143,6 +143,8 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
         return "Backup Phrase";
       case "setup-convenient":
         return shouldShowPasskey ? "Setup Passkey" : "Setup Password";
+      case "syncing-notes":
+        return "Syncing Notes";
       default:
         return getActionTitle();
     }
@@ -178,6 +180,8 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
         return "Save your recovery phrase";
       case "setup-convenient":
         return shouldShowPasskey ? "Setup biometric access" : "Create secure password";
+      case "syncing-notes":
+        return "Finding your privacy notes";
       default:
         return "";
     }
@@ -197,6 +201,7 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
           onBackupComplete={authSteps.handleBackupComplete}
           onRecoveryComplete={authSteps.handleRecoveryComplete}
           onConvenientAuthComplete={authSteps.handleConvenientAuthComplete}
+          onSyncingComplete={authSteps.handleSyncingComplete}
         />
       );
     }

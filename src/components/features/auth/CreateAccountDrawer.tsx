@@ -44,6 +44,8 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
         return "Backup Phrase";
       case "setup-convenient":
         return shouldShowPasskey ? "Setup Passkey" : "Setup Password";
+      case "syncing-notes":
+        return "Syncing Notes";
       default:
         return "Create Account";
     }
@@ -57,6 +59,8 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
         return "Save your recovery phrase";
       case "setup-convenient":
         return shouldShowPasskey ? "Setup biometric access" : "Create secure password";
+      case "syncing-notes":
+        return "Finding your privacy notes";
       default:
         return "Create new account";
     }
@@ -88,6 +92,7 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
         onBackupComplete={authSteps.handleBackupComplete}
         onRecoveryComplete={authSteps.handleRecoveryComplete}
         onConvenientAuthComplete={authSteps.handleConvenientAuthComplete}
+        onSyncingComplete={authSteps.handleSyncingComplete}
       />
     </ResponsiveModal>
   );

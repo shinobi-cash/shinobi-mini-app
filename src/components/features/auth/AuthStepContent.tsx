@@ -7,6 +7,7 @@ import { AuthSection } from "./AuthSection";
 import { BackupMnemonicSection } from "./BackupMnemonicSection";
 import { KeyGenerationSection } from "./KeyGenerationSection";
 import { LoginWithBackupPhrase } from "./LoginWithBackupPhrase";
+import { SyncingNotesSection } from "./SyncingNotesSection";
 import SetupConvenientAuth from "./SetupConvenientAuth";
 
 interface AuthStepContentProps {
@@ -20,6 +21,7 @@ interface AuthStepContentProps {
   onBackupComplete: () => void;
   onRecoveryComplete: (keys: KeyGenerationResult) => void;
   onConvenientAuthComplete: () => void;
+  onSyncingComplete: () => void;
 }
 
 export function AuthStepContent({
@@ -33,6 +35,7 @@ export function AuthStepContent({
   onBackupComplete,
   onRecoveryComplete,
   onConvenientAuthComplete,
+  onSyncingComplete,
 }: AuthStepContentProps) {
   const shouldShowPasskey = isPasskeySupported();
 
@@ -104,6 +107,9 @@ export function AuthStepContent({
           onSetupConvenientAuthComplete={onConvenientAuthComplete}
         />
       );
+
+    case "syncing-notes":
+      return <SyncingNotesSection onSyncComplete={onSyncingComplete} />;
 
     default:
       return null;

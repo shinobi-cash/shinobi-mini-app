@@ -58,6 +58,8 @@ export function LogInDrawer({ open, onOpenChange, onSessionInitialized }: LogInD
         return "Backup Phrase";
       case "setup-convenient":
         return shouldShowPasskey ? "Setup Passkey" : "Setup Password";
+      case "syncing-notes":
+        return "Syncing Notes";
       default:
         return "Auth";
     }
@@ -79,6 +81,8 @@ export function LogInDrawer({ open, onOpenChange, onSessionInitialized }: LogInD
         return "Save your recovery phrase";
       case "setup-convenient":
         return shouldShowPasskey ? "Setup biometric access" : "Create secure password";
+      case "syncing-notes":
+        return "Finding your privacy notes";
       default:
         return "";
     }
@@ -110,6 +114,7 @@ export function LogInDrawer({ open, onOpenChange, onSessionInitialized }: LogInD
         onBackupComplete={authSteps.handleBackupComplete}
         onRecoveryComplete={authSteps.handleRecoveryComplete}
         onConvenientAuthComplete={authSteps.handleConvenientAuthComplete}
+        onSyncingComplete={authSteps.handleSyncingComplete}
       />
 
       <div className="text-center mt-4">

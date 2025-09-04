@@ -91,7 +91,7 @@ export class NotesRepository {
   /**
    * Store data internally - exact implementation from noteCache.storeData
    */
-  private async storeData(
+  async storeData(
     publicKey: string,
     poolAddress: string,
     notes: NoteChain[],

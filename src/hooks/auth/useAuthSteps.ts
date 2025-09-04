@@ -8,7 +8,8 @@ export type AuthStep =
   | "login-backup"
   | "create-keys"
   | "create-backup"
-  | "setup-convenient";
+  | "setup-convenient"
+  | "syncing-notes";
 
 interface UseAuthStepsOptions {
   onAuthComplete?: () => void;
@@ -82,6 +83,18 @@ export function useAuthSteps(options: UseAuthStepsOptions = {}) {
   };
 
   const handleConvenientAuthComplete = () => {
+    // For login, go to syncing step first
+    // For setup (new accounts), skip syncing and complete immediately
+    if (currentStep === "login-convenient") {
+      setCurrentStep("syncing-notes");
+    } else {
+      // This is setup-convenient (new account), complete immediately
+      resetState();
+      options.onAuthComplete?.();
+    }
+  };
+
+  const handleSyncingComplete = () => {
     resetState();
     options.onAuthComplete?.();
   };
@@ -100,5 +113,6 @@ export function useAuthSteps(options: UseAuthStepsOptions = {}) {
     handleBackupComplete,
     handleRecoveryComplete,
     handleConvenientAuthComplete,
+    handleSyncingComplete,
   };
 }
