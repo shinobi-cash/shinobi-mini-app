@@ -13,7 +13,16 @@ import { config } from "./wagmi.ts";
 
 import "./index.css";
 
-const queryClient = new QueryClient();
+/** ---------- Query Client (app-wide) ---------- */
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 15_000, // don’t spam reloads
+      refetchOnWindowFocus: false, // keep UX calm
+      retry: 2,
+    },
+  },
+});
 
 // Component that conditionally wraps with RainbowKit
 const WalletProvider = ({ children }: { children: React.ReactNode }) => {

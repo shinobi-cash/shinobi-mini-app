@@ -11,48 +11,43 @@ import { type ScreenConfig, ScreenManager } from "../layout/ScreenManager";
 import { DepositScreen } from "./DepositScreen";
 import { MyNotesScreen } from "./MyNotesScreen";
 
-/**
- * Home Screen View Controller - Pool Dashboard
- */
 function HomeScreenController() {
   const lastErrorRef = useRef<string | null>(null);
 
-  const { activities, loading, error, fetchMore, hasNextPage, refetch, hasData } = useActivities({
-    poolId: CONTRACTS.ETH_PRIVACY_POOL,
-    limit: 10,
-  });
+  const { data, error, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } = useActivities(
+    CONTRACTS.ETH_PRIVACY_POOL,
+    10,
+  );
 
-  // Show toast error when we have data but error on refresh
+  // Flatten all pages into one array
+  const activities = data?.pages.flatMap((page) => page.items) ?? [];
+
+  // Show toast error if we already have some data and a new error occurs
   useEffect(() => {
     const errorMessage = error?.message || null;
 
-    if (errorMessage && hasData && errorMessage !== lastErrorRef.current) {
+    if (errorMessage && activities.length > 0 && errorMessage !== lastErrorRef.current) {
       showToast.error("Failed to refresh activities");
       lastErrorRef.current = errorMessage;
     } else if (!errorMessage) {
       lastErrorRef.current = null;
     }
-  }, [error?.message, hasData]);
+  }, [error?.message, activities.length]);
 
   return (
     <PoolDashboard
-      activities={activities || []}
-      loading={loading}
-      error={error && !hasData ? "Failed to load activities" : undefined}
+      activities={activities}
+      loading={isLoading}
+      error={error && activities.length === 0 ? "Failed to load activities" : undefined}
       hasNextPage={hasNextPage}
-      onFetchMore={async () => {
-        await fetchMore?.();
-      }}
-      onRefresh={async () => {
-        await refetch?.();
-      }}
+      onFetchMore={fetchNextPage}
+      onRefresh={refetch}
+      isFetchingMore={isFetchingNextPage}
     />
   );
 }
 
-/**
- * Screen Registry - Define all available screens
- */
+// Screen Registry
 const screenRegistry: ScreenConfig[] = [
   {
     id: "home",
@@ -74,9 +69,6 @@ const screenRegistry: ScreenConfig[] = [
   },
 ];
 
-/**
- * Fallback Screen - Shown when screen not found
- */
 function FallbackScreen() {
   return (
     <div className="flex-1 flex items-center justify-center">
@@ -88,9 +80,6 @@ function FallbackScreen() {
   );
 }
 
-/**
- * Main Screen Content - Uses Native App Layout
- */
 function MainContent() {
   return (
     <AppLayout header={<AppHeader />} banner={<AppBanner />}>
@@ -99,9 +88,6 @@ function MainContent() {
   );
 }
 
-/**
- * Main Screen with Navigation Provider
- */
 export const MainScreen = () => (
   <NavigationProvider>
     <MainContent />

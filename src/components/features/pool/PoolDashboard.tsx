@@ -1,9 +1,3 @@
-/**
- * Pool Dashboard - Main landing page
- * Displays pool statistics, asset selection, actions, and recent activity
- * Serves as the primary interface for pool interactions
- */
-
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import type { Activity } from "@/lib/indexer/sdk";
 import { showToast } from "@/lib/toast";
@@ -22,25 +16,32 @@ interface PoolDashboardProps {
   loading?: boolean;
   error?: string;
   hasNextPage?: boolean;
-  onFetchMore?: () => Promise<void>;
-  onRefresh?: () => Promise<void>;
+  onFetchMore?: () => Promise<unknown>;
+  onRefresh?: () => Promise<unknown>;
+  isFetchingMore?: boolean;
 }
 
-// Current supported asset - designed for future expansion
 const ETH_ASSET = {
   symbol: "ETH",
   name: "Ethereum",
   icon: "/ethereum.svg",
 };
 
-export function PoolDashboard({ activities, loading, error, onFetchMore, hasNextPage, onRefresh }: PoolDashboardProps) {
+export function PoolDashboard({
+  activities,
+  loading,
+  error,
+  hasNextPage,
+  onFetchMore,
+  onRefresh,
+  isFetchingMore,
+}: PoolDashboardProps) {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [selectedAsset] = useState(ETH_ASSET); // Future: make this dynamic
+  const [selectedAsset] = useState(ETH_ASSET);
 
-  // Pool stats state
+  // Pool stats
   const [poolStats, setPoolStats] = useState<{
     totalDeposits: string;
     totalWithdrawals: string;
@@ -50,9 +51,7 @@ export function PoolDashboard({ activities, loading, error, onFetchMore, hasNext
   const [poolStatsLoading, setPoolStatsLoading] = useState(true);
   const [poolStatsError, setPoolStatsError] = useState<Error | null>(null);
 
-  // Refs
   const lastPoolStatsErrorRef = useRef<string | null>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const { onTransactionIndexed } = useTransactionTracking();
 
@@ -77,12 +76,11 @@ export function PoolDashboard({ activities, loading, error, onFetchMore, hasNext
     [poolStats],
   );
 
-  // Load pool stats on mount
   useEffect(() => {
     loadPoolStats();
   }, [loadPoolStats]);
 
-  // Show toast error when pool stats refresh fails
+  // Show toast error
   useEffect(() => {
     const errorMessage = poolStatsError?.message || null;
 
@@ -94,7 +92,7 @@ export function PoolDashboard({ activities, loading, error, onFetchMore, hasNext
     }
   }, [poolStatsError?.message, poolStats]);
 
-  // Auto-refresh when transaction gets indexed
+  // Auto-refresh on transaction indexed
   useEffect(() => {
     const cleanup = onTransactionIndexed(() => {
       onRefresh?.();
@@ -103,33 +101,26 @@ export function PoolDashboard({ activities, loading, error, onFetchMore, hasNext
     return cleanup;
   }, [onTransactionIndexed, onRefresh, loadPoolStats]);
 
-  // Handle activity click
-  const handleActivityClick = (activity: Activity) => {
-    setSelectedActivity(activity);
-    setDrawerOpen(true);
-  };
-
   // Handle refresh
   const handleRefresh = () => {
     setIsRefreshing(true);
     Promise.all([onRefresh?.(), loadPoolStats(true)]).finally(() => setIsRefreshing(false));
   };
 
-  // Infinite scroll setup
+  // Infinite scroll observer
   useEffect(() => {
     if (!onFetchMore || !hasNextPage || !sentinelRef.current) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isFetchingMore && hasNextPage) {
-          setIsFetchingMore(true);
-          onFetchMore().finally(() => setIsFetchingMore(false));
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingMore) {
+          onFetchMore();
         }
       },
       {
-        root: scrollContainerRef.current,
-        rootMargin: "100px", // Trigger 100px before reaching the sentinel
-        threshold: 0.1,
+        root: null,
+        rootMargin: "20px",
+        threshold: 0.5,
       },
     );
 
@@ -145,12 +136,7 @@ export function PoolDashboard({ activities, loading, error, onFetchMore, hasNext
       {/* Pool Overview */}
       <div className="space-y-2">
         <PoolStatsCard totalDeposits={totalDeposits} memberCount={memberCount} loading={poolStatsLoading} />
-
-        <AssetSelector
-          selectedAsset={selectedAsset}
-          disabled={true} // Future: enable when multi-asset support is added
-        />
-
+        <AssetSelector selectedAsset={selectedAsset} disabled={true} />
         <PoolActions asset={selectedAsset} />
       </div>
 
@@ -175,7 +161,7 @@ export function PoolDashboard({ activities, loading, error, onFetchMore, hasNext
         </div>
 
         <div className="flex-1 bg-app-surface border-x border-b border-app rounded-b-xl overflow-hidden">
-          <div ref={scrollContainerRef} className="h-full overflow-y-auto">
+          <div className="h-full overflow-y-auto">
             {loading && activities.length === 0 ? (
               <div className="flex items-center justify-center py-12">
                 <p className="text-app-secondary">Loading activity...</p>
@@ -200,7 +186,10 @@ export function PoolDashboard({ activities, loading, error, onFetchMore, hasNext
                   <button
                     key={activity.id}
                     type="button"
-                    onClick={() => handleActivityClick(activity)}
+                    onClick={() => {
+                      setSelectedActivity(activity);
+                      setDrawerOpen(true);
+                    }}
                     className="w-full text-left border-b border-app-border last:border-b-0 hover:bg-app-surface-hover transition-colors duration-200"
                   >
                     <ActivityRow activity={activity} />
@@ -211,7 +200,6 @@ export function PoolDashboard({ activities, loading, error, onFetchMore, hasNext
                   <div className="p-6 text-center text-app-tertiary text-sm">Loading more activities...</div>
                 )}
 
-                {/* Sentinel for infinite scroll */}
                 {hasNextPage && <div ref={sentinelRef} className="h-4 w-full" />}
               </>
             )}
