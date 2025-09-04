@@ -1,6 +1,10 @@
 import { fetchLatestIndexedBlock } from "@/services/data/indexerService";
 import { publicClient } from "@/lib/clients";
 import { useBanner } from "@/contexts/BannerContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { CONTRACTS } from "@/config/constants";
+import { NoteDiscoveryService } from "@/lib/services/NoteDiscoveryService";
+import { StorageProviderAdapter } from "@/lib/services/adapters/StorageProviderAdapter";
 import type React from "react";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
@@ -28,6 +32,10 @@ export function useTransactionTracking() {
   return context;
 }
 
+// Create note discovery service instance outside provider
+const storageProvider = new StorageProviderAdapter();
+const discoveryService = new NoteDiscoveryService(storageProvider);
+
 export function TransactionTrackingProvider({ children }: { children: React.ReactNode }) {
   const [trackingStatus, setTrackingStatus] = useState<TrackingStatus>("idle");
   const [trackedTransaction, setTrackedTransaction] = useState<TransactionInfo | null>(null);
@@ -36,6 +44,7 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
   const intervalRef = useRef<NodeJS.Timeout>();
   const { banner } = useBanner();
   const bannerShownRef = useRef<{ [key: string]: boolean }>({});
+  const { publicKey, accountKey } = useAuth();
 
   const trackTransaction = useCallback((txHash: string) => {
     // Clear any existing tracking
@@ -134,6 +143,17 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
         ) {
           banner.success("Transaction indexed!");
           setTrackingStatus("synced");
+
+          // Sync notes globally when transaction is indexed
+          if (publicKey && accountKey) {
+            console.log("Auto-syncing notes after transaction indexed...");
+            discoveryService
+              .discoverNotes(publicKey, CONTRACTS.ETH_PRIVACY_POOL, accountKey)
+              .then(() => console.log("Auto-sync notes completed"))
+              .catch((err) => console.warn("Auto-sync notes failed:", err));
+          } else {
+            console.warn("Cannot auto-sync: missing publicKey or accountKey");
+          }
 
           // Emit the indexed event
           eventTargetRef.current.dispatchEvent(new CustomEvent("indexed"));
