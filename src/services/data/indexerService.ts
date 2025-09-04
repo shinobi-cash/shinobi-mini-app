@@ -60,12 +60,8 @@ export async function fetchActivities(
 export async function fetchStateTreeLeaves(poolId: string) {
   try {
     // Use SDK's built-in method that handles pagination automatically
-    const allLeaves = await indexerClient.getAllStateTreeLeaves(poolId);
-
-    return allLeaves.map((leaf) => ({
-      leafIndex: leaf.leafIndex,
-      leafValue: leaf.leafValue,
-    }));
+    return  await indexerClient.getAllStateTreeLeaves(poolId);
+   
   } catch (error) {
     console.error("Failed to fetch state tree leaves:", error);
     throw new Error("Failed to fetch state tree data from indexer");
@@ -136,7 +132,7 @@ export async function fetchASPData() {
     const approvalList = await fetchApprovedLabelsFromIPFS(ipfsCID);
 
     return {
-      aspRoot: root,
+      root,
       ipfsCID,
       timestamp,
       approvalList,
