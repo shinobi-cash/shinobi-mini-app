@@ -3,7 +3,7 @@ import type { KeyGenerationResult } from "@/utils/crypto";
 import { isPasskeySupported } from "@/utils/environment";
 import { Fingerprint, Lock } from "lucide-react";
 import { Button } from "../../ui/button";
-import { AuthSection } from "./AuthSection";
+import { ConvenientLogin } from "./ConvenientLogin";
 import { BackupMnemonicSection } from "./BackupMnemonicSection";
 import { KeyGenerationSection } from "./KeyGenerationSection";
 import { LoginWithBackupPhrase } from "./LoginWithBackupPhrase";
@@ -94,7 +94,7 @@ export function AuthStepContent({
       );
 
     case "login-convenient":
-      return <AuthSection mode="login" onSuccess={onConvenientAuthComplete} />;
+      return <ConvenientLogin onSuccess={onConvenientAuthComplete} />;
 
     case "login-backup":
       return <LoginWithBackupPhrase onRecoverAccountKey={onRecoveryComplete} />;
