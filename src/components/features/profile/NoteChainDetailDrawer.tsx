@@ -1,8 +1,8 @@
 import { NETWORK } from "@/config/constants";
 import type { NoteChain } from "@/lib/storage/types";
 import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
-import { ExternalLink, X } from "lucide-react";
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "../../ui/drawer";
+import { ExternalLink } from "lucide-react";
+import { ResponsiveModal } from "../../ui/responsive-modal";
 
 interface NoteChainDetailDrawerProps {
   noteChain: NoteChain | null;
@@ -15,23 +15,14 @@ export function NoteChainDetailDrawer({ noteChain, open, onOpenChange }: NoteCha
   const lastNote = noteChain[noteChain.length - 1];
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="bg-app-background border-app">
-        <DrawerHeader className="pb-0 px-4 py-1">
-          <div className="flex items-center justify-between">
-            <DrawerTitle className="text-lg font-semibold text-app-primary tracking-tight">
-              Deposit Note Timeline
-            </DrawerTitle>
-            <DrawerClose className="rounded-full h-7 w-7 flex items-center justify-center bg-app-surface hover:bg-app-surface-hover transition-colors duration-200">
-              <X className="h-3.5 w-3.5 text-app-secondary" />
-            </DrawerClose>
-          </div>
-          <DrawerDescription className="text-sm text-app-secondary">
-            Chronological details of your note chain
-          </DrawerDescription>
-        </DrawerHeader>
-
-        <div className="flex-1 overflow-y-auto px-4 pb-6">
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Deposit Note Timeline"
+      description="Chronological details of your note chain"
+      className="bg-app-background border-app"
+    >
+      <div className="space-y-6">
           {/* Balance Summary */}
           <div className="bg-app-surface rounded-xl p-2 border border-app shadow mb-6 text-center">
             <p className="text-sm font-medium text-app-secondary mb-1">Current Balance</p>
@@ -99,8 +90,7 @@ export function NoteChainDetailDrawer({ noteChain, open, onOpenChange }: NoteCha
               );
             })}
           </ul>
-        </div>
-      </DrawerContent>
-    </Drawer>
+      </div>
+    </ResponsiveModal>
   );
 }

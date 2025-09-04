@@ -2,9 +2,9 @@ import { NETWORK } from "@/config/constants";
 import { useBanner } from "@/contexts/BannerContext";
 import type { Activity } from "@/lib/indexer/sdk";
 import { formatEthAmount, formatHash, formatTimestamp } from "@/utils/formatters";
-import { Copy, ExternalLink, X } from "lucide-react";
+import { Copy, ExternalLink } from "lucide-react";
 import { useState } from "react";
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "../../ui/drawer";
+import { ResponsiveModal } from "../../ui/responsive-modal";
 
 interface ActivityDetailDrawerProps {
   activity: Activity | null;
@@ -32,24 +32,13 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
   if (!activity) return null;
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="bg-app-background border-app">
-        {/* iOS-style drag handle */}
-        {/* <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-app-tertiary/30" /> */}
-
-        <DrawerHeader className="pb-0 px-4 py-1">
-          <div className="flex items-center justify-between">
-            <DrawerTitle className="text-lg font-semibold text-app-primary capitalize tracking-tight">
-              {activity.type.toLowerCase()} Details
-            </DrawerTitle>
-            <DrawerClose className="rounded-full h-7 w-7 flex items-center justify-center bg-app-surface hover:bg-app-surface-hover transition-colors duration-200">
-              <X className="h-3.5 w-3.5 text-app-secondary" />
-            </DrawerClose>
-          </div>
-          <DrawerDescription className="text-sm items-start text-app-secondary" />
-        </DrawerHeader>
-
-        <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-2">
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={`${activity.type.toLowerCase()} Details`}
+      className="bg-app-background border-app"
+    >
+      <div className="space-y-2">
           {/* Amount Section - iOS card style */}
           <div className="bg-app-surface rounded-xl p-2 border border-app shadow-sm">
             {activity.type === "DEPOSIT" && activity.originalAmount && activity.vettingFeeAmount ? (
@@ -256,8 +245,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
               </div>
             </div>
           </div>
-        </div>
-      </DrawerContent>
-    </Drawer>
+      </div>
+    </ResponsiveModal>
   );
 };

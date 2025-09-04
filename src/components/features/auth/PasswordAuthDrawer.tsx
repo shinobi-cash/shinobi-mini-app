@@ -5,12 +5,12 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
-import { Eye, EyeOff, Lock, X } from "lucide-react";
+import { Eye, EyeOff, Lock } from "lucide-react";
 import type React from "react";
 import { useState, useEffect } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "../../ui/drawer";
+import { ResponsiveModal } from "../../ui/responsive-modal";
 
 export function PasswordAuthDrawer() {
   const { banner } = useBanner();
@@ -55,25 +55,14 @@ export function PasswordAuthDrawer() {
   };
 
   return (
-    <Drawer open={quickAuthState?.show ?? false} onOpenChange={(open) => !open && handleDismiss()}>
-      <DrawerContent className="bg-app-background border-app">
-        {/* iOS-style drag handle */}
-        <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-app-tertiary/30" />
-
-        <DrawerHeader className="pb-0 px-4 pt-2">
-          <div className="flex items-center justify-between">
-            <DrawerTitle className="text-lg font-semibold text-app-primary tracking-tight">Welcome Back</DrawerTitle>
-            <DrawerClose className="h-8 w-8 flex items-center justify-center hover:bg-app-surface-hover transition-colors duration-200">
-              <X className="h-4 w-4 text-app-secondary" />
-            </DrawerClose>
-          </div>
-          <DrawerDescription className="text-sm items-start text-app-secondary">
-            Detected an old session for '{quickAuthState?.accountName}'
-          </DrawerDescription>
-        </DrawerHeader>
-
-        <div className="flex-1 overflow-y-auto px-4 pb-6">
-          <form onSubmit={handleSubmit} className="space-y-2 pt-4">
+    <ResponsiveModal
+      open={quickAuthState?.show ?? false}
+      onOpenChange={(open) => !open && handleDismiss()}
+      title="Welcome Back"
+      description={`Detected an old session for '${quickAuthState?.accountName}'`}
+      className="bg-app-background border-app"
+    >
+      <form onSubmit={handleSubmit} className="space-y-2">
             <div className="relative">
               <Input
                 type={showPassword ? "text" : "password"}
@@ -127,8 +116,6 @@ export function PasswordAuthDrawer() {
               </Button>
             </div>
           </form>
-        </div>
-      </DrawerContent>
-    </Drawer>
+    </ResponsiveModal>
   );
 }

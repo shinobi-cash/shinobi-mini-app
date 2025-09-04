@@ -9,9 +9,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAccount } from "wagmi";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useNavigation, type Asset } from "@/contexts/NavigationContext";
-import { ChevronLeft, WalletIcon, ArrowRight } from "lucide-react";
+import { WalletIcon, ArrowRight } from "lucide-react";
 import { Button } from "../../ui/button";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "../../ui/drawer";
+import { ResponsiveModal } from "../../ui/responsive-modal";
 import { AuthStepContent } from "../auth/AuthStepContent";
 import { useAuthSteps } from "@/hooks/auth/useAuthSteps";
 import { isPasskeySupported } from "@/utils/environment";
@@ -199,8 +199,8 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
   };
 
   return (
-    <Drawer 
-      open={open} 
+    <ResponsiveModal
+      open={open}
       onOpenChange={(newOpen) => {
         // Prevent closing when wallet modal is open
         if (!newOpen && isWalletModalOpen) {
@@ -208,33 +208,12 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
         }
         onOpenChange(newOpen);
       }}
+      title={getTitle()}
+      description={getDescription()}
+      showBackButton={canGoBack()}
+      onBack={handleBack}
     >
-      <DrawerContent>
-        <DrawerHeader className="text-left">
-          <div className="flex items-center gap-3">
-            {canGoBack() && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBack}
-                className="p-2"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-            )}
-            <div className="flex-1">
-              <DrawerTitle className="text-left">{getTitle()}</DrawerTitle>
-              <DrawerDescription className="text-left">
-                {getDescription()}
-              </DrawerDescription>
-            </div>
-          </div>
-        </DrawerHeader>
-
-        <div className="px-4 pb-6">
-          {renderStepContent()}
-        </div>
-      </DrawerContent>
-    </Drawer>
+      {renderStepContent()}
+    </ResponsiveModal>
   );
 }

@@ -1,9 +1,9 @@
 import { useBanner } from "@/contexts/BannerContext";
 import type { Note } from "@/lib/storage/types";
 import { formatEthAmount, formatHash } from "@/utils/formatters";
-import { Copy, Info, Loader2, X } from "lucide-react";
+import { Copy, Info, Loader2 } from "lucide-react";
 import { Button } from "../../ui/button";
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "../../ui/drawer";
+import { ResponsiveModal } from "../../ui/responsive-modal";
 
 interface TransactionPreviewDrawerProps {
   isOpen: boolean;
@@ -41,23 +41,15 @@ export const TransactionPreviewDrawer = ({
   // Use consistent ETH formatting with 7 decimal places for precise comparison
 
   return (
-    <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerContent className="bg-app-background border-app">
-        <DrawerHeader className="pb-0 px-4 py-1">
-          <div className="flex items-center justify-between">
-            <DrawerTitle className="text-lg font-semibold text-app-primary tracking-tight">
-              Transaction Preview
-            </DrawerTitle>
-            <DrawerClose className="rounded-full h-7 w-7 flex items-center justify-center bg-app-surface hover:bg-app-surface-hover transition-colors duration-200">
-              <X className="h-3.5 w-3.5 text-app-secondary" />
-            </DrawerClose>
-          </div>
-          <DrawerDescription className="text-sm text-app-secondary">
-            Review your withdrawal details before confirming
-          </DrawerDescription>
-        </DrawerHeader>
+    <ResponsiveModal
+      open={isOpen}
+      onOpenChange={onClose}
+      title="Transaction Preview"
+      description="Review your withdrawal details before confirming"
+      className="bg-app-background border-app"
+    >
 
-        <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
+        <div className="space-y-2">
           {/* Amount Section */}
           <div className="bg-app-surface rounded-xl p-2 border border-app shadow-sm">
             <div className="text-center">
@@ -141,7 +133,7 @@ export const TransactionPreviewDrawer = ({
         </div>
 
         {/* Actions */}
-        <div className="px-4 pb-4">
+        <div className="mt-4">
           <Button
             onClick={onConfirm}
             disabled={isProcessing}
@@ -158,7 +150,6 @@ export const TransactionPreviewDrawer = ({
             )}
           </Button>
         </div>
-      </DrawerContent>
-    </Drawer>
+    </ResponsiveModal>
   );
 };
