@@ -26,11 +26,7 @@ export const DepositScreen = () => {
   // Default to ETH if no asset context (fallback)
   const asset = currentAsset || { symbol: "ETH", name: "Ethereum", icon: "⚫" };
 
-  const breadcrumbs = [
-    { label: "Pool", screen: "home" as const },
-    { label: asset.symbol },
-    { label: "Deposit" },
-  ];
+  const breadcrumbs = [{ label: "Pool", screen: "home" as const }, { label: asset.symbol }, { label: "Deposit" }];
 
   return (
     <>
@@ -60,8 +56,7 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
       try {
         const parsed = parseEther(value);
         if (parsed <= 0n) return "Amount must be positive";
-        if (parsed > availableBalance)
-          return `Amount cannot exceed ${formatEther(availableBalance)} ETH`;
+        if (parsed > availableBalance) return `Amount cannot exceed ${formatEther(availableBalance)} ETH`;
         return "";
       } catch {
         return "Please enter a valid amount";
@@ -83,19 +78,8 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
 
   // ---- Transaction Hooks ----
   const isOnCorrectNetwork = chainId === NETWORK.CHAIN_ID;
-  const { noteData, isGeneratingNote, error: noteError, regenerateNote } = useDepositCommitment(
-    publicKey,
-    accountKey,
-  );
-  const {
-    deposit,
-    reset,
-    clearError,
-    isLoading,
-    isSuccess,
-    error,
-    transactionHash,
-  } = useDepositTransaction();
+  const { noteData, isGeneratingNote, error: noteError, regenerateNote } = useDepositCommitment(publicKey, accountKey);
+  const { deposit, reset, clearError, isLoading, isSuccess, error, transactionHash } = useDepositTransaction();
 
   // ---- Error + Success Tracking ----
   const shownErrorsRef = useRef(new Set<string>());
@@ -143,12 +127,7 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
   const hasNoteData = !!noteData;
   const hasBalance = availableBalance > 0n;
   const canMakeDeposit =
-    !amountError &&
-    amount.trim() &&
-    isOnCorrectNetwork &&
-    hasNoteData &&
-    hasBalance &&
-    !isTransacting;
+    !amountError && amount.trim() && isOnCorrectNetwork && hasNoteData && hasBalance && !isTransacting;
 
   // ---- Button Label ----
   const getButtonLabel = () => {
@@ -214,9 +193,7 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
             <AlertTriangle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
             <div>
               <p className="text-xs font-medium text-orange-800 dark:text-orange-200">Wrong Network</p>
-              <p className="text-xs text-orange-600 dark:text-orange-400">
-                Please switch to {NETWORK.NAME}
-              </p>
+              <p className="text-xs text-orange-600 dark:text-orange-400">Please switch to {NETWORK.NAME}</p>
             </div>
           </div>
         </div>

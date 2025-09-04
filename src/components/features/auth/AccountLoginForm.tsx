@@ -3,6 +3,7 @@
  * Single component for login via passkey (if supported) or password otherwise.
  */
 import { useAuth } from "@/contexts/AuthContext";
+import { AuthError, AuthErrorCode } from "@/lib/errors/AuthError";
 import { showToast } from "@/lib/toast";
 import { isPasskeySupported } from "@/utils/environment";
 import { Fingerprint, Lock } from "lucide-react";
@@ -12,7 +13,6 @@ import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { PasswordField } from "../../ui/password-field";
 import { performPasskeyLogin, performPasswordLogin } from "./helpers/authFlows";
-import { AuthError, AuthErrorCode } from "@/lib/errors/AuthError";
 
 interface AccountLoginFormProps {
   onSuccess: () => void;
@@ -28,7 +28,6 @@ export function AccountLoginForm({ onSuccess }: AccountLoginFormProps) {
 
   // password-only state
   const [password, setPassword] = useState("");
-  
 
   useEffect(() => {
     const id = passkey ? "username-login" : "username-password-login";
@@ -162,7 +161,12 @@ export function AccountLoginForm({ onSuccess }: AccountLoginFormProps) {
         errorText={error ?? undefined}
       />
       {error && <p className="text-red-600 text-xs">{error}</p>}
-      <Button type="submit" disabled={isProcessing || !password.trim() || !accountName.trim()} className="w-full" size="lg">
+      <Button
+        type="submit"
+        disabled={isProcessing || !password.trim() || !accountName.trim()}
+        className="w-full"
+        size="lg"
+      >
         {isProcessing ? (
           <>
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />

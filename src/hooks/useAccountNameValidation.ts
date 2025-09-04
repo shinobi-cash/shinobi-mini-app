@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
 import { storageManager } from "@/lib/storage";
+import { useEffect, useRef, useState } from "react";
 
 async function validateAccountName(name: string): Promise<string | null> {
   const trimmed = name.trim();

@@ -6,21 +6,9 @@ import { StorageProviderAdapter } from "@/lib/services/adapters/StorageProviderA
 import { showToast } from "@/lib/toast";
 import { fetchLatestIndexedBlock } from "@/services/data/indexerService";
 import type React from "react";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
-export type TrackingStatus =
-  | "idle"
-  | "pending"
-  | "waiting"
-  | "synced"
-  | "failed";
+export type TrackingStatus = "idle" | "pending" | "waiting" | "synced" | "failed";
 
 interface TransactionInfo {
   hash: string;
@@ -34,15 +22,12 @@ interface TransactionTrackingContextType {
   trackedTxHash: string | null;
 }
 
-const TransactionTrackingContext =
-  createContext<TransactionTrackingContextType | null>(null);
+const TransactionTrackingContext = createContext<TransactionTrackingContextType | null>(null);
 
 export function useTransactionTracking() {
   const context = useContext(TransactionTrackingContext);
   if (!context) {
-    throw new Error(
-      "useTransactionTracking must be used within TransactionTrackingProvider",
-    );
+    throw new Error("useTransactionTracking must be used within TransactionTrackingProvider");
   }
   return context;
 }
@@ -56,10 +41,8 @@ export function TransactionTrackingProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [trackingStatus, setTrackingStatus] =
-    useState<TrackingStatus>("idle");
-  const [trackedTransaction, setTrackedTransaction] =
-    useState<TransactionInfo | null>(null);
+  const [trackingStatus, setTrackingStatus] = useState<TrackingStatus>("idle");
+  const [trackedTransaction, setTrackedTransaction] = useState<TransactionInfo | null>(null);
   const eventTargetRef = useRef(new EventTarget());
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -143,15 +126,8 @@ export function TransactionTrackingProvider({
         const shortHash = `${trackedTransaction.hash.slice(0, 6)}...${trackedTransaction.hash.slice(-4)}`;
 
         if (receipt.status === "success") {
-          showToast.success(
-            `${shortHash} • Transaction successful! Indexing...`,
-            { duration: 4000 },
-          );
-          setTrackedTransaction((prev) =>
-            prev
-              ? { ...prev, blockNumber: Number(receipt.blockNumber) }
-              : null,
-          );
+          showToast.success(`${shortHash} • Transaction successful! Indexing...`, { duration: 4000 });
+          setTrackedTransaction((prev) => (prev ? { ...prev, blockNumber: Number(receipt.blockNumber) } : null));
           setTrackingStatus("waiting");
         } else {
           showToast.error(`${shortHash} • Transaction failed`, {
@@ -178,11 +154,7 @@ export function TransactionTrackingProvider({
    * Poll until transaction is indexed
    */
   useEffect(() => {
-    if (
-      !trackedTransaction?.hash ||
-      trackingStatus !== "waiting" ||
-      trackedTransaction.blockNumber === null
-    ) {
+    if (!trackedTransaction?.hash || trackingStatus !== "waiting" || trackedTransaction.blockNumber === null) {
       return;
     }
 
@@ -192,27 +164,18 @@ export function TransactionTrackingProvider({
         if (
           indexedBlockInfo &&
           trackedTransaction.blockNumber !== null &&
-          Number.parseInt(indexedBlockInfo.blockNumber) >=
-            trackedTransaction.blockNumber
+          Number.parseInt(indexedBlockInfo.blockNumber) >= trackedTransaction.blockNumber
         ) {
           showToast.success("Transaction indexed!", { duration: 3000 });
           setTrackingStatus("synced");
 
           if (publicKey && accountKey) {
             discoveryService
-              .discoverNotes(
-                publicKey,
-                CONTRACTS.ETH_PRIVACY_POOL,
-                accountKey,
-              )
-              .catch((err) =>
-                console.warn("Auto-sync notes failed:", err),
-              );
+              .discoverNotes(publicKey, CONTRACTS.ETH_PRIVACY_POOL, accountKey)
+              .catch((err) => console.warn("Auto-sync notes failed:", err));
           }
 
-          eventTargetRef.current.dispatchEvent(
-            new CustomEvent("indexed"),
-          );
+          eventTargetRef.current.dispatchEvent(new CustomEvent("indexed"));
 
           // Auto-clear after 10s
           scheduleAutoClear(10000);
@@ -256,9 +219,5 @@ export function TransactionTrackingProvider({
     trackedTxHash: trackedTransaction?.hash || null,
   };
 
-  return (
-    <TransactionTrackingContext.Provider value={contextValue}>
-      {children}
-    </TransactionTrackingContext.Provider>
-  );
+  return <TransactionTrackingContext.Provider value={contextValue}>{children}</TransactionTrackingContext.Provider>;
 }

@@ -33,8 +33,8 @@ export function ResponsiveModal({
   if (isDesktop) {
     return (
       <Dialog modal={!isWalletModalOpen} open={open} onOpenChange={onOpenChange}>
-        <DialogContent 
-          className={className} 
+        <DialogContent
+          className={className}
           showCloseButton={false}
           onPointerDownOutside={(e) => {
             if (isWalletModalOpen) e.preventDefault();

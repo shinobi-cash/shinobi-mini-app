@@ -28,9 +28,7 @@ export function isUserCancelledError(err: unknown): boolean {
   const msg = String((err as any)?.message ?? err);
   const name = String((err as any)?.name ?? "");
   return (
-    name === "AbortError" ||
-    name === "NotAllowedError" ||
-    /canceled|cancelled|not allowed|aborted|denied/i.test(msg)
+    name === "AbortError" || name === "NotAllowedError" || /canceled|cancelled|not allowed|aborted|denied/i.test(msg)
   );
 }
 

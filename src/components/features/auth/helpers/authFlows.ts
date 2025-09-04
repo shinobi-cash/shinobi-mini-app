@@ -1,8 +1,8 @@
+import { AuthError, AuthErrorCode, mapPasskeyError } from "@/lib/errors/AuthError";
 import { storageManager } from "@/lib/storage";
 import { KDF } from "@/lib/storage/services/KeyDerivationService";
 import type { KeyGenerationResult } from "@/utils/crypto";
 import { createHash, restoreFromMnemonic } from "@/utils/crypto";
-import { AuthError, AuthErrorCode, mapPasskeyError } from "@/lib/errors/AuthError";
 
 export async function performPasskeyLogin(accountName: string) {
   const trimmed = accountName.trim();
@@ -37,7 +37,7 @@ export async function performPasswordLogin(accountName: string, password: string
 
   const accountData = await storageManager.getAccountData();
   if (!accountData) {
-  throw new AuthError(AuthErrorCode.INVALID_CREDENTIALS, "Account not found or incorrect password");
+    throw new AuthError(AuthErrorCode.INVALID_CREDENTIALS, "Account not found or incorrect password");
   }
 
   const { publicKey, privateKey, address } = restoreFromMnemonic(accountData.mnemonic);
@@ -49,7 +49,7 @@ export async function performPasskeySetup(accountName: string, generatedKeys: Ke
   const trimmed = accountName.trim();
   const hasPasskey = await storageManager.passkeyExists(trimmed);
   if (hasPasskey) {
-  throw new AuthError(AuthErrorCode.ACCOUNT_ALREADY_EXISTS, "Passkey already exists for this account");
+    throw new AuthError(AuthErrorCode.ACCOUNT_ALREADY_EXISTS, "Passkey already exists for this account");
   }
 
   const userHandle = await createHash(generatedKeys.publicKey);
@@ -91,9 +91,9 @@ export async function performPasswordSetup(accountName: string, generatedKeys: K
 
   try {
     await storageManager.storeAccountData({
-    accountName: trimmed,
-    mnemonic: generatedKeys.mnemonic,
-    createdAt: Date.now(),
+      accountName: trimmed,
+      mnemonic: generatedKeys.mnemonic,
+      createdAt: Date.now(),
     });
   } catch (err) {
     throw new AuthError(AuthErrorCode.DB_ERROR, "Failed to store account data", { cause: err });

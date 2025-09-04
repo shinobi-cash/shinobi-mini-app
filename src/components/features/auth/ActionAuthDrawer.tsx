@@ -134,7 +134,6 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
     }
   }, [isConnected, isWalletModalOpen]);
 
-
   const getActionTitle = () => {
     switch (action) {
       case "deposit":

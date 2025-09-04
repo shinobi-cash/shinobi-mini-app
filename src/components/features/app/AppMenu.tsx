@@ -110,9 +110,7 @@ export function AppMenu() {
                   Sign Out
                 </button>
               ) : (
-                <>
-                  
-                </>
+                <></>
               )}
             </div>
           </div>

@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
-import { showToast } from "@/lib/toast";
 import type { Note } from "@/lib/storage/types";
+import { showToast } from "@/lib/toast";
 import {
   type PreparedWithdrawal,
   type WithdrawalRequest,

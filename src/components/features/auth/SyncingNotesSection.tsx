@@ -2,12 +2,7 @@ import { CONTRACTS } from "@/config/constants";
 import { useAuth } from "@/contexts/AuthContext";
 import { NoteDiscoveryService } from "@/lib/services/NoteDiscoveryService";
 import { StorageProviderAdapter } from "@/lib/services/adapters/StorageProviderAdapter";
-import {
-  ArrowRight,
-  CheckCircle,
-  Loader2,
-  RefreshCw,
-} from "lucide-react";
+import { ArrowRight, CheckCircle, Loader2, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../../ui/button";
 
@@ -15,14 +10,10 @@ interface SyncingNotesSectionProps {
   onSyncComplete: () => void;
 }
 
-export function SyncingNotesSection({
-  onSyncComplete,
-}: SyncingNotesSectionProps) {
+export function SyncingNotesSection({ onSyncComplete }: SyncingNotesSectionProps) {
   const { publicKey, accountKey } = useAuth();
 
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
@@ -46,21 +37,16 @@ export function SyncingNotesSection({
     abortRef.current = new AbortController();
 
     try {
-      await discoveryService.discoverNotes(
-        publicKey,
-        CONTRACTS.ETH_PRIVACY_POOL,
-        accountKey,
-        { signal: abortRef.current.signal }
-      );
+      await discoveryService.discoverNotes(publicKey, CONTRACTS.ETH_PRIVACY_POOL, accountKey, {
+        signal: abortRef.current.signal,
+      });
       setStatus("success");
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
         return; // intentional cancel (cleanup/retry)
       }
       console.error("Sync error:", err);
-      setError(
-        err instanceof Error ? err.message : "Failed to sync notes"
-      );
+      setError(err instanceof Error ? err.message : "Failed to sync notes");
       setStatus("error");
     }
   }, [publicKey, accountKey, discoveryService]);
@@ -95,12 +81,8 @@ export function SyncingNotesSection({
           <CheckCircle className="w-16 h-16 text-green-500" />
         </div>
         <div className="text-center mb-6">
-          <h3 className="text-lg font-semibold text-app-primary mb-2">
-            Welcome to Shinobi!
-          </h3>
-          <p className="text-sm text-app-secondary">
-            Your account is ready to use
-          </p>
+          <h3 className="text-lg font-semibold text-app-primary mb-2">Welcome to Shinobi!</h3>
+          <p className="text-sm text-app-secondary">Your account is ready to use</p>
         </div>
       </>
     );
@@ -123,9 +105,7 @@ export function SyncingNotesSection({
           <RefreshCw className="w-16 h-16 text-red-500" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-app-primary mb-2">
-            Sync Failed
-          </h3>
+          <h3 className="text-lg font-semibold text-app-primary mb-2">Sync Failed</h3>
           <p className="text-sm text-app-secondary mb-4">{error}</p>
         </div>
         <Button onClick={handleRetry} className="w-full">
@@ -143,15 +123,9 @@ export function SyncingNotesSection({
         <Loader2 className="w-16 h-16 text-app-primary animate-spin" />
       </div>
       <div>
-        <h3 className="text-lg font-semibold text-app-primary mb-2">
-          Syncing Your Notes
-        </h3>
-        <p className="text-sm text-app-secondary mb-2">
-          Discovering your privacy notes from the blockchain...
-        </p>
-        <p className="text-xs text-app-tertiary mb-4">
-          This may take a few minutes
-        </p>
+        <h3 className="text-lg font-semibold text-app-primary mb-2">Syncing Your Notes</h3>
+        <p className="text-sm text-app-secondary mb-2">Discovering your privacy notes from the blockchain...</p>
+        <p className="text-xs text-app-tertiary mb-4">This may take a few minutes</p>
       </div>
     </div>
   );

@@ -3,13 +3,13 @@
  * Manages user authentication state with secure key management (no service indirection)
  */
 
+import { useNavigation } from "@/contexts/NavigationContext";
 import { storageManager } from "@/lib/storage";
 import { KDF } from "@/lib/storage/services/KeyDerivationService";
 import { getAccountKey } from "@/utils/accountKey";
 import type { KeyGenerationResult } from "@/utils/crypto";
 import { restoreFromMnemonic } from "@/utils/crypto";
 import { type ReactNode, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigation } from "@/contexts/NavigationContext";
 
 interface AuthState {
   publicKey: string | null;
@@ -48,7 +48,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { setCurrentScreen } = useNavigation();
-  
+
   const [authState, setAuthState] = useState<AuthState>({
     publicKey: null,
     privateKey: null,

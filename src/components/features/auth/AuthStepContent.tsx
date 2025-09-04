@@ -4,10 +4,10 @@ import { isPasskeySupported } from "@/utils/environment";
 import { Fingerprint, Lock } from "lucide-react";
 import { Button } from "../../ui/button";
 import { AccountLoginForm } from "./AccountLoginForm";
+import AccountSetupForm from "./AccountSetupForm";
 import { BackupMnemonicSection } from "./BackupMnemonicSection";
 import { KeyGenerationSection } from "./KeyGenerationSection";
 import { LoginWithBackupPhrase } from "./LoginWithBackupPhrase";
-import AccountSetupForm from "./AccountSetupForm";
 import { SyncingNotesSection } from "./SyncingNotesSection";
 
 interface AuthStepContentProps {
@@ -102,10 +102,7 @@ export function AuthStepContent({
 
     case "setup-convenient":
       return (
-        <AccountSetupForm
-          generatedKeys={generatedKeys || loginKey}
-          onAccountSetupComplete={onAccountSetupComplete}
-        />
+        <AccountSetupForm generatedKeys={generatedKeys || loginKey} onAccountSetupComplete={onAccountSetupComplete} />
       );
 
     case "syncing-notes":

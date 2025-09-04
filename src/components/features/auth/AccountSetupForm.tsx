@@ -5,12 +5,12 @@
  */
 
 import { useAuth } from "@/contexts/AuthContext";
+import { useAccountNameValidation } from "@/hooks/useAccountNameValidation";
+import { AuthError, AuthErrorCode } from "@/lib/errors/AuthError";
 import { storageManager } from "@/lib/storage";
 import { showToast } from "@/lib/toast";
 import type { KeyGenerationResult } from "@/utils/crypto";
-import { useAccountNameValidation } from "@/hooks/useAccountNameValidation";
 import { isPasskeySupported } from "@/utils/environment";
-import { AuthError, AuthErrorCode } from "@/lib/errors/AuthError";
 import { AlertCircle, Fingerprint, Lock } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
@@ -24,34 +24,21 @@ interface AccountSetupFormProps {
   onAccountSetupComplete: () => void;
 }
 
-export default function AccountSetupForm({
-  generatedKeys,
-  onAccountSetupComplete,
-}: AccountSetupFormProps) {
+export default function AccountSetupForm({ generatedKeys, onAccountSetupComplete }: AccountSetupFormProps) {
   const shouldShowPasskey = isPasskeySupported();
 
   if (shouldShowPasskey) {
-    return (
-      <PasskeySetupForm 
-        generatedKeys={generatedKeys} 
-        onSuccess={onAccountSetupComplete} 
-      />
-    );
+    return <PasskeySetupForm generatedKeys={generatedKeys} onSuccess={onAccountSetupComplete} />;
   }
 
-  return (
-    <PasswordSetupForm 
-      generatedKeys={generatedKeys} 
-      onSuccess={onAccountSetupComplete} 
-    />
-  );
+  return <PasswordSetupForm generatedKeys={generatedKeys} onSuccess={onAccountSetupComplete} />;
 }
 
 // Passkey Setup Form Component
-function PasskeySetupForm({ 
-  generatedKeys, 
-  onSuccess 
-}: { 
+function PasskeySetupForm({
+  generatedKeys,
+  onSuccess,
+}: {
   generatedKeys: KeyGenerationResult | null;
   onSuccess: () => void;
 }) {
@@ -168,10 +155,10 @@ function PasskeySetupForm({
 }
 
 // Password Setup Form Component
-function PasswordSetupForm({ 
-  generatedKeys, 
-  onSuccess 
-}: { 
+function PasswordSetupForm({
+  generatedKeys,
+  onSuccess,
+}: {
   generatedKeys: KeyGenerationResult | null;
   onSuccess: () => void;
 }) {
