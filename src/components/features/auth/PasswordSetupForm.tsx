@@ -5,16 +5,16 @@
  */
 
 import { useAuth } from "@/contexts/AuthContext";
-import { KDF } from "@/lib/storage/services/KeyDerivationService";
 import { storageManager } from "@/lib/storage";
 import { showToast } from "@/lib/toast";
-import { validateAccountName } from "@/utils/validation";
 import type { KeyGenerationResult } from "@/utils/crypto";
+import { validateAccountName } from "@/utils/validation";
 import { AlertCircle, Eye, EyeOff, Lock } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
+import { performPasswordSetup } from "./helpers/authFlows";
 
 interface PasswordSetupFormProps {
   generatedKeys: KeyGenerationResult | null;
@@ -102,22 +102,7 @@ export function PasswordSetupForm({ generatedKeys, onSuccess }: PasswordSetupFor
     setIsProcessing(true);
 
     try {
-      // Derive encryption key from password
-      const { symmetricKey } = await KDF.deriveKeyFromPassword(password, accountName.trim());
-
-      // Initialize session with the derived key
-      await storageManager.initializeAccountSession(accountName.trim(), symmetricKey);
-
-      // Store account data using the session
-      const accountData = {
-        accountName: accountName.trim(),
-        mnemonic: generatedKeys.mnemonic,
-        createdAt: Date.now(),
-      };
-      await storageManager.storeAccountData(accountData);
-
-      // Store session info for future restoration
-      KDF.storeSessionInfo(accountName.trim(), "password");
+      await performPasswordSetup(accountName, generatedKeys, password);
 
       // Set keys in auth context
       setKeys(generatedKeys);

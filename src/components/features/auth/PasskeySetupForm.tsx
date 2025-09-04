@@ -5,15 +5,15 @@
  */
 
 import { useAuth } from "@/contexts/AuthContext";
-import { KDF } from "@/lib/storage/services/KeyDerivationService";
 import { storageManager } from "@/lib/storage";
 import { showToast } from "@/lib/toast";
-import { type KeyGenerationResult, createHash } from "@/utils/crypto";
+import type { KeyGenerationResult } from "@/utils/crypto";
 import { validateAccountName } from "@/utils/validation";
 import { AlertCircle, Fingerprint } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
+import { performPasskeySetup } from "./helpers/authFlows";
 
 interface PasskeySetupFormProps {
   generatedKeys: KeyGenerationResult | null;
@@ -54,51 +54,23 @@ export function PasskeySetupForm({ generatedKeys, onSuccess }: PasskeySetupFormP
       return;
     }
 
-    // Check for existing passkey
-    const hasPasskey = await storageManager.passkeyExists(accountName.trim());
-    if (hasPasskey) {
-      setSetupError("Passkey already exists for this account");
-      return;
-    }
-
     setIsProcessing(true);
 
     try {
-      // Derive public key hash as user handle for WebAuthn
-      const { publicKey } = generatedKeys;
-      const userHandle = await createHash(publicKey);
+      await performPasskeySetup(accountName, generatedKeys);
 
-      // Create passkey credential
-      const { credentialId } = await KDF.createPasskeyCredential(accountName.trim(), userHandle);
-
-      // Derive encryption key from the passkey
-      const { symmetricKey } = await KDF.deriveKeyFromPasskey(accountName.trim(), credentialId);
-
-      // Initialize session with the derived key
-      await storageManager.initializeAccountSession(accountName.trim(), symmetricKey);
-
-      // Store account data using the session
-      const accountData = {
-        accountName: accountName.trim(),
-        mnemonic: generatedKeys.mnemonic,
-        createdAt: Date.now(),
-      };
-      await storageManager.storeAccountData(accountData);
-
-      // Store passkey metadata
-      const passkeyData = {
-        accountName: accountName.trim(),
-        credentialId: credentialId,
-        publicKeyHash: userHandle,
-        created: Date.now(),
-      };
-      await storageManager.storePasskeyData(passkeyData);
-
-      // Store session info for restoration
-      KDF.storeSessionInfo(accountName.trim(), "passkey", { credentialId });
-
-      // Set keys in auth context
+      // Set keys in auth context for immediate use
       setKeys(generatedKeys);
+
+      // Optionally initialize sync baseline for new account
+      if (generatedKeys.publicKey) {
+        try {
+          await storageManager.initializeSyncBaseline(generatedKeys.publicKey);
+        } catch (error) {
+          console.warn("Failed to initialize sync baseline:", error);
+          // Non-fatal
+        }
+      }
 
       showToast.auth.success("Account created");
       onSuccess();

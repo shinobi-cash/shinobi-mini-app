@@ -4,15 +4,13 @@
  */
 
 import { useAuth } from "@/contexts/AuthContext";
-import { KDF } from "@/lib/storage/services/KeyDerivationService";
-import { storageManager } from "@/lib/storage";
 import { showToast } from "@/lib/toast";
-import { restoreFromMnemonic } from "@/utils/crypto";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
+import { performPasswordLogin } from "./helpers/authFlows";
 
 interface PasswordLoginSectionProps {
   onSuccess: () => void;
@@ -46,28 +44,8 @@ export function PasswordLoginSection({ onSuccess }: PasswordLoginSectionProps) {
 
     try {
       // Derive encryption key from password
-      const { symmetricKey } = await KDF.deriveKeyFromPassword(password, accountName.trim());
-
-      // Initialize account-scoped session with derived key
-      await storageManager.initializeAccountSession(accountName.trim(), symmetricKey);
-
-      // Retrieve and restore account keys
-      const accountData = await storageManager.getAccountData();
-      if (!accountData) {
-        throw new Error("Account not found or incorrect password");
-      }
-
-      // Derive all keys from the stored mnemonic
-      const { publicKey, privateKey, address } = restoreFromMnemonic(accountData.mnemonic);
-      setKeys({
-        publicKey,
-        privateKey,
-        mnemonic: accountData.mnemonic,
-        address,
-      });
-
-      // Store session info for future restoration
-      KDF.storeSessionInfo(accountName.trim(), "password");
+      const result = await performPasswordLogin(accountName, password);
+      setKeys(result);
 
       showToast.auth.success("Login");
       onSuccess();

@@ -4,14 +4,12 @@
  */
 
 import { useAuth } from "@/contexts/AuthContext";
-import { KDF } from "@/lib/storage/services/KeyDerivationService";
-import { storageManager } from "@/lib/storage";
 import { showToast } from "@/lib/toast";
-import { restoreFromMnemonic } from "@/utils/crypto";
 import { Fingerprint } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
+import { performPasskeyLogin } from "./helpers/authFlows";
 
 interface PasskeyLoginSectionProps {
   onSuccess: () => void;
@@ -40,35 +38,8 @@ export function PasskeyLoginSection({ onSuccess }: PasskeyLoginSectionProps) {
     setError(null);
 
     try {
-      // Get passkey data for this account
-      const passkeyData = await storageManager.getPasskeyData(accountName.trim());
-      if (!passkeyData) {
-        throw new Error(`No passkey found for account '${accountName.trim()}'. Please create one first.`);
-      }
-
-      // Derive encryption key from passkey
-      const { symmetricKey } = await KDF.deriveKeyFromPasskey(accountName.trim(), passkeyData.credentialId);
-
-      // Initialize account-scoped session
-      await storageManager.initializeAccountSession(accountName.trim(), symmetricKey);
-
-      // Retrieve and restore account keys
-      const accountData = await storageManager.getAccountData();
-      if (!accountData) {
-        throw new Error("Account data not found");
-      }
-
-      // Derive all keys from the stored mnemonic
-      const { publicKey, privateKey, address } = restoreFromMnemonic(accountData.mnemonic);
-      setKeys({
-        publicKey,
-        privateKey,
-        mnemonic: accountData.mnemonic,
-        address,
-      });
-
-      // Store session info for future restoration
-      KDF.storeSessionInfo(accountName.trim(), "passkey", { credentialId: passkeyData.credentialId });
+      const result = await performPasskeyLogin(accountName);
+      setKeys(result);
 
       showToast.auth.success("Passkey login");
       onSuccess();

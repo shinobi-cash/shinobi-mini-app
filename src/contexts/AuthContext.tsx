@@ -5,9 +5,9 @@
 
 import { storageManager } from "@/lib/storage";
 import { KDF } from "@/lib/storage/services/KeyDerivationService";
+import { getAccountKey } from "@/utils/accountKey";
 import type { KeyGenerationResult } from "@/utils/crypto";
 import { restoreFromMnemonic } from "@/utils/crypto";
-import { getAccountKey } from "@/utils/accountKey";
 import { type ReactNode, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 interface AuthState {

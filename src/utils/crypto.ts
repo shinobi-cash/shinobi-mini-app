@@ -13,7 +13,6 @@ export interface KeyGenerationResult {
   address: string;
 }
 
-
 /**
  * Generate deterministic keys directly from random seed
  * This bypasses the passkey signing step for Farcaster environments
