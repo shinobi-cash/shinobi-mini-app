@@ -8,8 +8,8 @@ import { CONTRACTS } from "@/config/constants";
 import { useAuth } from "@/contexts/AuthContext";
 import { NoteDiscoveryService } from "@/lib/services/NoteDiscoveryService";
 import { StorageProviderAdapter } from "@/lib/services/adapters/StorageProviderAdapter";
-import { CheckCircle, Loader2, RefreshCw, ArrowRight, FileText, Coins } from "lucide-react";
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { ArrowRight, CheckCircle, Coins, FileText, Loader2, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "../../ui/button";
 
 interface SyncingNotesSectionProps {
@@ -69,16 +69,15 @@ export function SyncingNotesSection({ onSyncComplete, actionContext }: SyncingNo
         },
       });
 
-      setProgress(prev => ({ ...prev, complete: true }));
+      setProgress((prev) => ({ ...prev, complete: true }));
       setIsRunning(false);
-
     } catch (error) {
       console.error("Failed to sync notes:", error);
       setIsRunning(false);
-      setProgress(prev => ({ 
-        ...prev, 
+      setProgress((prev) => ({
+        ...prev,
         complete: false,
-        error: error instanceof Error ? error.message : "Failed to sync notes"
+        error: error instanceof Error ? error.message : "Failed to sync notes",
       }));
       // Error is already shown in the UI inline
     }
@@ -90,8 +89,8 @@ export function SyncingNotesSection({ onSyncComplete, actionContext }: SyncingNo
   }, [startSync]);
 
   const handleRetry = () => {
-    setIsRunning(false); // Reset running state 
-    setProgress(prev => ({ ...prev, error: undefined, complete: false })); // Clear error
+    setIsRunning(false); // Reset running state
+    setProgress((prev) => ({ ...prev, error: undefined, complete: false })); // Clear error
     startSync();
   };
 
@@ -109,8 +108,8 @@ export function SyncingNotesSection({ onSyncComplete, actionContext }: SyncingNo
           <div className="text-center mb-6">
             <h3 className="text-lg font-semibold text-app-primary mb-2">Welcome to Shinobi!</h3>
             <p className="text-sm text-app-secondary">
-              {progress.depositsMatched > 0 
-                ? `Found ${progress.depositsMatched} privacy notes` 
+              {progress.depositsMatched > 0
+                ? `Found ${progress.depositsMatched} privacy notes`
                 : "Your account is ready to use"}
             </p>
           </div>
@@ -123,20 +122,12 @@ export function SyncingNotesSection({ onSyncComplete, actionContext }: SyncingNo
           <div className="text-center space-y-4">
             {baseContent}
             <div className="space-y-2">
-              <Button 
-                onClick={actionContext.onNavigateToAction || onSyncComplete} 
-                className="w-full" 
-                size="lg"
-              >
+              <Button onClick={actionContext.onNavigateToAction || onSyncComplete} className="w-full" size="lg">
                 <Coins className="w-4 h-4 mr-2" />
                 Go to Deposit
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={onSyncComplete} 
-                className="w-full"
-              >
+              <Button variant="outline" onClick={onSyncComplete} className="w-full">
                 Get Started
               </Button>
             </div>
@@ -149,20 +140,12 @@ export function SyncingNotesSection({ onSyncComplete, actionContext }: SyncingNo
           <div className="text-center space-y-4">
             {baseContent}
             <div className="space-y-2">
-              <Button 
-                onClick={actionContext.onNavigateToAction || onSyncComplete} 
-                className="w-full" 
-                size="lg"
-              >
+              <Button onClick={actionContext.onNavigateToAction || onSyncComplete} className="w-full" size="lg">
                 <FileText className="w-4 h-4 mr-2" />
                 View My Notes
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={onSyncComplete} 
-                className="w-full"
-              >
+              <Button variant="outline" onClick={onSyncComplete} className="w-full">
                 Get Started
               </Button>
             </div>
@@ -198,17 +181,10 @@ export function SyncingNotesSection({ onSyncComplete, actionContext }: SyncingNo
           <p className="text-sm text-app-secondary mb-4">{progress.error}</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleSkip}
-            className="flex-1"
-          >
+          <Button variant="outline" onClick={handleSkip} className="flex-1">
             Skip for Now
           </Button>
-          <Button
-            onClick={handleRetry}
-            className="flex-1"
-          >
+          <Button onClick={handleRetry} className="flex-1">
             <RefreshCw className="w-4 h-4 mr-2" />
             Retry
           </Button>
@@ -222,15 +198,11 @@ export function SyncingNotesSection({ onSyncComplete, actionContext }: SyncingNo
       <div className="flex justify-center">
         <Loader2 className="w-16 h-16 text-app-primary animate-spin" />
       </div>
-      
+
       <div>
         <h3 className="text-lg font-semibold text-app-primary mb-2">Syncing Your Notes</h3>
-        <p className="text-sm text-app-secondary mb-2">
-          Discovering your privacy notes from the blockchain...
-        </p>
-        <p className="text-xs text-app-tertiary mb-4">
-          This may take a few minutes
-        </p>
+        <p className="text-sm text-app-secondary mb-2">Discovering your privacy notes from the blockchain...</p>
+        <p className="text-xs text-app-tertiary mb-4">This may take a few minutes</p>
       </div>
 
       {/* Progress Stats */}
@@ -250,12 +222,7 @@ export function SyncingNotesSection({ onSyncComplete, actionContext }: SyncingNo
       </div>
 
       {/* Skip option for impatient users */}
-      <Button
-        variant="ghost"
-        onClick={handleSkip}
-        className="text-app-tertiary hover:text-app-secondary"
-        size="sm"
-      >
+      <Button variant="ghost" onClick={handleSkip} className="text-app-tertiary hover:text-app-secondary" size="sm">
         Skip syncing for now
       </Button>
     </div>

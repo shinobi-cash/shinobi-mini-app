@@ -53,8 +53,8 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
       onNavigateToAction: () => {
         onOpenChange(false);
         navigateToScreen(getTargetScreen(action), asset);
-      }
-    }
+      },
+    },
   });
 
   // Reset state when drawer closes
@@ -76,7 +76,7 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
         // Stay in auth step to let sync component show and complete
         return;
       }
-      
+
       // For other completed auth steps, check if wallet is needed
       if (action === "deposit" && !isConnected) {
         setCurrentActionStep("wallet");
@@ -93,7 +93,17 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
       onOpenChange(false);
       navigateToScreen(getTargetScreen(action), asset);
     }
-  }, [open, isAuthenticated, isConnected, currentActionStep, action, asset, navigateToScreen, onOpenChange, authSteps.currentStep]);
+  }, [
+    open,
+    isAuthenticated,
+    isConnected,
+    currentActionStep,
+    action,
+    asset,
+    navigateToScreen,
+    onOpenChange,
+    authSteps.currentStep,
+  ]);
 
   const getTargetScreen = (actionType: ActionType): "deposit" | "my-notes" => {
     return actionType;

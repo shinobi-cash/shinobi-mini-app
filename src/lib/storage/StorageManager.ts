@@ -3,6 +3,8 @@
  * Maintains exact same API as current noteCache for seamless replacement
  */
 
+import { CONTRACTS } from "@/config/constants";
+import { fetchActivities } from "@/services/data/indexerService";
 import { localStorageAdapter, sessionStorageAdapter } from "./adapters/BrowserStorageAdapter";
 import {
   accountStorageAdapter,
@@ -18,8 +20,6 @@ import type {
   SessionInfo,
 } from "./interfaces/IDataTypes";
 import { AccountRepository } from "./repositories/AccountRepository";
-import { fetchActivities } from "@/services/data/indexerService";
-import { CONTRACTS } from "@/config/constants";
 import { NotesRepository } from "./repositories/NotesRepository";
 import { PasskeyRepository } from "./repositories/PasskeyRepository";
 import { SessionRepository } from "./repositories/SessionRepository";
@@ -199,7 +199,7 @@ class StorageManager {
   }
 
   // ============ NEW ACCOUNT SYNC BASELINE ============
-  
+
   /**
    * Initialize sync baseline for new accounts to avoid scanning historical data
    * Sets the current blockchain cursor as the starting point for future syncs
@@ -209,7 +209,7 @@ class StorageManager {
       // Get the most recent cursor from the indexer (latest activity)
       const result = await fetchActivities(poolAddress, 1, undefined, "desc");
       const currentCursor = result.pageInfo.endCursor;
-      
+
       // Store empty notes with current cursor as baseline
       const baselineData = {
         poolAddress,
@@ -226,7 +226,7 @@ class StorageManager {
         poolAddress,
         baselineData.notes,
         baselineData.lastUsedDepositIndex,
-        baselineData.lastProcessedCursor
+        baselineData.lastProcessedCursor,
       );
 
       console.log(`Initialized sync baseline for new account with cursor: ${currentCursor}`);

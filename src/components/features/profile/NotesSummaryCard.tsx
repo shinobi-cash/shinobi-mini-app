@@ -13,15 +13,15 @@ interface NotesSummaryCardProps {
   newNotesFound?: number;
 }
 
-export function NotesSummaryCard({ 
-  unspentNotes, 
-  totalNotes, 
-  isRediscovering, 
+export function NotesSummaryCard({
+  unspentNotes,
+  totalNotes,
+  isRediscovering,
   onRediscover,
   isScanning,
   scanProgress,
   syncError,
-  newNotesFound
+  newNotesFound,
 }: NotesSummaryCardProps) {
   const spentNotes = totalNotes - unspentNotes;
 
@@ -31,26 +31,26 @@ export function NotesSummaryCard({
       return {
         icon: <Loader2 className="w-3 h-3 animate-spin text-blue-500" />,
         text: "Scanning",
-        className: "text-blue-600"
+        className: "text-blue-600",
       };
     }
-    
+
     if (syncError) {
       return {
         icon: <AlertCircle className="w-3 h-3 text-red-500" />,
         text: "Failed",
-        className: "text-red-600"
+        className: "text-red-600",
       };
     }
-    
+
     if (newNotesFound && newNotesFound > 0) {
       return {
         icon: <CheckCircle className="w-3 h-3 text-green-500" />,
         text: `+${newNotesFound} new`,
-        className: "text-green-600"
+        className: "text-green-600",
       };
     }
-    
+
     return null;
   };
 
@@ -70,7 +70,7 @@ export function NotesSummaryCard({
               <p className="text-xl font-bold text-app-primary tabular-nums">{spentNotes}</p>
             </div>
           </div>
-          
+
           <div className="flex flex-col">
             <p className="text-sm font-semibold text-app-secondary mb-1">Status</p>
             <div className="flex items-center gap-1.5 justify-end">

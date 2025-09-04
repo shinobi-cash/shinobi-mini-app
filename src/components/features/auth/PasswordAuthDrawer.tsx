@@ -4,13 +4,13 @@
  */
 
 import { useAuth } from "@/contexts/AuthContext";
+import { showToast } from "@/lib/toast";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { ResponsiveModal } from "../../ui/responsive-modal";
-import { showToast } from "@/lib/toast";
 
 export function PasswordAuthDrawer() {
   const { quickAuthState, handleQuickPasswordAuth, dismissQuickAuth } = useAuth();
@@ -89,7 +89,6 @@ export function PasswordAuthDrawer() {
         </div>
 
         {error && <p className="text-red-600 text-sm">{error}</p>}
-        
 
         <div className="flex gap-2">
           <Button type="button" variant="outline" onClick={handleDismiss} disabled={isProcessing} className="flex-1">

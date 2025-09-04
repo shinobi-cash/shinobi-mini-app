@@ -4,7 +4,7 @@ import { useNavigation } from "@/contexts/NavigationContext";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { useModalWithSelection } from "@/hooks/ui/useModalState";
 import { useNotes } from "@/hooks/useNoteDiscovery";
-import type { NoteChain, Note } from "@/lib/storage/types";
+import type { Note, NoteChain } from "@/lib/storage/types";
 import { useEffect, useMemo, useState } from "react";
 import { NoteChainDetailDrawer } from "../features/profile/NoteChainDetailDrawer";
 import { NotesHistorySection } from "../features/profile/NotesHistorySection";
@@ -117,7 +117,7 @@ const NotesContent = ({
           <BackButton onClick={exitWithdrawal} />
           <h1 className="text-lg font-semibold text-app-primary tracking-tight">Withdraw ETH</h1>
         </div>
-        
+
         <div className="flex-1 flex flex-col min-h-0">
           <WithdrawalForm
             asset={{ symbol: "ETH", name: "Ethereum", icon: "⚫" }}
@@ -167,4 +167,3 @@ const NotesContent = ({
     </div>
   );
 };
-

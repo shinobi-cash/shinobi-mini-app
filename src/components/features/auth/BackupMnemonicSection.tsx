@@ -27,7 +27,6 @@ export function BackupMnemonicSection({ generatedKeys, onBackupMnemonicComplete 
     }
   };
 
-
   return (
     <div className="space-y-2">
       {/* Mnemonic Display */}

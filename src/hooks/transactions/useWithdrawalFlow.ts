@@ -79,7 +79,7 @@ export function useWithdrawalFlow({ note, onTransactionSuccess }: UseWithdrawalF
 
       setShowPreview(false);
       setIsExecuting(false);
-      
+
       // Call success callback if provided
       onTransactionSuccess?.();
     } catch (error) {

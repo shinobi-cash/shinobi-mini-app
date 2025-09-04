@@ -140,9 +140,9 @@ export function WithdrawalForm({ asset, preSelectedNote, onTransactionSuccess }:
     label: "dummy",
   };
 
-  const withdrawalFlow = useWithdrawalFlow({ 
+  const withdrawalFlow = useWithdrawalFlow({
     note: selectedNote || dummyNote,
-    onTransactionSuccess
+    onTransactionSuccess,
   });
 
   const withdrawalAmounts = useMemo(() => {
@@ -198,7 +198,7 @@ export function WithdrawalForm({ asset, preSelectedNote, onTransactionSuccess }:
           <Button
             variant="outline"
             onClick={() => !preSelectedNote && setIsNoteDropdownOpen(!isNoteDropdownOpen)}
-            className={`w-full h-16 p-4 justify-between text-left rounded-xl has-[>svg]:px-4 ${preSelectedNote ? 'cursor-default' : ''}`}
+            className={`w-full h-16 p-4 justify-between text-left rounded-xl has-[>svg]:px-4 ${preSelectedNote ? "cursor-default" : ""}`}
             aria-labelledby="from-label"
             aria-haspopup={preSelectedNote ? undefined : "listbox"}
             aria-expanded={preSelectedNote ? undefined : isNoteDropdownOpen}

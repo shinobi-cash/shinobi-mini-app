@@ -1,5 +1,5 @@
 import { type KeyGenerationResult, generateKeysFromRandomSeed } from "@/utils/crypto";
-import { Key, AlertCircle } from "lucide-react";
+import { AlertCircle, Key } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../../ui/button";
 

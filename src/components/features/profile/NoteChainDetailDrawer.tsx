@@ -12,12 +12,7 @@ interface NoteChainDetailDrawerProps {
   onWithdrawClick?: (noteChain: NoteChain) => void;
 }
 
-export function NoteChainDetailDrawer({ 
-  noteChain, 
-  open, 
-  onOpenChange, 
-  onWithdrawClick
-}: NoteChainDetailDrawerProps) {
+export function NoteChainDetailDrawer({ noteChain, open, onOpenChange, onWithdrawClick }: NoteChainDetailDrawerProps) {
   if (!noteChain) return null;
   const lastNote = noteChain[noteChain.length - 1];
 

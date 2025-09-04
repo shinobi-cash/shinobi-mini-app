@@ -6,11 +6,11 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { KDF } from "@/lib/auth/keyDerivation";
 import { storageManager } from "@/lib/storage";
+import { showToast } from "@/lib/toast";
 import { type KeyGenerationResult, createHash } from "@/utils/crypto";
-import { Fingerprint, AlertCircle } from "lucide-react";
+import { AlertCircle, Fingerprint } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../../ui/button";
-import { showToast } from "@/lib/toast";
 
 interface PasskeySetupSectionProps {
   accountName: string;
@@ -109,22 +109,22 @@ export function PasskeySetupSection({
       )}
 
       <Button
-      onClick={handlePasskeySetup}
-      disabled={isProcessing || !!accountNameError || !accountName.trim()}
-      className="w-full"
-      size="lg"
-    >
-      {isProcessing ? (
-        <>
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-          Setting up Passkey...
-        </>
-      ) : (
-        <>
-          <Fingerprint className="w-4 h-4 mr-2" />
-          Set up Passkey
-        </>
-      )}
+        onClick={handlePasskeySetup}
+        disabled={isProcessing || !!accountNameError || !accountName.trim()}
+        className="w-full"
+        size="lg"
+      >
+        {isProcessing ? (
+          <>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+            Setting up Passkey...
+          </>
+        ) : (
+          <>
+            <Fingerprint className="w-4 h-4 mr-2" />
+            Set up Passkey
+          </>
+        )}
       </Button>
     </div>
   );

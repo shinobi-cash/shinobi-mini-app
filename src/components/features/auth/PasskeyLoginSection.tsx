@@ -4,9 +4,9 @@
  */
 
 import { useAuth } from "@/contexts/AuthContext";
-import { showToast } from "@/lib/toast";
 import { KDF } from "@/lib/auth/keyDerivation";
 import { storageManager } from "@/lib/storage";
+import { showToast } from "@/lib/toast";
 import { restoreFromMnemonic } from "@/utils/crypto";
 import { Fingerprint } from "lucide-react";
 import { useEffect, useState } from "react";

@@ -7,8 +7,8 @@ import { AuthSection } from "./AuthSection";
 import { BackupMnemonicSection } from "./BackupMnemonicSection";
 import { KeyGenerationSection } from "./KeyGenerationSection";
 import { LoginWithBackupPhrase } from "./LoginWithBackupPhrase";
-import { SyncingNotesSection } from "./SyncingNotesSection";
 import SetupConvenientAuth from "./SetupConvenientAuth";
+import { SyncingNotesSection } from "./SyncingNotesSection";
 
 interface AuthStepContentProps {
   currentStep: AuthStep;

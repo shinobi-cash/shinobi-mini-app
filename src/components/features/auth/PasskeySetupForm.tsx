@@ -7,12 +7,12 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { KDF } from "@/lib/auth/keyDerivation";
 import { storageManager } from "@/lib/storage";
+import { showToast } from "@/lib/toast";
 import { type KeyGenerationResult, createHash } from "@/utils/crypto";
-import { Fingerprint, AlertCircle } from "lucide-react";
+import { AlertCircle, Fingerprint } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
-import { showToast } from "@/lib/toast";
 
 interface PasskeySetupFormProps {
   generatedKeys: KeyGenerationResult | null;
@@ -176,7 +176,6 @@ export function PasskeySetupForm({ generatedKeys, onSuccess }: PasskeySetupFormP
           <p className="text-red-700 text-sm">{setupError}</p>
         </div>
       )}
-
 
       <Button
         type="submit"

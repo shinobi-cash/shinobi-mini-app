@@ -25,7 +25,6 @@ export const showToast = {
     });
   },
 
-
   // Utility for authentication actions
   auth: {
     success: (action: string) => {

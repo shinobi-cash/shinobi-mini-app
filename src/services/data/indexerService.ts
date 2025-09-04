@@ -60,8 +60,7 @@ export async function fetchActivities(
 export async function fetchStateTreeLeaves(poolId: string) {
   try {
     // Use SDK's built-in method that handles pagination automatically
-    return  await indexerClient.getAllStateTreeLeaves(poolId);
-   
+    return await indexerClient.getAllStateTreeLeaves(poolId);
   } catch (error) {
     console.error("Failed to fetch state tree leaves:", error);
     throw new Error("Failed to fetch state tree data from indexer");

@@ -7,13 +7,13 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { KDF } from "@/lib/auth/keyDerivation";
 import { storageManager } from "@/lib/storage";
+import { showToast } from "@/lib/toast";
 import type { KeyGenerationResult } from "@/utils/crypto";
-import { Eye, EyeOff, Lock, AlertCircle } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Lock } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
-import { showToast } from "@/lib/toast";
 
 interface PasswordSetupFormProps {
   generatedKeys: KeyGenerationResult | null;
@@ -251,7 +251,6 @@ export function PasswordSetupForm({ generatedKeys, onSuccess }: PasswordSetupFor
           <p className="text-red-700 text-sm">{setupError}</p>
         </div>
       )}
-
 
       <div className="text-xs text-app-tertiary space-y-1">
         <p>Password requirements:</p>
