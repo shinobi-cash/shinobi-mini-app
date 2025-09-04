@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { performPasskeySetup } from "./helpers/authFlows";
+import { AuthError, AuthErrorCode } from "@/lib/errors/AuthError";
 
 interface PasskeySetupFormProps {
   generatedKeys: KeyGenerationResult | null;
@@ -66,8 +67,16 @@ export function PasskeySetupForm({ generatedKeys, onSuccess }: PasskeySetupFormP
       onSuccess();
     } catch (error) {
       console.error("Passkey setup failed:", error);
-      if (error instanceof Error && error.message.includes("PRF")) {
-        setSetupError("Device not supported - passkeys with PRF extension required");
+      if (error instanceof AuthError) {
+        if (error.code === AuthErrorCode.PASSKEY_PRF_UNSUPPORTED) {
+          setSetupError("Device not supported - passkeys with PRF extension required");
+        } else if (error.code === AuthErrorCode.ACCOUNT_ALREADY_EXISTS) {
+          setSetupError("Passkey already exists for this account");
+        } else if (error.code === AuthErrorCode.PASSKEY_CANCELLED) {
+          setSetupError("Setup was cancelled. Please try again.");
+        } else {
+          setSetupError(error.message || "Passkey setup failed. Please try again.");
+        }
       } else {
         setSetupError("Passkey setup failed. Please try again.");
       }

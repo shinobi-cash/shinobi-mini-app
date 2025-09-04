@@ -12,6 +12,7 @@ import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { PasswordField } from "../../ui/password-field";
 import { performPasskeyLogin, performPasswordLogin } from "./helpers/authFlows";
+import { AuthError, AuthErrorCode } from "@/lib/errors/AuthError";
 
 interface ConvenientLoginProps {
   onSuccess: () => void;
@@ -49,18 +50,23 @@ export function ConvenientLogin({ onSuccess }: ConvenientLoginProps) {
       onSuccess();
     } catch (err) {
       console.error("Passkey login failed:", err);
-      let errorMessage = "Authentication failed. Please try again.";
-      if (err instanceof Error) {
-        if (err.message.includes("PRF")) {
-          errorMessage =
-            "Your device does not support advanced passkey features. Please use password authentication instead.";
-        } else if (err.message.includes("No passkey found")) {
-          errorMessage = err.message;
-        } else if (err.message.includes("canceled") || err.message.includes("not allowed")) {
-          errorMessage = "Authentication was cancelled. Please try again.";
+      let msg = "Authentication failed. Please try again.";
+      if (err instanceof AuthError) {
+        switch (err.code) {
+          case AuthErrorCode.PASSKEY_PRF_UNSUPPORTED:
+            msg = "Your device doesn’t support required passkey features. Use password instead.";
+            break;
+          case AuthErrorCode.PASSKEY_NOT_FOUND:
+            msg = err.message;
+            break;
+          case AuthErrorCode.PASSKEY_CANCELLED:
+            msg = "Authentication was cancelled. Please try again.";
+            break;
+          default:
+            msg = err.message || msg;
         }
       }
-      setError(errorMessage);
+      setError(msg);
     } finally {
       setIsProcessing(false);
     }
@@ -81,8 +87,8 @@ export function ConvenientLogin({ onSuccess }: ConvenientLoginProps) {
       onSuccess();
     } catch (err) {
       console.error("Password login failed:", err);
-      const errorMessage = err instanceof Error ? err.message : "Authentication failed";
-      setError(errorMessage);
+      const msg = err instanceof AuthError ? err.message : err instanceof Error ? err.message : "Authentication failed";
+      setError(msg);
     } finally {
       setIsProcessing(false);
     }

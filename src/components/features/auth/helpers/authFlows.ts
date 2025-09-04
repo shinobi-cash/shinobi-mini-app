@@ -2,19 +2,28 @@ import { storageManager } from "@/lib/storage";
 import { KDF } from "@/lib/storage/services/KeyDerivationService";
 import type { KeyGenerationResult } from "@/utils/crypto";
 import { createHash, restoreFromMnemonic } from "@/utils/crypto";
+import { AuthError, AuthErrorCode, mapPasskeyError } from "@/lib/errors/AuthError";
 
 export async function performPasskeyLogin(accountName: string) {
   const trimmed = accountName.trim();
   const passkeyData = await storageManager.getPasskeyData(trimmed);
   if (!passkeyData) {
-    throw new Error(`No passkey found for account '${trimmed}'. Please create one first.`);
+    throw new AuthError(
+      AuthErrorCode.PASSKEY_NOT_FOUND,
+      `No passkey found for account '${trimmed}'. Please create one first.`,
+    );
   }
 
-  const { symmetricKey } = await KDF.deriveKeyFromPasskey(trimmed, passkeyData.credentialId);
+  let symmetricKey: CryptoKey;
+  try {
+    ({ symmetricKey } = await KDF.deriveKeyFromPasskey(trimmed, passkeyData.credentialId));
+  } catch (err) {
+    throw mapPasskeyError(err);
+  }
   await storageManager.initializeAccountSession(trimmed, symmetricKey);
 
   const accountData = await storageManager.getAccountData();
-  if (!accountData) throw new Error("Account data not found");
+  if (!accountData) throw new AuthError(AuthErrorCode.ACCOUNT_NOT_FOUND, "Account data not found");
 
   const { publicKey, privateKey, address } = restoreFromMnemonic(accountData.mnemonic);
   await KDF.storeSessionInfo(trimmed, "passkey", { credentialId: passkeyData.credentialId });
@@ -28,7 +37,7 @@ export async function performPasswordLogin(accountName: string, password: string
 
   const accountData = await storageManager.getAccountData();
   if (!accountData) {
-    throw new Error("Account not found or incorrect password");
+  throw new AuthError(AuthErrorCode.INVALID_CREDENTIALS, "Account not found or incorrect password");
   }
 
   const { publicKey, privateKey, address } = restoreFromMnemonic(accountData.mnemonic);
@@ -40,12 +49,22 @@ export async function performPasskeySetup(accountName: string, generatedKeys: Ke
   const trimmed = accountName.trim();
   const hasPasskey = await storageManager.passkeyExists(trimmed);
   if (hasPasskey) {
-    throw new Error("Passkey already exists for this account");
+  throw new AuthError(AuthErrorCode.ACCOUNT_ALREADY_EXISTS, "Passkey already exists for this account");
   }
 
   const userHandle = await createHash(generatedKeys.publicKey);
-  const { credentialId } = await KDF.createPasskeyCredential(trimmed, userHandle);
-  const { symmetricKey } = await KDF.deriveKeyFromPasskey(trimmed, credentialId);
+  let credentialId: string;
+  try {
+    ({ credentialId } = await KDF.createPasskeyCredential(trimmed, userHandle));
+  } catch (err) {
+    throw mapPasskeyError(err);
+  }
+  let symmetricKey: CryptoKey;
+  try {
+    ({ symmetricKey } = await KDF.deriveKeyFromPasskey(trimmed, credentialId));
+  } catch (err) {
+    throw mapPasskeyError(err);
+  }
 
   await storageManager.initializeAccountSession(trimmed, symmetricKey);
 
@@ -70,11 +89,15 @@ export async function performPasswordSetup(accountName: string, generatedKeys: K
   const { symmetricKey } = await KDF.deriveKeyFromPassword(password, trimmed);
   await storageManager.initializeAccountSession(trimmed, symmetricKey);
 
-  await storageManager.storeAccountData({
+  try {
+    await storageManager.storeAccountData({
     accountName: trimmed,
     mnemonic: generatedKeys.mnemonic,
     createdAt: Date.now(),
-  });
+    });
+  } catch (err) {
+    throw new AuthError(AuthErrorCode.DB_ERROR, "Failed to store account data", { cause: err });
+  }
 
   await KDF.storeSessionInfo(trimmed, "password");
 }
