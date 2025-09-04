@@ -1,5 +1,5 @@
 /**
- * ConvenientLogin
+ * Account Login Form
  * Single component for login via passkey (if supported) or password otherwise.
  */
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,11 +14,11 @@ import { PasswordField } from "../../ui/password-field";
 import { performPasskeyLogin, performPasswordLogin } from "./helpers/authFlows";
 import { AuthError, AuthErrorCode } from "@/lib/errors/AuthError";
 
-interface ConvenientLoginProps {
+interface AccountLoginFormProps {
   onSuccess: () => void;
 }
 
-export function ConvenientLogin({ onSuccess }: ConvenientLoginProps) {
+export function AccountLoginForm({ onSuccess }: AccountLoginFormProps) {
   const { setKeys } = useAuth();
   const passkey = useMemo(() => isPasskeySupported(), []);
 

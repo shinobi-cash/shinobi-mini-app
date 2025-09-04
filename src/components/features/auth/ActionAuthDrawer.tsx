@@ -221,7 +221,7 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
           onKeyGenerationComplete={authSteps.handleKeyGenerationComplete}
           onBackupComplete={authSteps.handleBackupComplete}
           onRecoveryComplete={authSteps.handleRecoveryComplete}
-          onConvenientAuthComplete={authSteps.handleConvenientAuthComplete}
+          onAccountSetupComplete={authSteps.handleAccountSetupComplete}
           onSyncingComplete={authSteps.handleSyncingComplete}
         />
       );

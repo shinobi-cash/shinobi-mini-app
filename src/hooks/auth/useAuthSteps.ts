@@ -86,7 +86,7 @@ export function useAuthSteps(options: UseAuthStepsOptions = {}) {
     setCurrentStep("setup-convenient");
   };
 
-  const handleConvenientAuthComplete = () => {
+  const handleAccountSetupComplete = () => {
     // Always go to syncing step for consistent UX and "Welcome to Shinobi!" experience
     setCurrentStep("syncing-notes");
   };
@@ -109,7 +109,7 @@ export function useAuthSteps(options: UseAuthStepsOptions = {}) {
     handleKeyGenerationComplete,
     handleBackupComplete,
     handleRecoveryComplete,
-    handleConvenientAuthComplete,
+    handleAccountSetupComplete,
     handleSyncingComplete,
     actionContext: options.actionContext,
   };

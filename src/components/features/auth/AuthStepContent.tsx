@@ -3,11 +3,11 @@ import type { KeyGenerationResult } from "@/utils/crypto";
 import { isPasskeySupported } from "@/utils/environment";
 import { Fingerprint, Lock } from "lucide-react";
 import { Button } from "../../ui/button";
-import { ConvenientLogin } from "./ConvenientLogin";
+import { AccountLoginForm } from "./AccountLoginForm";
 import { BackupMnemonicSection } from "./BackupMnemonicSection";
 import { KeyGenerationSection } from "./KeyGenerationSection";
 import { LoginWithBackupPhrase } from "./LoginWithBackupPhrase";
-import SetupConvenientAuth from "./SetupConvenientAuth";
+import AccountSetupForm from "./AccountSetupForm";
 import { SyncingNotesSection } from "./SyncingNotesSection";
 
 interface AuthStepContentProps {
@@ -20,7 +20,7 @@ interface AuthStepContentProps {
   onKeyGenerationComplete: (keys: KeyGenerationResult) => void;
   onBackupComplete: () => void;
   onRecoveryComplete: (keys: KeyGenerationResult) => void;
-  onConvenientAuthComplete: () => void;
+  onAccountSetupComplete: () => void;
   onSyncingComplete: () => void;
 }
 
@@ -34,7 +34,7 @@ export function AuthStepContent({
   onKeyGenerationComplete,
   onBackupComplete,
   onRecoveryComplete,
-  onConvenientAuthComplete,
+  onAccountSetupComplete,
   onSyncingComplete,
 }: AuthStepContentProps) {
   const shouldShowPasskey = isPasskeySupported();
@@ -89,7 +89,7 @@ export function AuthStepContent({
       );
 
     case "login-convenient":
-      return <ConvenientLogin onSuccess={onConvenientAuthComplete} />;
+      return <AccountLoginForm onSuccess={onAccountSetupComplete} />;
 
     case "login-backup":
       return <LoginWithBackupPhrase onRecoverAccountKey={onRecoveryComplete} />;
@@ -102,9 +102,9 @@ export function AuthStepContent({
 
     case "setup-convenient":
       return (
-        <SetupConvenientAuth
+        <AccountSetupForm
           generatedKeys={generatedKeys || loginKey}
-          onSetupConvenientAuthComplete={onConvenientAuthComplete}
+          onAccountSetupComplete={onAccountSetupComplete}
         />
       );
 

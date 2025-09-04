@@ -8,7 +8,7 @@ import { type Asset, useNavigation } from "@/contexts/NavigationContext";
 import { FileText, Plus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../../ui/button";
-import { ActionAuthDrawer } from "./ActionAuthDrawer";
+import { ActionAuthDrawer } from "../auth/ActionAuthDrawer";
 
 interface PoolAction {
   id: "deposit" | "my-notes";
