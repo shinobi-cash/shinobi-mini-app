@@ -134,6 +134,7 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
     }
   }, [isConnected, isWalletModalOpen]);
 
+
   const getActionTitle = () => {
     switch (action) {
       case "deposit":
@@ -250,17 +251,12 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
   return (
     <ResponsiveModal
       open={open}
-      onOpenChange={(newOpen) => {
-        // Prevent closing when wallet modal is open
-        if (!newOpen && isWalletModalOpen) {
-          return;
-        }
-        onOpenChange(newOpen);
-      }}
+      onOpenChange={onOpenChange}
       title={getTitle()}
       description={getDescription()}
       showBackButton={canGoBack()}
       onBack={handleBack}
+      isWalletModalOpen={isWalletModalOpen}
     >
       {renderStepContent()}
     </ResponsiveModal>

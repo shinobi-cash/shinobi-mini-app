@@ -320,3 +320,8 @@
     font-size: var(--font-size-emoji);
   }
 }
+
+/* Fix RainbowKit modal interaction when opened from Radix Dialog */
+[aria-labelledby="rk_connect_title"] {
+  pointer-events: auto !important;
+}

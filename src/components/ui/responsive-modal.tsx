@@ -14,6 +14,7 @@ interface ResponsiveModalProps {
   showBackButton?: boolean;
   onBack?: () => void;
   className?: string;
+  isWalletModalOpen?: boolean;
 }
 
 export function ResponsiveModal({
@@ -25,13 +26,20 @@ export function ResponsiveModal({
   showBackButton = false,
   onBack,
   className,
+  isWalletModalOpen = false,
 }: ResponsiveModalProps) {
   const isDesktop = useMediaQuery("(min-width: 640px)");
 
   if (isDesktop) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className={className} showCloseButton={false}>
+      <Dialog modal={!isWalletModalOpen} open={open} onOpenChange={onOpenChange}>
+        <DialogContent 
+          className={className} 
+          showCloseButton={false}
+          onPointerDownOutside={(e) => {
+            if (isWalletModalOpen) e.preventDefault();
+          }}
+        >
           <DialogHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
