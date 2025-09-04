@@ -3,10 +3,10 @@
  * Manages user authentication state with secure key management
  */
 
+import { type AuthState, AuthenticationService, type QuickAuthState } from "@/lib/services/AuthenticationService";
+import { AuthStorageProviderAdapter } from "@/lib/services/adapters/AuthStorageProviderAdapter";
 import type { KeyGenerationResult } from "@/utils/crypto";
 import { type ReactNode, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { AuthenticationService, type AuthState, type QuickAuthState } from "@/lib/services/AuthenticationService";
-import { AuthStorageProviderAdapter } from "@/lib/services/adapters/AuthStorageProviderAdapter";
 
 interface AuthContextType {
   // Authentication state

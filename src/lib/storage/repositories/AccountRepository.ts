@@ -4,9 +4,9 @@
  */
 
 import { restoreFromMnemonic } from "@/utils/crypto";
-import type { CachedAccountData, EncryptedData } from "../interfaces/IDataTypes";
 import type { IndexedDBAdapter } from "../adapters/IndexedDBAdapter";
-import { EncryptionService } from "../services/EncryptionService";
+import type { CachedAccountData, EncryptedData } from "../interfaces/IDataTypes";
+import type { EncryptionService } from "../services/EncryptionService";
 
 export class AccountRepository {
   constructor(

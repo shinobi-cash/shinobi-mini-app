@@ -4,7 +4,7 @@
  * Handles deposit and withdrawal navigation
  */
 
-import { useNavigation, type Asset } from "@/contexts/NavigationContext";
+import { type Asset, useNavigation } from "@/contexts/NavigationContext";
 import { FileText, Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../../ui/button";
@@ -43,31 +43,26 @@ export function PoolActions({ asset, disabled = false }: PoolActionsProps) {
     <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       <div className="flex gap-3 min-w-max px-1">
         {poolActions.map((action) => {
-        const isActive = currentScreen === action.screen;
+          const isActive = currentScreen === action.screen;
 
-        return (
-          <Button
-            key={action.id}
-            onClick={() => handleActionClick(action)}
-            disabled={disabled}
-            variant={isActive ? "default" : "outline"}
-            size="lg"
-            className="whitespace-nowrap px-6 h-12 text-sm font-semibold transition-all duration-200 active:scale-95"
-          >
-            {action.icon}
-            <span className="ml-2">{action.label}</span>
-          </Button>
-        );
-      })}
+          return (
+            <Button
+              key={action.id}
+              onClick={() => handleActionClick(action)}
+              disabled={disabled}
+              variant={isActive ? "default" : "outline"}
+              size="lg"
+              className="whitespace-nowrap px-6 h-12 text-sm font-semibold transition-all duration-200 active:scale-95"
+            >
+              {action.icon}
+              <span className="ml-2">{action.label}</span>
+            </Button>
+          );
+        })}
       </div>
 
       {/* Action Auth Drawer */}
-      <ActionAuthDrawer
-        open={authDrawerOpen}
-        onOpenChange={setAuthDrawerOpen}
-        action={selectedAction}
-        asset={asset}
-      />
+      <ActionAuthDrawer open={authDrawerOpen} onOpenChange={setAuthDrawerOpen} action={selectedAction} asset={asset} />
     </div>
   );
 }

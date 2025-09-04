@@ -4,13 +4,13 @@
  * Includes wallet connection, settings, about, and other app features
  */
 
-import { BookOpen, HelpCircle, LogOut, Menu, Settings, LogIn, WalletIcon, UserPlus } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { BookOpen, HelpCircle, LogIn, LogOut, Menu, Settings, UserPlus, WalletIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAccount, useDisconnect } from "wagmi";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { useAuth } from "@/contexts/AuthContext";
-import { LogInDrawer } from "../auth/LogInDrawer";
 import { CreateAccountDrawer } from "../auth/CreateAccountDrawer";
+import { LogInDrawer } from "../auth/LogInDrawer";
 
 export function AppMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +25,6 @@ export function AppMenu() {
 
   // Authentication state
   const { isAuthenticated, signOut } = useAuth();
-
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -72,7 +71,6 @@ export function AppMenu() {
     setIsOpen(false);
   };
 
-
   const shortenAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
@@ -100,12 +98,12 @@ export function AppMenu() {
               {/* Right: Status */}
               {isAuthenticated ? (
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
                   <p className="text-xs text-green-600 dark:text-green-400">Signed In</p>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full" />
                   <p className="text-xs text-app-secondary">Not Signed In</p>
                 </div>
               )}
@@ -157,12 +155,12 @@ export function AppMenu() {
               {/* Right: Status */}
               {isConnected ? (
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
                   <p className="text-xs text-green-600 dark:text-green-400">Connected</p>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full" />
                   <p className="text-xs text-app-secondary">Not Connected</p>
                 </div>
               )}

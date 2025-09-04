@@ -3,9 +3,9 @@
  * Extracted from useDepositCommitment.ts to separate deposit logic from storage and React coupling
  */
 
-import type { IDepositStorageProvider } from "./interfaces/IDepositStorageProvider";
 import { deriveDepositNullifier, deriveDepositSecret } from "@/utils/noteDerivation";
 import { poseidon2 } from "poseidon-lite";
+import type { IDepositStorageProvider } from "./interfaces/IDepositStorageProvider";
 
 export interface CashNoteData {
   poolAddress: string;

@@ -10,7 +10,7 @@ import { KDF } from "@/lib/auth/keyDerivation";
 import { storageManager } from "@/lib/storage";
 import { type KeyGenerationResult, createHash } from "@/utils/crypto";
 import { Fingerprint } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 

@@ -1,7 +1,7 @@
+import { type KeyGenerationResult, restoreFromMnemonic, validateMnemonic } from "@/utils/crypto";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
-import { type KeyGenerationResult, restoreFromMnemonic, validateMnemonic } from "@/utils/crypto";
 
 interface LoginWithBackupPhraseProps {
   onRecoverAccountKey: (key: KeyGenerationResult) => void;

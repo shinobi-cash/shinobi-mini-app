@@ -1,10 +1,10 @@
-import { fetchLatestIndexedBlock } from "@/services/data/indexerService";
-import { publicClient } from "@/lib/clients";
-import { useBanner } from "@/contexts/BannerContext";
-import { useAuth } from "@/contexts/AuthContext";
 import { CONTRACTS } from "@/config/constants";
+import { useAuth } from "@/contexts/AuthContext";
+import { useBanner } from "@/contexts/BannerContext";
+import { publicClient } from "@/lib/clients";
 import { NoteDiscoveryService } from "@/lib/services/NoteDiscoveryService";
 import { StorageProviderAdapter } from "@/lib/services/adapters/StorageProviderAdapter";
+import { fetchLatestIndexedBlock } from "@/services/data/indexerService";
 import type React from "react";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
@@ -46,29 +46,32 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
   const bannerShownRef = useRef<{ [key: string]: boolean }>({});
   const { publicKey, accountKey } = useAuth();
 
-  const trackTransaction = useCallback((txHash: string) => {
-    // Clear any existing tracking
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    if (intervalRef.current) clearInterval(intervalRef.current);
+  const trackTransaction = useCallback(
+    (txHash: string) => {
+      // Clear any existing tracking
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
 
-    // Reset banner tracking
-    bannerShownRef.current = {};
-    
-    const shortHash = `${txHash.slice(0, 6)}...${txHash.slice(-4)}`;
-    banner.info(`${shortHash} • Confirming transaction...`);
-    
-    setTrackedTransaction({ hash: txHash, blockNumber: null });
-    setTrackingStatus("pending");
+      // Reset banner tracking
+      bannerShownRef.current = {};
 
-    // Auto-clear tracking after 5 minutes
-    timeoutRef.current = setTimeout(
-      () => {
-        setTrackedTransaction(null);
-        setTrackingStatus("idle");
-      },
-      5 * 60 * 1000,
-    );
-  }, [banner]);
+      const shortHash = `${txHash.slice(0, 6)}...${txHash.slice(-4)}`;
+      banner.info(`${shortHash} • Confirming transaction...`);
+
+      setTrackedTransaction({ hash: txHash, blockNumber: null });
+      setTrackingStatus("pending");
+
+      // Auto-clear tracking after 5 minutes
+      timeoutRef.current = setTimeout(
+        () => {
+          setTrackedTransaction(null);
+          setTrackingStatus("idle");
+        },
+        5 * 60 * 1000,
+      );
+    },
+    [banner],
+  );
 
   const onTransactionIndexed = useCallback((callback: () => void) => {
     const eventTarget = eventTargetRef.current;
@@ -176,7 +179,7 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [trackedTransaction?.hash, trackingStatus, trackedTransaction?.blockNumber]);
+  }, [trackedTransaction?.hash, trackingStatus, trackedTransaction?.blockNumber, publicKey, accountKey]);
 
   // Cleanup on unmount
   useEffect(() => {

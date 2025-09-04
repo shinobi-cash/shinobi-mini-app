@@ -91,14 +91,14 @@ export const BannerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       (message: string, options?: { duration?: number; confetti?: boolean }) => {
         const shortMessage = shortenMessage(message);
         showBanner({ type: "success", message: shortMessage }, options?.duration);
-        
+
         // Show confetti for success messages if explicitly requested
         if (options?.confetti === true) {
           // Clear existing confetti timeout
           if (confettiTimeoutRef.current) {
             clearTimeout(confettiTimeoutRef.current);
           }
-          
+
           setShowConfetti(true);
           confettiTimeoutRef.current = setTimeout(() => setShowConfetti(false), 3000);
         }

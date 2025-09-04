@@ -3,9 +3,9 @@
  * Extracted from AuthContext.tsx to separate auth flows from React state and storage coupling
  */
 
+import { getAccountKey } from "@/utils/accountKey";
 import type { KeyGenerationResult } from "@/utils/crypto";
 import { restoreFromMnemonic } from "@/utils/crypto";
-import { getAccountKey } from "@/utils/accountKey";
 import type { IAuthStorageProvider } from "./interfaces/IAuthStorageProvider";
 
 export interface AuthState {

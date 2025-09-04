@@ -1,19 +1,19 @@
-import { useBanner } from "@/contexts/BannerContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBanner } from "@/contexts/BannerContext";
 import { useNavigation } from "@/contexts/NavigationContext";
+import { useDepositCommitment } from "@/hooks/transactions/useDepositCommitment";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatEther, parseEther } from "viem";
 import { useAccount, useBalance, useChainId } from "wagmi";
 import { NETWORK } from "../../config/constants";
-import { useDepositCommitment } from "@/hooks/transactions/useDepositCommitment";
 import { useDepositTransaction } from "../../hooks/transactions/useDepositTransaction";
+import { ScreenHeader } from "../layout/ScreenHeader";
+import { ScreenContent } from "../layout/ScreenLayout";
 import { AuthenticationGate } from "../shared/AuthenticationGate";
 import { WalletGate } from "../shared/WalletGate";
 import { Button } from "../ui/button";
-import { ScreenHeader } from "../layout/ScreenHeader";
-import { ScreenContent } from "../layout/ScreenLayout";
 
 const DEPOSIT_AMOUNTS = [
   { value: "0.01", label: "0.01 ETH" },
@@ -24,15 +24,11 @@ const DEPOSIT_AMOUNTS = [
 
 export const DepositScreen = () => {
   const { currentAsset } = useNavigation();
-  
+
   // Default to ETH if no asset context (fallback)
   const asset = currentAsset || { symbol: "ETH", name: "Ethereum", icon: "⚫" };
-  
-  const breadcrumbs = [
-    { label: "Pool", screen: "home" as const }, 
-    { label: asset.symbol }, 
-    { label: "Deposit" }
-  ];
+
+  const breadcrumbs = [{ label: "Pool", screen: "home" as const }, { label: asset.symbol }, { label: "Deposit" }];
 
   return (
     <>
@@ -207,11 +203,12 @@ const DepositForm = ({ asset }: { asset: { symbol: string; name: string; icon: s
         <div className="flex justify-between text-xs">
           <span className="text-app-secondary font-bold">Available</span>
           <span className="text-app-primary font-medium">
-            {balance ? `${Number.parseFloat(formatEther(balance.value)).toFixed(4)} ${asset.symbol}` : `0.000 ${asset.symbol}`}
+            {balance
+              ? `${Number.parseFloat(formatEther(balance.value)).toFixed(4)} ${asset.symbol}`
+              : `0.000 ${asset.symbol}`}
           </span>
         </div>
       </div>
-
 
       {/* Button */}
       <div className="mt-auto">

@@ -1,18 +1,18 @@
 import { CONTRACTS } from "@/config/constants";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCachedNotes } from "@/hooks/useCachedNotes";
 import { useWithdrawalFlow } from "@/hooks/transactions/useWithdrawalFlow";
+import { useCachedNotes } from "@/hooks/useCachedNotes";
 import type { Note } from "@/lib/storage/types";
 import { cn } from "@/lib/utils";
 import { calculateWithdrawalAmounts } from "@/services/privacy/withdrawalService";
 import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
 import { Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isAddress, parseEther } from "viem";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { TransactionPreviewDrawer } from "./TransactionPreviewDrawer";
-import { ChevronDown, ChevronUp, X } from "lucide-react";
 
 interface WithdrawalFormProps {
   asset: { symbol: string; name: string; icon: string };
@@ -57,8 +57,8 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
 
   // Helper function for note labels
   const getNoteLabel = (note: Note) => {
-    return note.changeIndex === 0 
-      ? `Deposit #${note.depositIndex}` 
+    return note.changeIndex === 0
+      ? `Deposit #${note.depositIndex}`
       : `Change #${note.depositIndex}.${note.changeIndex}`;
   };
 
@@ -111,7 +111,6 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
     [validateAddress],
   );
 
-
   const handleMaxClick = useCallback(() => {
     if (!selectedNote) return;
     const maxValue = availableBalance.toString();
@@ -136,7 +135,7 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
     status: "unspent",
     label: "dummy",
   };
-  
+
   const withdrawalFlow = useWithdrawalFlow({ note: selectedNote || dummyNote });
 
   const withdrawalAmounts = useMemo(() => {
@@ -158,7 +157,7 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
 
   useEffect(() => {
     resetStates();
-  }, [resetStates, withdrawAmount, toAddress, selectedNote]);
+  }, [resetStates]);
 
   // Re-validate amount when selected note changes
   useEffect(() => {
@@ -167,20 +166,36 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
     }
   }, [selectedNote, withdrawAmount, validateAmount]);
 
-
-
   return (
     <div className="h-full flex flex-col px-4 py-4">
       {/* Note Selection */}
       <div className="mb-6">
         <div className="relative">
-          <label className="text-sm font-medium text-app-secondary mb-2 block">From</label>
-          
+          <label htmlFor="from-note" id="from-label" className="text-sm font-medium text-app-secondary mb-2 block">
+            From
+          </label>
+
+          {/* Hidden input so label is properly associated with an actual form control */}
+          <input
+            id="from-note"
+            readOnly
+            value={
+              selectedNote
+                ? `${getNoteLabel(selectedNote)} — ${formatEthAmount(selectedNote.amount, { maxDecimals: 6 })} ${asset.symbol}`
+                : ""
+            }
+            className="sr-only"
+          />
+
           {/* Dropdown Trigger */}
           <Button
             variant="outline"
             onClick={() => setIsNoteDropdownOpen(!isNoteDropdownOpen)}
             className="w-full h-16 p-4 justify-between text-left rounded-xl has-[>svg]:px-4"
+            aria-labelledby="from-label"
+            aria-haspopup="listbox"
+            aria-expanded={isNoteDropdownOpen}
+            aria-controls={isNoteDropdownOpen ? "note-dropdown" : undefined}
           >
             {isLoadingNotes ? (
               <div className="flex items-center gap-2">
@@ -191,9 +206,7 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
               <span className="text-app-secondary">No notes available</span>
             ) : selectedNote ? (
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-app-primary text-sm">
-                  {getNoteLabel(selectedNote)}
-                </div>
+                <div className="font-semibold text-app-primary text-sm">{getNoteLabel(selectedNote)}</div>
                 <div className="text-xs text-app-secondary">
                   {formatEthAmount(selectedNote.amount, { maxDecimals: 6 })} {asset.symbol}
                 </div>
@@ -201,18 +214,22 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
             ) : (
               <span className="text-app-secondary">Choose a note...</span>
             )}
-            {!isLoadingNotes && availableNotes.length > 0 && (
-              isNoteDropdownOpen ? (
+            {!isLoadingNotes &&
+              availableNotes.length > 0 &&
+              (isNoteDropdownOpen ? (
                 <ChevronUp className="w-4 h-4 text-app-secondary ml-2" />
               ) : (
                 <ChevronDown className="w-4 h-4 text-app-secondary ml-2" />
-              )
-            )}
+              ))}
           </Button>
 
           {/* Dropdown Content */}
           {isNoteDropdownOpen && availableNotes.length > 1 && (
-            <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-app-surface border border-app rounded-xl shadow-lg overflow-hidden">
+            <div
+              id="note-dropdown"
+              role="listbox"
+              className="absolute top-full left-0 right-0 z-10 mt-1 bg-app-surface border border-app rounded-xl shadow-lg overflow-hidden"
+            >
               <div className="max-h-60 overflow-y-auto">
                 {availableNotes.map((note) => (
                   <button
@@ -223,12 +240,14 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
                       setIsNoteDropdownOpen(false);
                     }}
                     className="w-full text-left px-4 py-3 hover:bg-app-surface-hover transition-colors border-b border-app-border last:border-b-0"
+                    role="option"
+                    aria-selected={
+                      selectedNote?.depositIndex === note.depositIndex && selectedNote?.changeIndex === note.changeIndex
+                    }
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-app-primary text-sm truncate">
-                          {getNoteLabel(note)}
-                        </div>
+                        <div className="font-semibold text-app-primary text-sm truncate">{getNoteLabel(note)}</div>
                         <div className="text-xs text-app-secondary font-medium">
                           {formatEthAmount(note.amount, { maxDecimals: 6 })} {asset.symbol}
                         </div>
@@ -250,11 +269,14 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
       {/* To Address - Only show if note is selected */}
       {selectedNote && (
         <div className="mb-4">
-          <label className="text-sm font-medium text-app-secondary mb-2 block">
+          <label htmlFor="to-address" className="text-sm font-medium text-app-secondary mb-2 block">
             To
           </label>
           {toAddress && !toError ? (
             <div className="flex items-center gap-2 bg-app-surface border border-app rounded-xl px-4 py-3 h-16">
+              {/* Hidden read-only input so the label is always associated with an input in the DOM */}
+              <input id="to-address" readOnly value={toAddress} className="sr-only" />
+
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-mono text-app-primary truncate">{toAddress}</p>
               </div>
@@ -265,6 +287,7 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
                   setToError("");
                 }}
                 className="w-6 h-6 flex items-center justify-center rounded-xl hover:bg-app-surface-hover transition-colors"
+                aria-label="Clear recipient address"
               >
                 <X className="w-4 h-4 text-app-secondary" />
               </button>
@@ -277,7 +300,10 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
                 placeholder="Enter public address (0x)"
                 value={toAddress}
                 onChange={(e) => handleAddressChange(e.target.value)}
-                className={cn("font-mono text-xs h-16 px-4 py-3", toError && "border-destructive focus:border-destructive")}
+                className={cn(
+                  "font-mono text-xs h-16 px-4 py-3",
+                  toError && "border-destructive focus:border-destructive",
+                )}
                 autoFocus={false}
               />
               {toError && <p className="text-xs text-red-500 text-center mt-2">{toError}</p>}
@@ -292,10 +318,12 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
           <label htmlFor="amount" className="text-sm font-medium text-app-secondary mb-2 block">
             Amount
           </label>
-          <div className={cn(
-            "relative border border-app rounded-xl bg-app-surface p-4 h-16 flex items-center",
-            withdrawAmountError && withdrawAmount.trim().length > 0 && "border-destructive"
-          )}>
+          <div
+            className={cn(
+              "relative border border-app rounded-xl bg-app-surface p-4 h-16 flex items-center",
+              withdrawAmountError && withdrawAmount.trim().length > 0 && "border-destructive",
+            )}
+          >
             <div className="flex items-center justify-between w-full">
               {/* Left side - Asset info */}
               <div className="flex items-center gap-3">
@@ -306,7 +334,7 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
                   <p className="text-sm font-medium text-app-primary">{asset.symbol}</p>
                 </div>
               </div>
-              
+
               {/* Right side - Amount input */}
               <div className="text-right flex-1 max-w-[120px]">
                 <Input
@@ -317,13 +345,13 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
                   onChange={(e) => handleAmountChange(e.target.value)}
                   className={cn(
                     "text-right text-lg font-medium border-none bg-transparent p-0 h-auto focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:border-none shadow-none",
-                    withdrawAmountError && withdrawAmount.trim().length > 0 ? "text-red-500" : "text-app-primary"
+                    withdrawAmountError && withdrawAmount.trim().length > 0 ? "text-red-500" : "text-app-primary",
                   )}
                   autoFocus={true}
                 />
                 <p className="text-xs text-app-tertiary">$0.00</p>
               </div>
-              
+
               {/* Swap icon */}
               {/* <div className="ml-3">
                 <ArrowUpDown className="w-4 h-4 text-app-secondary" />
@@ -332,23 +360,17 @@ export function WithdrawalForm({ asset }: WithdrawalFormProps) {
           </div>
           <div className="flex justify-between items-center mt-2">
             <p className="text-xs text-app-secondary">
-              Balance: <span className="text-app-primary font-medium">
+              Balance:{" "}
+              <span className="text-app-primary font-medium">
                 {formatEthAmount(selectedNote.amount, { maxDecimals: 6 })} {asset.symbol}
               </span>
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleMaxClick}
-              className="rounded-xl px-2 py-1 text-xs h-6"
-            >
+            <Button variant="outline" size="sm" onClick={handleMaxClick} className="rounded-xl px-2 py-1 text-xs h-6">
               MAX
             </Button>
           </div>
         </div>
       )}
-
-      
 
       {/* Action Button */}
       <div className="mt-auto">

@@ -1,18 +1,18 @@
 import { CONTRACTS } from "@/config/constants";
+import { useAuth } from "@/contexts/AuthContext";
 import { useBanner } from "@/contexts/BannerContext";
-import { useNotes } from "@/hooks/useNoteDiscovery";
+import { useNavigation } from "@/contexts/NavigationContext";
+import { useActivities } from "@/hooks/data/useActivities";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { useModalWithSelection } from "@/hooks/ui/useModalState";
+import { useNotes } from "@/hooks/useNoteDiscovery";
 import type { NoteChain } from "@/lib/storage/types";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { NoteChainDetailDrawer } from "../features/profile/NoteChainDetailDrawer";
-import { NotesSummaryCard } from "../features/profile/NotesSummaryCard";
-import { NotesHistorySection } from "../features/profile/NotesHistorySection";
-import { BackButton } from "../ui/back-button";
 import { PoolDashboard } from "../features/pool/PoolDashboard";
-import { useActivities } from "@/hooks/data/useActivities";
-import { useNavigation } from "@/contexts/NavigationContext";
+import { NoteChainDetailDrawer } from "../features/profile/NoteChainDetailDrawer";
+import { NotesHistorySection } from "../features/profile/NotesHistorySection";
+import { NotesSummaryCard } from "../features/profile/NotesSummaryCard";
+import { BackButton } from "../ui/back-button";
 
 export const MyNotesScreen = () => {
   const { isAuthenticated } = useAuth();

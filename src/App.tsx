@@ -1,13 +1,13 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SplashScreen } from "@/components/SplashScreen";
 import { PasswordAuthDrawer } from "@/components/features/auth/PasswordAuthDrawer";
-import { TransactionTrackingProvider } from "./hooks/transactions/useTransactionTracking";
 import { MainScreen } from "@/components/screens/MainScreen";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { BannerProvider } from "@/contexts/BannerContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { sdk } from "@farcaster/miniapp-sdk";
 import { useEffect } from "react";
+import { TransactionTrackingProvider } from "./hooks/transactions/useTransactionTracking";
 
 function AppContent() {
   const { isRestoringSession, quickAuthState } = useAuth();

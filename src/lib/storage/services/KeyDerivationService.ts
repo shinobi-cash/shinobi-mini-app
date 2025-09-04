@@ -3,9 +3,9 @@
  * Provides cryptographic key derivation with secure storage integration
  */
 
+import { localStorageAdapter, sessionStorageAdapter } from "../adapters/BrowserStorageAdapter";
 import type { SessionInfo } from "../interfaces/IDataTypes";
 import { SessionRepository } from "../repositories/SessionRepository";
-import { localStorageAdapter, sessionStorageAdapter } from "../adapters/BrowserStorageAdapter";
 
 // Configuration - exact match to keyDerivation.ts
 const CONFIG = {

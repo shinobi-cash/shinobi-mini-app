@@ -1,13 +1,13 @@
+import type { AuthStep } from "@/hooks/auth/useAuthSteps";
+import type { KeyGenerationResult } from "@/utils/crypto";
+import { isPasskeySupported } from "@/utils/environment";
 import { Fingerprint, Lock } from "lucide-react";
 import { Button } from "../../ui/button";
 import { AuthSection } from "./AuthSection";
-import { KeyGenerationSection } from "./KeyGenerationSection";
 import { BackupMnemonicSection } from "./BackupMnemonicSection";
-import SetupConvenientAuth from "./SetupConvenientAuth";
+import { KeyGenerationSection } from "./KeyGenerationSection";
 import { LoginWithBackupPhrase } from "./LoginWithBackupPhrase";
-import { type AuthStep } from "@/hooks/auth/useAuthSteps";
-import { type KeyGenerationResult } from "@/utils/crypto";
-import { isPasskeySupported } from "@/utils/environment";
+import SetupConvenientAuth from "./SetupConvenientAuth";
 
 interface AuthStepContentProps {
   currentStep: AuthStep;
@@ -95,12 +95,7 @@ export function AuthStepContent({
       return <KeyGenerationSection onKeyGenerationComplete={onKeyGenerationComplete} />;
 
     case "create-backup":
-      return (
-        <BackupMnemonicSection
-          generatedKeys={generatedKeys}
-          onBackupMnemonicComplete={onBackupComplete}
-        />
-      );
+      return <BackupMnemonicSection generatedKeys={generatedKeys} onBackupMnemonicComplete={onBackupComplete} />;
 
     case "setup-convenient":
       return (

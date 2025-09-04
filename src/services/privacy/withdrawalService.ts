@@ -8,6 +8,7 @@ import { WithdrawalProofGenerator } from "@/utils/WithdrawalProofGenerator";
 import { encodeAbiParameters, isAddress, keccak256, parseEther } from "viem";
 
 import { getWithdrawalSmartAccountClient } from "@/lib/clients";
+import type { ASPData, StateTreeLeaf } from "@/lib/indexer/sdk";
 import {
   deriveChangeNullifier,
   deriveChangeSecret,
@@ -28,7 +29,6 @@ import {
 } from "../blockchain/contractService";
 // Import our new services
 import { fetchASPData, fetchStateTreeLeaves } from "../data/indexerService";
-import type { ASPData, StateTreeLeaf } from "@/lib/indexer/sdk";
 
 // ============ TYPES ============
 

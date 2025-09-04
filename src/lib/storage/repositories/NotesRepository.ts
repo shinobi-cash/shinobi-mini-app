@@ -3,15 +3,15 @@
  * Maintains exact logic and data compatibility with current noteCache implementation
  */
 
+import type { IndexedDBAdapter } from "../adapters/IndexedDBAdapter";
 import type {
   CachedNoteData,
   DiscoveryResult,
+  EncryptedData,
   NoteChain,
   StoredEncryptedData,
-  EncryptedData,
 } from "../interfaces/IDataTypes";
-import type { IndexedDBAdapter } from "../adapters/IndexedDBAdapter";
-import { EncryptionService } from "../services/EncryptionService";
+import type { EncryptionService } from "../services/EncryptionService";
 
 export class NotesRepository {
   constructor(

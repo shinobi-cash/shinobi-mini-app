@@ -100,5 +100,5 @@ export class BrowserStorageAdapter<T = string> implements IBrowserStorageAdapter
 }
 
 // Concrete implementations for localStorage and sessionStorage
-export const localStorageAdapter = new BrowserStorageAdapter<any>(localStorage);
-export const sessionStorageAdapter = new BrowserStorageAdapter<any>(sessionStorage);
+export const localStorageAdapter = new BrowserStorageAdapter<unknown>(localStorage);
+export const sessionStorageAdapter = new BrowserStorageAdapter<unknown>(sessionStorage);

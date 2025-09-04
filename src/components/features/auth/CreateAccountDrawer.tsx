@@ -1,7 +1,7 @@
+import { useAuthSteps } from "@/hooks/auth/useAuthSteps";
 import { isPasskeySupported } from "@/utils/environment";
 import { ResponsiveModal } from "../../ui/responsive-modal";
 import { AuthStepContent } from "./AuthStepContent";
-import { useAuthSteps } from "@/hooks/auth/useAuthSteps";
 
 interface CreateAccountDrawerProps {
   open: boolean;
@@ -10,12 +10,12 @@ interface CreateAccountDrawerProps {
 
 export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerProps) => {
   const shouldShowPasskey = isPasskeySupported();
-  
+
   // Use shared auth steps logic, start with create-keys
   const authSteps = useAuthSteps({
     onAuthComplete: () => {
       onOpenChange(false);
-    }
+    },
   });
 
   // Override to start with create flow
@@ -38,19 +38,27 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
 
   const getTitle = () => {
     switch (currentStep) {
-      case "create-keys": return "Generate Keys";
-      case "create-backup": return "Backup Phrase";
-      case "setup-convenient": return shouldShowPasskey ? "Setup Passkey" : "Setup Password";
-      default: return "Create Account";
+      case "create-keys":
+        return "Generate Keys";
+      case "create-backup":
+        return "Backup Phrase";
+      case "setup-convenient":
+        return shouldShowPasskey ? "Setup Passkey" : "Setup Password";
+      default:
+        return "Create Account";
     }
   };
 
   const getDescription = () => {
     switch (currentStep) {
-      case "create-keys": return "Generate keys locally";
-      case "create-backup": return "Save your recovery phrase";
-      case "setup-convenient": return shouldShowPasskey ? "Setup biometric access" : "Create secure password";
-      default: return "Create new account";
+      case "create-keys":
+        return "Generate keys locally";
+      case "create-backup":
+        return "Save your recovery phrase";
+      case "setup-convenient":
+        return shouldShowPasskey ? "Setup biometric access" : "Create secure password";
+      default:
+        return "Create new account";
     }
   };
 

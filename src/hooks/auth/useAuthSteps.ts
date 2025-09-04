@@ -1,7 +1,7 @@
+import type { KeyGenerationResult } from "@/utils/crypto";
 import { useState } from "react";
-import { type KeyGenerationResult } from "@/utils/crypto";
 
-export type AuthStep = 
+export type AuthStep =
   | "choose"
   | "login-method"
   | "login-convenient"
@@ -26,7 +26,14 @@ export function useAuthSteps(options: UseAuthStepsOptions = {}) {
   };
 
   const canGoBack = () => {
-    return ["login-method", "login-convenient", "login-backup", "create-keys", "create-backup", "setup-convenient"].includes(currentStep);
+    return [
+      "login-method",
+      "login-convenient",
+      "login-backup",
+      "create-keys",
+      "create-backup",
+      "setup-convenient",
+    ].includes(currentStep);
   };
 
   const handleBack = () => {
@@ -55,7 +62,7 @@ export function useAuthSteps(options: UseAuthStepsOptions = {}) {
   // Step handlers
   const handleLoginChoice = () => setCurrentStep("login-method");
   const handleCreateChoice = () => setCurrentStep("create-keys");
-  
+
   const handleLoginMethodChoice = (method: "convenient" | "backup") => {
     setCurrentStep(method === "convenient" ? "login-convenient" : "login-backup");
   };

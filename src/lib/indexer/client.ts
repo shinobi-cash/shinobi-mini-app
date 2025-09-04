@@ -2,8 +2,8 @@
  * Shinobi Indexer SDK Client Configuration
  */
 
-import { createShinobiClient, setShinobiClient } from "./sdk/client";
 import { INDEXER_CONFIG } from "@/config/constants";
+import { createShinobiClient, setShinobiClient } from "./sdk/client";
 
 // Create the indexer client with environment-based configuration
 const indexerClient = createShinobiClient({

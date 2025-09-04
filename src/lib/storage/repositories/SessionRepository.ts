@@ -172,14 +172,14 @@ export class SessionRepository {
   /**
    * Store theme preference - from ThemeContext.tsx
    */
-  async storeTheme(theme: string, storageKey: string = "shinobi.cash.theme"): Promise<void> {
+  async storeTheme(theme: string, storageKey = "shinobi.cash.theme"): Promise<void> {
     await this.localStorageAdapter.set(storageKey, theme);
   }
 
   /**
    * Get theme preference - from ThemeContext.tsx
    */
-  async getTheme(storageKey: string = "shinobi.cash.theme"): Promise<string | null> {
+  async getTheme(storageKey = "shinobi.cash.theme"): Promise<string | null> {
     return this.localStorageAdapter.get(storageKey) as Promise<string | null>;
   }
 }

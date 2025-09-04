@@ -1,20 +1,16 @@
 import { useNavigation } from "@/contexts/NavigationContext";
 import { WithdrawalForm } from "../features/withdrawal/WithdrawalForm";
-import { AuthenticationGate } from "../shared/AuthenticationGate";
 import { ScreenHeader } from "../layout/ScreenHeader";
 import { ScreenContent } from "../layout/ScreenLayout";
+import { AuthenticationGate } from "../shared/AuthenticationGate";
 
 export const WithdrawalScreen = () => {
   const { currentAsset } = useNavigation();
-  
+
   // Default to ETH if no asset context (fallback)
   const asset = currentAsset || { symbol: "ETH", name: "Ethereum", icon: "⚫" };
-  
-  const breadcrumbs = [
-    { label: "Pool", screen: "home" as const }, 
-    { label: asset.symbol }, 
-    { label: "Withdraw" }
-  ];
+
+  const breadcrumbs = [{ label: "Pool", screen: "home" as const }, { label: asset.symbol }, { label: "Withdraw" }];
 
   return (
     <>

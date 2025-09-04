@@ -3,9 +3,9 @@
  * Provides cached note data with optimized loading
  */
 
-import { useEffect, useState } from "react";
-import type { DiscoveryResult } from "@/lib/storage/types";
 import { storageManager } from "@/lib/storage";
+import type { DiscoveryResult } from "@/lib/storage/types";
+import { useEffect, useState } from "react";
 
 export function useCachedNotes(publicKey: string, poolAddress: string) {
   const [data, setData] = useState<DiscoveryResult | null>(null);

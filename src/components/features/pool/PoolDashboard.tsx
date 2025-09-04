@@ -4,18 +4,18 @@
  * Serves as the primary interface for pool interactions
  */
 
+import { useBanner } from "@/contexts/BannerContext";
 import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import type { Activity } from "@/lib/indexer/sdk";
 import { fetchPoolStats } from "@/services/data/indexerService";
-import { useBanner } from "@/contexts/BannerContext";
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
 import { ActivityDetailDrawer } from "../profile/ActivityDetailDrawer";
 import { ActivityRow } from "../profile/ActivityRow";
-import { PoolStatsCard } from "./PoolStatsCard";
 import { AssetSelector } from "./AssetSelector";
 import { PoolActions } from "./PoolActions";
+import { PoolStatsCard } from "./PoolStatsCard";
 
 interface PoolDashboardProps {
   activities: Activity[];

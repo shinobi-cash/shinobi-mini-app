@@ -94,7 +94,7 @@ export interface LatestIndexedBlock {
 export interface IndexerError {
   message: string;
   code?: string;
-  details?: any;
+  details?: unknown;
 }
 
 // ============ CLIENT CONFIGURATION ============

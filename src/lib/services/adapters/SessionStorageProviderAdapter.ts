@@ -3,8 +3,8 @@
  * Bridges refactored storage to session service interface
  */
 
-import type { ISessionStorageProvider } from "../interfaces/ISessionStorageProvider";
 import { storageManager } from "@/lib/storage";
+import type { ISessionStorageProvider } from "../interfaces/ISessionStorageProvider";
 
 export class SessionStorageProviderAdapter implements ISessionStorageProvider {
   clearSession(): void {

@@ -3,10 +3,10 @@
  * Bridges refactored storage and key derivation to authentication service interface
  */
 
-import type { IAuthStorageProvider, DerivedKeyResult } from "../interfaces/IAuthStorageProvider";
-import type { CachedAccountData, SessionInfo } from "@/lib/storage/interfaces/IDataTypes";
 import { storageManager } from "@/lib/storage";
 import { KDF } from "@/lib/storage";
+import type { CachedAccountData, SessionInfo } from "@/lib/storage/interfaces/IDataTypes";
+import type { DerivedKeyResult, IAuthStorageProvider } from "../interfaces/IAuthStorageProvider";
 
 export class AuthStorageProviderAdapter implements IAuthStorageProvider {
   /**

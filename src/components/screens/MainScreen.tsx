@@ -1,14 +1,14 @@
+import { useEffect, useRef } from "react";
+import { CONTRACTS } from "../../config/constants";
+import { useBanner } from "../../contexts/BannerContext";
 import { NavigationProvider } from "../../contexts/NavigationContext";
 import { useActivities } from "../../hooks/data/useActivities";
-import { CONTRACTS } from "../../config/constants";
 import { PoolDashboard } from "../features/pool/PoolDashboard";
 import { AppBanner } from "../layout/AppBanner";
 import { AppHeader } from "../layout/AppHeader";
 import { AppLayout } from "../layout/ScreenLayout";
 import { type ScreenConfig, ScreenManager } from "../layout/ScreenManager";
 import { DepositScreen } from "./DepositScreen";
-import { useBanner } from "../../contexts/BannerContext";
-import { useEffect, useRef } from "react";
 import { MyNotesScreen } from "./MyNotesScreen";
 import { WithdrawalScreen } from "./WithdrawalScreen";
 

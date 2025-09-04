@@ -3,8 +3,8 @@
  * Bridges refactored storage to deposit service interface
  */
 
-import type { IDepositStorageProvider } from "../interfaces/IDepositStorageProvider";
 import { storageManager } from "@/lib/storage";
+import type { IDepositStorageProvider } from "../interfaces/IDepositStorageProvider";
 
 export class DepositStorageProviderAdapter implements IDepositStorageProvider {
   async getNextDepositIndex(publicKey: string, poolAddress: string): Promise<number> {

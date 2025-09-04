@@ -10,7 +10,7 @@ import { storageManager } from "@/lib/storage";
 import type { KeyGenerationResult } from "@/utils/crypto";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import type React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 

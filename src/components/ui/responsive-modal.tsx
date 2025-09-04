@@ -1,23 +1,9 @@
-import * as React from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogClose,
-} from "./dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerClose,
-} from "./drawer";
-import { X, ChevronLeft } from "lucide-react";
+import { ChevronLeft, X } from "lucide-react";
+import type * as React from "react";
 import { Button } from "./button";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./dialog";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "./drawer";
 
 interface ResponsiveModalProps {
   open: boolean;
@@ -83,9 +69,7 @@ export function ResponsiveModal({
               </DialogClose>
             </div>
           </DialogHeader>
-          <div className="flex-1 overflow-y-auto">
-            {children}
-          </div>
+          <div className="flex-1 overflow-y-auto">{children}</div>
         </DialogContent>
       </Dialog>
     );
@@ -96,7 +80,7 @@ export function ResponsiveModal({
       <DrawerContent className="bg-app-background border-app">
         {/* iOS-style drag handle */}
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-app-tertiary/30" />
-        
+
         <DrawerHeader className="pb-0 px-4 pt-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -130,9 +114,7 @@ export function ResponsiveModal({
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-4 pb-6">
-          <div className="p-2">
-            {children}
-          </div>
+          <div className="p-2">{children}</div>
         </div>
       </DrawerContent>
     </Drawer>

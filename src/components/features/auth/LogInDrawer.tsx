@@ -5,12 +5,12 @@
  * Follows mobile-first drawer design patterns
  */
 
+import { useAuthSteps } from "@/hooks/auth/useAuthSteps";
+import { storageManager } from "@/lib/storage";
 import { isPasskeySupported } from "@/utils/environment";
 import { useEffect } from "react";
 import { ResponsiveModal } from "../../ui/responsive-modal";
 import { AuthStepContent } from "./AuthStepContent";
-import { useAuthSteps } from "@/hooks/auth/useAuthSteps";
-import { storageManager } from "@/lib/storage";
 
 interface LogInDrawerProps {
   open: boolean;
@@ -20,12 +20,12 @@ interface LogInDrawerProps {
 
 export function LogInDrawer({ open, onOpenChange, onSessionInitialized }: LogInDrawerProps) {
   const shouldShowPasskey = isPasskeySupported();
-  
+
   // Use shared auth steps logic
   const authSteps = useAuthSteps({
     onAuthComplete: () => {
       onSessionInitialized();
-    }
+    },
   });
 
   // Load available accounts when drawer opens
@@ -44,27 +44,43 @@ export function LogInDrawer({ open, onOpenChange, onSessionInitialized }: LogInD
 
   const getTitle = () => {
     switch (authSteps.currentStep) {
-      case "choose": return "Login";
-      case "login-method": return "Login";
-      case "login-convenient": return shouldShowPasskey ? "Passkey" : "Password";
-      case "login-backup": return "Recovery";
-      case "create-keys": return "Generate Keys";
-      case "create-backup": return "Backup Phrase";
-      case "setup-convenient": return shouldShowPasskey ? "Setup Passkey" : "Setup Password";
-      default: return "Auth";
+      case "choose":
+        return "Login";
+      case "login-method":
+        return "Login";
+      case "login-convenient":
+        return shouldShowPasskey ? "Passkey" : "Password";
+      case "login-backup":
+        return "Recovery";
+      case "create-keys":
+        return "Generate Keys";
+      case "create-backup":
+        return "Backup Phrase";
+      case "setup-convenient":
+        return shouldShowPasskey ? "Setup Passkey" : "Setup Password";
+      default:
+        return "Auth";
     }
   };
 
   const getDescription = () => {
     switch (authSteps.currentStep) {
-      case "choose": return "Choose login method";
-      case "login-method": return "Choose login method";
-      case "login-convenient": return shouldShowPasskey ? "Use biometric auth" : "Enter account and password";
-      case "login-backup": return "Enter recovery phrase";
-      case "create-keys": return "Generate keys locally";
-      case "create-backup": return "Save your recovery phrase";
-      case "setup-convenient": return shouldShowPasskey ? "Setup biometric access" : "Create secure password";
-      default: return "";
+      case "choose":
+        return "Choose login method";
+      case "login-method":
+        return "Choose login method";
+      case "login-convenient":
+        return shouldShowPasskey ? "Use biometric auth" : "Enter account and password";
+      case "login-backup":
+        return "Enter recovery phrase";
+      case "create-keys":
+        return "Generate keys locally";
+      case "create-backup":
+        return "Save your recovery phrase";
+      case "setup-convenient":
+        return shouldShowPasskey ? "Setup biometric access" : "Create secure password";
+      default:
+        return "";
     }
   };
 
@@ -95,7 +111,7 @@ export function LogInDrawer({ open, onOpenChange, onSessionInitialized }: LogInD
         onRecoveryComplete={authSteps.handleRecoveryComplete}
         onConvenientAuthComplete={authSteps.handleConvenientAuthComplete}
       />
-      
+
       <div className="text-center mt-4">
         <p className="text-xs text-app-tertiary">🔐 Your data is encrypted locally and never leaves your device</p>
       </div>

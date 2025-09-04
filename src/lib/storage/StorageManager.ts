@@ -3,6 +3,13 @@
  * Maintains exact same API as current noteCache for seamless replacement
  */
 
+import { localStorageAdapter, sessionStorageAdapter } from "./adapters/BrowserStorageAdapter";
+import {
+  accountStorageAdapter,
+  notesStorageAdapter,
+  passkeyStorageAdapter,
+  sharedEncryptionService,
+} from "./adapters/IndexedDBAdapter";
 import type {
   CachedAccountData,
   DiscoveryResult,
@@ -10,15 +17,8 @@ import type {
   NoteChain,
   SessionInfo,
 } from "./interfaces/IDataTypes";
-import {
-  notesStorageAdapter,
-  accountStorageAdapter,
-  passkeyStorageAdapter,
-  sharedEncryptionService,
-} from "./adapters/IndexedDBAdapter";
-import { localStorageAdapter, sessionStorageAdapter } from "./adapters/BrowserStorageAdapter";
-import { NotesRepository } from "./repositories/NotesRepository";
 import { AccountRepository } from "./repositories/AccountRepository";
+import { NotesRepository } from "./repositories/NotesRepository";
 import { PasskeyRepository } from "./repositories/PasskeyRepository";
 import { SessionRepository } from "./repositories/SessionRepository";
 

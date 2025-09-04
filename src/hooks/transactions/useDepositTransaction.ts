@@ -1,6 +1,6 @@
 import { PRIVACY_POOL_ENTRYPOINT_ABI } from "@/config/abis";
 import { CONTRACTS } from "@/config/constants";
-import { CashNoteData } from "@/lib/services/DepositService";
+import type { CashNoteData } from "@/lib/services/DepositService";
 import { useCallback, useEffect, useState } from "react";
 import { parseEther } from "viem";
 import { useWriteContract } from "wagmi";

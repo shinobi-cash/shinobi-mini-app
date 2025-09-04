@@ -3,11 +3,11 @@
  * Manages deposit commitment generation with collision detection
  */
 
+import { CONTRACTS } from "@/config/constants";
+import { type CashNoteData, DepositService } from "@/lib/services/DepositService";
+import { DepositStorageProviderAdapter } from "@/lib/services/adapters/DepositStorageProviderAdapter";
 import { useCallback, useEffect, useState } from "react";
 import { useAccount } from "wagmi";
-import { CONTRACTS } from "@/config/constants";
-import { DepositService, type CashNoteData } from "@/lib/services/DepositService";
-import { DepositStorageProviderAdapter } from "@/lib/services/adapters/DepositStorageProviderAdapter";
 
 // Create service instances
 const storageProvider = new DepositStorageProviderAdapter();

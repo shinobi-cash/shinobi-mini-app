@@ -3,10 +3,10 @@
  * Provides cache-first note discovery with background scanning
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { DiscoveryResult } from "@/lib/storage/types";
-import { NoteDiscoveryService, type DiscoveryProgress } from "@/lib/services/NoteDiscoveryService";
+import { type DiscoveryProgress, NoteDiscoveryService } from "@/lib/services/NoteDiscoveryService";
 import { StorageProviderAdapter } from "@/lib/services/adapters/StorageProviderAdapter";
+import type { DiscoveryResult } from "@/lib/storage/types";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // Create service instances
 const storageProvider = new StorageProviderAdapter();
@@ -108,7 +108,7 @@ export function useNoteDiscovery(
       });
 
     return () => controller.abort();
-  }, [poolAddress, publicKey, accountKey, options?.autoScan]);
+  }, [poolAddress, publicKey, accountKey, options?.autoScan, runDiscovery]);
 
   const refresh = useCallback(async () => {
     const runId = ++refreshIdRef.current;
@@ -147,7 +147,7 @@ export function useNoteDiscovery(
         setLoading(false);
       }
     }
-  }, [runDiscovery]);
+  }, [runDiscovery, data]);
 
   return { data, loading, error, progress, refresh };
 }

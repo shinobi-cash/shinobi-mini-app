@@ -4,17 +4,17 @@
  * Guides users through auth and wallet connection based on the specific action context
  */
 
-import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAccount } from "wagmi";
+import { type Asset, useNavigation } from "@/contexts/NavigationContext";
+import { useAuthSteps } from "@/hooks/auth/useAuthSteps";
+import { isPasskeySupported } from "@/utils/environment";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { useNavigation, type Asset } from "@/contexts/NavigationContext";
-import { WalletIcon, ArrowRight } from "lucide-react";
+import { ArrowRight, WalletIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
 import { Button } from "../../ui/button";
 import { ResponsiveModal } from "../../ui/responsive-modal";
 import { AuthStepContent } from "../auth/AuthStepContent";
-import { useAuthSteps } from "@/hooks/auth/useAuthSteps";
-import { isPasskeySupported } from "@/utils/environment";
 
 type ActionStep = "auth" | "wallet" | "complete";
 
@@ -31,7 +31,7 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
   const [currentActionStep, setCurrentActionStep] = useState<ActionStep>("auth");
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const shouldShowPasskey = isPasskeySupported();
-  
+
   const { isAuthenticated } = useAuth();
   const { isConnected } = useAccount();
   const { openConnectModal } = useConnectModal();
@@ -46,7 +46,7 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
       } else {
         setCurrentActionStep("complete");
       }
-    }
+    },
   });
 
   // Reset state when drawer closes
@@ -111,10 +111,14 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
 
   const getActionTitle = () => {
     switch (action) {
-      case "deposit": return `Deposit ${asset.symbol}`;
-      case "withdraw": return `Withdraw ${asset.symbol}`;
-      case "my-notes": return "My Notes";
-      default: return "Get Started";
+      case "deposit":
+        return `Deposit ${asset.symbol}`;
+      case "withdraw":
+        return `Withdraw ${asset.symbol}`;
+      case "my-notes":
+        return "My Notes";
+      default:
+        return "Get Started";
     }
   };
 
@@ -122,17 +126,25 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
     if (currentActionStep === "wallet") {
       return "Connect Wallet";
     }
-    
+
     // For auth step, use context-aware titles
     switch (authSteps.currentStep) {
-      case "choose": return getActionTitle();
-      case "login-method": return "Login";
-      case "login-convenient": return shouldShowPasskey ? "Passkey" : "Password";
-      case "login-backup": return "Recovery";
-      case "create-keys": return "Generate Keys";
-      case "create-backup": return "Backup Phrase";
-      case "setup-convenient": return shouldShowPasskey ? "Setup Passkey" : "Setup Password";
-      default: return getActionTitle();
+      case "choose":
+        return getActionTitle();
+      case "login-method":
+        return "Login";
+      case "login-convenient":
+        return shouldShowPasskey ? "Passkey" : "Password";
+      case "login-backup":
+        return "Recovery";
+      case "create-keys":
+        return "Generate Keys";
+      case "create-backup":
+        return "Backup Phrase";
+      case "setup-convenient":
+        return shouldShowPasskey ? "Setup Passkey" : "Setup Password";
+      default:
+        return getActionTitle();
     }
   };
 
@@ -145,18 +157,29 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
     switch (authSteps.currentStep) {
       case "choose":
         switch (action) {
-          case "deposit": return "Sign in to access deposit functionality";
-          case "withdraw": return "Sign in to access your privacy notes";
-          case "my-notes": return "Sign in to view your transaction history";
-          default: return "Sign in to continue";
+          case "deposit":
+            return "Sign in to access deposit functionality";
+          case "withdraw":
+            return "Sign in to access your privacy notes";
+          case "my-notes":
+            return "Sign in to view your transaction history";
+          default:
+            return "Sign in to continue";
         }
-      case "login-method": return "Choose login method";
-      case "login-convenient": return shouldShowPasskey ? "Use biometric auth" : "Enter account and password";
-      case "login-backup": return "Enter recovery phrase";
-      case "create-keys": return "Generate keys locally";
-      case "create-backup": return "Save your recovery phrase";
-      case "setup-convenient": return shouldShowPasskey ? "Setup biometric access" : "Create secure password";
-      default: return "";
+      case "login-method":
+        return "Choose login method";
+      case "login-convenient":
+        return shouldShowPasskey ? "Use biometric auth" : "Enter account and password";
+      case "login-backup":
+        return "Enter recovery phrase";
+      case "create-keys":
+        return "Generate keys locally";
+      case "create-backup":
+        return "Save your recovery phrase";
+      case "setup-convenient":
+        return shouldShowPasskey ? "Setup biometric access" : "Create secure password";
+      default:
+        return "";
     }
   };
 

@@ -3,8 +3,9 @@
  * Uses consistent SDK-based service layer
  */
 
-import { useCallback, useEffect, useState } from "react";
+import type { Activity, PaginatedResponse } from "@/lib/indexer/sdk/types";
 import { fetchActivities } from "@/services/data/indexerService";
+import { useCallback, useEffect, useState } from "react";
 
 interface UseActivitiesOptions {
   poolId: string;
@@ -13,7 +14,7 @@ interface UseActivitiesOptions {
 }
 
 interface UseActivitiesResult {
-  activities: any[] | null;
+  activities: Activity[] | null;
   loading: boolean;
   error: Error | null;
   fetchMore: () => Promise<void>;
@@ -27,7 +28,7 @@ export function useActivities({
   limit = 10,
   orderDirection = "desc",
 }: UseActivitiesOptions): UseActivitiesResult {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<PaginatedResponse<Activity> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -55,8 +56,13 @@ export function useActivities({
         } else {
           setData(result);
         }
-      } catch (err: any) {
-        setError(err);
+      } catch (err: unknown) {
+        // Normalize unknown to Error before updating state
+        if (err instanceof Error) {
+          setError(err);
+        } else {
+          setError(new Error(String(err)));
+        }
 
         // If this is a refresh and we have existing data, don't clear it
         if (!isRefresh && !isLoadMore) {
@@ -80,7 +86,7 @@ export function useActivities({
 
   useEffect(() => {
     fetchActivitiesData(false);
-  }, [poolId, limit, orderDirection]);
+  }, [fetchActivitiesData]);
 
   return {
     activities: data?.items || null,
@@ -89,6 +95,6 @@ export function useActivities({
     fetchMore,
     refetch,
     hasNextPage: data?.pageInfo.hasNextPage || false,
-    hasData: data?.items?.length > 0,
+    hasData: (data?.items?.length ?? 0) > 0,
   };
 }

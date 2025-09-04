@@ -3,8 +3,8 @@
  * Maintains exact logic and data compatibility with current noteCache passkey methods
  */
 
-import type { NamedPasskeyData } from "../interfaces/IDataTypes";
 import type { IndexedDBAdapter } from "../adapters/IndexedDBAdapter";
+import type { NamedPasskeyData } from "../interfaces/IDataTypes";
 
 export class PasskeyRepository {
   constructor(private storageAdapter: IndexedDBAdapter) {}

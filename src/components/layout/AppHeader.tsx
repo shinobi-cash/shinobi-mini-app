@@ -1,7 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { Moon, Sun } from "lucide-react";
-import { Switch } from "../ui/switch";
 import { AppMenu } from "../features/app/AppMenu";
+import { Switch } from "../ui/switch";
 
 export const AppHeader = () => {
   const { effectiveTheme, toggleTheme } = useTheme();

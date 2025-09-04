@@ -4,19 +4,14 @@
  * Main client for interacting with the Shinobi privacy pool indexer GraphQL API
  */
 
-import { ApolloClient, NormalizedCacheObject, createHttpLink, InMemoryCache, ApolloQueryResult } from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
 import {
-  Activity,
-  ActivitiesQueryOptions,
-  ASPApprovalList,
-  HealthStatus,
-  IndexerError,
-  LatestIndexedBlock,
-  PaginatedResponse,
-  ShinobiIndexerConfig,
-  StateTreeLeaf,
-} from "./types";
+  ApolloClient,
+  type ApolloQueryResult,
+  InMemoryCache,
+  type NormalizedCacheObject,
+  createHttpLink,
+} from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
 import {
   GET_ACTIVITIES,
   GET_LATEST_ASP_ROOT,
@@ -26,6 +21,17 @@ import {
   GET_STATE_TREE_COMMITMENTS,
   HEALTH_CHECK,
 } from "./queries";
+import type {
+  ASPApprovalList,
+  ActivitiesQueryOptions,
+  Activity,
+  HealthStatus,
+  IndexerError,
+  LatestIndexedBlock,
+  PaginatedResponse,
+  ShinobiIndexerConfig,
+  StateTreeLeaf,
+} from "./types";
 
 /**
  * Main Shinobi Indexer SDK Client
@@ -82,10 +88,9 @@ export class ShinobiIndexerClient {
       }
 
       return result.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const indexerError: IndexerError = {
-        message: error.message || "Unknown error occurred",
-        code: error.code,
+        message: (error as Error)?.message || "Unknown error occurred",
         details: error,
       };
       throw indexerError;

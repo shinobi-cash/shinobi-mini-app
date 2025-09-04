@@ -4,11 +4,11 @@
  */
 
 import type { Activity } from "@/lib/indexer/sdk";
-import type { Note, NoteChain, DiscoveryResult } from "@/lib/storage/interfaces/IDataTypes";
-import type { INoteStorageProvider } from "./interfaces/INoteStorageProvider";
+import type { DiscoveryResult, Note, NoteChain } from "@/lib/storage/interfaces/IDataTypes";
 import { fetchActivities } from "@/services/data/indexerService";
 import { deriveChangeNullifier, deriveDepositNullifier, deriveDepositSecret } from "@/utils/noteDerivation";
 import { poseidon1, poseidon2 } from "poseidon-lite";
+import type { INoteStorageProvider } from "./interfaces/INoteStorageProvider";
 
 const ACTIVITIES_PER_PAGE = 100;
 

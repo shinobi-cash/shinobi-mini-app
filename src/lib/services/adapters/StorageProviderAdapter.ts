@@ -3,9 +3,9 @@
  * Bridges refactored storage to note discovery service interface
  */
 
-import type { INoteStorageProvider } from "../interfaces/INoteStorageProvider";
-import type { DiscoveryResult, NoteChain } from "@/lib/storage/interfaces/IDataTypes";
 import { storageManager } from "@/lib/storage";
+import type { DiscoveryResult, NoteChain } from "@/lib/storage/interfaces/IDataTypes";
+import type { INoteStorageProvider } from "../interfaces/INoteStorageProvider";
 
 export class StorageProviderAdapter implements INoteStorageProvider {
   async getCachedNotes(publicKey: string, poolAddress: string): Promise<DiscoveryResult | null> {

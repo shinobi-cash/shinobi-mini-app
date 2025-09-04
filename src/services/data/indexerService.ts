@@ -2,8 +2,8 @@
  * Indexer Service
  */
 
-import { indexerClient } from "@/lib/indexer/client";
 import { CONTRACTS, IPFS_GATEWAY_URL } from "@/config/constants";
+import { indexerClient } from "@/lib/indexer/client";
 
 // ============ LOCAL TYPES ============
 
@@ -30,7 +30,7 @@ export interface ASPApprovalListLegacy {
  */
 export async function fetchActivities(
   poolAddress?: string,
-  limit: number = 100,
+  limit = 100,
   after?: string,
   orderDirection: "asc" | "desc" = "desc",
 ) {
@@ -57,7 +57,7 @@ export async function fetchActivities(
  * Fetch all state tree commitments ordered by leafIndex (with automatic pagination)
  * Uses SDK client which handles pagination internally
  */
-export async function fetchStateTreeLeaves(poolId: string): Promise<any[]> {
+export async function fetchStateTreeLeaves(poolId: string) {
   try {
     // Use SDK's built-in method that handles pagination automatically
     const allLeaves = await indexerClient.getAllStateTreeLeaves(poolId);
@@ -127,7 +127,7 @@ export async function fetchApprovedLabelsFromIPFS(ipfsCID: string): Promise<stri
  * Orchestrates fetching ASP root from indexer and approval list from IPFS
  * Fetches approved labels directly from IPFS for most up-to-date data
  */
-export async function fetchASPData(): Promise<any> {
+export async function fetchASPData() {
   try {
     // Step 1: Get latest ASP root and IPFS CID from indexer
     const { root, ipfsCID, timestamp } = await fetchLatestASPRoot();

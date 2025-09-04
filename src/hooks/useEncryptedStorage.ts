@@ -3,8 +3,8 @@
  * Manages session state and automatic timeout with user activity tracking
  */
 
-import { useCallback, useEffect, useState } from "react";
 import { storageManager } from "@/lib/storage";
+import { useCallback, useEffect, useState } from "react";
 
 interface EncryptedStorageState {
   isSessionActive: boolean;

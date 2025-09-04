@@ -1,5 +1,5 @@
-import type React from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import type React from "react";
 import { AuthenticationActions } from "./AuthenticationActions";
 
 interface AuthenticationGateProps {
