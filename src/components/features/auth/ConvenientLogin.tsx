@@ -5,11 +5,12 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { showToast } from "@/lib/toast";
 import { isPasskeySupported } from "@/utils/environment";
-import { Fingerprint, Eye, EyeOff, Lock } from "lucide-react";
+import { Fingerprint, Lock } from "lucide-react";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
+import { PasswordField } from "../../ui/password-field";
 import { performPasskeyLogin, performPasswordLogin } from "./helpers/authFlows";
 
 interface ConvenientLoginProps {
@@ -26,7 +27,7 @@ export function ConvenientLogin({ onSuccess }: ConvenientLoginProps) {
 
   // password-only state
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  
 
   useEffect(() => {
     const id = passkey ? "username-login" : "username-password-login";
@@ -141,30 +142,19 @@ export function ConvenientLogin({ onSuccess }: ConvenientLoginProps) {
         className="mt-3 mb-2"
         disabled={isProcessing}
       />
-      <div className="relative">
-        <Input
-          id="login-password"
-          type={showPassword ? "text" : "password"}
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            if (error) setError(null);
-          }}
-          className="pr-10"
-          placeholder="Enter your password"
-          required
-          disabled={isProcessing}
-          autoComplete="current-password"
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center"
-          disabled={isProcessing}
-        >
-          {showPassword ? <EyeOff className="h-4 w-4 text-app-tertiary" /> : <Eye className="h-4 w-4 text-app-tertiary" />}
-        </button>
-      </div>
+      <PasswordField
+        id="login-password"
+        value={password}
+        onChange={(val) => {
+          setPassword(val);
+          if (error) setError(null);
+        }}
+        placeholder="Enter your password"
+        required
+        disabled={isProcessing}
+        autoComplete="current-password"
+        errorText={error ?? undefined}
+      />
       {error && <p className="text-red-600 text-xs">{error}</p>}
       <Button type="submit" disabled={isProcessing || !password.trim() || !accountName.trim()} className="w-full" size="lg">
         {isProcessing ? (

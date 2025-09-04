@@ -8,9 +8,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { storageManager } from "@/lib/storage";
 import { showToast } from "@/lib/toast";
 import type { KeyGenerationResult } from "@/utils/crypto";
-import { validateAccountName } from "@/utils/validation";
+import { useAccountNameValidation } from "@/hooks/useAccountNameValidation";
 import { AlertCircle, Fingerprint } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { performPasskeySetup } from "./helpers/authFlows";
@@ -22,11 +22,10 @@ interface PasskeySetupFormProps {
 
 export function PasskeySetupForm({ generatedKeys, onSuccess }: PasskeySetupFormProps) {
   const [accountName, setAccountName] = useState("");
-  const [accountNameError, setAccountNameError] = useState("");
+  const { accountNameError, onAccountNameChange, setAccountNameError } = useAccountNameValidation();
   const [isProcessing, setIsProcessing] = useState(false);
   const [setupError, setSetupError] = useState("");
   const { setKeys } = useAuth();
-  const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-focus on account name input when component mounts
   useEffect(() => {
@@ -34,15 +33,6 @@ export function PasskeySetupForm({ generatedKeys, onSuccess }: PasskeySetupFormP
     if (input) {
       input.focus();
     }
-  }, []);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (validationTimeoutRef.current) {
-        clearTimeout(validationTimeoutRef.current);
-      }
-    };
   }, []);
 
   // Account name validation moved to shared util
@@ -98,21 +88,7 @@ export function PasskeySetupForm({ generatedKeys, onSuccess }: PasskeySetupFormP
           if (setupError) setSetupError("");
 
           // Debounce the validation to avoid excessive database calls
-          if (validationTimeoutRef.current) {
-            clearTimeout(validationTimeoutRef.current);
-          }
-
-          if (e.target.value.trim()) {
-            validationTimeoutRef.current = setTimeout(async () => {
-              try {
-                const error = await validateAccountName(e.target.value);
-                setAccountNameError(error || "");
-              } catch (err) {
-                console.warn("Account validation failed:", err);
-                // Don't set an error - just skip validation if DB is not ready
-              }
-            }, 500); // Wait 500ms after user stops typing
-          }
+          onAccountNameChange(e.target.value);
         }}
         placeholder="Account Name"
         maxLength={30}

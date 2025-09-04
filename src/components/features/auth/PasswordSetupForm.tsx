@@ -8,12 +8,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { storageManager } from "@/lib/storage";
 import { showToast } from "@/lib/toast";
 import type { KeyGenerationResult } from "@/utils/crypto";
-import { validateAccountName } from "@/utils/validation";
-import { AlertCircle, Eye, EyeOff, Lock } from "lucide-react";
+import { useAccountNameValidation } from "@/hooks/useAccountNameValidation";
+import { AlertCircle, Lock } from "lucide-react";
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
+import { PasswordField } from "../../ui/password-field";
 import { performPasswordSetup } from "./helpers/authFlows";
 
 interface PasswordSetupFormProps {
@@ -23,15 +24,15 @@ interface PasswordSetupFormProps {
 
 export function PasswordSetupForm({ generatedKeys, onSuccess }: PasswordSetupFormProps) {
   const [accountName, setAccountName] = useState("");
-  const [accountNameError, setAccountNameError] = useState("");
+  const { accountNameError, onAccountNameChange, setAccountNameError } = useAccountNameValidation();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  
   const [isProcessing, setIsProcessing] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [setupError, setSetupError] = useState("");
   const { setKeys } = useAuth();
-  const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
 
   // Auto-focus on account name input when component mounts
   useEffect(() => {
@@ -41,14 +42,7 @@ export function PasswordSetupForm({ generatedKeys, onSuccess }: PasswordSetupFor
     }
   }, []);
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (validationTimeoutRef.current) {
-        clearTimeout(validationTimeoutRef.current);
-      }
-    };
-  }, []);
+  // no-op
 
   // Account name validation moved to shared util
 
@@ -140,21 +134,7 @@ export function PasswordSetupForm({ generatedKeys, onSuccess }: PasswordSetupFor
             if (setupError) setSetupError("");
 
             // Debounce the validation to avoid excessive database calls
-            if (validationTimeoutRef.current) {
-              clearTimeout(validationTimeoutRef.current);
-            }
-
-            if (e.target.value.trim()) {
-              validationTimeoutRef.current = setTimeout(async () => {
-                try {
-                  const error = await validateAccountName(e.target.value);
-                  setAccountNameError(error || "");
-                } catch (err) {
-                  console.warn("Account validation failed:", err);
-                  // Don't set an error - just skip validation if DB is not ready
-                }
-              }, 500); // Wait 500ms after user stops typing
-            }
+            onAccountNameChange(e.target.value);
           }}
           placeholder="Account Name"
           maxLength={30}
@@ -164,49 +144,31 @@ export function PasswordSetupForm({ generatedKeys, onSuccess }: PasswordSetupFor
         {accountNameError && <p className="text-red-600 text-xs mt-1">{accountNameError}</p>}
       </div>
 
-      <div className="relative">
-        <Input
-          id="setup-password"
-          type={showPassword ? "text" : "password"}
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            if (passwordError) setPasswordError("");
-            if (setupError) setSetupError("");
-          }}
-          className="pr-10"
-          placeholder="Enter password"
-          required
-          disabled={isProcessing}
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center"
-          disabled={isProcessing}
-        >
-          {showPassword ? (
-            <EyeOff className="h-4 w-4 text-app-tertiary" />
-          ) : (
-            <Eye className="h-4 w-4 text-app-tertiary" />
-          )}
-        </button>
-      </div>
+      <PasswordField
+        id="setup-password"
+        value={password}
+        onChange={(val) => {
+          setPassword(val);
+          if (passwordError) setPasswordError("");
+          if (setupError) setSetupError("");
+        }}
+        placeholder="Enter password"
+        required
+        disabled={isProcessing}
+        errorText={passwordError}
+      />
 
-      <div className="relative">
-        <Input
-          id="confirm-password"
-          type={showPassword ? "text" : "password"}
-          value={confirmPassword}
-          onChange={(e) => {
-            setConfirmPassword(e.target.value);
-            if (passwordError) setPasswordError("");
-          }}
-          placeholder="Confirm your password"
-          required
-          disabled={isProcessing}
-        />
-      </div>
+      <PasswordField
+        id="confirm-password"
+        value={confirmPassword}
+        onChange={(val) => {
+          setConfirmPassword(val);
+          if (passwordError) setPasswordError("");
+        }}
+        placeholder="Confirm your password"
+        required
+        disabled={isProcessing}
+      />
 
       {passwordError && <p className="text-red-600 text-xs">{passwordError}</p>}
 
