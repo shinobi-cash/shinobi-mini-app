@@ -47,6 +47,14 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
         setCurrentActionStep("complete");
       }
     },
+    // Pass action context for better completion UX
+    actionContext: {
+      type: action,
+      onNavigateToAction: () => {
+        onOpenChange(false);
+        navigateToScreen(getTargetScreen(action), asset);
+      }
+    }
   });
 
   // Reset state when drawer closes
@@ -62,7 +70,14 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
     if (!open) return;
 
     if (isAuthenticated && currentActionStep === "auth") {
-      // Auth complete, check if wallet is needed
+      // Auth complete, but don't auto-advance if we're in syncing-notes step
+      // Let the sync component handle its own completion
+      if (authSteps.currentStep === "syncing-notes") {
+        // Stay in auth step to let sync component show and complete
+        return;
+      }
+      
+      // For other completed auth steps, check if wallet is needed
       if (action === "deposit" && !isConnected) {
         setCurrentActionStep("wallet");
       } else {
@@ -78,7 +93,7 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
       onOpenChange(false);
       navigateToScreen(getTargetScreen(action), asset);
     }
-  }, [open, isAuthenticated, isConnected, currentActionStep, action, asset, navigateToScreen, onOpenChange]);
+  }, [open, isAuthenticated, isConnected, currentActionStep, action, asset, navigateToScreen, onOpenChange, authSteps.currentStep]);
 
   const getTargetScreen = (actionType: ActionType): "deposit" | "my-notes" => {
     return actionType;
@@ -198,6 +213,7 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
           onRecoveryComplete={authSteps.handleRecoveryComplete}
           onConvenientAuthComplete={authSteps.handleConvenientAuthComplete}
           onSyncingComplete={authSteps.handleSyncingComplete}
+          actionContext={authSteps.actionContext}
         />
       );
     }

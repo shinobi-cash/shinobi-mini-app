@@ -6,15 +6,19 @@
 
 import { CONTRACTS } from "@/config/constants";
 import { useAuth } from "@/contexts/AuthContext";
-import { useBanner } from "@/contexts/BannerContext";
 import { NoteDiscoveryService } from "@/lib/services/NoteDiscoveryService";
 import { StorageProviderAdapter } from "@/lib/services/adapters/StorageProviderAdapter";
-import { CheckCircle, Loader2, RefreshCw } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { CheckCircle, Loader2, RefreshCw, ArrowRight, FileText, Coins } from "lucide-react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { Button } from "../../ui/button";
 
 interface SyncingNotesSectionProps {
   onSyncComplete: () => void;
+  // Optional context for better completion UX
+  actionContext?: {
+    type: "deposit" | "my-notes" | "general";
+    onNavigateToAction?: () => void;
+  };
 }
 
 interface SyncProgress {
@@ -25,22 +29,27 @@ interface SyncProgress {
   error?: string;
 }
 
-export function SyncingNotesSection({ onSyncComplete }: SyncingNotesSectionProps) {
+export function SyncingNotesSection({ onSyncComplete, actionContext }: SyncingNotesSectionProps) {
   const { publicKey, accountKey } = useAuth();
-  const { banner } = useBanner();
   const [progress, setProgress] = useState<SyncProgress>({
     pagesProcessed: 0,
     depositsChecked: 0,
     depositsMatched: 0,
     complete: false,
   });
+  const [isRunning, setIsRunning] = useState(false);
 
-  const storageProvider = new StorageProviderAdapter();
-  const discoveryService = new NoteDiscoveryService(storageProvider);
+  // Create services only once to prevent infinite loops
+  const discoveryService = useMemo(() => {
+    const storageProvider = new StorageProviderAdapter();
+    return new NoteDiscoveryService(storageProvider);
+  }, []);
 
   const startSync = useCallback(async () => {
     if (!publicKey || !accountKey) return;
+    if (isRunning || progress.complete) return; // Prevent multiple runs
 
+    setIsRunning(true);
     setProgress({
       pagesProcessed: 0,
       depositsChecked: 0,
@@ -61,23 +70,19 @@ export function SyncingNotesSection({ onSyncComplete }: SyncingNotesSectionProps
       });
 
       setProgress(prev => ({ ...prev, complete: true }));
-      
-      // Wait a moment to show completion before proceeding
-      setTimeout(() => {
-        banner.success("Notes synced successfully");
-        onSyncComplete();
-      }, 1000);
+      setIsRunning(false);
 
     } catch (error) {
       console.error("Failed to sync notes:", error);
+      setIsRunning(false);
       setProgress(prev => ({ 
         ...prev, 
         complete: false,
         error: error instanceof Error ? error.message : "Failed to sync notes"
       }));
-      banner.error("Failed to sync notes");
+      // Error is already shown in the UI inline
     }
-  }, [publicKey, accountKey, discoveryService, onSyncComplete, banner]);
+  }, [publicKey, accountKey, discoveryService, isRunning, progress.complete]);
 
   // Start syncing on mount
   useEffect(() => {
@@ -85,28 +90,101 @@ export function SyncingNotesSection({ onSyncComplete }: SyncingNotesSectionProps
   }, [startSync]);
 
   const handleRetry = () => {
+    setIsRunning(false); // Reset running state 
+    setProgress(prev => ({ ...prev, error: undefined, complete: false })); // Clear error
     startSync();
   };
 
   const handleSkip = () => {
-    banner.info("Skipped note syncing");
     onSyncComplete();
   };
 
   if (progress.complete) {
-    return (
-      <div className="text-center space-y-4">
-        <div className="flex justify-center">
-          <CheckCircle className="w-16 h-16 text-green-500" />
+    const getCompletionContent = () => {
+      const baseContent = (
+        <>
+          <div className="flex justify-center">
+            <CheckCircle className="w-16 h-16 text-green-500" />
+          </div>
+          <div className="text-center mb-6">
+            <h3 className="text-lg font-semibold text-app-primary mb-2">Welcome to Shinobi!</h3>
+            <p className="text-sm text-app-secondary">
+              {progress.depositsMatched > 0 
+                ? `Found ${progress.depositsMatched} privacy notes` 
+                : "Your account is ready to use"}
+            </p>
+          </div>
+        </>
+      );
+
+      // Context-aware completion options
+      if (actionContext?.type === "deposit") {
+        return (
+          <div className="text-center space-y-4">
+            {baseContent}
+            <div className="space-y-2">
+              <Button 
+                onClick={actionContext.onNavigateToAction || onSyncComplete} 
+                className="w-full" 
+                size="lg"
+              >
+                <Coins className="w-4 h-4 mr-2" />
+                Go to Deposit
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={onSyncComplete} 
+                className="w-full"
+              >
+                Get Started
+              </Button>
+            </div>
+          </div>
+        );
+      }
+
+      if (actionContext?.type === "my-notes") {
+        return (
+          <div className="text-center space-y-4">
+            {baseContent}
+            <div className="space-y-2">
+              <Button 
+                onClick={actionContext.onNavigateToAction || onSyncComplete} 
+                className="w-full" 
+                size="lg"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                View My Notes
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={onSyncComplete} 
+                className="w-full"
+              >
+                Get Started
+              </Button>
+            </div>
+          </div>
+        );
+      }
+
+      // Default: general account creation/login
+      return (
+        <div className="text-center space-y-4">
+          {baseContent}
+          <div className="space-y-2">
+            <Button onClick={onSyncComplete} className="w-full" size="lg">
+              Get Started
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
         </div>
-        <div>
-          <h3 className="text-lg font-semibold text-app-primary mb-2">Sync Complete!</h3>
-          <p className="text-sm text-app-secondary">
-            Found {progress.depositsMatched} privacy notes
-          </p>
-        </div>
-      </div>
-    );
+      );
+    };
+
+    return getCompletionContent();
   }
 
   if (progress.error) {

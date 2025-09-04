@@ -75,7 +75,6 @@ export function PasswordLoginSection({ onSuccess }: PasswordLoginSectionProps) {
       console.error("Password login failed:", error);
       const errorMessage = error instanceof Error ? error.message : "Authentication failed";
       setError(errorMessage);
-      showToast.auth.error("Login");
     } finally {
       setIsProcessing(false);
     }

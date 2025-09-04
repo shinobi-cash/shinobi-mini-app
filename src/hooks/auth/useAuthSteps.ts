@@ -13,6 +13,10 @@ export type AuthStep =
 
 interface UseAuthStepsOptions {
   onAuthComplete?: () => void;
+  actionContext?: {
+    type: "deposit" | "my-notes" | "general";
+    onNavigateToAction?: () => void;
+  };
 }
 
 export function useAuthSteps(options: UseAuthStepsOptions = {}) {
@@ -83,15 +87,8 @@ export function useAuthSteps(options: UseAuthStepsOptions = {}) {
   };
 
   const handleConvenientAuthComplete = () => {
-    // For login, go to syncing step first
-    // For setup (new accounts), skip syncing and complete immediately
-    if (currentStep === "login-convenient") {
-      setCurrentStep("syncing-notes");
-    } else {
-      // This is setup-convenient (new account), complete immediately
-      resetState();
-      options.onAuthComplete?.();
-    }
+    // Always go to syncing step for consistent UX and "Welcome to Shinobi!" experience
+    setCurrentStep("syncing-notes");
   };
 
   const handleSyncingComplete = () => {
@@ -114,5 +111,6 @@ export function useAuthSteps(options: UseAuthStepsOptions = {}) {
     handleRecoveryComplete,
     handleConvenientAuthComplete,
     handleSyncingComplete,
+    actionContext: options.actionContext,
   };
 }

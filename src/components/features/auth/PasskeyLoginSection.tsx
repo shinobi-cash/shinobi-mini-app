@@ -88,7 +88,6 @@ export function PasskeyLoginSection({ onSuccess }: PasskeyLoginSectionProps) {
       }
 
       setError(errorMessage);
-      showToast.auth.error("Passkey login");
     } finally {
       setIsProcessing(false);
     }

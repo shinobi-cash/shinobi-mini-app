@@ -93,6 +93,7 @@ export const CreateAccountDrawer = ({ open, onOpenChange }: CreateAccountDrawerP
         onRecoveryComplete={authSteps.handleRecoveryComplete}
         onConvenientAuthComplete={authSteps.handleConvenientAuthComplete}
         onSyncingComplete={authSteps.handleSyncingComplete}
+        actionContext={{ type: "general" }}
       />
     </ResponsiveModal>
   );

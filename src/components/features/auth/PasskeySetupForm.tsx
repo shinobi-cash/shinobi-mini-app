@@ -5,14 +5,14 @@
  */
 
 import { useAuth } from "@/contexts/AuthContext";
-import { useBanner } from "@/contexts/BannerContext";
 import { KDF } from "@/lib/auth/keyDerivation";
 import { storageManager } from "@/lib/storage";
 import { type KeyGenerationResult, createHash } from "@/utils/crypto";
-import { Fingerprint } from "lucide-react";
+import { Fingerprint, AlertCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
+import { showToast } from "@/lib/toast";
 
 interface PasskeySetupFormProps {
   generatedKeys: KeyGenerationResult | null;
@@ -23,8 +23,8 @@ export function PasskeySetupForm({ generatedKeys, onSuccess }: PasskeySetupFormP
   const [accountName, setAccountName] = useState("");
   const [accountNameError, setAccountNameError] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [setupError, setSetupError] = useState("");
   const { setKeys } = useAuth();
-  const { banner } = useBanner();
   const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-focus on account name input when component mounts
@@ -76,7 +76,7 @@ export function PasskeySetupForm({ generatedKeys, onSuccess }: PasskeySetupFormP
     // Check for existing passkey
     const hasPasskey = await storageManager.passkeyExists(accountName.trim());
     if (hasPasskey) {
-      banner.error("Passkey already exists");
+      setSetupError("Passkey already exists for this account");
       return;
     }
 
@@ -120,14 +120,14 @@ export function PasskeySetupForm({ generatedKeys, onSuccess }: PasskeySetupFormP
       // Set keys in auth context
       setKeys(generatedKeys);
 
-      banner.success("Account created");
+      showToast.auth.success("Account created");
       onSuccess();
     } catch (error) {
       console.error("Passkey setup failed:", error);
       if (error instanceof Error && error.message.includes("PRF")) {
-        banner.error("Device not supported");
+        setSetupError("Device not supported - passkeys with PRF extension required");
       } else {
-        banner.error("Passkey setup failed");
+        setSetupError("Passkey setup failed. Please try again.");
       }
     } finally {
       setIsProcessing(false);
@@ -143,6 +143,7 @@ export function PasskeySetupForm({ generatedKeys, onSuccess }: PasskeySetupFormP
         onChange={(e) => {
           setAccountName(e.target.value);
           if (accountNameError) setAccountNameError("");
+          if (setupError) setSetupError("");
 
           // Debounce the validation to avoid excessive database calls
           if (validationTimeoutRef.current) {
@@ -167,6 +168,15 @@ export function PasskeySetupForm({ generatedKeys, onSuccess }: PasskeySetupFormP
         aria-invalid={!!accountNameError}
       />
       {accountNameError && <p className="text-red-600 text-xs">{accountNameError}</p>}
+
+      {/* Setup Status Messages */}
+      {setupError && (
+        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+          <p className="text-red-700 text-sm">{setupError}</p>
+        </div>
+      )}
+
 
       <Button
         type="submit"

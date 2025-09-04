@@ -1,6 +1,5 @@
-import { useBanner } from "@/contexts/BannerContext";
 import { type KeyGenerationResult, generateKeysFromRandomSeed } from "@/utils/crypto";
-import { Key } from "lucide-react";
+import { Key, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../../ui/button";
 
@@ -12,11 +11,12 @@ export function KeyGenerationSection({ onKeyGenerationComplete }: KeyGenerationS
   const [progress, setProgress] = useState(0);
   const [currentTask, setCurrentTask] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const { banner } = useBanner();
+  const [generationError, setGenerationError] = useState("");
 
   const handleGenerateKeys = async () => {
     setProgress(0);
     setIsGenerating(true);
+    setGenerationError(""); // Clear any previous error
     try {
       // Simulate progress for better UX
       const tasks = [
@@ -62,7 +62,7 @@ export function KeyGenerationSection({ onKeyGenerationComplete }: KeyGenerationS
     } catch (error) {
       console.error("Key generation failed:", error);
       setIsGenerating(false);
-      banner.error("Key generation failed. Please try again.");
+      setGenerationError("Key generation failed. Please try again.");
     }
   };
 
@@ -114,8 +114,16 @@ export function KeyGenerationSection({ onKeyGenerationComplete }: KeyGenerationS
         </div>
       </div>
 
+      {/* Generation Status Messages */}
+      {generationError && (
+        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+          <p className="text-red-700 text-sm">{generationError}</p>
+        </div>
+      )}
+
       <Button onClick={handleGenerateKeys} className="w-full" size="lg">
-        Generate My Keys
+        {generationError ? "Try Again" : "Generate My Keys"}
       </Button>
     </div>
   );

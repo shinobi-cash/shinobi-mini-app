@@ -4,15 +4,15 @@
  */
 
 import { useAuth } from "@/contexts/AuthContext";
-import { useBanner } from "@/contexts/BannerContext";
 import { KDF } from "@/lib/auth/keyDerivation";
 import { storageManager } from "@/lib/storage";
 import type { KeyGenerationResult } from "@/utils/crypto";
-import { Eye, EyeOff, Lock } from "lucide-react";
+import { Eye, EyeOff, Lock, AlertCircle } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
+import { showToast } from "@/lib/toast";
 
 interface PasswordSetupSectionProps {
   accountName: string;
@@ -32,8 +32,8 @@ export function PasswordSetupSection({
   const [showPassword, setShowPassword] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [setupError, setSetupError] = useState("");
   const { setKeys } = useAuth();
-  const { banner } = useBanner();
   const passwordInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-focus on password input when component mounts
@@ -81,12 +81,12 @@ export function PasswordSetupSection({
       // Check for existing account (this also initializes the database)
       const existingAccount = await storageManager.getAccountDataByName(accountName.trim());
       if (existingAccount) {
-        banner.error("Account already exists");
+        setSetupError("Account already exists");
         return;
       }
     } catch (error) {
       console.error("Failed to check existing account:", error);
-      banner.error("Database error");
+      setSetupError("Database error");
       return;
     }
 
@@ -113,11 +113,11 @@ export function PasswordSetupSection({
       // Set keys in auth context
       setKeys(generatedKeys);
 
-      banner.success("Account created");
+      showToast.auth.success("Account created");
       onSuccess();
     } catch (error) {
       console.error("Password setup failed:", error);
-      banner.error("Setup failed");
+      setSetupError("Setup failed. Please try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -135,6 +135,7 @@ export function PasswordSetupSection({
             onChange={(e) => {
               setPassword(e.target.value);
               if (passwordError) setPasswordError("");
+              if (setupError) setSetupError("");
             }}
             className="pr-10"
             placeholder="Create a secure password"
@@ -163,6 +164,7 @@ export function PasswordSetupSection({
             onChange={(e) => {
               setConfirmPassword(e.target.value);
               if (passwordError) setPasswordError("");
+              if (setupError) setSetupError("");
             }}
             placeholder="Confirm your password"
             required
@@ -172,6 +174,14 @@ export function PasswordSetupSection({
       </div>
 
       {passwordError && <p className="text-red-600 text-xs">{passwordError}</p>}
+
+      {/* Setup Status Messages */}
+      {setupError && (
+        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+          <p className="text-red-700 text-sm">{setupError}</p>
+        </div>
+      )}
 
       <div className="text-xs text-app-tertiary space-y-1">
         <p>Password requirements:</p>

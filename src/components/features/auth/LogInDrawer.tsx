@@ -115,6 +115,7 @@ export function LogInDrawer({ open, onOpenChange, onSessionInitialized }: LogInD
         onRecoveryComplete={authSteps.handleRecoveryComplete}
         onConvenientAuthComplete={authSteps.handleConvenientAuthComplete}
         onSyncingComplete={authSteps.handleSyncingComplete}
+        actionContext={{ type: "general" }}
       />
 
       <div className="text-center mt-4">

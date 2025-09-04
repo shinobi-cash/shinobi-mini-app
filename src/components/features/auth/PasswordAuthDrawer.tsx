@@ -4,16 +4,15 @@
  */
 
 import { useAuth } from "@/contexts/AuthContext";
-import { useBanner } from "@/contexts/BannerContext";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { ResponsiveModal } from "../../ui/responsive-modal";
+import { showToast } from "@/lib/toast";
 
 export function PasswordAuthDrawer() {
-  const { banner } = useBanner();
   const { quickAuthState, handleQuickPasswordAuth, dismissQuickAuth } = useAuth();
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -38,7 +37,7 @@ export function PasswordAuthDrawer() {
 
     try {
       await handleQuickPasswordAuth(password);
-      banner.success("Session restored successfully");
+      showToast.auth.success("Session restored");
     } catch (error) {
       console.error("Quick auth failed:", error);
       const errorMessage = error instanceof Error ? error.message : "Authentication failed";
@@ -90,6 +89,7 @@ export function PasswordAuthDrawer() {
         </div>
 
         {error && <p className="text-red-600 text-sm">{error}</p>}
+        
 
         <div className="flex gap-2">
           <Button type="button" variant="outline" onClick={handleDismiss} disabled={isProcessing} className="flex-1">
