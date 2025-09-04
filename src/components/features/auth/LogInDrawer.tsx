@@ -80,7 +80,7 @@ export function LogInDrawer({ open, onOpenChange, onSessionInitialized }: LogInD
         onOpenChange(newOpen);
       }}
     >
-      <DrawerContent className="bg-app-background border-app max-h-[85vh]">
+      <DrawerContent className="bg-app-background border-app">
         {/* iOS-style drag handle */}
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-app-tertiary/30" />
 

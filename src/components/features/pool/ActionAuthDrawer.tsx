@@ -209,7 +209,7 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
         onOpenChange(newOpen);
       }}
     >
-      <DrawerContent className="max-h-[90vh]">
+      <DrawerContent>
         <DrawerHeader className="text-left">
           <div className="flex items-center gap-3">
             {canGoBack() && (

@@ -16,7 +16,7 @@ export function NoteChainDetailDrawer({ noteChain, open, onOpenChange }: NoteCha
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="bg-app-background border-app max-h-[85vh]">
+      <DrawerContent className="bg-app-background border-app">
         <DrawerHeader className="pb-0 px-4 py-1">
           <div className="flex items-center justify-between">
             <DrawerTitle className="text-lg font-semibold text-app-primary tracking-tight">
