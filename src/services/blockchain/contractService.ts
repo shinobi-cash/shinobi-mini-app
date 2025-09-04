@@ -50,8 +50,6 @@ const publicClient = createPublicClient({
  */
 export async function fetchPoolScope(): Promise<string> {
   try {
-    console.log("⚙️ Fetching pool scope via contract call...");
-
     const scope = (await publicClient.readContract({
       address: CONTRACTS.ETH_PRIVACY_POOL as `0x${string}`,
       abi: PRIVACY_POOL_ABI,
@@ -59,8 +57,6 @@ export async function fetchPoolScope(): Promise<string> {
     })) as bigint;
 
     const scopeString = scope.toString();
-    console.log(`✅ Pool scope fetched: ${scopeString}`);
-
     return scopeString;
   } catch (error) {
     console.error("Failed to fetch pool scope:", error);
@@ -158,7 +154,6 @@ export async function prepareWithdrawalUserOperation(
   relayCallData: `0x${string}`,
 ) {
   try {
-    console.log("📤 Preparing UserOperation for withdrawal...");
     if (!smartAccountClient.account) {
       throw new Error("Smart account not initialized");
     }
@@ -172,10 +167,6 @@ export async function prepareWithdrawalUserOperation(
         },
       ],
     });
-
-    console.log("✅ UserOperation prepared successfully");
-    console.log(`   Target: ${CONTRACTS.PRIVACY_POOL_ENTRYPOINT}`);
-    console.log(`   Account: ${smartAccountClient.account?.address}`);
 
     return preparedUserOperation;
   } catch (error) {
@@ -192,7 +183,6 @@ export async function executeWithdrawalUserOperation(
   userOperation: UserOperation,
 ): Promise<string> {
   try {
-    console.log("🚀 Executing withdrawal UserOperation...");
     const signature = await smartAccountClient.account?.signUserOperation(userOperation);
     const userOpHash = await smartAccountClient.sendUserOperation({
       entryPointAddress: entryPoint07Address,
@@ -200,14 +190,7 @@ export async function executeWithdrawalUserOperation(
       signature,
     });
 
-    console.log(`✅ UserOperation sent with hash: ${userOpHash}`);
-
-    // Wait for transaction to be mined
-    console.log("⏳ Waiting for transaction to be mined...");
     const receipt = await smartAccountClient.waitForUserOperationReceipt({ hash: userOpHash });
-
-    console.log(`   Transaction hash: ${receipt.receipt.transactionHash}`);
-
     return receipt.receipt.transactionHash;
   } catch (error) {
     console.error("Failed to execute UserOperation:", error);

@@ -142,67 +142,52 @@ const NotesContent = ({
     return lastNote.status === "unspent";
   }).length;
 
-  const handleNoteChainClick = (noteChain: NoteChain) => {
-    noteChainModal.openWith(noteChain);
-  };
-
   const handleRefresh = () => {
     setIsRefreshing(true);
     refresh().finally(() => setIsRefreshing(false));
   };
 
-  const handleWithdrawClick = (noteChain: NoteChain) => {
+  const startWithdrawal = (noteChain: NoteChain) => {
     const lastNote = noteChain[noteChain.length - 1];
     if (lastNote.status === "unspent") {
       setWithdrawalNote(lastNote);
       setShowingWithdrawalForm(true);
-      noteChainModal.setOpen(false); // Close the note detail drawer
+      noteChainModal.setOpen(false);
     }
   };
 
-  const handleBackToNotes = () => {
+  const exitWithdrawal = () => {
     setShowingWithdrawalForm(false);
     setWithdrawalNote(null);
-  };
-
-  const handleTransactionSuccess = () => {
-    // Return to notes screen and refresh data
-    handleBackToNotes();
     refresh();
   };
 
-  // Render withdrawal form in full screen when active
   if (showingWithdrawalForm && withdrawalNote) {
     return (
       <div className="flex flex-col h-full gap-2 p-2">
-        {/* Withdrawal Header */}
         <div className="flex items-center gap-3">
-          <BackButton onClick={handleBackToNotes} />
+          <BackButton onClick={exitWithdrawal} />
           <h1 className="text-lg font-semibold text-app-primary tracking-tight">Withdraw ETH</h1>
         </div>
         
-        {/* Withdrawal Form - Full Screen */}
         <div className="flex-1 flex flex-col min-h-0">
           <WithdrawalForm
             asset={{ symbol: "ETH", name: "Ethereum", icon: "⚫" }}
             preSelectedNote={withdrawalNote}
-            onTransactionSuccess={handleTransactionSuccess}
+            onTransactionSuccess={exitWithdrawal}
           />
         </div>
       </div>
     );
   }
 
-  // Render normal notes screen
   return (
     <div className="flex flex-col h-full gap-2 p-2">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <BackButton to="home" />
         <h1 className="text-lg font-semibold text-app-primary tracking-tight">My Notes</h1>
       </div>
 
-      {/* Notes Overview */}
       <div className="space-y-2">
         <NotesSummaryCard
           unspentNotes={unspentNotes}
@@ -212,31 +197,25 @@ const NotesContent = ({
         />
       </div>
 
-      {/* Notes History */}
       <div className="flex-1 flex flex-col min-h-0">
         <NotesHistorySection
           noteChains={noteChains}
           loading={loading}
           error={!!error}
-          onNoteChainClick={handleNoteChainClick}
+          onNoteChainClick={noteChainModal.openWith}
         />
       </div>
 
-      {/* Note Chain Detail Drawer - Only for viewing note details */}
       <NoteChainDetailDrawer
         noteChain={noteChainModal.selectedItem}
         open={noteChainModal.isOpen}
         onOpenChange={noteChainModal.setOpen}
-        onWithdrawClick={handleWithdrawClick}
+        onWithdrawClick={startWithdrawal}
       />
     </div>
   );
 };
 
-/**
- * Pool Dashboard for non-authenticated users
- * Shows the same Pool Dashboard as home screen
- */
 const PoolDashboardForNonAuthenticated = () => {
   const { banner } = useBanner();
   const lastErrorRef = useRef<string | null>(null);
@@ -246,10 +225,8 @@ const PoolDashboardForNonAuthenticated = () => {
     limit: 10,
   });
 
-  // Show banner error when we have data but error on refresh
   useEffect(() => {
     const errorMessage = error?.message || null;
-
     if (errorMessage && hasData && errorMessage !== lastErrorRef.current) {
       banner.error("Failed to refresh activities", { duration: 5000 });
       lastErrorRef.current = errorMessage;

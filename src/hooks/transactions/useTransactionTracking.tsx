@@ -149,10 +149,8 @@ export function TransactionTrackingProvider({ children }: { children: React.Reac
 
           // Sync notes globally when transaction is indexed
           if (publicKey && accountKey) {
-            console.log("Auto-syncing notes after transaction indexed...");
             discoveryService
               .discoverNotes(publicKey, CONTRACTS.ETH_PRIVACY_POOL, accountKey)
-              .then(() => console.log("Auto-sync notes completed"))
               .catch((err) => console.warn("Auto-sync notes failed:", err));
           } else {
             console.warn("Cannot auto-sync: missing publicKey or accountKey");
