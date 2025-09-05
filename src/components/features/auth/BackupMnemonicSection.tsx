@@ -1,14 +1,33 @@
 import type { KeyGenerationResult } from "@/utils/crypto";
 import { Check, Copy, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 
 interface BackupMnemonicSectionProps {
   generatedKeys: KeyGenerationResult | null;
   onBackupMnemonicComplete: () => void;
+  registerFooterActions?: (
+    primary: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+    secondary?: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+  ) => void;
 }
 
-export function BackupMnemonicSection({ generatedKeys, onBackupMnemonicComplete }: BackupMnemonicSectionProps) {
+export function BackupMnemonicSection({
+  generatedKeys,
+  onBackupMnemonicComplete,
+  registerFooterActions,
+}: BackupMnemonicSectionProps) {
   const [isRevealed, setIsRevealed] = useState(false);
   const [hasConfirmed, setHasConfirmed] = useState(false);
   const [hasCopied, setHasCopied] = useState(false);
@@ -27,15 +46,46 @@ export function BackupMnemonicSection({ generatedKeys, onBackupMnemonicComplete 
     }
   };
 
+  useEffect(() => {
+    if (!registerFooterActions) return;
+    const canContinue = isRevealed && hasConfirmed;
+    registerFooterActions({ label: "Continue", onClick: onBackupMnemonicComplete, disabled: !canContinue });
+    return () => registerFooterActions(null);
+  }, [registerFooterActions, isRevealed, hasConfirmed, onBackupMnemonicComplete]);
+
   return (
     <div className="space-y-2">
       {/* Mnemonic Display */}
       <div className="bg-app-surface rounded-xl p-2 border border-app shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-medium text-app-primary">Your 12 Words</h3>
-          <Button variant="ghost" size="sm" onClick={() => setIsRevealed(!isRevealed)} className="h-8 w-8 p-0">
-            {isRevealed ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          </Button>
+          <div className="flex items-center gap-1">
+            {isRevealed && displayMnemonic ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCopyMnemonic}
+                    className="h-8 w-8 p-0"
+                    aria-label={hasCopied ? "Copied" : "Copy recovery phrase"}
+                  >
+                    {hasCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent sideOffset={6}>{hasCopied ? "Copied" : "Tap to copy"}</TooltipContent>
+              </Tooltip>
+            ) : null}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsRevealed(!isRevealed)}
+              className="h-8 w-8 p-0"
+              aria-label={isRevealed ? "Hide recovery phrase" : "Reveal recovery phrase"}
+            >
+              {isRevealed ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </Button>
+          </div>
         </div>
 
         {isRevealed && displayMnemonic ? (
@@ -51,21 +101,7 @@ export function BackupMnemonicSection({ generatedKeys, onBackupMnemonicComplete 
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={handleCopyMnemonic} className="w-full h-10 rounded-xl text-sm">
-                {hasCopied ? (
-                  <>
-                    <Check className="w-4 h-4 mr-1" />
-                    Copied
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 mr-1" />
-                    Copy
-                  </>
-                )}
-              </Button>
-            </div>
+            {/* Copy button moved next to the eye icon in the header when revealed */}
           </div>
         ) : (
           <button
@@ -109,9 +145,7 @@ export function BackupMnemonicSection({ generatedKeys, onBackupMnemonicComplete 
         </div>
       </div>
 
-      <Button onClick={onBackupMnemonicComplete} disabled={!isRevealed || !hasConfirmed} className="w-full" size="lg">
-        {!isRevealed ? "Reveal Recovery Phrase First" : "Continue to Setup"}
-      </Button>
+      {/* Actions moved to footer */}
     </div>
   );
 }

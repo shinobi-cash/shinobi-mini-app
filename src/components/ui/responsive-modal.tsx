@@ -45,7 +45,7 @@ export function ResponsiveModal({
           }}
         >
           <DialogHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between">
               <div className="flex items-center gap-2">
                 {showBackButton && onBack && (
                   <Button
@@ -63,11 +63,8 @@ export function ResponsiveModal({
                       {title}
                     </DialogTitle>
                   )}
-                  {description && (
-                    <DialogDescription className="text-sm text-left text-app-secondary mt-1">
-                      {description}
-                    </DialogDescription>
-                  )}
+                  {/* Keep an empty description for ARIA describedby; real description is rendered in content */}
+                  <DialogDescription className="sr-only" />
                 </div>
               </div>
               <DialogClose asChild>
@@ -89,7 +86,14 @@ export function ResponsiveModal({
               </DialogClose>
             </div>
           </DialogHeader>
-          <div className="flex-1 overflow-y-auto">{children}</div>
+          <div className="flex-1 overflow-y-auto">
+            {description && (
+              <div className="px-0 pb-2">
+                <p className="text-sm text-left text-app-secondary">{description}</p>
+              </div>
+            )}
+            {children}
+          </div>
           {showFooter && <div className="p-4">{footerContent}</div>}
         </DialogContent>
       </Dialog>
@@ -103,7 +107,7 @@ export function ResponsiveModal({
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-app-tertiary/30" />
 
         <DrawerHeader className="pb-0 px-4 pt-2">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
               {showBackButton && onBack && (
                 <Button
@@ -121,11 +125,8 @@ export function ResponsiveModal({
                     {title}
                   </DrawerTitle>
                 )}
-                {description && (
-                  <DrawerDescription className="text-sm text-left text-app-secondary mt-1">
-                    {description}
-                  </DrawerDescription>
-                )}
+                {/* Keep an empty description for ARIA describedby; real description is rendered in content */}
+                <DrawerDescription className="sr-only" />
               </div>
             </div>
             <DrawerClose
@@ -143,15 +144,16 @@ export function ResponsiveModal({
           </div>
         </DrawerHeader>
 
-  <div className="flex-1 overflow-y-auto px-4">
+        <div className="flex-1 overflow-y-auto px-4">
+          {description && (
+            <div className="pt-1 pb-2">
+              <p className="text-sm text-left text-app-secondary">{description}</p>
+            </div>
+          )}
           <div className="p-2">{children}</div>
         </div>
 
-        {showFooter && (
-          <div className="p-4 mt-auto border-t border-app-border">
-            {footerContent}
-          </div>
-        )}
+        {showFooter && <div className="p-4 mt-auto border-t border-app-border">{footerContent}</div>}
       </DrawerContent>
     </Drawer>
   );

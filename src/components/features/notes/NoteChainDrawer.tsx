@@ -31,7 +31,7 @@ export function NoteChainDrawer({ noteChain, open, onOpenChange, onWithdrawClick
         Cancel
       </Button>
       <Button
-        onClick={() => onWithdrawClick? onWithdrawClick(noteChain) : {}}
+        onClick={() => (onWithdrawClick ? onWithdrawClick(noteChain) : {})}
         className="flex-1 h-12 text-base font-medium rounded-xl"
         size="lg"
       >

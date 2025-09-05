@@ -5,9 +5,9 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { showToast } from "@/lib/toast";
-import { Eye, EyeOff, Lock } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock } from "lucide-react";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { ResponsiveModal } from "../../ui/responsive-modal";
@@ -18,10 +18,11 @@ export function PasswordAuthDrawer() {
   const [showPassword, setShowPassword] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
   // Auto-focus on password input when drawer opens
   useEffect(() => {
     if (quickAuthState?.show) {
-      const input = document.querySelector('[placeholder="Enter your password"]') as HTMLInputElement;
+      const input = document.getElementById("quick-auth-password") as HTMLInputElement | null;
       if (input) {
         input.focus();
       }
@@ -60,10 +61,44 @@ export function PasswordAuthDrawer() {
       title="Welcome Back"
       description={`Detected an old session for '${quickAuthState?.accountName}'`}
       className="bg-app-background border-app"
+      showFooter
+      footerContent={
+        <div className="grid grid-cols-2 gap-3 w-full">
+          <Button
+            variant="outline"
+            onClick={handleDismiss}
+            disabled={isProcessing}
+            className="col-span-1 w-full min-h-12 py-3 text-base font-medium rounded-2xl"
+            size="lg"
+          >
+            <span className="w-full text-center leading-tight">Use different account</span>
+          </Button>
+          <Button
+            variant="default"
+            onClick={() => formRef.current?.requestSubmit()}
+            disabled={isProcessing || !password.trim()}
+            className="col-span-1 w-full min-h-12 py-3 text-base font-medium rounded-2xl justify-center gap-2"
+            size="lg"
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span className="text-center leading-tight">Signing in…</span>
+              </>
+            ) : (
+              <>
+                <Lock className="w-5 h-5" />
+                <span className="text-center leading-tight">Sign in</span>
+              </>
+            )}
+          </Button>
+        </div>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-2">
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-2">
         <div className="relative">
           <Input
+            id="quick-auth-password"
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => {
@@ -89,25 +124,6 @@ export function PasswordAuthDrawer() {
         </div>
 
         {error && <p className="text-red-600 text-sm">{error}</p>}
-
-        <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={handleDismiss} disabled={isProcessing} className="flex-1">
-            Use Different Account
-          </Button>
-          <Button type="submit" disabled={isProcessing || !password.trim()} className="flex-1">
-            {isProcessing ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                Signing In...
-              </>
-            ) : (
-              <>
-                <Lock className="w-4 h-4 mr-2" />
-                Sign In
-              </>
-            )}
-          </Button>
-        </div>
       </form>
     </ResponsiveModal>
   );

@@ -1,8 +1,5 @@
 import type { AuthStep } from "@/hooks/auth/useAuthSteps";
 import type { KeyGenerationResult } from "@/utils/crypto";
-import { isPasskeySupported } from "@/utils/environment";
-import { Fingerprint, Lock } from "lucide-react";
-import { Button } from "../../ui/button";
 import { AccountLoginForm } from "./AccountLoginForm";
 import AccountSetupForm from "./AccountSetupForm";
 import { BackupMnemonicSection } from "./BackupMnemonicSection";
@@ -22,91 +19,87 @@ interface AuthStepContentProps {
   onRecoveryComplete: (keys: KeyGenerationResult) => void;
   onAccountSetupComplete: () => void;
   onSyncingComplete: () => void;
+  registerFooterActions?: (
+    primary: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+    secondary?: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+  ) => void;
 }
 
 export function AuthStepContent({
   currentStep,
   generatedKeys,
   loginKey,
-  onLoginChoice,
-  onCreateChoice,
-  onLoginMethodChoice,
+  onLoginChoice: _onLoginChoice,
+  onCreateChoice: _onCreateChoice,
+  onLoginMethodChoice: _onLoginMethodChoice,
   onKeyGenerationComplete,
   onBackupComplete,
   onRecoveryComplete,
   onAccountSetupComplete,
   onSyncingComplete,
+  registerFooterActions,
 }: AuthStepContentProps) {
-  const shouldShowPasskey = isPasskeySupported();
-
   switch (currentStep) {
     case "choose":
       return (
-        <div className="space-y-2">
-          <div className="flex gap-3">
-            <Button
-              variant="default"
-              className="flex-1 h-12 text-base font-medium rounded-2xl"
-              onClick={onLoginChoice}
-              size="lg"
-            >
-              Log In
-            </Button>
-
-            <Button
-              variant="outline"
-              className="flex-1 h-12 text-base font-medium rounded-2xl border border-app"
-              onClick={onCreateChoice}
-              size="lg"
-            >
-              Create Account
-            </Button>
-          </div>
+        <div className="text-center">
+          <p className="text-sm text-app-secondary">Your data is kept locally and encrypted.</p>
         </div>
       );
 
     case "login-method":
       return (
-        <div className="space-y-2">
-          <Button onClick={() => onLoginMethodChoice("convenient")} className="w-full" size="lg">
-            {shouldShowPasskey ? (
-              <>
-                <Fingerprint className="w-4 h-4 mr-2" />
-                Continue with Passkey
-              </>
-            ) : (
-              <>
-                <Lock className="w-4 h-4 mr-2" />
-                Continue with Password
-              </>
-            )}
-          </Button>
-
-          <Button variant="outline" onClick={() => onLoginMethodChoice("backup")} className="w-full">
-            Continue with Backup Phrase
-          </Button>
+        <div className="text-center">
+          <p className="text-sm text-app-secondary">We don't upload your login data or keys.</p>
         </div>
       );
 
     case "login-convenient":
-      return <AccountLoginForm onSuccess={onAccountSetupComplete} />;
+      return <AccountLoginForm onSuccess={onAccountSetupComplete} registerFooterActions={registerFooterActions} />;
 
     case "login-backup":
-      return <LoginWithBackupPhrase onRecoverAccountKey={onRecoveryComplete} />;
+      return (
+        <LoginWithBackupPhrase onRecoverAccountKey={onRecoveryComplete} registerFooterActions={registerFooterActions} />
+      );
 
     case "create-keys":
-      return <KeyGenerationSection onKeyGenerationComplete={onKeyGenerationComplete} />;
+      return (
+        <KeyGenerationSection
+          onKeyGenerationComplete={onKeyGenerationComplete}
+          registerFooterActions={registerFooterActions}
+        />
+      );
 
     case "create-backup":
-      return <BackupMnemonicSection generatedKeys={generatedKeys} onBackupMnemonicComplete={onBackupComplete} />;
+      return (
+        <BackupMnemonicSection
+          generatedKeys={generatedKeys}
+          onBackupMnemonicComplete={onBackupComplete}
+          registerFooterActions={registerFooterActions}
+        />
+      );
 
     case "setup-convenient":
       return (
-        <AccountSetupForm generatedKeys={generatedKeys || loginKey} onAccountSetupComplete={onAccountSetupComplete} />
+        <AccountSetupForm
+          generatedKeys={generatedKeys || loginKey}
+          onAccountSetupComplete={onAccountSetupComplete}
+          registerFooterActions={registerFooterActions}
+        />
       );
 
     case "syncing-notes":
-      return <SyncingNotesSection onSyncComplete={onSyncingComplete} />;
+      return <SyncingNotesSection onSyncComplete={onSyncingComplete} registerFooterActions={registerFooterActions} />;
 
     default:
       return null;

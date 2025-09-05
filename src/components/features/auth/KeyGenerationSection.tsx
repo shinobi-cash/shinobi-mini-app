@@ -1,13 +1,26 @@
 import { type KeyGenerationResult, generateKeysFromRandomSeed } from "@/utils/crypto";
-import { AlertCircle, Key } from "lucide-react";
-import { useState } from "react";
-import { Button } from "../../ui/button";
+import { AlertCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface KeyGenerationSectionProps {
   onKeyGenerationComplete: (keys: KeyGenerationResult) => void;
+  registerFooterActions?: (
+    primary: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+    secondary?: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+  ) => void;
 }
 
-export function KeyGenerationSection({ onKeyGenerationComplete }: KeyGenerationSectionProps) {
+export function KeyGenerationSection({ onKeyGenerationComplete, registerFooterActions }: KeyGenerationSectionProps) {
   const [progress, setProgress] = useState(0);
   const [currentTask, setCurrentTask] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -66,6 +79,14 @@ export function KeyGenerationSection({ onKeyGenerationComplete }: KeyGenerationS
     }
   };
 
+  useEffect(() => {
+    if (!registerFooterActions) return;
+    const disabled = isGenerating;
+    const label = generationError ? "Try Again" : isGenerating ? "Generating..." : "Generate Keys";
+    registerFooterActions({ label, onClick: handleGenerateKeys, disabled });
+    return () => registerFooterActions(null);
+  }, [registerFooterActions, isGenerating, generationError]);
+
   if (isGenerating) {
     return (
       <div className="space-y-2">
@@ -86,18 +107,6 @@ export function KeyGenerationSection({ onKeyGenerationComplete }: KeyGenerationS
 
   return (
     <div className="space-y-2">
-      <div className="text-center space-y-2">
-        <div className="w-16 h-16 bg-violet-100 dark:bg-violet-900/30 rounded-full flex items-center justify-center mx-auto">
-          <Key className="w-8 h-8 text-violet-600 dark:text-violet-400" />
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold text-app-primary">Generate Keys</h3>
-          <p className="text-sm text-app-secondary max-w-sm mx-auto mt-2">
-            Create your secure cryptographic keys and recovery phrase to get started with Shinobi.
-          </p>
-        </div>
-      </div>
-
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-2">
         <div className="flex items-start gap-3">
           <div className="w-5 h-5 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -107,7 +116,8 @@ export function KeyGenerationSection({ onKeyGenerationComplete }: KeyGenerationS
             <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">What happens next?</p>
             <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
               <li>• Generate cryptographically secure keys</li>
-              <li>• Create a 12-word recovery phrase</li>
+              <li>• Your identity keys let Shinobi discover your on‑chain notes</li>
+              <li>• A session key encrypts notes locally; your 12‑word phrase restores this on a new device</li>
               <li>• Set up convenient authentication</li>
             </ul>
           </div>
@@ -122,9 +132,7 @@ export function KeyGenerationSection({ onKeyGenerationComplete }: KeyGenerationS
         </div>
       )}
 
-      <Button onClick={handleGenerateKeys} className="w-full" size="lg">
-        {generationError ? "Try Again" : "Generate My Keys"}
-      </Button>
+      {/* Action moved to footer */}
     </div>
   );
 }

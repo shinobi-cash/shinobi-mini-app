@@ -2,8 +2,8 @@
 
 import { CONTRACTS } from "@/config/constants";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { useNotes } from "@/hooks/notes/useNoteDiscovery";
+import { useTransactionTracking } from "@/hooks/transactions/useTransactionTracking";
 import { useEffect, useMemo, useState } from "react";
 
 export function useNotesData() {

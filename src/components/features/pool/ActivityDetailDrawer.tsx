@@ -1,10 +1,10 @@
+import { Button } from "@/components/ui/button";
 import { NETWORK } from "@/config/constants";
 import type { Activity } from "@/lib/indexer/sdk";
 import { formatEthAmount, formatHash, formatTimestamp } from "@/utils/formatters";
 import { Check, Copy, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { ResponsiveModal } from "../../ui/responsive-modal";
-import { Button } from "@/components/ui/button";
 
 interface ActivityDetailDrawerProps {
   activity: Activity | null;
@@ -28,7 +28,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
 
   // formatHash is now imported from utils/formatters
 
-   const footerContent = (
+  const footerContent = (
     <div className="flex justify-center">
       <Button
         variant="outline"
@@ -39,9 +39,8 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
         Close
       </Button>
     </div>
-)
+  );
   if (!activity) return null;
-
 
   return (
     <ResponsiveModal

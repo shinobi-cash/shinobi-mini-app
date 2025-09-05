@@ -20,7 +20,7 @@ export function NoteRow({ note, chainLength, onClick }: NoteRowProps) {
     <div
       className="bg-app-surface border-b border-app px-2 py-2 sm:px-3 sm:py-3 active:bg-app-surface-hover transition-all duration-150 cursor-pointer hover:bg-app-surface-hover"
       onMouseDown={(e) => e.preventDefault()}
-  onClick={() => {
+      onClick={() => {
         // Blur any focused element prior to opening the drawer
         const active = document.activeElement as HTMLElement | null;
         if (active && typeof active.blur === "function") active.blur();

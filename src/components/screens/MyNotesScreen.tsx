@@ -1,8 +1,8 @@
 // File: src/components/screens/MyNotesScreen.tsx
 
 import { useAuth } from "@/contexts/AuthContext";
-import { useModalWithSelection } from "@/hooks/ui/useModalState";
 import { useNotesData } from "@/hooks/notes/useNotesData";
+import { useModalWithSelection } from "@/hooks/ui/useModalState";
 import type { Note, NoteChain } from "@/lib/storage/types";
 import { useState } from "react";
 import { NoteChainDrawer } from "../features/notes/NoteChainDrawer";

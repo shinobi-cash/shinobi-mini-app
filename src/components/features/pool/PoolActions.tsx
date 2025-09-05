@@ -33,10 +33,10 @@ export function PoolActions({ asset, disabled = false }: PoolActionsProps) {
   const [selectedAction, setSelectedAction] = useState<"deposit" | "my-notes">("deposit");
 
   const handleActionClick = (action: PoolAction) => {
-  // Avoid leaving focus on the trigger button when opening a modal
-  // This prevents "Blocked aria-hidden... descendant retained focus" warnings
-  const active = document.activeElement as HTMLElement | null;
-  if (active && typeof active.blur === "function") active.blur();
+    // Avoid leaving focus on the trigger button when opening a modal
+    // This prevents "Blocked aria-hidden... descendant retained focus" warnings
+    const active = document.activeElement as HTMLElement | null;
+    if (active && typeof active.blur === "function") active.blur();
 
     // Always show unified auth drawer - it will handle requirements and navigation
     setSelectedAction(action.id);

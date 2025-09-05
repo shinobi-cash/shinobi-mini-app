@@ -11,10 +11,9 @@ import { storageManager } from "@/lib/storage";
 import { showToast } from "@/lib/toast";
 import type { KeyGenerationResult } from "@/utils/crypto";
 import { isPasskeySupported } from "@/utils/environment";
-import { AlertCircle, Fingerprint, Lock } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { PasswordField } from "../../ui/password-field";
 import { performPasskeySetup, performPasswordSetup } from "./helpers/authFlows";
@@ -22,25 +21,70 @@ import { performPasskeySetup, performPasswordSetup } from "./helpers/authFlows";
 interface AccountSetupFormProps {
   generatedKeys: KeyGenerationResult | null;
   onAccountSetupComplete: () => void;
+  registerFooterActions?: (
+    primary: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+    secondary?: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+  ) => void;
 }
 
-export default function AccountSetupForm({ generatedKeys, onAccountSetupComplete }: AccountSetupFormProps) {
+export default function AccountSetupForm({
+  generatedKeys,
+  onAccountSetupComplete,
+  registerFooterActions,
+}: AccountSetupFormProps) {
   const shouldShowPasskey = isPasskeySupported();
 
   if (shouldShowPasskey) {
-    return <PasskeySetupForm generatedKeys={generatedKeys} onSuccess={onAccountSetupComplete} />;
+    return (
+      <PasskeySetupForm
+        generatedKeys={generatedKeys}
+        onSuccess={onAccountSetupComplete}
+        registerFooterActions={registerFooterActions}
+      />
+    );
   }
 
-  return <PasswordSetupForm generatedKeys={generatedKeys} onSuccess={onAccountSetupComplete} />;
+  return (
+    <PasswordSetupForm
+      generatedKeys={generatedKeys}
+      onSuccess={onAccountSetupComplete}
+      registerFooterActions={registerFooterActions}
+    />
+  );
 }
 
 // Passkey Setup Form Component
 function PasskeySetupForm({
   generatedKeys,
   onSuccess,
+  registerFooterActions,
 }: {
   generatedKeys: KeyGenerationResult | null;
   onSuccess: () => void;
+  registerFooterActions?: (
+    primary: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+    secondary?: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+  ) => void;
 }) {
   const [accountName, setAccountName] = useState("");
   const { accountNameError, onAccountNameChange, setAccountNameError } = useAccountNameValidation();
@@ -103,6 +147,17 @@ function PasskeySetupForm({
     }
   };
 
+  useEffect(() => {
+    if (!registerFooterActions) return;
+    const disabled = isProcessing || !!accountNameError || !accountName.trim() || !generatedKeys;
+    registerFooterActions({
+      label: "Continue",
+      onClick: () => void handlePasskeySetup(new Event("submit") as any),
+      disabled,
+    });
+    return () => registerFooterActions(null);
+  }, [registerFooterActions, isProcessing, accountNameError, accountName, generatedKeys]);
+
   return (
     <form onSubmit={handlePasskeySetup} className="space-y-2">
       <Input
@@ -132,24 +187,7 @@ function PasskeySetupForm({
         </div>
       )}
 
-      <Button
-        type="submit"
-        disabled={isProcessing || !!accountNameError || !accountName.trim()}
-        className="w-full"
-        size="lg"
-      >
-        {isProcessing ? (
-          <>
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-            Setting up Passkey...
-          </>
-        ) : (
-          <>
-            <Fingerprint className="w-4 h-4 mr-2" />
-            Set up Passkey
-          </>
-        )}
-      </Button>
+      {/* Actions moved to footer */}
     </form>
   );
 }
@@ -158,9 +196,24 @@ function PasskeySetupForm({
 function PasswordSetupForm({
   generatedKeys,
   onSuccess,
+  registerFooterActions,
 }: {
   generatedKeys: KeyGenerationResult | null;
   onSuccess: () => void;
+  registerFooterActions?: (
+    primary: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+    secondary?: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+  ) => void;
 }) {
   const [accountName, setAccountName] = useState("");
   const { accountNameError, onAccountNameChange, setAccountNameError } = useAccountNameValidation();
@@ -254,6 +307,18 @@ function PasswordSetupForm({
     }
   };
 
+  useEffect(() => {
+    if (!registerFooterActions) return;
+    const disabled =
+      isProcessing || !!accountNameError || !accountName.trim() || !generatedKeys || !password || !confirmPassword;
+    registerFooterActions({
+      label: "Continue",
+      onClick: () => void handlePasswordSetup(new Event("submit") as any),
+      disabled,
+    });
+    return () => registerFooterActions(null);
+  }, [registerFooterActions, isProcessing, accountNameError, accountName, generatedKeys, password, confirmPassword]);
+
   return (
     <form onSubmit={handlePasswordSetup} className="space-y-3">
       <div>
@@ -322,24 +387,7 @@ function PasswordSetupForm({
         </ul>
       </div>
 
-      <Button
-        type="submit"
-        disabled={isProcessing || !!accountNameError || !accountName.trim() || !password || !confirmPassword}
-        className="w-full"
-        size="lg"
-      >
-        {isProcessing ? (
-          <>
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-            Setting up Password...
-          </>
-        ) : (
-          <>
-            <Lock className="w-4 h-4 mr-2" />
-            Set up Password Access
-          </>
-        )}
-      </Button>
+      {/* Actions moved to footer */}
     </form>
   );
 }

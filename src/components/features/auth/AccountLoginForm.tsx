@@ -6,19 +6,31 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AuthError, AuthErrorCode } from "@/lib/errors/AuthError";
 import { showToast } from "@/lib/toast";
 import { isPasskeySupported } from "@/utils/environment";
-import { Fingerprint, Lock } from "lucide-react";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
-import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { PasswordField } from "../../ui/password-field";
 import { performPasskeyLogin, performPasswordLogin } from "./helpers/authFlows";
 
 interface AccountLoginFormProps {
   onSuccess: () => void;
+  registerFooterActions?: (
+    primary: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+    secondary?: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+  ) => void;
 }
 
-export function AccountLoginForm({ onSuccess }: AccountLoginFormProps) {
+export function AccountLoginForm({ onSuccess, registerFooterActions }: AccountLoginFormProps) {
   const { setKeys } = useAuth();
   const passkey = useMemo(() => isPasskeySupported(), []);
 
@@ -73,6 +85,14 @@ export function AccountLoginForm({ onSuccess }: AccountLoginFormProps) {
 
   const onPasswordSubmit: React.FormEventHandler = async (e) => {
     e.preventDefault();
+    await doPasswordLogin();
+  };
+
+  const doPasswordLogin = async () => {
+    if (!password.trim() || !accountName.trim()) {
+      setError("Please enter both account name and password");
+      return;
+    }
     if (!password.trim() || !accountName.trim()) {
       setError("Please enter both account name and password");
       return;
@@ -92,6 +112,15 @@ export function AccountLoginForm({ onSuccess }: AccountLoginFormProps) {
       setIsProcessing(false);
     }
   };
+
+  // Register footer actions
+  useEffect(() => {
+    if (!registerFooterActions) return;
+    const canSubmit = !isProcessing && !!accountName.trim() && (passkey ? true : !!password.trim());
+    const onClick = passkey ? doPasskeyLogin : doPasswordLogin;
+    registerFooterActions({ label: "Sign in", onClick, disabled: !canSubmit });
+    return () => registerFooterActions(null);
+  }, [registerFooterActions, passkey, isProcessing, accountName, password]);
 
   if (passkey) {
     return (
@@ -115,19 +144,6 @@ export function AccountLoginForm({ onSuccess }: AccountLoginFormProps) {
           disabled={isProcessing}
         />
         {error && <p className="text-red-600 text-xs mb-2">{error}</p>}
-        <Button onClick={doPasskeyLogin} disabled={isProcessing || !accountName.trim()} className="w-full" size="lg">
-          {isProcessing ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-              Authenticating...
-            </>
-          ) : (
-            <>
-              <Fingerprint className="w-4 h-4 mr-2" />
-              Login with Passkey
-            </>
-          )}
-        </Button>
       </div>
     );
   }
@@ -161,24 +177,6 @@ export function AccountLoginForm({ onSuccess }: AccountLoginFormProps) {
         errorText={error ?? undefined}
       />
       {error && <p className="text-red-600 text-xs">{error}</p>}
-      <Button
-        type="submit"
-        disabled={isProcessing || !password.trim() || !accountName.trim()}
-        className="w-full"
-        size="lg"
-      >
-        {isProcessing ? (
-          <>
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-            Logging in...
-          </>
-        ) : (
-          <>
-            <Lock className="w-4 h-4 mr-2" />
-            Login with Password
-          </>
-        )}
-      </Button>
     </form>
   );
 }

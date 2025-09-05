@@ -9,8 +9,8 @@ import { type Asset, useNavigation } from "@/contexts/NavigationContext";
 import { useAuthSteps } from "@/hooks/auth/useAuthSteps";
 import { isPasskeySupported } from "@/utils/environment";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { ArrowRight, WalletIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Loader2, WalletIcon } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { Button } from "../../ui/button";
 import { ResponsiveModal } from "../../ui/responsive-modal";
@@ -155,19 +155,19 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
       case "choose":
         return getActionTitle();
       case "login-method":
-        return "Login";
+        return "Sign in";
       case "login-convenient":
-        return shouldShowPasskey ? "Passkey" : "Password";
+        return "Sign in";
       case "login-backup":
-        return "Recovery";
+        return "Recover with phrase";
       case "create-keys":
-        return "Generate Keys";
+        return "Creating your secure identity";
       case "create-backup":
-        return "Backup Phrase";
+        return "Save your recovery phrase";
       case "setup-convenient":
-        return shouldShowPasskey ? "Setup Passkey" : "Setup Password";
+        return shouldShowPasskey ? "Set up quick sign‑in" : "Create a password";
       case "syncing-notes":
-        return "Syncing Notes";
+        return "Syncing notes";
       default:
         return getActionTitle();
     }
@@ -181,32 +181,53 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
     // For auth step, use context-aware descriptions
     switch (authSteps.currentStep) {
       case "choose":
-        switch (action) {
-          case "deposit":
-            return "Sign in to access deposit functionality";
-          case "my-notes":
-            return "Sign in to view your private notes";
-          default:
-            return "Sign in to continue";
-        }
+        return "Sign in to continue. Your identity is created and stored on this device; we never send your keys to a server.";
       case "login-method":
-        return "Choose login method";
+        return "Choose how to sign in. Credentials are stored locally and encrypted. We don’t upload your login data or keys.";
       case "login-convenient":
-        return shouldShowPasskey ? "Use biometric auth" : "Enter account and password";
+        return "Use your credentials to continue. They never leave your device.";
       case "login-backup":
-        return "Enter recovery phrase";
+        return "Enter your 12‑word recovery phrase to restore your local keys. The phrase is processed only on this device.";
       case "create-keys":
-        return "Generate keys locally";
+        return "Generating keys on your device and encrypting them. This takes a few seconds. Keys never leave your device.";
       case "create-backup":
-        return "Save your recovery phrase";
+        return "Write these 12 words down. They can restore your encrypted keys on any device. They’re not uploaded.";
       case "setup-convenient":
-        return shouldShowPasskey ? "Setup biometric access" : "Create secure password";
+        return shouldShowPasskey
+          ? "Enable passkey stored in your device’s secure enclave. Your keys remain local and encrypted."
+          : "Create a password to encrypt your local account data for faster sign‑in. We never upload your password.";
       case "syncing-notes":
-        return "Finding your privacy notes";
+        return "Securely discovering your deposits using your local keys. Nothing sensitive leaves your device.";
       default:
         return "";
     }
   };
+
+  // Footer actions registration API
+  type FooterAction = {
+    label: string;
+    onClick: () => void;
+    variant?: "default" | "outline" | "ghost";
+    disabled?: boolean;
+  };
+
+  const [footerPrimary, setFooterPrimary] = useState<FooterAction | null>(null);
+  const [footerSecondary, setFooterSecondary] = useState<FooterAction | null>(null);
+
+  const resetFooter = () => {
+    setFooterPrimary(null);
+    setFooterSecondary(null);
+  };
+
+  useEffect(() => {
+    // Clear when step changes; content will re-register
+    resetFooter();
+  }, [authSteps.currentStep]);
+
+  const registerFooterActions = useCallback((primary: FooterAction | null, secondary?: FooterAction | null) => {
+    setFooterPrimary(primary);
+    setFooterSecondary(secondary ?? null);
+  }, []);
 
   const renderStepContent = () => {
     if (currentActionStep === "auth") {
@@ -223,29 +244,70 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
           onRecoveryComplete={authSteps.handleRecoveryComplete}
           onAccountSetupComplete={authSteps.handleAccountSetupComplete}
           onSyncingComplete={authSteps.handleSyncingComplete}
+          registerFooterActions={registerFooterActions}
         />
       );
     }
 
     if (currentActionStep === "wallet") {
-      return (
-        <div className="space-y-2">
-          <Button
-            variant="default"
-            className="w-full h-12 text-base font-medium rounded-2xl"
-            onClick={handleConnectWallet}
-            size="lg"
-          >
-            <WalletIcon className="w-5 h-5 mr-2" />
-            Connect Wallet
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-        </div>
-      );
+      return null; // Content will be in footer
     }
 
     return null;
   };
+
+  // Default footer actions for steps that don't require component state
+  useEffect(() => {
+    if (currentActionStep !== "auth") return;
+
+    if (authSteps.currentStep === "choose") {
+      const nextPrimary = { label: "Log in", variant: "default" as const };
+      const nextSecondary = { label: "Create account", variant: "outline" as const };
+
+      const needsUpdate =
+        footerPrimary?.label !== nextPrimary.label ||
+        (footerPrimary?.variant ?? "default") !== nextPrimary.variant ||
+        footerSecondary?.label !== nextSecondary.label ||
+        (footerSecondary?.variant ?? "outline") !== nextSecondary.variant;
+
+      if (needsUpdate) {
+        registerFooterActions(
+          { ...nextPrimary, onClick: authSteps.handleLoginChoice },
+          { ...nextSecondary, onClick: authSteps.handleCreateChoice },
+        );
+      }
+    } else if (authSteps.currentStep === "login-method") {
+      const primaryLabel = shouldShowPasskey ? "Use passkey" : "Use password";
+      const nextPrimary = { label: primaryLabel, variant: "default" as const };
+      const nextSecondary = { label: "Use recovery phrase", variant: "outline" as const };
+
+      const needsUpdate =
+        footerPrimary?.label !== nextPrimary.label ||
+        (footerPrimary?.variant ?? "default") !== nextPrimary.variant ||
+        footerSecondary?.label !== nextSecondary.label ||
+        (footerSecondary?.variant ?? "outline") !== nextSecondary.variant;
+
+      if (needsUpdate) {
+        registerFooterActions(
+          { ...nextPrimary, onClick: () => authSteps.handleLoginMethodChoice("convenient") },
+          { ...nextSecondary, onClick: () => authSteps.handleLoginMethodChoice("backup") },
+        );
+      }
+    }
+    // Other steps will have their components register actions dynamically
+  }, [
+    currentActionStep,
+    authSteps.currentStep,
+    shouldShowPasskey,
+    registerFooterActions,
+    authSteps.handleLoginChoice,
+    authSteps.handleCreateChoice,
+    authSteps.handleLoginMethodChoice,
+    footerPrimary,
+    footerSecondary,
+  ]);
+
+  const shouldShowFooter = () => !!footerPrimary || !!footerSecondary || currentActionStep === "wallet";
 
   return (
     <ResponsiveModal
@@ -253,9 +315,122 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
       onOpenChange={onOpenChange}
       title={getTitle()}
       description={getDescription()}
-      showBackButton={canGoBack()}
-      onBack={handleBack}
+      showBackButton={false}
+      onBack={undefined}
       isWalletModalOpen={isWalletModalOpen}
+      showFooter={shouldShowFooter()}
+      footerContent={
+        currentActionStep === "wallet" ? (
+          <div className="grid grid-cols-2 gap-3 w-full">
+            <Button
+              variant="outline"
+              onClick={handleBack}
+              className="col-span-1 w-full min-h-12 py-3 text-base font-medium rounded-2xl"
+              size="lg"
+            >
+              <span className="w-full text-center leading-tight">Back</span>
+            </Button>
+            <Button
+              variant="default"
+              className="col-span-1 w-full min-h-12 py-3 text-base font-medium rounded-2xl justify-center gap-2"
+              onClick={handleConnectWallet}
+              disabled={isWalletModalOpen}
+              size="lg"
+            >
+              {isWalletModalOpen ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-center leading-tight">Connecting…</span>
+                </>
+              ) : (
+                <>
+                  <WalletIcon className="w-5 h-5" />
+                  <span className="text-center leading-tight">Connect Wallet</span>
+                </>
+              )}
+            </Button>
+          </div>
+        ) : (
+          (footerPrimary || footerSecondary || canGoBack()) &&
+          (() => {
+            const explicitSecondary = footerSecondary;
+            const backSecondary: FooterAction | null = canGoBack()
+              ? { label: "Back", onClick: handleBack, variant: "outline" as const }
+              : null;
+            const threeActions = !!(footerPrimary && explicitSecondary && backSecondary);
+
+            if (threeActions) {
+              return (
+                <div className="grid gap-3 w-full">
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Back */}
+                    <Button
+                      variant="outline"
+                      onClick={backSecondary!.onClick}
+                      disabled={backSecondary!.disabled}
+                      className="col-span-1 w-full min-h-12 py-3 text-base font-medium rounded-2xl"
+                      size="lg"
+                    >
+                      <span className="w-full text-center leading-tight">{backSecondary!.label}</span>
+                    </Button>
+                    {/* Primary */}
+                    <Button
+                      variant={footerPrimary!.variant ?? "default"}
+                      onClick={footerPrimary!.onClick}
+                      disabled={footerPrimary!.disabled}
+                      className="col-span-1 w-full min-h-12 py-3 text-base font-medium rounded-2xl"
+                      size="lg"
+                    >
+                      <span className="w-full text-center leading-tight">{footerPrimary!.label}</span>
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-1">
+                    {/* Explicit secondary full-width */}
+                    <Button
+                      variant={explicitSecondary!.variant ?? "outline"}
+                      onClick={explicitSecondary!.onClick}
+                      disabled={explicitSecondary!.disabled}
+                      className="col-span-1 w-full min-h-12 py-3 text-base font-medium rounded-2xl"
+                      size="lg"
+                    >
+                      <span className="w-full text-center leading-tight">{explicitSecondary!.label}</span>
+                    </Button>
+                  </div>
+                </div>
+              );
+            }
+
+            const secondary: FooterAction | null = explicitSecondary ?? backSecondary;
+            const twoButtons = !!(secondary && footerPrimary);
+            return (
+              <div className={`grid ${twoButtons ? "grid-cols-2" : "grid-cols-2"} gap-3 w-full`}>
+                {secondary && (
+                  <Button
+                    variant={backSecondary ? "outline" : (secondary.variant ?? "outline")}
+                    onClick={secondary.onClick}
+                    disabled={secondary.disabled}
+                    className={`${twoButtons ? "col-span-1" : "col-span-2"} w-full min-h-12 py-3 text-base font-medium rounded-2xl`}
+                    size="lg"
+                  >
+                    <span className="w-full text-center leading-tight">{secondary.label}</span>
+                  </Button>
+                )}
+                {footerPrimary && (
+                  <Button
+                    variant={footerPrimary.variant ?? "default"}
+                    onClick={footerPrimary.onClick}
+                    disabled={footerPrimary.disabled}
+                    className={`${twoButtons ? "col-span-1" : "col-span-2"} w-full min-h-12 py-3 text-base font-medium rounded-2xl`}
+                    size="lg"
+                  >
+                    <span className="w-full text-center leading-tight">{footerPrimary.label}</span>
+                  </Button>
+                )}
+              </div>
+            );
+          })()
+        )
+      }
     >
       {renderStepContent()}
     </ResponsiveModal>

@@ -7,8 +7,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "../../ui/button";
 import { ActivityDetailDrawer } from "./ActivityDetailDrawer";
 import { ActivityRow } from "./ActivityRow";
-import { PoolAssetSelector } from "./PoolAssetSelector";
 import { PoolActions } from "./PoolActions";
+import { PoolAssetSelector } from "./PoolAssetSelector";
 import { PoolStatsCard } from "./PoolStatsCard";
 
 interface PoolDashboardProps {

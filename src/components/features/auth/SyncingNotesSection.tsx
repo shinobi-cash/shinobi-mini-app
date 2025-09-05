@@ -2,15 +2,28 @@ import { CONTRACTS } from "@/config/constants";
 import { useAuth } from "@/contexts/AuthContext";
 import { NoteDiscoveryService } from "@/lib/services/NoteDiscoveryService";
 import { StorageProviderAdapter } from "@/lib/services/adapters/StorageProviderAdapter";
-import { ArrowRight, CheckCircle, Loader2, RefreshCw } from "lucide-react";
+import { CheckCircle, Loader2, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "../../ui/button";
 
 interface SyncingNotesSectionProps {
   onSyncComplete: () => void;
+  registerFooterActions?: (
+    primary: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+    secondary?: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+  ) => void;
 }
 
-export function SyncingNotesSection({ onSyncComplete }: SyncingNotesSectionProps) {
+export function SyncingNotesSection({ onSyncComplete, registerFooterActions }: SyncingNotesSectionProps) {
   const { publicKey, accountKey } = useAuth();
 
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -72,6 +85,22 @@ export function SyncingNotesSection({ onSyncComplete }: SyncingNotesSectionProps
     setStatus("idle"); // will trigger startSync via effect
   };
 
+  // Register footer actions based on status
+  useEffect(() => {
+    if (!registerFooterActions) return;
+    if (status === "success") {
+      registerFooterActions({ label: "Get Started", onClick: onSyncComplete });
+      return () => registerFooterActions(null);
+    }
+    if (status === "error") {
+      registerFooterActions({ label: "Try Again", onClick: handleRetry });
+      return () => registerFooterActions(null);
+    }
+    // loading/idle: no primary action
+    registerFooterActions(null);
+    return () => registerFooterActions(null);
+  }, [registerFooterActions, status, onSyncComplete]);
+
   // ----- UI states -----
 
   if (status === "success") {
@@ -87,15 +116,7 @@ export function SyncingNotesSection({ onSyncComplete }: SyncingNotesSectionProps
       </>
     );
 
-    return (
-      <div className="text-center space-y-4">
-        {baseContent}
-        <Button onClick={onSyncComplete} className="w-full" size="lg">
-          Get Started
-          <ArrowRight className="w-4 h-4 ml-2" />
-        </Button>
-      </div>
-    );
+    return <div className="text-center space-y-4">{baseContent}</div>;
   }
 
   if (status === "error") {
@@ -108,10 +129,6 @@ export function SyncingNotesSection({ onSyncComplete }: SyncingNotesSectionProps
           <h3 className="text-lg font-semibold text-app-primary mb-2">Sync Failed</h3>
           <p className="text-sm text-app-secondary mb-4">{error}</p>
         </div>
-        <Button onClick={handleRetry} className="w-full">
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Try Again
-        </Button>
       </div>
     );
   }

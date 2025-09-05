@@ -1,13 +1,26 @@
 import { type KeyGenerationResult, restoreFromMnemonic, validateMnemonic } from "@/utils/crypto";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "../../ui/button";
 
 interface LoginWithBackupPhraseProps {
   onRecoverAccountKey: (key: KeyGenerationResult) => void;
+  registerFooterActions?: (
+    primary: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+    secondary?: {
+      label: string;
+      onClick: () => void;
+      variant?: "default" | "outline" | "ghost";
+      disabled?: boolean;
+    } | null,
+  ) => void;
 }
 
-export function LoginWithBackupPhrase({ onRecoverAccountKey }: LoginWithBackupPhraseProps) {
+export function LoginWithBackupPhrase({ onRecoverAccountKey, registerFooterActions }: LoginWithBackupPhraseProps) {
   const [words, setWords] = useState<string[]>(Array(12).fill(""));
   const firstInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string>();
@@ -39,9 +52,7 @@ export function LoginWithBackupPhrase({ onRecoverAccountKey }: LoginWithBackupPh
     setWords(updated);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const performRecover = async () => {
     if (!words.every((w) => w.trim())) {
       setError("Please enter all 12 words of your Login with Backup Phrase.");
       return;
@@ -63,6 +74,18 @@ export function LoginWithBackupPhrase({ onRecoverAccountKey }: LoginWithBackupPh
       setIsProcessing(false);
     }
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await performRecover();
+  };
+
+  useEffect(() => {
+    if (!registerFooterActions) return;
+    const canSubmit = !isProcessing && words.every((w) => w.trim());
+    registerFooterActions({ label: "Recover account", onClick: () => void performRecover(), disabled: !canSubmit });
+    return () => registerFooterActions(null);
+  }, [registerFooterActions, words, isProcessing]);
 
   return (
     <div className="space-y-2">
@@ -90,9 +113,7 @@ export function LoginWithBackupPhrase({ onRecoverAccountKey }: LoginWithBackupPh
             ))}
           </div>
 
-          <Button type="submit" className="w-full" disabled={isProcessing || !words.every((w) => w)}>
-            {isProcessing ? "Processing..." : "Load Account"}
-          </Button>
+          {/* Actions moved to footer */}
 
           {error && (
             <div className="p-2 rounded-lg bg-red-50 border border-red-200">
