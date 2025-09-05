@@ -65,7 +65,13 @@ export function AppMenu() {
     <div className="relative" ref={dropdownRef}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          // Blur active element to avoid retaining focus under aria-hidden containers
+          const active = document.activeElement as HTMLElement | null;
+          if (active && typeof active.blur === "function") active.blur();
+          setIsOpen(!isOpen);
+        }}
+        onMouseDown={(e) => e.preventDefault()}
         aria-label="App menu"
         className="flex items-center gap-1 p-2 hover:bg-app-surface-hover rounded-lg active:scale-95 transition-all"
       >

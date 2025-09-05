@@ -33,6 +33,11 @@ export function PoolActions({ asset, disabled = false }: PoolActionsProps) {
   const [selectedAction, setSelectedAction] = useState<"deposit" | "my-notes">("deposit");
 
   const handleActionClick = (action: PoolAction) => {
+  // Avoid leaving focus on the trigger button when opening a modal
+  // This prevents "Blocked aria-hidden... descendant retained focus" warnings
+  const active = document.activeElement as HTMLElement | null;
+  if (active && typeof active.blur === "function") active.blur();
+
     // Always show unified auth drawer - it will handle requirements and navigation
     setSelectedAction(action.id);
     setAuthDrawerOpen(true);
@@ -48,6 +53,9 @@ export function PoolActions({ asset, disabled = false }: PoolActionsProps) {
             <Button
               key={action.id}
               onClick={() => handleActionClick(action)}
+              // Prevent the button from becoming focused on mouse down
+              // so background focus isn't retained when the modal opens
+              onMouseDown={(e) => e.preventDefault()}
               disabled={disabled}
               variant={isActive ? "default" : "outline"}
               size="lg"

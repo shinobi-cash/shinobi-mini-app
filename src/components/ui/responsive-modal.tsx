@@ -75,6 +75,14 @@ export function ResponsiveModal({
                   variant="ghost"
                   size="sm"
                   className="h-8 w-8 p-0 hover:bg-app-surface-hover transition-colors duration-200"
+                  onClick={() => {
+                    // Avoid leaving focus on a control that may become hidden
+                    requestAnimationFrame(() => {
+                      const active = document.activeElement as HTMLElement | null;
+                      if (active && typeof active.blur === "function") active.blur();
+                    });
+                  }}
+                  onMouseDown={(e) => e.preventDefault()}
                 >
                   <X className="h-4 w-4 text-app-secondary" />
                 </Button>
@@ -120,7 +128,16 @@ export function ResponsiveModal({
                 )}
               </div>
             </div>
-            <DrawerClose className="h-8 w-8 flex items-center justify-center hover:bg-app-surface-hover transition-colors duration-200">
+            <DrawerClose
+              className="h-8 w-8 flex items-center justify-center hover:bg-app-surface-hover transition-colors duration-200"
+              onClick={() => {
+                requestAnimationFrame(() => {
+                  const active = document.activeElement as HTMLElement | null;
+                  if (active && typeof active.blur === "function") active.blur();
+                });
+              }}
+              onMouseDown={(e) => e.preventDefault()}
+            >
               <X className="h-4 w-4 text-app-secondary" />
             </DrawerClose>
           </div>

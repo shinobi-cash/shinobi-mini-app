@@ -85,7 +85,13 @@ export function NotesSummaryCard({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={onRediscover}
+                  onClick={(e) => {
+                    // Remove focus before triggering refresh actions that may open modals
+                    const target = e.currentTarget as HTMLElement;
+                    if (typeof target.blur === "function") target.blur();
+                    onRediscover();
+                  }}
+                  onMouseDown={(e) => e.preventDefault()}
                   disabled={isRediscovering}
                   className="h-6 w-6 p-0 text-app-tertiary hover:text-app-primary"
                   title="Refresh deposits from blockchain"
