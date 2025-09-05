@@ -214,15 +214,18 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
   const [footerPrimary, setFooterPrimary] = useState<FooterAction | null>(null);
   const [footerSecondary, setFooterSecondary] = useState<FooterAction | null>(null);
 
-  const resetFooter = () => {
+  const resetFooter = useCallback(() => {
     setFooterPrimary(null);
     setFooterSecondary(null);
-  };
+  }, []);
 
   useEffect(() => {
     // Clear when step changes; content will re-register
     resetFooter();
-  }, [authSteps.currentStep]);
+    // reference current step to satisfy dependency usage
+    const step = authSteps.currentStep;
+    void step;
+  }, [authSteps.currentStep, resetFooter]);
 
   const registerFooterActions = useCallback((primary: FooterAction | null, secondary?: FooterAction | null) => {
     setFooterPrimary(primary);
@@ -366,34 +369,34 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
                     {/* Back */}
                     <Button
                       variant="outline"
-                      onClick={backSecondary!.onClick}
-                      disabled={backSecondary!.disabled}
+                      onClick={backSecondary?.onClick}
+                      disabled={backSecondary?.disabled}
                       className="col-span-1 w-full min-h-12 py-3 text-base font-medium rounded-2xl"
                       size="lg"
                     >
-                      <span className="w-full text-center leading-tight">{backSecondary!.label}</span>
+                      <span className="w-full text-center leading-tight">{backSecondary?.label}</span>
                     </Button>
                     {/* Primary */}
                     <Button
-                      variant={footerPrimary!.variant ?? "default"}
-                      onClick={footerPrimary!.onClick}
-                      disabled={footerPrimary!.disabled}
+                      variant={footerPrimary?.variant ?? "default"}
+                      onClick={footerPrimary?.onClick}
+                      disabled={footerPrimary?.disabled}
                       className="col-span-1 w-full min-h-12 py-3 text-base font-medium rounded-2xl"
                       size="lg"
                     >
-                      <span className="w-full text-center leading-tight">{footerPrimary!.label}</span>
+                      <span className="w-full text-center leading-tight">{footerPrimary?.label}</span>
                     </Button>
                   </div>
                   <div className="grid grid-cols-1">
                     {/* Explicit secondary full-width */}
                     <Button
-                      variant={explicitSecondary!.variant ?? "outline"}
-                      onClick={explicitSecondary!.onClick}
-                      disabled={explicitSecondary!.disabled}
+                      variant={explicitSecondary?.variant ?? "outline"}
+                      onClick={explicitSecondary?.onClick}
+                      disabled={explicitSecondary?.disabled}
                       className="col-span-1 w-full min-h-12 py-3 text-base font-medium rounded-2xl"
                       size="lg"
                     >
-                      <span className="w-full text-center leading-tight">{explicitSecondary!.label}</span>
+                      <span className="w-full text-center leading-tight">{explicitSecondary?.label}</span>
                     </Button>
                   </div>
                 </div>

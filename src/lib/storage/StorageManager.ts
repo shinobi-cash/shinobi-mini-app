@@ -125,7 +125,16 @@ class StorageManager {
   }
 
   async getAccountDataByName(accountName: string): Promise<CachedAccountData | null> {
-    return this.accountRepo.getAccountDataByName(accountName);
+    // We need decrypted data for callers expecting CachedAccountData
+    // Temporarily set context and use getAccountData which handles decryption
+    // without changing public API.
+    const previous = this.currentAccountName;
+    this.currentAccountName = accountName;
+    try {
+      return await this.accountRepo.getAccountData(accountName);
+    } finally {
+      this.currentAccountName = previous;
+    }
   }
 
   async listAccountNames(): Promise<string[]> {

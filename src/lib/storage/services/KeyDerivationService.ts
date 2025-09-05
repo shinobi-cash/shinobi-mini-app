@@ -142,7 +142,8 @@ export class KeyDerivationService {
   async createPasskeyCredential(accountName: string, userHandle: string): Promise<{ credentialId: string }> {
     const challenge = crypto.getRandomValues(new Uint8Array(32));
     const userId = new TextEncoder().encode(userHandle);
-    const rpId = (import.meta as any)?.env?.VITE_RP_ID ?? window.location.hostname;
+    const env = (import.meta as ImportMeta).env as Record<string, string | undefined>;
+    const rpId = env?.VITE_RP_ID ?? window.location.hostname;
 
     const credential = (await navigator.credentials.create({
       publicKey: {

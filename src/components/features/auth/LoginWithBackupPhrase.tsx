@@ -1,6 +1,6 @@
 import { type KeyGenerationResult, restoreFromMnemonic, validateMnemonic } from "@/utils/crypto";
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface LoginWithBackupPhraseProps {
   onRecoverAccountKey: (key: KeyGenerationResult) => void;
@@ -52,7 +52,7 @@ export function LoginWithBackupPhrase({ onRecoverAccountKey, registerFooterActio
     setWords(updated);
   };
 
-  const performRecover = async () => {
+  const performRecover = useCallback(async () => {
     if (!words.every((w) => w.trim())) {
       setError("Please enter all 12 words of your Login with Backup Phrase.");
       return;
@@ -73,7 +73,7 @@ export function LoginWithBackupPhrase({ onRecoverAccountKey, registerFooterActio
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [words, onRecoverAccountKey]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +85,7 @@ export function LoginWithBackupPhrase({ onRecoverAccountKey, registerFooterActio
     const canSubmit = !isProcessing && words.every((w) => w.trim());
     registerFooterActions({ label: "Recover account", onClick: () => void performRecover(), disabled: !canSubmit });
     return () => registerFooterActions(null);
-  }, [registerFooterActions, words, isProcessing]);
+  }, [registerFooterActions, words, isProcessing, performRecover]);
 
   return (
     <div className="space-y-2">

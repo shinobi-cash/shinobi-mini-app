@@ -8,6 +8,28 @@ import type { IndexedDBAdapter } from "../adapters/IndexedDBAdapter";
 import type { CachedAccountData, EncryptedData } from "../interfaces/IDataTypes";
 import type { EncryptionService } from "../services/EncryptionService";
 
+type StorageRecord = {
+  id: string;
+  publicKeyHash: string;
+  encryptedPayload: { iv: string; data: string; salt: string };
+  createdAt: number;
+};
+
+function isStorageRecord(value: unknown): value is StorageRecord {
+  if (!value || typeof value !== "object") return false;
+  const v = value as Record<string, unknown>;
+  const payload = v.encryptedPayload as Record<string, unknown> | undefined;
+  return (
+    typeof v.id === "string" &&
+    typeof v.publicKeyHash === "string" &&
+    !!payload &&
+    typeof payload.iv === "string" &&
+    typeof payload.data === "string" &&
+    typeof payload.salt === "string" &&
+    typeof v.createdAt === "number"
+  );
+}
+
 export class AccountRepository {
   constructor(
     private storageAdapter: IndexedDBAdapter,
@@ -45,9 +67,9 @@ export class AccountRepository {
   /**
    * Get account data by name - exact implementation from noteCache.getAccountDataByName
    */
-  async getAccountDataByName(accountName: string): Promise<any | null> {
-    const result = await this.storageAdapter.get(accountName);
-    if (result) {
+  async getAccountDataByName(accountName: string): Promise<StorageRecord | null> {
+    const result = (await this.storageAdapter.get(accountName)) as unknown;
+    if (isStorageRecord(result)) {
       // Return the raw encrypted data for now - matches current implementation
       return result;
     }
@@ -65,8 +87,8 @@ export class AccountRepository {
       throw new Error("No current account context");
     }
 
-    const result = await this.storageAdapter.get(currentAccountName);
-    if (result) {
+    const result = (await this.storageAdapter.get(currentAccountName)) as unknown;
+    if (isStorageRecord(result)) {
       try {
         const encryptedData: EncryptedData = {
           iv: this.encryptionService.base64ToArrayBuffer(result.encryptedPayload.iv),

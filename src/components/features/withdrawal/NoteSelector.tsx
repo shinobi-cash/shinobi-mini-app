@@ -49,7 +49,7 @@ export const NoteSelector = ({
           preSelectedNote ? "cursor-default" : ""
         }`}
         aria-labelledby="from-label"
-        aria-haspopup={preSelectedNote ? undefined : "listbox"}
+        aria-haspopup={preSelectedNote ? undefined : "menu"}
         aria-expanded={preSelectedNote ? undefined : isNoteDropdownOpen}
         aria-controls={!preSelectedNote && isNoteDropdownOpen ? "note-dropdown" : undefined}
       >
@@ -83,7 +83,8 @@ export const NoteSelector = ({
       {!preSelectedNote && isNoteDropdownOpen && availableNotes.length > 1 && (
         <div
           id="note-dropdown"
-          role="listbox"
+          role="menu"
+          tabIndex={-1}
           className="absolute top-full left-0 right-0 z-10 mt-1 bg-app-surface border border-app rounded-xl shadow-lg overflow-hidden"
         >
           <div className="max-h-60 overflow-y-auto">
@@ -96,7 +97,7 @@ export const NoteSelector = ({
                   setIsNoteDropdownOpen(false);
                 }}
                 className="w-full text-left px-4 py-3 hover:bg-app-surface-hover transition-colors border-b border-app-border last:border-b-0"
-                role="option"
+                role="menuitem"
                 aria-selected={
                   selectedNote?.depositIndex === note.depositIndex && selectedNote?.changeIndex === note.changeIndex
                 }

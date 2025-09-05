@@ -212,7 +212,7 @@ export function useWithdrawal({ note, onTransactionSuccess }: UseWithdrawalProps
 
   useEffect(() => {
     resetStates();
-  }, [note, resetStates]);
+  }, [resetStates]);
 
   return {
     ...state,

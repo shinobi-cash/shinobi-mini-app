@@ -13,7 +13,7 @@ import type { KeyGenerationResult } from "@/utils/crypto";
 import { isPasskeySupported } from "@/utils/environment";
 import { AlertCircle } from "lucide-react";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "../../ui/input";
 import { PasswordField } from "../../ui/password-field";
 import { performPasskeySetup, performPasswordSetup } from "./helpers/authFlows";
@@ -91,6 +91,7 @@ function PasskeySetupForm({
   const [isProcessing, setIsProcessing] = useState(false);
   const [setupError, setSetupError] = useState("");
   const { setKeys } = useAuth();
+  const formRef = useRef<HTMLFormElement | null>(null);
 
   // Auto-focus on account name input when component mounts
   useEffect(() => {
@@ -152,14 +153,17 @@ function PasskeySetupForm({
     const disabled = isProcessing || !!accountNameError || !accountName.trim() || !generatedKeys;
     registerFooterActions({
       label: "Continue",
-      onClick: () => void handlePasskeySetup(new Event("submit") as any),
+      onClick: () => {
+        // Submit the form to reuse onSubmit validation/flow
+        formRef.current?.requestSubmit();
+      },
       disabled,
     });
     return () => registerFooterActions(null);
   }, [registerFooterActions, isProcessing, accountNameError, accountName, generatedKeys]);
 
   return (
-    <form onSubmit={handlePasskeySetup} className="space-y-2">
+    <form ref={formRef} onSubmit={handlePasskeySetup} className="space-y-2">
       <Input
         id="account-name"
         type="text"
@@ -223,6 +227,7 @@ function PasswordSetupForm({
   const [passwordError, setPasswordError] = useState("");
   const [setupError, setSetupError] = useState("");
   const { setKeys } = useAuth();
+  const formRef = useRef<HTMLFormElement | null>(null);
 
   // Auto-focus on account name input when component mounts
   useEffect(() => {
@@ -313,14 +318,17 @@ function PasswordSetupForm({
       isProcessing || !!accountNameError || !accountName.trim() || !generatedKeys || !password || !confirmPassword;
     registerFooterActions({
       label: "Continue",
-      onClick: () => void handlePasswordSetup(new Event("submit") as any),
+      onClick: () => {
+        // Submit the form to reuse onSubmit validation/flow
+        formRef.current?.requestSubmit();
+      },
       disabled,
     });
     return () => registerFooterActions(null);
   }, [registerFooterActions, isProcessing, accountNameError, accountName, generatedKeys, password, confirmPassword]);
 
   return (
-    <form onSubmit={handlePasswordSetup} className="space-y-3">
+    <form ref={formRef} onSubmit={handlePasswordSetup} className="space-y-3">
       <div>
         <Input
           id="account-name"

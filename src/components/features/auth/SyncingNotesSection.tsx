@@ -81,9 +81,9 @@ export function SyncingNotesSection({ onSyncComplete, registerFooterActions }: S
     };
   }, []);
 
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     setStatus("idle"); // will trigger startSync via effect
-  };
+  }, []);
 
   // Register footer actions based on status
   useEffect(() => {
@@ -99,7 +99,7 @@ export function SyncingNotesSection({ onSyncComplete, registerFooterActions }: S
     // loading/idle: no primary action
     registerFooterActions(null);
     return () => registerFooterActions(null);
-  }, [registerFooterActions, status, onSyncComplete]);
+  }, [registerFooterActions, status, onSyncComplete, handleRetry]);
 
   // ----- UI states -----
 

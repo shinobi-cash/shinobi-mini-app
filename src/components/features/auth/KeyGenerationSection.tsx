@@ -1,6 +1,6 @@
 import { type KeyGenerationResult, generateKeysFromRandomSeed } from "@/utils/crypto";
 import { AlertCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface KeyGenerationSectionProps {
   onKeyGenerationComplete: (keys: KeyGenerationResult) => void;
@@ -26,7 +26,7 @@ export function KeyGenerationSection({ onKeyGenerationComplete, registerFooterAc
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState("");
 
-  const handleGenerateKeys = async () => {
+  const handleGenerateKeys = useCallback(async () => {
     setProgress(0);
     setIsGenerating(true);
     setGenerationError(""); // Clear any previous error
@@ -77,7 +77,7 @@ export function KeyGenerationSection({ onKeyGenerationComplete, registerFooterAc
       setIsGenerating(false);
       setGenerationError("Key generation failed. Please try again.");
     }
-  };
+  }, [onKeyGenerationComplete]);
 
   useEffect(() => {
     if (!registerFooterActions) return;
@@ -85,7 +85,7 @@ export function KeyGenerationSection({ onKeyGenerationComplete, registerFooterAc
     const label = generationError ? "Try Again" : isGenerating ? "Generating..." : "Generate Keys";
     registerFooterActions({ label, onClick: handleGenerateKeys, disabled });
     return () => registerFooterActions(null);
-  }, [registerFooterActions, isGenerating, generationError]);
+  }, [registerFooterActions, isGenerating, generationError, handleGenerateKeys]);
 
   if (isGenerating) {
     return (

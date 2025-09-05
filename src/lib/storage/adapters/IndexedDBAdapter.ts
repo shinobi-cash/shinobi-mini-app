@@ -13,7 +13,7 @@ const STORE_NAME = "encrypted-notes";
 const ACCOUNT_STORE_NAME = "encrypted-account";
 const PASSKEY_STORE_NAME = "passkey-credentials";
 
-export class IndexedDBAdapter<T = any> implements IEncryptedStorageAdapter<T> {
+export class IndexedDBAdapter<T = unknown> implements IEncryptedStorageAdapter<T> {
   private db: IDBDatabase | null = null;
   private encryptionService: EncryptionService;
   private storeName: string;

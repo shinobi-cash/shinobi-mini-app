@@ -20,8 +20,18 @@ export class PasskeyRepository {
    * Get passkey data by account name - exact implementation from noteCache.getPasskeyData
    */
   async getPasskeyData(accountName: string): Promise<NamedPasskeyData | null> {
-    const result = await this.storageAdapter.get(accountName);
-    return result || null;
+    const result = (await this.storageAdapter.get(accountName)) as unknown;
+    if (
+      result &&
+      typeof result === "object" &&
+      typeof (result as Record<string, unknown>).accountName === "string" &&
+      typeof (result as Record<string, unknown>).credentialId === "string" &&
+      typeof (result as Record<string, unknown>).publicKeyHash === "string" &&
+      typeof (result as Record<string, unknown>).created === "number"
+    ) {
+      return result as NamedPasskeyData;
+    }
+    return null;
   }
 
   /**

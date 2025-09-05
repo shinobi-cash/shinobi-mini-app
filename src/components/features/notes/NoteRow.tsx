@@ -17,8 +17,9 @@ export function NoteRow({ note, chainLength, onClick }: NoteRowProps) {
         : "Updated Balance";
 
   return (
-    <div
-      className="bg-app-surface border-b border-app px-2 py-2 sm:px-3 sm:py-3 active:bg-app-surface-hover transition-all duration-150 cursor-pointer hover:bg-app-surface-hover"
+    <button
+      type="button"
+      className="w-full text-left bg-app-surface border-b border-app px-2 py-2 sm:px-3 sm:py-3 active:bg-app-surface-hover transition-all duration-150 cursor-pointer hover:bg-app-surface-hover"
       onMouseDown={(e) => e.preventDefault()}
       onClick={() => {
         // Blur any focused element prior to opening the drawer
@@ -47,6 +48,6 @@ export function NoteRow({ note, chainLength, onClick }: NoteRowProps) {
           </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 }

@@ -25,15 +25,17 @@ export class AuthError extends Error {
 
 export function isUserCancelledError(err: unknown): boolean {
   if (!err) return false;
-  const msg = String((err as any)?.message ?? err);
-  const name = String((err as any)?.name ?? "");
+  const maybeObj = typeof err === "object" && err !== null ? (err as Record<string, unknown>) : undefined;
+  const msg = String((maybeObj?.message as string | undefined) ?? err);
+  const name = String((maybeObj?.name as string | undefined) ?? "");
   return (
     name === "AbortError" || name === "NotAllowedError" || /canceled|cancelled|not allowed|aborted|denied/i.test(msg)
   );
 }
 
 export function mapPasskeyError(err: unknown): AuthError {
-  const msg = String((err as any)?.message ?? err);
+  const maybeObj = typeof err === "object" && err !== null ? (err as Record<string, unknown>) : undefined;
+  const msg = String((maybeObj?.message as string | undefined) ?? err);
   if (isUserCancelledError(err)) {
     return new AuthError(AuthErrorCode.PASSKEY_CANCELLED, "Authentication was cancelled.", { cause: err });
   }

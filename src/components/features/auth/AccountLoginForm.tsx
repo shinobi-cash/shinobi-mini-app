@@ -7,7 +7,7 @@ import { AuthError, AuthErrorCode } from "@/lib/errors/AuthError";
 import { showToast } from "@/lib/toast";
 import { isPasskeySupported } from "@/utils/environment";
 import type React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Input } from "../../ui/input";
 import { PasswordField } from "../../ui/password-field";
 import { performPasskeyLogin, performPasswordLogin } from "./helpers/authFlows";
@@ -47,7 +47,7 @@ export function AccountLoginForm({ onSuccess, registerFooterActions }: AccountLo
     input?.focus();
   }, [passkey]);
 
-  const doPasskeyLogin = async () => {
+  const doPasskeyLogin = useCallback(async () => {
     if (!accountName.trim()) {
       setError("Please enter an account name");
       return;
@@ -81,14 +81,14 @@ export function AccountLoginForm({ onSuccess, registerFooterActions }: AccountLo
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [accountName, onSuccess, setKeys]);
 
   const onPasswordSubmit: React.FormEventHandler = async (e) => {
     e.preventDefault();
     await doPasswordLogin();
   };
 
-  const doPasswordLogin = async () => {
+  const doPasswordLogin = useCallback(async () => {
     if (!password.trim() || !accountName.trim()) {
       setError("Please enter both account name and password");
       return;
@@ -111,7 +111,7 @@ export function AccountLoginForm({ onSuccess, registerFooterActions }: AccountLo
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [accountName, password, onSuccess, setKeys]);
 
   // Register footer actions
   useEffect(() => {
@@ -120,7 +120,7 @@ export function AccountLoginForm({ onSuccess, registerFooterActions }: AccountLo
     const onClick = passkey ? doPasskeyLogin : doPasswordLogin;
     registerFooterActions({ label: "Sign in", onClick, disabled: !canSubmit });
     return () => registerFooterActions(null);
-  }, [registerFooterActions, passkey, isProcessing, accountName, password]);
+  }, [registerFooterActions, passkey, isProcessing, accountName, password, doPasskeyLogin, doPasswordLogin]);
 
   if (passkey) {
     return (

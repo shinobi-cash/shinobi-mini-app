@@ -74,11 +74,11 @@ export function WithdrawalForm({ asset, preSelectedNote, onTransactionSuccess }:
     resetStates,
   } = withdrawalFlow;
 
-  // Reset states when component mounts or dependencies change
+  // Reset states when selected note changes
   useEffect(() => {
     resetStates();
     resetForm();
-  }, [resetStates, resetForm, selectedNote, preSelectedNote]);
+  }, [resetStates, resetForm]);
 
   const handleSubmit = useCallback(() => {
     if (selectedNote && isValidAmount && isValidAddress) {

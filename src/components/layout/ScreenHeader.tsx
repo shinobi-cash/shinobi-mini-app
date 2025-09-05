@@ -21,7 +21,7 @@ export function ScreenHeader({ title, backTo = "home", showBackButton = true, br
       {breadcrumbs ? (
         <div className="flex items-center gap-2">
           {breadcrumbs.map((item, index) => (
-            <div key={index} className="flex items-center gap-2">
+            <div key={`${item.label}-${index}`} className="flex items-center gap-2">
               <span
                 className={`text-sm ${
                   index === breadcrumbs.length - 1 ? "font-semibold text-app-primary" : "text-app-secondary"
