@@ -98,7 +98,7 @@ export function ResponsiveModal({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="bg-app-background border-app h-auto max-h-[90vh] flex flex-col">
+      <DrawerContent className="bg-app-background border-app flex flex-col">
         {/* iOS-style drag handle */}
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-app-tertiary/30" />
 
@@ -143,7 +143,7 @@ export function ResponsiveModal({
           </div>
         </DrawerHeader>
 
-        <div className="flex-1 overflow-y-auto px-4 pb-6">
+  <div className="flex-1 overflow-y-auto px-4 pb-6">
           <div className="p-2">{children}</div>
         </div>
 
