@@ -185,7 +185,7 @@ export function ActionAuthDrawer({ open, onOpenChange, action, asset }: ActionAu
           case "deposit":
             return "Sign in to access deposit functionality";
           case "my-notes":
-            return "Sign in to view your transaction history";
+            return "Sign in to view your private notes";
           default:
             return "Sign in to continue";
         }

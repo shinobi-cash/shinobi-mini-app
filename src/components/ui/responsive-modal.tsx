@@ -143,7 +143,7 @@ export function ResponsiveModal({
           </div>
         </DrawerHeader>
 
-  <div className="flex-1 overflow-y-auto px-4 pb-6">
+  <div className="flex-1 overflow-y-auto px-4">
           <div className="p-2">{children}</div>
         </div>
 

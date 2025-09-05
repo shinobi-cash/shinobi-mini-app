@@ -111,23 +111,15 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
               {/* Transaction Hash */}
               <div className="px-2 py-2 flex items-center justify-between">
                 <span className="text-xs font-medium text-app-secondary">Explorer Link</span>
-                <div className="flex items-center gap-1.5">
-                  {/* <span className="text-xs font-mono text-app-primary">{activity.transactionHash}</span> */}
-                  {/* <button
-                      type="button"
-                      onClick={() => copyToClipboard(activity.transactionHash, "Transaction Hash")}
-                      className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
-                    >
-                      <Copy className="h-3.5 w-3.5 text-app-tertiary" />
-                    </button> */}
+                <div className="flex items-center">
                   <a
                     href={`${NETWORK.EXPLORER_URL}/tx/${activity.transactionHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex gap-1 p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
+                    className="flex items-center gap-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
                   >
                     <span className="text-xs font-mono text-app-primary">{"View"}</span>
-                    <ExternalLink className="h-3.5 w-3.5 text-app-tertiary" />
+                    <ExternalLink className="h-3 w-3 text-app-tertiary" />
                   </a>
                 </div>
               </div>
@@ -183,7 +175,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                       <button
                         type="button"
                         onClick={() => copyToClipboard(activity.recipient || "", "Recipient")}
-                        className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
+                        className="rounded-md hover:bg-app-surface-hover transition-colors duration-200"
                         title={copiedField === "Recipient" ? "Copied!" : "Copy recipient address"}
                       >
                         {copiedField === "Recipient" ? (
@@ -248,7 +240,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                 <button
                   type="button"
                   onClick={() => copyToClipboard(activity.poolId || "", "Pool Address")}
-                  className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
+                  className="rounded-md hover:bg-app-surface-hover transition-colors duration-200"
                   title={copiedField === "Pool Address" ? "Copied!" : "Copy pool address"}
                 >
                   {copiedField === "Pool Address" ? (
@@ -261,7 +253,7 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
                   href={`${NETWORK.EXPLORER_URL}/address/${activity.poolId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-1 rounded-md hover:bg-app-surface-hover transition-colors duration-200"
+                  className="rounded-md hover:bg-app-surface-hover transition-colors duration-200"
                 >
                   <ExternalLink className="h-3.5 w-3.5 text-app-tertiary" />
                 </a>

@@ -6,7 +6,7 @@ interface ActivityRowProps {
 }
 
 export const ActivityRow = ({ activity }: ActivityRowProps) => (
-  <div className="bg-app-surface border-b border-app px-2 py-2 sm:px-3 sm:py-3 active:bg-app-surface-hover transition-all duration-150 cursor-pointer hover:bg-app-surface-hover">
+  <div className="bg-app-surface border-b border-app px-2 py-2 active:bg-app-surface-hover transition-all duration-150 cursor-pointer hover:bg-app-surface-hover">
     <div className="flex items-center justify-between gap-2">
       {/* Left side: Type and amount */}
       <div className="flex-1 min-w-0">
@@ -14,7 +14,7 @@ export const ActivityRow = ({ activity }: ActivityRowProps) => (
           {activity.type.toLowerCase()}
         </div>
         <div
-          className={`text-xs sm:text-base font-medium tabular-nums flex items-center gap-1 ${
+          className={`text-xs sm:text-sm font-medium tabular-nums flex items-center gap-1 ${
             activity.type === "DEPOSIT" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
           }`}
         >
