@@ -5,9 +5,9 @@ import { useModalWithSelection } from "@/hooks/ui/useModalState";
 import { useNotesData } from "@/hooks/notes/useNotesData";
 import type { Note, NoteChain } from "@/lib/storage/types";
 import { useState } from "react";
-import { NoteChainDetailDrawer } from "../features/notes/NoteChainDetailDrawer";
-import { NotesHistorySection } from "../features/notes/NotesHistorySection";
-import { NotesSummaryCard } from "../features/notes/NotesSummaryCard";
+import { NoteChainDrawer } from "../features/notes/NoteChainDrawer";
+import { NotesSection } from "../features/notes/NotesSection";
+import { NotesSummaryCard } from "../features/notes/NotesSummary";
 import { WithdrawalForm } from "../features/withdrawal/WithdrawalForm";
 import { BackButton } from "../ui/back-button";
 
@@ -94,7 +94,7 @@ export const MyNotesScreen = () => {
       </div>
 
       <div className="flex-1 flex flex-col min-h-0">
-        <NotesHistorySection
+        <NotesSection
           noteChains={noteChains}
           loading={loading}
           error={!!error}
@@ -102,7 +102,7 @@ export const MyNotesScreen = () => {
         />
       </div>
 
-      <NoteChainDetailDrawer
+      <NoteChainDrawer
         noteChain={noteChainModal.selectedItem}
         open={noteChainModal.isOpen}
         onOpenChange={noteChainModal.setOpen}

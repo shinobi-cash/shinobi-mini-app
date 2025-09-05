@@ -1,9 +1,9 @@
 import type { NoteChain } from "@/lib/storage/types";
 import { RefreshCw } from "lucide-react";
 import { useState } from "react";
-import { CashNoteCard } from "./CashNoteCard";
+import { NoteRow } from "./NoteRow";
 
-interface NotesHistorySectionProps {
+interface NotesSectionProps {
   noteChains: NoteChain[];
   loading: boolean;
   error: boolean;
@@ -12,7 +12,7 @@ interface NotesHistorySectionProps {
 
 type NoteFilter = "unspent" | "spent";
 
-export function NotesHistorySection({ noteChains, loading, error, onNoteChainClick }: NotesHistorySectionProps) {
+export function NotesSection({ noteChains, loading, error, onNoteChainClick }: NotesSectionProps) {
   const [activeFilter, setActiveFilter] = useState<NoteFilter>("unspent");
 
   // Filter note chains based on selected tab
@@ -37,7 +37,7 @@ export function NotesHistorySection({ noteChains, loading, error, onNoteChainCli
                 : "text-app-secondary hover:text-app-primary"
             }`}
           >
-            Unspent ({unspentCount})
+            Available ({unspentCount})
           </button>
           <button
             type="button"
@@ -58,15 +58,15 @@ export function NotesHistorySection({ noteChains, loading, error, onNoteChainCli
           {error ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
-                <p className="text-app-secondary mb-1">Failed to load history</p>
-                <p className="text-sm text-app-tertiary">Check your connection and try again</p>
+                <p className="text-app-secondary mb-1">Unable to load notes</p>
+                <p className="text-sm text-app-tertiary">Please check your connection and try again</p>
               </div>
             </div>
           ) : loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
                 <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-app-secondary" />
-                <p className="text-app-secondary">Loading your notes history...</p>
+                <p className="text-app-secondary">Discovering your notes...</p>
               </div>
             </div>
           ) : filteredNoteChains.length === 0 && noteChains.length > 0 ? (
@@ -75,14 +75,14 @@ export function NotesHistorySection({ noteChains, loading, error, onNoteChainCli
                 {activeFilter === "unspent" ? (
                   <>
                     <span className="text-2xl mb-2 block">💸</span>
-                    <p className="text-app-secondary mb-1">No unspent notes</p>
-                    <p className="text-sm text-app-tertiary">All your notes have been spent</p>
+                    <p className="text-app-secondary mb-1">No available funds</p>
+                    <p className="text-sm text-app-tertiary">All your deposits have been spent</p>
                   </>
                 ) : (
                   <>
                     <span className="text-2xl mb-2 block">🔒</span>
-                    <p className="text-app-secondary mb-1">No spent notes</p>
-                    <p className="text-sm text-app-tertiary">Your notes are still available for withdrawal</p>
+                    <p className="text-app-secondary mb-1">No spent deposits</p>
+                    <p className="text-sm text-app-tertiary">Your deposits are still available</p>
                   </>
                 )}
               </div>
@@ -91,8 +91,8 @@ export function NotesHistorySection({ noteChains, loading, error, onNoteChainCli
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <span className="text-2xl mb-2 block">💰</span>
-                <p className="text-app-secondary mb-1">No notes yet</p>
-                <p className="text-sm text-app-tertiary">Make a deposit to create your first note</p>
+                <p className="text-app-secondary mb-1">No deposits yet</p>
+                <p className="text-sm text-app-tertiary">Make your first private deposit to get started</p>
               </div>
             </div>
           ) : (
@@ -104,7 +104,7 @@ export function NotesHistorySection({ noteChains, loading, error, onNoteChainCli
                     key={`chain-${index}-${lastNote.depositIndex}-${lastNote.changeIndex}`}
                     className="border-b border-app-border last:border-b-0"
                   >
-                    <CashNoteCard
+                    <NoteRow
                       note={lastNote}
                       chainLength={noteChain.length}
                       onClick={() => onNoteChainClick(noteChain)}

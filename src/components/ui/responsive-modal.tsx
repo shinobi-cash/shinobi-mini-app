@@ -15,6 +15,8 @@ interface ResponsiveModalProps {
   onBack?: () => void;
   className?: string;
   isWalletModalOpen?: boolean;
+  showFooter?: boolean;
+  footerContent?: React.ReactNode;
 }
 
 export function ResponsiveModal({
@@ -27,6 +29,8 @@ export function ResponsiveModal({
   onBack,
   className,
   isWalletModalOpen = false,
+  showFooter = false,
+  footerContent,
 }: ResponsiveModalProps) {
   const isDesktop = useMediaQuery("(min-width: 640px)");
 
@@ -78,6 +82,7 @@ export function ResponsiveModal({
             </div>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto">{children}</div>
+          {showFooter && <div className="p-4">{footerContent}</div>}
         </DialogContent>
       </Dialog>
     );
@@ -85,7 +90,7 @@ export function ResponsiveModal({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="bg-app-background border-app">
+      <DrawerContent className="bg-app-background border-app h-auto max-h-[90vh] flex flex-col">
         {/* iOS-style drag handle */}
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-app-tertiary/30" />
 
@@ -124,6 +129,12 @@ export function ResponsiveModal({
         <div className="flex-1 overflow-y-auto px-4 pb-6">
           <div className="p-2">{children}</div>
         </div>
+
+        {showFooter && (
+          <div className="p-4 mt-auto border-t border-app-border">
+            {footerContent}
+          </div>
+        )}
       </DrawerContent>
     </Drawer>
   );

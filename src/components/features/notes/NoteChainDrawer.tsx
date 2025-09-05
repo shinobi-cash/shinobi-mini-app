@@ -1,28 +1,65 @@
 import { NETWORK } from "@/config/constants";
 import type { NoteChain } from "@/lib/storage/types";
 import { formatEthAmount, formatTimestamp } from "@/utils/formatters";
-import { ExternalLink, Minus } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { Button } from "../../ui/button";
 import { ResponsiveModal } from "../../ui/responsive-modal";
 
-interface NoteChainDetailDrawerProps {
+interface NoteChainDrawerProps {
   noteChain: NoteChain | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onWithdrawClick?: (noteChain: NoteChain) => void;
 }
 
-export function NoteChainDetailDrawer({ noteChain, open, onOpenChange, onWithdrawClick }: NoteChainDetailDrawerProps) {
+export function NoteChainDrawer({ noteChain, open, onOpenChange, onWithdrawClick }: NoteChainDrawerProps) {
   if (!noteChain) return null;
   const lastNote = noteChain[noteChain.length - 1];
+
+  // Show footer for both unspent notes with withdrawal option and spent notes with just cancel
+  const canWithdraw = lastNote.status === "unspent" && BigInt(lastNote.amount) > 0n && !!onWithdrawClick;
+  const showFooter = canWithdraw || lastNote.status === "spent";
+
+  const footerContent = canWithdraw ? (
+    <div className="flex gap-3">
+      <Button
+        variant="outline"
+        onClick={() => onOpenChange(false)}
+        className="flex-1 h-12 text-base font-medium rounded-xl"
+        size="lg"
+      >
+        Cancel
+      </Button>
+      <Button
+        onClick={() => onWithdrawClick? onWithdrawClick(noteChain) : {}}
+        className="flex-1 h-12 text-base font-medium rounded-xl"
+        size="lg"
+      >
+        Withdraw
+      </Button>
+    </div>
+  ) : (
+    <div className="flex justify-center">
+      <Button
+        variant="outline"
+        onClick={() => onOpenChange(false)}
+        className="flex-1 h-12 text-base font-medium rounded-xl"
+        size="lg"
+      >
+        Close
+      </Button>
+    </div>
+  );
 
   return (
     <ResponsiveModal
       open={open}
       onOpenChange={onOpenChange}
-      title="Deposit Note Timeline"
-      description="Chronological details of your note chain"
+      title="Note Details"
+      description="Detail of your private deposit and withdrawals"
       className="bg-app-background border-app"
+      showFooter={showFooter}
+      footerContent={footerContent}
     >
       <div className="space-y-6">
         {/* Balance Summary */}
@@ -41,25 +78,11 @@ export function NoteChainDetailDrawer({ noteChain, open, onOpenChange, onWithdra
             <div
               className={`w-1.5 h-1.5 rounded-full ${lastNote.status === "spent" ? "bg-red-500" : "bg-green-500"}`}
             />
-            {lastNote.status === "spent" ? "Fully Spent" : "Available"}
+            {lastNote.status === "spent" ? "Spent" : "Available"}
           </div>
         </div>
 
-        {/* Withdraw Action - Only show for unspent notes */}
-        {lastNote.status === "unspent" && BigInt(lastNote.amount) > 0n && onWithdrawClick && (
-          <div className="mb-6">
-            <Button
-              onClick={() => onWithdrawClick(noteChain)}
-              className="w-full h-12 text-base font-medium rounded-xl"
-              size="lg"
-            >
-              <Minus className="w-5 h-5 mr-2" />
-              Withdraw ETH
-            </Button>
-          </div>
-        )}
-
-        {/* Feed */}
+        {/* Timeline */}
         <ul className="-mb-8">
           {noteChain.map((note, index) => {
             const isLast = index === noteChain.length - 1;
@@ -81,7 +104,7 @@ export function NoteChainDetailDrawer({ noteChain, open, onOpenChange, onWithdra
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium text-app-primary">
-                          {index === 0 ? "Deposited: " : isLast ? "Final Balance: " : "Balance: "}
+                          {index === 0 ? "Deposited: " : isLast ? "Current Balance: " : "Balance: "}
                           <a
                             href={`${NETWORK.EXPLORER_URL}/tx/${note.transactionHash}`}
                             target="_blank"

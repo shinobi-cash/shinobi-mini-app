@@ -61,7 +61,7 @@ export function NotesSummaryCard({
         <div className="flex justify-between items-end mb-3">
           <div className="flex gap-6">
             <div className="flex flex-col">
-              <p className="text-sm font-semibold text-app-secondary mb-1">Unspent</p>
+              <p className="text-sm font-semibold text-app-secondary mb-1">Available</p>
               <p className="text-xl font-bold text-app-primary tabular-nums">{unspentNotes}</p>
             </div>
             <div className="flex flex-col">
@@ -88,7 +88,8 @@ export function NotesSummaryCard({
                   onClick={onRediscover}
                   disabled={isRediscovering}
                   className="h-6 w-6 p-0 text-app-tertiary hover:text-app-primary"
-                  title="Re-discover notes from blockchain"
+                  title="Refresh deposits from blockchain"
+                  tabIndex={-1}
                 >
                   <RotateCcw className={`w-3 h-3 ${isRediscovering ? "animate-spin" : ""}`} />
                 </Button>
