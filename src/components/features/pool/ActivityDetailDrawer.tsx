@@ -4,6 +4,7 @@ import { formatEthAmount, formatHash, formatTimestamp } from "@/utils/formatters
 import { Check, Copy, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { ResponsiveModal } from "../../ui/responsive-modal";
+import { Button } from "@/components/ui/button";
 
 interface ActivityDetailDrawerProps {
   activity: Activity | null;
@@ -27,14 +28,29 @@ export const ActivityDetailDrawer = ({ activity, open, onOpenChange }: ActivityD
 
   // formatHash is now imported from utils/formatters
 
+   const footerContent = (
+    <div className="flex justify-center">
+      <Button
+        variant="outline"
+        onClick={() => onOpenChange(false)}
+        className="flex-1 h-12 text-base font-medium rounded-xl"
+        size="lg"
+      >
+        Close
+      </Button>
+    </div>
+)
   if (!activity) return null;
+
 
   return (
     <ResponsiveModal
       open={open}
       onOpenChange={onOpenChange}
-      title={`${activity.type.toLowerCase()} Details`}
+      title={"Activity Details"}
       className="bg-app-background border-app"
+      showFooter={true}
+      footerContent={footerContent}
     >
       <div className="space-y-2">
         {/* Amount Section - iOS card style */}
