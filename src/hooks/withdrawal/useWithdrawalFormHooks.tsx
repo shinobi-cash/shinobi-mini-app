@@ -29,6 +29,7 @@ export const useWithdrawalFormState = (selectedNote: Note | null, asset: { symbo
     toAddress: "",
     destinationChainId: NETWORK.CHAIN_ID
   });
+
   const [validationErrors, setValidationErrors] = useState<WithdrawalValidationErrors>({
     amount: "",
     toAddress: "",
@@ -111,7 +112,12 @@ export const useWithdrawalFormState = (selectedNote: Note | null, asset: { symbo
   }, []);
 
   const resetForm = useCallback(() => {
-    setForm({ withdrawAmount: "", toAddress: "", destinationChainId:NETWORK.CHAIN_ID });
+    setForm(prev => ({ 
+      ...prev, 
+      withdrawAmount: "", 
+      toAddress: "" 
+      // Keep destinationChainId - don't reset user's chain selection
+    }));
     setValidationErrors({ amount: "", toAddress: "" });
   }, []);
 

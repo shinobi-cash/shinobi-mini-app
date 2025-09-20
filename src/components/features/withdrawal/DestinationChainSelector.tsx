@@ -1,5 +1,5 @@
 
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import {
   Select,
   SelectContent,
@@ -15,7 +15,8 @@ interface DestinationChain {
   name: string;
 }
 
-const SUPPORTED_DESTINATIONS: DestinationChain[] = [
+// Move outside component to prevent recreation on every render
+const SUPPORTED_DESTINATIONS: readonly DestinationChain[] = [
   {
     chainId: 421614,
     name: "Arbitrum Sepolia"
@@ -24,7 +25,7 @@ const SUPPORTED_DESTINATIONS: DestinationChain[] = [
     chainId: 84532,
     name: "Base Sepolia"
   }
-];
+] as const;
 
 interface DestinationChainSelectorProps {
   selectedChainId: number;
@@ -37,7 +38,10 @@ export const DestinationChainSelector = memo(({
   onChainSelect, 
   disabled 
 }: DestinationChainSelectorProps) => {
-  const selectedChain = SUPPORTED_DESTINATIONS.find(chain => chain.chainId === selectedChainId);
+  const selectedChain = useMemo(
+    () => SUPPORTED_DESTINATIONS.find(chain => chain.chainId === selectedChainId),
+    [selectedChainId]
+  );
 
   return (
     <div className="space-y-2">

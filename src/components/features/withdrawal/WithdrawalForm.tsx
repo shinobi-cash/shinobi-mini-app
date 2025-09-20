@@ -1,4 +1,4 @@
-import { CONTRACTS, NETWORK } from "@/config/constants";
+import { CONTRACTS } from "@/config/constants";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWithdrawal } from "@/hooks/withdrawal/useWithdrawal";
 import type { Note } from "@/lib/storage/types";
@@ -48,6 +48,7 @@ export function WithdrawalForm({ asset, preSelectedNote, onTransactionSuccess }:
   // Withdrawal flow hook - only works when we have a selected note
   const withdrawalFlow = useWithdrawal({
     note: selectedNote || ({} as Note), // Use a more robust mock or null check
+    destinationChainId: form.destinationChainId,
     onTransactionSuccess,
   });
 

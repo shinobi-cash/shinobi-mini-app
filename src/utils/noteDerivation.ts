@@ -47,6 +47,8 @@ const TAG_DEPOSIT_NULLIFIER = keccak256(encodePacked(["string"], ["shinobi.cash:
 const TAG_DEPOSIT_SECRET = keccak256(encodePacked(["string"], ["shinobi.cash:DepositSecretV1"]));
 const TAG_CHANGE_NULLIFIER = keccak256(encodePacked(["string"], ["shinobi.cash:ChangeNullifierV1"]));
 const TAG_CHANGE_SECRET = keccak256(encodePacked(["string"], ["shinobi.cash:ChangeSecretV1"]));
+const TAG_REFUND_NULLIFIER = keccak256(encodePacked(["string"], ["shinobi.cash:RefundNullifierV1"]));
+const TAG_REFUND_SECRET = keccak256(encodePacked(["string"], ["shinobi.cash:RefundSecretV1"]));
 
 const DOM_DEPOSIT_NULLIFIER = fieldFromKeccak(TAG_DEPOSIT_NULLIFIER);
 const DOM_DEPOSIT_SECRET = fieldFromKeccak(TAG_DEPOSIT_SECRET);
@@ -96,6 +98,27 @@ export function deriveChangeSecret(
 ): bigint {
   const k = parseUserKey(userKey);
   const ctx = contextField(poolAddress, depositIndex, changeIndex, TAG_CHANGE_SECRET);
+  return prf2(k, ctx, DOM_CHANGE_SECRET);
+}
+export function deriveRefundNullifier(
+  userKey: string | bigint,
+  poolAddress: string,
+  depositIndex: number | bigint,
+  changeIndex: number | bigint,
+): bigint {
+  const k = parseUserKey(userKey);
+  const ctx = contextField(poolAddress, depositIndex, changeIndex, TAG_REFUND_NULLIFIER);
+  return prf2(k, ctx, DOM_CHANGE_NULLIFIER);
+}
+
+export function deriveRefundSecret(
+  userKey: string | bigint,
+  poolAddress: string,
+  depositIndex: number | bigint,
+  changeIndex: number | bigint,
+): bigint {
+  const k = parseUserKey(userKey);
+  const ctx = contextField(poolAddress, depositIndex, changeIndex, TAG_REFUND_SECRET);
   return prf2(k, ctx, DOM_CHANGE_SECRET);
 }
 

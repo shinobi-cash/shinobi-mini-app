@@ -23,11 +23,40 @@ export interface WithdrawalData {
   data: `0x${string}`;
 }
 
+export interface CrossChainWithdrawalData {
+  processooor: `0x${string}`;
+  data: `0x${string}`; // Encoded CrossChainRelayData
+}
+
+export interface CrossChainIntentParams {
+  fillDeadline: number;
+  expires: number;
+  inputOracle: `0x${string}`;
+  inputs: readonly [bigint, bigint][]; // [address, amount] pairs as readonly tuples
+  outputs: {
+    oracle: `0x${string}`;    // Oracle implementation for output chain
+    settler: `0x${string}`;   // Output Settler on destination chain  
+    chainId: bigint;
+    token: `0x${string}`;     // Token address (bytes32 as hex string)
+    amount: bigint;           // Amount to transfer
+    recipient: `0x${string}`; // Recipient address (bytes32 as hex string)
+    call: `0x${string}`;
+    context: `0x${string}`;
+  }[];
+}
+
 export interface WithdrawalProof {
   pA: [bigint, bigint];
   pB: [[bigint, bigint], [bigint, bigint]];
   pC: [bigint, bigint];
   pubSignals: [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint];
+}
+
+export interface CrossChainWithdrawalProof {
+  pA: [bigint, bigint];
+  pB: [[bigint, bigint], [bigint, bigint]];
+  pC: [bigint, bigint];
+  pubSignals: [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint]; // 9 signals
 }
 
 export interface SmartAccountConfig {
@@ -198,5 +227,179 @@ export async function executeWithdrawalUserOperation(
   } catch (error) {
     console.error("Failed to execute UserOperation:", error);
     throw new Error("Failed to execute withdrawal transaction");
+  }
+}
+
+// ============ CROSS-CHAIN WITHDRAWAL FUNCTIONS ============
+
+/**
+ * Create cross-chain withdrawal data structure
+ */
+export function createCrossChainWithdrawalData(
+  recipientAddress: string,
+  destinationChainId: number,
+  feeRecipient: string,
+  relayFeeBPS: bigint = WITHDRAWAL_FEES.DEFAULT_RELAY_FEE_BPS,
+): readonly [`0x${string}`, `0x${string}`] {
+  // Encode destination as chainId(32 bits) + recipient(160 bits)
+  const encodedDestination = (BigInt(destinationChainId) << 224n) | BigInt(recipientAddress);
+  
+  return [
+    CONTRACTS.PRIVACY_POOL_ENTRYPOINT as `0x${string}`,
+    encodeAbiParameters(
+      [
+        { type: "address", name: "feeRecipient" },
+        { type: "uint256", name: "relayFeeBPS" },
+        { type: "bytes32", name: "encodedDestination" },
+      ],
+      [feeRecipient as `0x${string}`, relayFeeBPS, `0x${encodedDestination.toString(16).padStart(64, '0')}`],
+    ),
+  ] as const;
+}
+
+/**
+ * Format ZK proof from snarkjs format to cross-chain contract format
+ */
+export function formatCrossChainProofForContract(
+  proof: {
+    pi_a: string[];
+    pi_b: string[][];
+    pi_c: string[];
+  },
+  publicSignals: string[],
+): CrossChainWithdrawalProof {
+  // Pass public signals in the exact order they come from the circuit:
+  // [0] newCommitmentHash, [1] existingNullifierHash, [2] refundCommitmentHash, 
+  // [3] withdrawnValue, [4] stateRoot, [5] stateTreeDepth, [6] ASPRoot, [7] ASPTreeDepth, [8] context
+  
+  return {
+    pA: [BigInt(proof.pi_a[0]), BigInt(proof.pi_a[1])],
+    pB: [
+      [BigInt(proof.pi_b[0][1]), BigInt(proof.pi_b[0][0])],
+      [BigInt(proof.pi_b[1][1]), BigInt(proof.pi_b[1][0])],
+    ],
+    pC: [BigInt(proof.pi_c[0]), BigInt(proof.pi_c[1])],
+    pubSignals: [
+      BigInt(publicSignals[0]), // [0] newCommitmentHash
+      BigInt(publicSignals[1]), // [1] existingNullifierHash
+      BigInt(publicSignals[2]), // [2] refundCommitmentHash
+      BigInt(publicSignals[3]), // [3] withdrawnValue
+      BigInt(publicSignals[4]), // [4] stateRoot
+      BigInt(publicSignals[5]), // [5] stateTreeDepth
+      BigInt(publicSignals[6]), // [6] ASPRoot
+      BigInt(publicSignals[7]), // [7] ASPTreeDepth
+      BigInt(publicSignals[8]), // [8] context
+    ],
+  };
+}
+
+/**
+ * Encode cross-chain withdrawal call data
+ */
+export function encodeCrossChainWithdrawalCallData(
+  withdrawalData: CrossChainWithdrawalData,
+  proof: CrossChainWithdrawalProof,
+  scope: bigint,
+  intentParams: CrossChainIntentParams,
+): `0x${string}` {
+  return encodeFunctionData({
+    abi: [
+      {
+        name: "processCrossChainWithdrawal",
+        type: "function",
+        stateMutability: "nonpayable",
+        inputs: [
+          {
+            name: "withdrawal",
+            type: "tuple",
+            components: [
+              { name: "processooor", type: "address" },
+              { name: "data", type: "bytes" }
+            ]
+          },
+          {
+            name: "proof",
+            type: "tuple", 
+            components: [
+              { name: "pA", type: "uint256[2]" },
+              { name: "pB", type: "uint256[2][2]" },
+              { name: "pC", type: "uint256[2]" },
+              { name: "pubSignals", type: "uint256[9]" }
+            ]
+          },
+          { name: "scope", type: "uint256" },
+          {
+            name: "intentParams",
+            type: "tuple",
+            components: [
+              { name: "fillDeadline", type: "uint32" },
+              { name: "expires", type: "uint32" },
+              { name: "inputOracle", type: "address" },
+              { name: "inputs", type: "uint256[2][]" },
+              { 
+                name: "outputs", 
+                type: "tuple[]",
+                components: [
+                  { name: "oracle", type: "bytes32" },
+                  { name: "settler", type: "bytes32" },
+                  { name: "chainId", type: "uint256" },
+                  { name: "token", type: "bytes32" },
+                  { name: "amount", type: "uint256" },
+                  { name: "recipient", type: "bytes32" },
+                  { name: "call", type: "bytes" },
+                  { name: "context", type: "bytes" }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    functionName: "processCrossChainWithdrawal",
+    args: [
+      {
+        processooor: withdrawalData.processooor,
+        data: withdrawalData.data,
+      },
+      {
+        pA: proof.pA,
+        pB: proof.pB,
+        pC: proof.pC,
+        pubSignals: proof.pubSignals,
+      },
+      scope,
+      intentParams
+    ],
+  });
+}
+
+/**
+ * Prepare UserOperation for cross-chain withdrawal
+ */
+export async function prepareCrossChainWithdrawalUserOperation(
+  smartAccountClient: SmartAccountClient,
+  crossChainCallData: `0x${string}`,
+) {
+  try {
+    if (!smartAccountClient.account) {
+      throw new Error("Smart account not initialized");
+    }
+    const userOperationGasPrice = await pimlicoClient.getUserOperationGasPrice()
+    const preparedUserOperation = await smartAccountClient.prepareUserOperation({
+      account: smartAccountClient.account,
+      calls: [
+        {
+          to: CONTRACTS.PRIVACY_POOL_ENTRYPOINT as `0x${string}`,
+          data: crossChainCallData,
+          value: 0n,
+        },
+      ],
+      ...userOperationGasPrice.fast
+    });
+
+    return preparedUserOperation;
+  } catch (error) {
+    console.error("Failed to prepare cross-chain UserOperation:", error);
+    throw new Error("Failed to prepare cross-chain UserOperation");
   }
 }

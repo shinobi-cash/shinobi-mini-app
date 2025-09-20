@@ -16,10 +16,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface UseWithdrawalProps {
   note: Note;
+  destinationChainId?: number;
   onTransactionSuccess?: () => void;
 }
 
-export function useWithdrawal({ note, onTransactionSuccess }: UseWithdrawalProps) {
+export function useWithdrawal({ note, destinationChainId, onTransactionSuccess }: UseWithdrawalProps) {
   const { accountKey } = useAuth();
   const { trackTransaction } = useTransactionTracking();
 
@@ -110,6 +111,7 @@ export function useWithdrawal({ note, onTransactionSuccess }: UseWithdrawalProps
           withdrawAmount,
           recipientAddress,
           accountKey,
+          destinationChainId,
         };
 
         updateStepStatus("validation", "processing");
@@ -152,7 +154,7 @@ export function useWithdrawal({ note, onTransactionSuccess }: UseWithdrawalProps
         if (mountedRef.current) setState((prevState) => ({ ...prevState, isPreparing: false }));
       }
     },
-    [note, accountKey, initializeSteps, updateStepStatus, state.steps],
+    [note, accountKey, destinationChainId, initializeSteps, updateStepStatus, state.steps],
   );
 
   const handleExecuteTransaction = useCallback(async () => {
