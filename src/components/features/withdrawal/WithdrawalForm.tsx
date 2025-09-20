@@ -1,4 +1,4 @@
-import { CONTRACTS } from "@/config/constants";
+import { CONTRACTS, NETWORK } from "@/config/constants";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWithdrawal } from "@/hooks/withdrawal/useWithdrawal";
 import type { Note } from "@/lib/storage/types";
@@ -12,6 +12,7 @@ import { AddressInput } from "./AddressInput";
 import { AmountInput } from "./AmountInput";
 import { NoteSelector } from "./NoteSelector";
 import { WithdrawalTimelineDrawer } from "./WithdrawalTimelineDrawer";
+import { DestinationChainSelector } from "./DestinationChainSelector";
 
 interface WithdrawalFormProps {
   asset: { symbol: string; name: string; icon: string };
@@ -36,7 +37,7 @@ export function WithdrawalForm({ asset, preSelectedNote, onTransactionSuccess }:
   );
 
   // Use custom hook to manage form state and validation
-  const { form, validationErrors, handleAmountChange, handleAddressChange, handleMaxClick, resetForm } =
+  const { form, validationErrors, handleAmountChange, handleAddressChange, handleMaxClick, resetForm, handleDestinationChainChange } =
     useWithdrawalFormState(selectedNote, asset);
 
   // Derived state from form values
@@ -103,13 +104,28 @@ export function WithdrawalForm({ asset, preSelectedNote, onTransactionSuccess }:
         />
       </div>
 
+      {/* Destination Chain Selection */}
+      {selectedNote && (
+        <div className="mb-6">
+          <DestinationChainSelector
+            selectedChainId={form.destinationChainId}
+            onChainSelect={handleDestinationChainChange}
+            disabled={isPreparing || isExecuting}
+          />
+        </div>
+      )}
+
       {/* To Address Input */}
       {selectedNote && (
         <div className="mb-4">
           <label htmlFor="to-address" className="text-sm font-medium text-app-secondary mb-2 block">
-            To
+            Recipient Address
           </label>
-          <AddressInput value={form.toAddress} onChange={handleAddressChange} error={validationErrors.toAddress} />
+          <AddressInput 
+            value={form.toAddress} 
+            onChange={handleAddressChange} 
+            error={validationErrors.toAddress} 
+          />
         </div>
       )}
 

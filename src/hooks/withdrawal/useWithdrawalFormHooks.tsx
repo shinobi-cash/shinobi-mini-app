@@ -1,3 +1,4 @@
+import { NETWORK } from "@/config/constants";
 import { useCachedNotes } from "@/hooks/notes/useCachedNotes";
 import type { Note } from "@/lib/storage/types";
 import { formatEthAmount } from "@/utils/formatters";
@@ -13,6 +14,7 @@ import { isAddress, parseEther } from "viem";
 interface WithdrawalFormState {
   withdrawAmount: string;
   toAddress: string;
+  destinationChainId:number
 }
 
 interface WithdrawalValidationErrors {
@@ -25,6 +27,7 @@ export const useWithdrawalFormState = (selectedNote: Note | null, asset: { symbo
   const [form, setForm] = useState<WithdrawalFormState>({
     withdrawAmount: "",
     toAddress: "",
+    destinationChainId: NETWORK.CHAIN_ID
   });
   const [validationErrors, setValidationErrors] = useState<WithdrawalValidationErrors>({
     amount: "",
@@ -35,6 +38,7 @@ export const useWithdrawalFormState = (selectedNote: Note | null, asset: { symbo
     () => (selectedNote ? Number.parseFloat(formatEthAmount(selectedNote.amount)) : 0),
     [selectedNote],
   );
+  
 
   const validateAmount = useCallback(
     (value: string): string => {
@@ -93,8 +97,21 @@ export const useWithdrawalFormState = (selectedNote: Note | null, asset: { symbo
     }));
   }, [availableBalance, validateAmount, selectedNote]);
 
+  const handleDestinationChainChange = useCallback((chainId: number) => {
+    setForm(prev => ({ 
+      ...prev, 
+      destinationChainId: chainId,
+      // Clear address when switching chains for UX
+      toAddress: chainId !== NETWORK.CHAIN_ID ? '' : prev.toAddress 
+    }));
+    // Clear address validation error when switching chains
+    if (chainId !== NETWORK.CHAIN_ID) {
+      setValidationErrors(prev => ({ ...prev, toAddress: '' }));
+    }
+  }, []);
+
   const resetForm = useCallback(() => {
-    setForm({ withdrawAmount: "", toAddress: "" });
+    setForm({ withdrawAmount: "", toAddress: "", destinationChainId:NETWORK.CHAIN_ID });
     setValidationErrors({ amount: "", toAddress: "" });
   }, []);
 
@@ -114,6 +131,7 @@ export const useWithdrawalFormState = (selectedNote: Note | null, asset: { symbo
     handleAmountChange,
     handleAddressChange,
     handleMaxClick,
+    handleDestinationChainChange,
     resetForm,
   };
 };

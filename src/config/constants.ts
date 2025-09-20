@@ -85,4 +85,21 @@ export const NETWORK = {
   EXPLORER_URL: "https://sepolia.arbiscan.io",
 } as const;
 
+export const SUPPORTED_CHAINS = {
+  ARBITRUM_SEPOLIA: {
+    chainId: 421614,
+    name: "Arbitrum Sepolia",
+    type: 'source' as const,
+    rpcUrl: `https://arb-sepolia.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_API_KEY}`,
+    explorerUrl: "https://sepolia.arbiscan.io",
+  },
+  BASE_SEPOLIA: {
+    chainId: 84532, 
+    name: "Base Sepolia",
+    type: 'destination' as const,
+    rpcUrl: `https://base-sepolia.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_API_KEY}`,
+    explorerUrl: "https://sepolia.basescan.org",
+  }
+} as const;
+
 export const BUNDLER_URL = `https://api.pimlico.io/v2/421614/rpc?apikey=${import.meta.env.VITE_PIMLICO_API_KEY}`;
