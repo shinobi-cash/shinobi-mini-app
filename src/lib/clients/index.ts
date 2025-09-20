@@ -5,17 +5,26 @@
 import { BUNDLER_URL, WITHDRAWAL_ACCOUNT_PRIVATE_KEY } from "@/config/constants";
 import { CONTRACTS } from "@/config/constants";
 import { createSmartAccountClient } from "permissionless";
+import { createPimlicoClient } from 'permissionless/clients/pimlico'
 import { toSimpleSmartAccount } from "permissionless/accounts";
 import { http, createPublicClient } from "viem";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { privateKeyToAccount } from "viem/accounts";
-import { baseSepolia } from "viem/chains";
+import { arbitrumSepolia } from "viem/chains";
 
 // Create public client for contract calls
 export const publicClient = createPublicClient({
-  chain: baseSepolia,
+  chain: arbitrumSepolia,
   transport: http(),
 });
+
+export const pimlicoClient = createPimlicoClient({
+  transport: http(BUNDLER_URL),
+  entryPoint: {
+    address: entryPoint07Address,
+    version: "0.7",
+  }
+})
 
 export async function getWithdrawalSmartAccountClient() {
   const account = privateKeyToAccount(WITHDRAWAL_ACCOUNT_PRIVATE_KEY);

@@ -131,6 +131,7 @@ export class WithdrawalProofGenerator {
 
     // Build Merkle trees
     const { stateTree, aspTree } = this.buildMerkleTrees(stateTreeCommitments, aspTreeLabels);
+    console.log({stateTreeCommitments, existingCommitmentHash})
     // Find indices in trees
     const stateIndex = stateTreeCommitments.indexOf(existingCommitmentHash);
     const aspIndex = aspTreeLabels.indexOf(label);

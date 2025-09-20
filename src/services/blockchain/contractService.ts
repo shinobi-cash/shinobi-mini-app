@@ -10,10 +10,11 @@
 
 import { PRIVACY_POOL_ABI, PRIVACY_POOL_ENTRYPOINT_ABI } from "@/config/abis";
 import { CONTRACTS, WITHDRAWAL_FEES } from "@/config/constants";
+import { pimlicoClient } from "@/lib/clients";
 import type { SmartAccountClient } from "permissionless";
 import { http, createPublicClient, encodeAbiParameters, encodeFunctionData } from "viem";
 import { type UserOperation, entryPoint07Address } from "viem/account-abstraction";
-import { baseSepolia } from "viem/chains";
+import { arbitrumSepolia } from "viem/chains";
 
 // ============ TYPES ============
 
@@ -39,7 +40,7 @@ export interface SmartAccountConfig {
 
 // Create public client for contract calls
 const publicClient = createPublicClient({
-  chain: baseSepolia,
+  chain: arbitrumSepolia,
   transport: http(),
 });
 
@@ -157,6 +158,7 @@ export async function prepareWithdrawalUserOperation(
     if (!smartAccountClient.account) {
       throw new Error("Smart account not initialized");
     }
+    const userOperationGasPrice = await pimlicoClient.getUserOperationGasPrice()
     const preparedUserOperation = await smartAccountClient.prepareUserOperation({
       account: smartAccountClient.account,
       calls: [
@@ -166,6 +168,7 @@ export async function prepareWithdrawalUserOperation(
           value: 0n,
         },
       ],
+      ...userOperationGasPrice.fast
     });
 
     return preparedUserOperation;

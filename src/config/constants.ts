@@ -64,25 +64,25 @@ export const IPFS_GATEWAY_URL = "https://gateway.pinata.cloud/ipfs/";
 
 // Deployed contract addresses on Base Sepolia (updated to match indexer)
 export const CONTRACTS = {
-  // SimplePrivacyPoolPaymaster (updated from indexer)
-  PAYMASTER: "0xbF03af7e4870c5Cc4e3C4F9914239F5E093F959a",
+  // SimpleShinobiCashPoolPaymaster
+  PAYMASTER: "0x207b90941d9cff79A750C1E5c05dDaA17eA01B9F",
 
   // Expected smart account for deterministic pattern
   EXPECTED_SMART_ACCOUNT: "0xa3aBDC7f6334CD3EE466A115f30522377787c024",
 
-  // Privacy Pool contracts (updated from indexer)
-  PRIVACY_POOL_ENTRYPOINT: "0xfBa5eDD64d4611ca50DD8dF9C4F94b895C66219b",
-  ETH_PRIVACY_POOL: "0xB68E4f712bd0783fbc6b369409885c2319Db114a",
+  // ShinobiCash Pool contracts 
+  PRIVACY_POOL_ENTRYPOINT: "0xB993eA4F6Bcb16784e9d59688040571490172498",
+  ETH_PRIVACY_POOL: "0xB648107Af0009A3447Fce0Ec1542b6A01bDB1E37",
 
   // ERC-4337 EntryPoint (standard across networks)
   ERC4337_ENTRYPOINT: "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
 } as const;
 
 export const NETWORK = {
-  CHAIN_ID: 84532, // Base Sepolia
-  NAME: "Base Sepolia",
-  RPC_URL: "https://sepolia.base.org",
-  EXPLORER_URL: "https://sepolia.basescan.org",
+  CHAIN_ID: 421614, // Arbitrum Sepolia
+  NAME: "Arbitrum Sepolia",
+  RPC_URL: `https://arb-sepolia.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_API_KEY}`,
+  EXPLORER_URL: "https://sepolia.arbiscan.io",
 } as const;
 
-export const BUNDLER_URL = `https://api.pimlico.io/v2/84532/rpc?apikey=${import.meta.env.VITE_PIMLICO_API_KEY}`;
+export const BUNDLER_URL = `https://api.pimlico.io/v2/421614/rpc?apikey=${import.meta.env.VITE_PIMLICO_API_KEY}`;
