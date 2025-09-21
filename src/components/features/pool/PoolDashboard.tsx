@@ -129,13 +129,14 @@ export function PoolDashboard({
   }, [onFetchMore, hasNextPage, isFetchingMore]);
 
   const totalDeposits = poolStats?.totalDeposits ? BigInt(poolStats.totalDeposits) : 0n;
+  const totalWithdrawals = poolStats?.totalWithdrawals ? BigInt(poolStats.totalWithdrawals) : 0n;
   const memberCount = poolStats?.memberCount || 0;
 
   return (
     <div className="flex flex-col h-full gap-2 p-2">
       {/* Pool Overview */}
       <div className="space-y-2">
-        <PoolStatsCard totalDeposits={totalDeposits} memberCount={memberCount} loading={poolStatsLoading} />
+        <PoolStatsCard totalDeposits={totalDeposits - totalWithdrawals}  memberCount={memberCount} loading={poolStatsLoading} />
         <PoolAssetSelector selectedAsset={selectedAsset} disabled={true} />
         <PoolActions asset={selectedAsset} />
       </div>
